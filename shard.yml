@@ -1,0 +1,12 @@
+name: engine-driver
+version: 1.0.0
+
+dependencies:
+  protobuf:
+    github: jeromegn/protobuf.cr
+  tokenizer:
+    github: spider-gazelle/tokenizer
+
+development_dependencies:
+  ameba:
+    github: veelenga/ameba
