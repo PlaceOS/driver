@@ -2,10 +2,18 @@ name: engine-driver
 version: 1.0.0
 
 dependencies:
-  protobuf:
-    github: jeromegn/protobuf.cr
+  priority-queue:
+    github: spider-gazelle/priority-queue
   tokenizer:
     github: spider-gazelle/tokenizer
+  promise:
+    github: spider-gazelle/promise
+  tasker:
+    github: spider-gazelle/tasker
+  protobuf:
+    github: jeromegn/protobuf.cr
+  ssh2:
+    github: datanoise/ssh2.cr
 
 development_dependencies:
   ameba:
