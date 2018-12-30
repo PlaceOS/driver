@@ -140,7 +140,7 @@ describe EngineDriver::Queue do
 
     result.should eq({
       result: :abort,
-      payload: "timeout",
+      payload: "retries failed",
       backtrace: [] of String
     })
   end

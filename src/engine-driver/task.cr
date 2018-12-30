@@ -75,6 +75,7 @@ class EngineDriver::Task
         # TODO:: log the error
       end
     end
+
     @channel.close
     self
   end
@@ -97,7 +98,7 @@ class EngineDriver::Task
       delay_required?
       execute!
     else
-      abort("timeout")
+      abort("retries failed")
     end
   end
 
