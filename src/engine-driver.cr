@@ -1,13 +1,27 @@
+# https://github.com/Sija/retriable.cr#kernel-extension
+require "retriable/core_ext/kernel"
+
 abstract class EngineDriver
+  def initialize(@queue : EngineDriver::Queue, @transport : EngineDriver::TransportTCP)
+  end
+
+  property :queue, :transport
+
   macro inherited
     macro finished
         __build_helpers__
     end
   end
 
+  RESERVED_METHODS = {} of Nil => Nil
+  {% RESERVED_METHODS["received"] = true %}
+
   macro __build_helpers__
+    {% methods = @type.methods %}
+    {% methods = methods.reject { |method| RESERVED_METHODS[method.name.stringify] } %}
+
     # Build a class that represents each method
-    {% for method in @type.methods %}
+    {% for method in methods %}
       class Method{{method.name.stringify.camelcase.id}}
         JSON.mapping(
           {% if method.args.size == 0 %}
@@ -29,7 +43,7 @@ abstract class EngineDriver
     class KlassExecutor
       JSON.mapping(
         ___exec: String,
-        {% for method in @type.methods %}
+        {% for method in methods %}
             {{method.name}}: Method{{method.name.stringify.camelcase.id}}?,
         {% end %}
       )
@@ -37,7 +51,7 @@ abstract class EngineDriver
       # Once serialised, we want to execute the request on the class
       def execute(klass : {{@type.id}})
         case self.___exec
-        {% for method in @type.methods %}
+        {% for method in methods %}
           {% if method.visibility == :public %}
             when {{method.name.stringify}}
               {% if method.args.size == 0 %}
@@ -65,7 +79,7 @@ abstract class EngineDriver
       functions = @@functions
       return functions if functions
         list = %[{
-        {% for method in @type.methods %}
+        {% for method in methods %}
           {% if method.visibility == :public %}
             {{method.name.stringify}}: {
               {% for arg in method.args %}
@@ -80,3 +94,4 @@ abstract class EngineDriver
 end
 
 require "./engine-driver/*"
+require "./engine-driver/**"

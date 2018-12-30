@@ -2,8 +2,9 @@ require "./helper"
 
 describe EngineDriver::Queue do
   it "should process task with response" do
-    queue = EngineDriver::Queue.new
-    spawn { queue.process! }
+    queue = Helper.queue
+    queue.online = true
+
     t = queue.add do |task|
       task.success 1234
     end
@@ -18,8 +19,9 @@ describe EngineDriver::Queue do
     })
 
     # Slightly different way to indicate if a response is required
-    queue = EngineDriver::Queue.new
-    spawn { queue.process! }
+    queue = Helper.queue
+    queue.online = true
+
     t = queue.add do |task|
       task.success 1234
     end
@@ -34,8 +36,9 @@ describe EngineDriver::Queue do
   end
 
   it "should process task with default response" do
-    queue = EngineDriver::Queue.new
-    spawn { queue.process! }
+    queue = Helper.queue
+    queue.online = true
+
     t = queue.add do |task|
       task.success 1234
     end
@@ -51,8 +54,9 @@ describe EngineDriver::Queue do
   end
 
   it "should process task with default response" do
-    queue = EngineDriver::Queue.new
-    spawn { queue.process! }
+    queue = Helper.queue
+    queue.online = true
+
     t = queue.add do |task|
       task.success 1234
     end
@@ -68,8 +72,9 @@ describe EngineDriver::Queue do
   end
 
   it "should process multiple tasks" do
-    queue = EngineDriver::Queue.new
-    spawn { queue.process! }
+    queue = Helper.queue
+    queue.online = true
+
     t1 = queue.add { |task|
       task.success 50
     }.response_required!
@@ -96,8 +101,8 @@ describe EngineDriver::Queue do
   end
 
   it "should retry a task if a timeout occurs" do
-    queue = EngineDriver::Queue.new
-    spawn { queue.process! }
+    queue = Helper.queue
+    queue.online = true
 
     count = 0
 
@@ -118,9 +123,31 @@ describe EngineDriver::Queue do
     })
   end
 
+  it "should fail a task with abort if retries fail" do
+    queue = Helper.queue
+    queue.online = true
+
+    count = 0
+
+    t = queue.add(timeout: 5.milliseconds) { |task|
+      count += 1
+    }.response_required!
+
+    result = t.get
+    queue.terminate
+
+    count.should eq(4)
+
+    result.should eq({
+      result: :abort,
+      payload: "timeout",
+      backtrace: [] of String
+    })
+  end
+
   it "should return an exception if an error occurs running the task" do
-    queue = EngineDriver::Queue.new
-    spawn { queue.process! }
+    queue = Helper.queue
+    queue.online = true
 
     t = queue.add { |task|
       raise "error"
@@ -131,6 +158,6 @@ describe EngineDriver::Queue do
 
     result[:result].should eq(:exception)
     result[:payload].should eq("error")
-    result[:backtrace].size.should eq(6)
+    (result[:backtrace].size > 0).should eq(true)
   end
 end

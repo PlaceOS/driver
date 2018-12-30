@@ -12,6 +12,8 @@ dependencies:
     github: spider-gazelle/tasker
   protobuf:
     github: jeromegn/protobuf.cr
+  retriable:
+    github: Sija/retriable.cr
   ssh2:
     github: datanoise/ssh2.cr
 

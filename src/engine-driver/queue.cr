@@ -5,20 +5,32 @@ require "json"
 class EngineDriver::Queue
   def initialize
     @queue = Priority::Queue(Task).new
+
+    # Task defaults
     @priority = 50
     @timeout = 5.seconds
     @retries = 3
     @wait = true
-    @current = nil
+
+    # Queue controls
     @channel = Channel(Nil).new
-    @waiting = 0
     @terminated = false
+    @waiting = false
+    @online = false
   end
 
   @current : Task?
   @previous : Task?
   @timeout : Time::Span
   getter :current, :waiting
+  getter :online
+
+  def online=(state : Bool)
+    @online = state
+    if @online && @waiting && @queue.size > 0
+      spawn { @channel.send nil }
+    end
+  end
 
   def add(
     priority = @priority,
@@ -29,8 +41,14 @@ class EngineDriver::Queue
     &callback : (Task) -> Nil
   )
     task = Task.new(self, callback, priority, timeout, retries, wait, name)
-    @queue.push priority, task
-    spawn { @channel.send nil }
+
+    if @online
+      @queue.push priority, task
+      # Spawn so the channel send occurs next tick
+      spawn { @channel.send nil } if @waiting
+    elsif name
+      @queue.push priority, task
+    end
 
     # Task returned so response_required! can be called as required
     task
@@ -44,11 +62,19 @@ class EngineDriver::Queue
   def process!
     loop do
       # Wait for a new task to be available
-      @waiting += 1
-      @channel.receive?
-      @waiting -= 1
+      if @online && @queue.size > 0
+        break if @terminated
+      else
+        @waiting = true
+        @channel.receive?
+        @waiting = false
 
-      break if @terminated
+        break if @terminated
+
+        # Prevent any race conditions
+        # Could be multiple adds before receive returns
+        next if !@online || @queue.size <= 0
+      end
 
       # Check if the previous task should effect the current task
       if previous = @previous

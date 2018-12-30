@@ -25,7 +25,9 @@ class EngineDriver::Task
   end
 
   @timer : Tasker::Task?
+  @processing : Proc(Bytes, Nil)?
   getter :last_executed, :state, :payload, :backtrace
+  property :processing
 
   def result
     {result: @state, payload: @payload, backtrace: @backtrace}

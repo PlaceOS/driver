@@ -16,7 +16,7 @@ describe EngineDriver::Protocol do
     input.write json.to_slice
 
     while id.nil?
-      sleep 0.01
+      sleep 0.001
     end
 
     id.should eq("mod_1234")
@@ -53,7 +53,7 @@ describe EngineDriver::Protocol do
     IO.copy(io, input)
 
     while results.size < 2
-      sleep 0.01
+      sleep 0.001
     end
     input.close
     results.should eq(["mod_1234", "mod_5678"])
