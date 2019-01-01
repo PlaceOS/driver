@@ -3,9 +3,22 @@ require "retriable/core_ext/kernel"
 
 abstract class EngineDriver
   def initialize(@queue : EngineDriver::Queue, @transport : EngineDriver::TransportTCP)
+    @status = EngineDriver::Status.new
   end
 
-  property :queue, :transport
+  property :queue, :transport, :status
+
+  def []=(key, value)
+    @status.set_json(key, value)
+  end
+
+  def [](key)
+    @status.fetch_json(key)
+  end
+
+  def []?(key)
+    @status.fetch_json?(key)
+  end
 
   macro inherited
     macro finished
