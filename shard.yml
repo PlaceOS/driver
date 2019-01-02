@@ -4,6 +4,8 @@ version: 1.0.0
 dependencies:
   priority-queue:
     github: spider-gazelle/priority-queue
+  redis:
+    github: stefanwille/crystal-redis
   tokenizer:
     github: spider-gazelle/tokenizer
   promise:
