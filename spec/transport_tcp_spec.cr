@@ -5,9 +5,14 @@ describe EngineDriver::TransportTCP do
     Helper.tcp_server
 
     queue = Helper.queue
-    transport = EngineDriver::TransportTCP.new(queue, "localhost", 1234)
-    driver = Helper::TestDriver.new(queue, transport)
-    transport.driver = driver
+    transport = EngineDriver::TransportTCP.new(queue, "localhost", 1234) do |data, task|
+      # This would usually call: driver.received(data, task)
+      response = IO::Memory.new(data).to_s
+      task.try &.success(response)
+    end
+
+    #driver = Helper::TestDriver.new(queue, transport)
+    #transport.driver = driver
     transport.connect
 
     queue.online.should eq(true)
@@ -23,9 +28,14 @@ describe EngineDriver::TransportTCP do
     Helper.tcp_server
 
     queue = Helper.queue
-    transport = EngineDriver::TransportTCP.new(queue, "localhost", 1234)
-    driver = Helper::TestDriver.new(queue, transport)
-    transport.driver = driver
+    transport = EngineDriver::TransportTCP.new(queue, "localhost", 1234) do |data, task|
+      # This would usually call: driver.received(data, task)
+      response = IO::Memory.new(data).to_s
+      task.try &.success(response)
+    end
+
+    # driver = Helper::TestDriver.new(queue, transport)
+    # transport.driver = driver
     transport.connect
 
     queue.online.should eq(true)

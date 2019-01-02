@@ -2,13 +2,12 @@ require "socket"
 
 class EngineDriver::TransportTCP < EngineDriver::Transport
   # timeouts in seconds
-  def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32)
+  def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, &@received : (Bytes, EngineDriver::Task?) -> Nil)
     @terminated = false
   end
 
   @socket : TCPSocket?
-  @driver : EngineDriver?
-  property :driver
+  property :received
 
   def connect(connect_timeout : Int32 = 10)
     return if @terminated
@@ -73,18 +72,21 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     # Check if the task provided a response processing block
     if task = @queue.current
       if processing = task.processing
-        return processing.call(data)
+        processing.call(data)
+        return
       end
     end
 
-    # Otherwise fallback to the default received function
-    d = driver
-    if d && d.responds_to?(:received)
-      d.received(data, @queue.current)
-    else
-      # TODO:: log errors properly
-      puts "no received function provided for #{self.class}"
-    end
+    @received.call(data, @queue.current)
+
+    # This should be performed in the callback:
+    #d = driver
+    #if d && d.responds_to?(:received)
+    # d.received(data, @queue.current)
+    #else
+    #  # TODO:: log errors properly
+    #  puts "no received function provided for #{self.class}"
+    #end
   rescue error
     # TODO:: log errors properly
     puts "error processing received data\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
