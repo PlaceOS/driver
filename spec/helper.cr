@@ -46,4 +46,13 @@ class Helper
       task.try &.success(response)
     end
   end
+
+  def self.settings
+    EngineDriver::Settings.new %({
+      "integer": 1234,
+      "string": "hello",
+      "array": [12, 34, 54],
+      "hash": {"hello": "world"}
+    })
+  end
 end

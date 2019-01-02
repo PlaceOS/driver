@@ -1,4 +1,3 @@
-
 class EngineDriver::Status < Hash(String, String)
   def set_json(key, value)
     self[key.to_s] = value.to_json

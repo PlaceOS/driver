@@ -80,13 +80,14 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     @received.call(data, @queue.current)
 
     # This should be performed in the callback:
-    #d = driver
-    #if d && d.responds_to?(:received)
+    # d = driver
+    # if d && d.responds_to?(:received)
     # d.received(data, @queue.current)
-    #else
+    # else
     #  # TODO:: log errors properly
     #  puts "no received function provided for #{self.class}"
-    #end
+    # end
+
   rescue error
     # TODO:: log errors properly
     puts "error processing received data\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"

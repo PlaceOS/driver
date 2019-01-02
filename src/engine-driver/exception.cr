@@ -1,4 +1,3 @@
-
 class EngineDriver::RemoteException < Exception
   def initialize(@message : String, @backtrace = [] of String)
   end

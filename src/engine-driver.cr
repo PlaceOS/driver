@@ -2,12 +2,14 @@
 require "retriable/core_ext/kernel"
 
 abstract class EngineDriver
-  def initialize(@queue : EngineDriver::Queue, @transport : EngineDriver::TransportTCP)
+  def initialize(@module_id : String, @queue : EngineDriver::Queue, @transport : EngineDriver::Transport)
     @status = EngineDriver::Status.new
   end
 
-  property :queue, :transport, :status
+  @settings : EngineDriver::Settings? # TODO:: don't make this nillable
+  property :queue, :transport, :status, settings
 
+  # Status helpers
   def []=(key, value)
     @status.set_json(key, value)
   end
@@ -20,6 +22,16 @@ abstract class EngineDriver
     @status.fetch_json?(key)
   end
 
+  # Settings helpers
+  macro setting(klass, *types)
+    @settings.get { setting({{klass}}, {{*types}}) }
+  end
+
+  macro setting?(klass, *types)
+    @settings.get { setting?({{klass}}, {{*types}}) }
+  end
+
+  # Remote execution helpers
   macro inherited
     macro finished
         __build_helpers__

@@ -42,8 +42,8 @@ describe EngineDriver::Storage do
     store[:other] = "1234"
     store.size.should eq(2)
     store.to_h.should eq({
-      "test" => "null",
-      "other" => "1234"
+      "test"  => "null",
+      "other" => "1234",
     })
     store.clear
     store.size.should eq(0)

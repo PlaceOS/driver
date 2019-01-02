@@ -11,8 +11,8 @@ describe EngineDriver::TransportTCP do
       task.try &.success(response)
     end
 
-    #driver = Helper::TestDriver.new(queue, transport)
-    #transport.driver = driver
+    # driver = Helper::TestDriver.new(queue, transport)
+    # transport.driver = driver
     transport.connect
 
     queue.online.should eq(true)
