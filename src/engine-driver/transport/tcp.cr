@@ -34,7 +34,7 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
 
   def send(message) : Int32
     socket = @socket
-    return 0 unless socket && !socket.closed?
+    return 0 if socket.nil? || socket.closed?
     data = message.to_slice
     socket.write data
     return data.size
@@ -42,7 +42,7 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
 
   def send(message, task : EngineDriver::Task, &block : Bytes -> Nil) : Int32
     socket = @socket
-    return 0 unless socket && !socket.closed?
+    return 0 if socket.nil? || socket.closed?
     task.processing = block
     data = message.to_slice
     socket.write data
@@ -87,6 +87,7 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     #  # TODO:: log errors properly
     #  puts "no received function provided for #{self.class}"
     # end
+
 
   rescue error
     # TODO:: log errors properly

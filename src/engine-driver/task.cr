@@ -88,7 +88,7 @@ class EngineDriver::Task
 
   # Possible failure or device busy.
   def retry
-    return unless @wait && !@channel.closed?
+    return if @wait == false || @channel.closed?
 
     # TODO:: log the retry
 

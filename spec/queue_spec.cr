@@ -129,7 +129,7 @@ describe EngineDriver::Queue do
 
     count = 0
 
-    t = queue.add(timeout: 5.milliseconds) { |task|
+    t = queue.add(timeout: 5.milliseconds) {
       count += 1
     }.response_required!
 
@@ -149,7 +149,7 @@ describe EngineDriver::Queue do
     queue = Helper.queue
     queue.online = true
 
-    t = queue.add { |task|
+    t = queue.add {
       raise "error"
     }
 

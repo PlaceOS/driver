@@ -25,6 +25,9 @@ describe EngineDriver::Settings do
 
   it "should grab deep settings" do
     settings = Helper.settings
+
     settings.get { setting(String, :hash, :hello) }.should eq("world")
+    settings.get { setting?(String, :hash, :hello) }.should eq("world")
+    settings.get { setting?(String, :hash, :no_exist) }.should eq(nil)
   end
 end

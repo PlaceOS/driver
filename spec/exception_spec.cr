@@ -5,7 +5,7 @@ describe EngineDriver::RemoteException do
     queue = Helper.queue
     queue.online = true
 
-    t = queue.add { |task|
+    t = queue.add {
       raise "error"
     }
 

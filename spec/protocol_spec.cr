@@ -2,7 +2,7 @@ require "./helper"
 
 describe EngineDriver::Protocol do
   it "should parse an incomming request" do
-    proto, input, output = Helper.protocol
+    proto, input, _ = Helper.protocol
 
     id = nil
     proto.register :start do |request|
@@ -23,7 +23,7 @@ describe EngineDriver::Protocol do
   end
 
   it "should send outgoing requests" do
-    proto, input, output = Helper.protocol
+    proto, _, output = Helper.protocol
     req = proto.request("sys-abcd", :exec, {mod: "Display_1"})
 
     raw_data = Bytes.new(4096)
@@ -33,7 +33,7 @@ describe EngineDriver::Protocol do
   end
 
   it "should handle back to back requests" do
-    proto, input, output = Helper.protocol
+    proto, input, _ = Helper.protocol
 
     results = [] of String
     proto.register :start do |request|
