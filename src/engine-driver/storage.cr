@@ -2,12 +2,23 @@ require "redis"
 
 class EngineDriver::Storage < Hash(String, String)
   @@instance : Redis::PooledClient?
+  def self.redis_pool
+    # TODO:: provide redis connection details
+    @@instance ||= Redis::PooledClient.new
+  end
 
-  def initialize(@module_id : String, prefix = "status")
+  def self.get(key)
+    redis = @@instance ||= Redis::PooledClient.new
+    redis.get(key.to_s)
+  end
+
+  KEY_PREFIX = "status"
+
+  def initialize(@module_id : String)
     super()
     @@instance ||= Redis::PooledClient.new
     @redis = @@instance.not_nil!
-    @hash_key = "#{prefix}\x02#{@module_id}"
+    @hash_key = "#{KEY_PREFIX}\x02#{@module_id}"
   end
 
   @redis : Redis::PooledClient
