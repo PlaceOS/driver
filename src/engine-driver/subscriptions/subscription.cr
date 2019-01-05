@@ -1,9 +1,5 @@
 abstract class EngineDriver::Subscriptions::Subscription
-  def callback(message : String)
-    # TODO:: catch and log errors here!
-    @callback.call(self, message)
-  end
-
+  abstract def callback(message : String) : Nil
   abstract def subscribe_to : String?
   abstract def current_value : String?
 

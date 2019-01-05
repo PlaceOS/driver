@@ -17,7 +17,10 @@ class EngineDriver::Subscriptions
 
     # TODO:: provide redis connection details
     @redis_subscribe = Redis.new
-    spawn { monitor_changes }
+
+    channel = Channel(Nil).new
+    spawn { monitor_changes(channel) }
+    channel.receive?
   end
 
   def terminate
@@ -50,7 +53,7 @@ class EngineDriver::Subscriptions
   end
 
   # Provide generic channels for modules to communicate over
-  def channel(name, &callback) : EngineDriver::Subscriptions::ChannelSubscription
+  def channel(name, &callback : (EngineDriver::Subscriptions::ChannelSubscription, String) -> Nil) : EngineDriver::Subscriptions::ChannelSubscription
     sub = EngineDriver::Subscriptions::ChannelSubscription.new(name.to_s, &callback)
     if channel = sub.subscribe_to
       # update the subscription cache
@@ -95,7 +98,9 @@ class EngineDriver::Subscriptions
     end
   end
 
-  private def monitor_changes
+  private def monitor_changes(wait)
+    wait.close
+
     retry max_interval: 5.seconds do
       @redis_subscribe.subscribe(SYSTEM_ORDER_UPDATE) do |on|
         on.message { |c, m| on_message(c, m) }
@@ -159,7 +164,7 @@ class EngineDriver::Subscriptions
 
       # notify of current value
       if current_value = subscription.current_value
-        spawn { subscription.callback(current_value) }
+        spawn { subscription.callback(current_value.not_nil!) }
       end
     end
   end

@@ -1,12 +1,15 @@
 require "./subscription"
 
 class EngineDriver::Subscriptions::DirectSubscription < EngineDriver::Subscriptions::Subscription
-  def initialize(@module_id : String, status, &@callback)
+  def initialize(@module_id : String, status, &@callback : (EngineDriver::Subscriptions::DirectSubscription, String) ->)
     @status = status.to_s
     @storage = EngineDriver::Storage.new(@module_id)
   end
 
-  @callback : (EngineDriver::Subscriptions::DirectSubscription, String) -> Nil
+  def callback(message : String)
+    # TODO:: catch and log errors here!
+    @callback.call(self, message)
+  end
 
   getter :module_id, :status
 

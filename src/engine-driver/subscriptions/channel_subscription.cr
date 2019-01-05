@@ -1,10 +1,13 @@
 require "./subscription"
 
 class EngineDriver::Subscriptions::ChannelSubscription < EngineDriver::Subscriptions::Subscription
-  def initialize(@channel : String, &@callback)
+  def initialize(@channel : String, &@callback : (EngineDriver::Subscriptions::ChannelSubscription, String) ->)
   end
 
-  @callback : (EngineDriver::Subscriptions::ChannelSubscription, String) -> Nil
+  def callback(message : String)
+    # TODO:: catch and log errors here!
+    @callback.call(self, message)
+  end
 
   getter :channel
 
