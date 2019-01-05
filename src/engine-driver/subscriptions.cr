@@ -1,4 +1,3 @@
-
 class EngineDriver::Subscriptions
   SYSTEM_ORDER_UPDATE = "lookup\x02change"
 
@@ -66,7 +65,7 @@ class EngineDriver::Subscriptions
     sub
   end
 
-  def unsubscribe(subscription : EngineDriver::Subscriptions::Subscription) : nil
+  def unsubscribe(subscription : EngineDriver::Subscriptions::Subscription) : Nil
     @mutex.synchronize {
       # clean up indirect subscription (if this is one)
       if redirect = @redirections[subscription.system_id]?
@@ -129,7 +128,7 @@ class EngineDriver::Subscriptions
         subscribed = false
 
         # Check if currently mapped
-        if mod_id = sub.module_id
+        if sub.module_id
           current_channel = sub.subscribe_to
           sub.reset
           new_channel = sub.subscribe_to

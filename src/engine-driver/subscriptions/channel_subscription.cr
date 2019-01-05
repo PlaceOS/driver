@@ -1,5 +1,6 @@
+require "./subscription"
 
-class EngineDriver::Subscriptions::ChannelSubscription < Subscription
+class EngineDriver::Subscriptions::ChannelSubscription < EngineDriver::Subscriptions::Subscription
   def initialize(@channel : String, &@callback)
   end
 

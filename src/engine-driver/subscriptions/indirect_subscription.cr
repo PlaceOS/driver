@@ -1,5 +1,6 @@
+require "./subscription"
 
-class EngineDriver::Subscriptions::IndirectSubscription < Subscription
+class EngineDriver::Subscriptions::IndirectSubscription < EngineDriver::Subscriptions::Subscription
   def initialize(@system_id : String, @module_name : String, @index : Int32, @status : String, &@callback)
   end
 
@@ -10,7 +11,7 @@ class EngineDriver::Subscriptions::IndirectSubscription < Subscription
   getter :system_id, :module_name, :index, :module_id, :status
 
   def subscribe_to
-    if module_id = get_module_id
+    if get_module_id
       "#{@storage.not_nil!.hash_key}\x02#{@status}"
     end
   end

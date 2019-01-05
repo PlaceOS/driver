@@ -1,4 +1,3 @@
-
 abstract class EngineDriver::Subscriptions::Subscription
   def callback(message : String)
     # TODO:: catch and log errors here!
