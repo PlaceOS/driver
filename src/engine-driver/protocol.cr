@@ -99,9 +99,11 @@ class EngineDriver::Protocol
     send(message)
   end
 
-  def request(id, command, payload = nil)
+  def request(id, command, payload = nil, raw = false)
     req = Request.new(id.to_s, command.to_s)
-    req.payload = payload.to_json if payload
+    if payload
+      req.payload = raw ? payload.to_s : payload.to_json
+    end
     send req
   end
 
