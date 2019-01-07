@@ -1,5 +1,5 @@
 class EngineDriver::Subscriptions
-  SYSTEM_ORDER_UPDATE = "lookup\x02change"
+  SYSTEM_ORDER_UPDATE = "lookup-change"
 
   def initialize
     @terminated = false
@@ -18,13 +18,19 @@ class EngineDriver::Subscriptions
     # TODO:: provide redis connection details
     @redis_subscribe = Redis.new
 
+    # Is the subscription loop running?
+    @running = false
+
     channel = Channel(Nil).new
     spawn { monitor_changes(channel) }
     channel.receive?
   end
 
-  def terminate
-    @terminated = true
+  getter :running
+
+  def terminate(terminate = true)
+    @terminated = terminate
+    @running = false
 
     # Unsubscribe with no arguments unsubscribes from all, this will terminate
     # the subscription loop, allowing monitor_changes to return
@@ -32,14 +38,14 @@ class EngineDriver::Subscriptions
   end
 
   # Self reference subscription
-  def subscribe(module_id, status, &callback) : EngineDriver::Subscriptions::DirectSubscription
+  def subscribe(module_id, status, &callback : (EngineDriver::Subscriptions::DirectSubscription, String) ->) : EngineDriver::Subscriptions::DirectSubscription
     sub = EngineDriver::Subscriptions::DirectSubscription.new(module_id.to_s, status.to_s, &callback)
     perform_subscribe(sub)
     sub
   end
 
   # Abstract subscription
-  def subscribe(system_id, module_name, index, status, &callback) : EngineDriver::Subscriptions::IndirectSubscription
+  def subscribe(system_id, module_name, index, status, &callback : (EngineDriver::Subscriptions::IndirectSubscription, String) ->) : EngineDriver::Subscriptions::IndirectSubscription
     sub = EngineDriver::Subscriptions::IndirectSubscription.new(system_id.to_s, module_name.to_s, index.to_i, status.to_s, &callback)
 
     @mutex.synchronize {
@@ -102,33 +108,58 @@ class EngineDriver::Subscriptions
     wait.close
 
     retry max_interval: 5.seconds do
-      @redis_subscribe.subscribe(SYSTEM_ORDER_UPDATE) do |on|
-        on.message { |c, m| on_message(c, m) }
+      begin
+        wait = Channel(Nil).new
 
         # This will run on redis reconnect
-        @mutex.synchronize {
-          # re-subscribe to existing subscriptions here
-          @subscriptions.each_key do |channel|
-            @redis_subscribe.subscribe channel
-          end
+        # We can't have this run in the subscribe block as the subscribe block
+        # needs to return before we subscribe to further channels
+        spawn {
+          wait.receive?
+          @mutex.synchronize {
+            # re-subscribe to existing subscriptions here
+            @subscriptions.each_key do |channel|
+              @redis_subscribe.subscribe channel
+            end
 
-          # re-check indirect subscriptions
-          @redirections.each_key do |system_id|
-            remap_indirect(system_id)
-          end
+            # re-check indirect subscriptions
+            @redirections.each_key do |system_id|
+              remap_indirect(system_id)
+            end
 
-          # TODO:: check for any value changes
-          # disconnect might have been a network partition and an update may
-          # have occurred during this time gap
+            @running = true
+
+            # TODO:: check for any value changes
+            # disconnect might have been a network partition and an update may
+            # have occurred during this time gap
+          }
         }
-      end
 
-      raise "reconnect" unless @terminated
+        # NOTE:: The crystal redis subscription API could use a little work.
+        # The reason for all the sync and spawns is that the first subscribe
+        # requires a block and subsequent ones throw an error with a block.
+        @redis_subscribe.subscribe(SYSTEM_ORDER_UPDATE) do |on|
+          on.message { |c, m| on_message(c, m) }
+          spawn { wait.close }
+        end
+
+        raise "no subscriptions, restarting loop" unless @terminated
+      rescue e
+        # TODO:: improve logging here
+        puts "#{e.message}\n#{e.backtrace?.try &.join("\n")}"
+        raise e
+      ensure
+        wait.close
+        @running = false
+
+        # We need to re-create the subscribe object for our sanity
+        @redis_subscribe = Redis.new unless @terminated
+      end
     end
   end
 
   private def remap_indirect(system_id)
-    if subscriptions = @redirections[system_id]
+    if subscriptions = @redirections[system_id]?
       subscriptions.each do |sub|
         subscribed = false
 

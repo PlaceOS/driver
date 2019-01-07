@@ -1,8 +1,7 @@
 require "./subscription"
 
 class EngineDriver::Subscriptions::DirectSubscription < EngineDriver::Subscriptions::Subscription
-  def initialize(@module_id : String, status, &@callback : (EngineDriver::Subscriptions::DirectSubscription, String) ->)
-    @status = status.to_s
+  def initialize(@module_id : String, @status : String, &@callback : (EngineDriver::Subscriptions::DirectSubscription, String) ->)
     @storage = EngineDriver::Storage.new(@module_id)
   end
 
