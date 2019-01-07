@@ -47,6 +47,22 @@ class Helper
     end
   end
 
+  macro new_driver(klass, module_id)
+    %settings = Helper.settings
+    %queue = Helper.queue
+    %logger = EngineDriver::Logger.new({{module_id}}, EngineDriver::Protocol.instance)
+    %driver = nil
+    %transport = EngineDriver::TransportTCP.new(%queue, "localhost", 1234) do |data, task|
+      d = %driver.not_nil!
+      if d.responds_to?(:received)
+        d.received(data, task)
+      else
+        d.logger.warn "no received function provided for #{d.class}"
+      end
+    end
+    %driver = {{klass}}.new {{module_id}}.to_s, %settings, %queue, %transport, %logger
+  end
+
   def self.settings
     EngineDriver::Settings.new %({
       "integer": 1234,

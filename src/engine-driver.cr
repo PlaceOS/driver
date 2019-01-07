@@ -2,44 +2,68 @@
 require "retriable/core_ext/kernel"
 
 abstract class EngineDriver
-  def initialize(@module_id : String, @queue : EngineDriver::Queue, @transport : EngineDriver::Transport)
-    @status = EngineDriver::Status.new
+  def initialize(
+    @__module_id__ : String,
+    @__settings__ : EngineDriver::Settings,
+    @__queue__ : EngineDriver::Queue,
+    @__transport__ : EngineDriver::Transport,
+    @__logger__ : EngineDriver::Logger
+  )
+    @__status__ = EngineDriver::Status.new
+    @__storage__ = EngineDriver::Storage.new(@__module_id__)
+    @__storage__.clear
   end
 
-  @settings : EngineDriver::Settings? # TODO:: don't make this nillable
-  property :queue, :transport, :status, settings
+  # Access to the various components
+  HELPERS = %w(queue transport logger settings)
+  {% for name in HELPERS %}
+    def {{name.id}}
+      @__{{name.id}}__
+    end
+  {% end %}
 
   # Status helpers
   def []=(key, value)
-    @status.set_json(key, value)
+    json = @__status__.set_json(key, value)
+    @__storage__[key] = json
+    value
   end
 
   def [](key)
-    @status.fetch_json(key)
+    @__status__.fetch_json(key)
   end
 
   def []?(key)
-    @status.fetch_json?(key)
+    @__status__.fetch_json?(key)
   end
 
   # Settings helpers
   macro setting(klass, *types)
-    @settings.get { setting({{klass}}, {{*types}}) }
+    @__settings__.get { setting({{klass}}, {{*types}}) }
   end
 
   macro setting?(klass, *types)
-    @settings.get { setting?({{klass}}, {{*types}}) }
+    @__settings__.get { setting?({{klass}}, {{*types}}) }
   end
+
+  # Keep track of loaded driver classes. Should only be one.
+  CONCRETE_DRIVERS = {} of Nil => Nil
 
   # Remote execution helpers
   macro inherited
     macro finished
         __build_helpers__
+        {% CONCRETE_DRIVERS[@type.name.id] = @type.name.id %}
     end
   end
 
   RESERVED_METHODS = {} of Nil => Nil
   {% RESERVED_METHODS["received"] = true %}
+  {% RESERVED_METHODS["[]?"] = true %}
+  {% RESERVED_METHODS["[]"] = true %}
+  {% for name in HELPERS %}
+    {% RESERVED_METHODS[name.id.stringify] = true %}
+  {% end %}
 
   macro __build_helpers__
     {% methods = @type.methods %}
