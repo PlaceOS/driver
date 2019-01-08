@@ -41,6 +41,26 @@ class Helper
       puts io
     end
 
+    # Any method that requires a block is not included in the public API
+    def add(a)
+      a + yield
+    end
+
+    # Public API methods need to define argument types
+    def add(a : Int32, b : Int32, *others)
+      num = 0
+      others.each { |o| num + o }
+      a + b + num
+    end
+
+    # Public API will ignore splat arguments
+    def splat_add(*splat, **dsplat)
+      num = 0
+      splat.each { |o| num + o }
+      dsplat.values.each { |o| num + o }
+      num
+    end
+
     def received(data, task)
       response = IO::Memory.new(data).to_s
       task.try &.success(response)

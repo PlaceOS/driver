@@ -53,7 +53,7 @@ abstract class EngineDriver
   macro inherited
     macro finished
         __build_helpers__
-        {% CONCRETE_DRIVERS[@type.name.id] = @type.name.id %}
+        {% CONCRETE_DRIVERS[@type.name.id] = (@type.name.id.stringify + "::KlassExecutor").id %}
     end
   end
 
@@ -69,19 +69,29 @@ abstract class EngineDriver
     {% methods = @type.methods %}
     {% methods = methods.reject { |method| RESERVED_METHODS[method.name.stringify] } %}
     {% methods = methods.reject { |method| method.visibility != :public } %}
+    {% methods = methods.reject { |method| method.accepts_block? } %}
 
     # Build a class that represents each method
     {% for method in methods %}
+      {% index = 0 %}
+      {% args = [] of Crystal::Macros::Arg %}
+      {% for arg in method.args %}
+        {% if !method.splat_index || index < method.splat_index %}
+          {% args << arg %}
+        {% end %}
+        {% index = index + 1 %}
+      {% end %}
+
       class Method{{method.name.stringify.camelcase.id}}
         JSON.mapping(
-          {% if method.args.size == 0 %}
+          {% if args.size == 0 %}
              {} of String => String
           {% else %}
-             {% for arg in method.args %}
+             {% for arg in args %}
                 {% if !arg.restriction %}
                   "Public method '{{@type.id}}.{{method.name}}' has no type specified for argument '{{arg.name}}'"
                 {% else %}
-                  {{arg.name}}: {{arg.restriction}}
+                  {{arg.name}}: {{arg.restriction}},
                 {% end %}
             {% end %}
           {% end %}
@@ -89,27 +99,69 @@ abstract class EngineDriver
       end
     {% end %}
 
-    # A class that handles every method
+    # A class that handles executing every public method defined
+    # NOTE:: currently doesn't handle multiple methods signatures (except block
+    # and no block). Technically we could add the support however the JSON
+    # parsing does not reliably pick the closest match and instead picks the
+    # first or simplest match. So simpler to have a single method signature for
+    # all public API methods
     class KlassExecutor
       JSON.mapping(
-        ___exec: String,
+        __exec__: String,
         {% for method in methods %}
             {{method.name}}: Method{{method.name.stringify.camelcase.id}}?,
         {% end %}
       )
 
+      # provide introspection into available functions
+      @@functions : String?
+      def self.functions : String
+        functions = @@functions
+        return functions if functions
+
+          list = %({
+          {% for method in methods %}
+            {% index = 0 %}
+            {% args = [] of Crystal::Macros::Arg %}
+            {% for arg in method.args %}
+              {% if !method.splat_index || index < method.splat_index %}
+                {% args << arg %}
+              {% end %}
+              {% index = index + 1 %}
+            {% end %}
+
+            {{method.name.stringify}}: {
+              {% for arg in args %}
+                {{arg.name.stringify}}: {{arg.restriction.stringify}},
+              {% end %}
+            },
+          {% end %}})
+
+        # Remove whitespace, remove all ',' followed by a '}'
+        @@functions = list.gsub(/\s/, "").gsub(",}", "}")
+      end
+
       # Once serialised, we want to execute the request on the class
       def execute(klass : {{@type.id}})
-        case self.___exec
+        case self.__exec__
         {% for method in methods %}
+          {% index = 0 %}
+          {% args = [] of Crystal::Macros::Arg %}
+          {% for arg in method.args %}
+            {% if !method.splat_index || index < method.splat_index %}
+              {% args << arg %}
+            {% end %}
+            {% index = index + 1 %}
+          {% end %}
+
           when {{method.name.stringify}}
-            {% if method.args.size == 0 %}
+            {% if args.size == 0 %}
               return klass.{{method.name}}
             {% else %}
               obj = self.{{method.name}}.not_nil!
               args = {
-                {% for arg in method.args %}
-                  {{arg.name}}: obj.{{arg.name}}
+                {% for arg in args %}
+                  {{arg.name}}: obj.{{arg.name}},
                 {% end %}
               }
               return klass.{{method.name}} **args
@@ -119,22 +171,6 @@ abstract class EngineDriver
 
         raise "unknown method"
       end
-    end
-
-    # provide introspection into available functions
-    @@functions : String?
-    def self.__functions__
-      functions = @@functions
-      return functions if functions
-        list = %[{
-        {% for method in methods %}
-          {{method.name.stringify}}: {
-            {% for arg in method.args %}
-              {{arg.name.stringify}}: {{arg.restriction.stringify}}
-            {% end %}
-          },
-        {% end %} ]
-      @@functions = list.gsub(/\s/, "")[0..-2] + '}'
     end
   end
 end
