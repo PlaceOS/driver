@@ -18,8 +18,7 @@ class EngineDriver::Settings
       begin
         extract {{klass}}, %json
       rescue ex : TypeCastError
-        # TODO:: improve logging
-        puts "setting[#{%keys.join("->")}] expected to be type of {{klass}}"
+        logger.error "setting[#{%keys.join("->")}] expected to be type of {{klass}}"
         raise ex
       end
     else
@@ -34,8 +33,7 @@ class EngineDriver::Settings
       begin
         extract {{klass}}, %json
       rescue ex : TypeCastError
-        # TODO:: improve logging
-        puts "setting[#{%keys.join("->")}] expected to be type of {{klass}}"
+        logger.error "setting[#{%keys.join("->")}] expected to be type of {{klass}}"
         raise ex
       end
     else

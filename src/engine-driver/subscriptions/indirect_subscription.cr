@@ -1,12 +1,15 @@
 require "./subscription"
 
 class EngineDriver::Subscriptions::IndirectSubscription < EngineDriver::Subscriptions::Subscription
-  def initialize(@system_id : String, @module_name : String, @index : Int32, @status : String, &@callback : (EngineDriver::Subscriptions::IndirectSubscription, String) ->)
+  def initialize(@system_id : String, @module_name : String, @index : Int32, @status : String, &@callback : (IndirectSubscription, String) ->)
   end
 
-  def callback(message : String)
-    # TODO:: catch and log errors here!
+  def callback(logger : ::Logger, message : String)
+    # Error handling is the responsibility of the callback
+    # This is fine as this should only be used internally
     @callback.call(self, message)
+  rescue e
+    logger.error "error in subscription callback\n#{e.message}\n#{e.backtrace?.try &.join("\n")}"
   end
 
   @storage : EngineDriver::Storage?

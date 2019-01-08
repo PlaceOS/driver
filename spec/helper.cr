@@ -29,9 +29,9 @@ class Helper
 
   # Returns a running queue
   def self.queue
-    queue = EngineDriver::Queue.new
-    spawn { queue.process! }
-    queue
+    std_out = IO::Memory.new
+    logger = ::Logger.new(std_out)
+    EngineDriver::Queue.new(logger)
   end
 
   # A basic engine driver for testing
@@ -83,8 +83,10 @@ class Helper
     %driver = {{klass}}.new {{module_id}}.to_s, %settings, %queue, %transport, %logger
   end
 
-  def self.settings
-    EngineDriver::Settings.new %({
+  macro settings
+    std_out = IO::Memory.new
+    logger = ::Logger.new(std_out)
+    settings = EngineDriver::Settings.new %({
       "integer": 1234,
       "string": "hello",
       "array": [12, 34, 54],

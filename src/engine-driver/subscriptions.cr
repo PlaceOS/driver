@@ -1,8 +1,11 @@
+require "logger"
+
 class EngineDriver::Subscriptions
   SYSTEM_ORDER_UPDATE = "lookup-change"
 
   def initialize
     @terminated = false
+    @logger = ::Logger.new(STDOUT)
 
     # Mutex for indirect subscriptions as it involves two hashes, a redis lookup
     # and the possibility of an index change. The redis lookup pauses the
@@ -95,12 +98,11 @@ class EngineDriver::Subscriptions
       @mutex.synchronize { remap_indirect(message) }
     elsif subscriptions = @subscriptions[channel]?
       subscriptions.each do |subscription|
-        subscription.callback message
+        subscription.callback @logger, message
       end
     else
-      # TODO:: log issue, subscribed to channel but no subscriptions
-      puts "WARN: received message for channel with no subscription!"
-      puts "Channel: #{channel}\nMessage: #{message}"
+      # subscribed to channel but no subscriptions
+      @logger.warn "received message for channel with no subscription!\nChannel: #{channel}\nMessage: #{message}"
     end
   end
 
@@ -145,8 +147,7 @@ class EngineDriver::Subscriptions
 
         raise "no subscriptions, restarting loop" unless @terminated
       rescue e
-        # TODO:: improve logging here
-        puts "#{e.message}\n#{e.backtrace?.try &.join("\n")}"
+        @logger.warn "redis subscription loop exited\n#{e.message}\n#{e.backtrace?.try &.join("\n")}"
         raise e
       ensure
         wait.close
@@ -195,7 +196,7 @@ class EngineDriver::Subscriptions
 
       # notify of current value
       if current_value = subscription.current_value
-        spawn { subscription.callback(current_value.not_nil!) }
+        spawn { subscription.callback(@logger, current_value.not_nil!) }
       end
     end
   end

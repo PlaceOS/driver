@@ -3,7 +3,7 @@ require "tasker"
 require "json"
 
 class EngineDriver::Queue
-  def initialize
+  def initialize(@logger : ::Logger)
     @queue = Priority::Queue(Task).new
 
     # Task defaults
@@ -17,13 +17,15 @@ class EngineDriver::Queue
     @terminated = false
     @waiting = false
     @online = false
+
+    spawn { process! }
   end
 
   @current : Task?
   @previous : Task?
   @timeout : Time::Span
   getter :current, :waiting
-  getter :online
+  getter :online, :logger
 
   def online=(state : Bool)
     @online = state
@@ -59,7 +61,7 @@ class EngineDriver::Queue
     @channel.close
   end
 
-  def process!
+  private def process!
     loop do
       # Wait for a new task to be available
       if @online && @queue.size > 0

@@ -19,14 +19,17 @@ class EngineDriver::Task
     @last_executed = 0_i64
     @channel = Channel(Nil).new
 
+    @logger = @queue.logger
+
     @state = :unknown
     @payload = DEFAULT_RESULT
     @backtrace = DEFAULT_BACKTR
   end
 
+  @logger : ::Logger
   @timer : Tasker::Task?
   @processing : Proc(Bytes, Nil)?
-  getter :last_executed, :state, :payload, :backtrace
+  getter :last_executed, :state, :payload, :backtrace, :logger
   property :processing
 
   def result
@@ -47,6 +50,7 @@ class EngineDriver::Task
     @wait ? start_timers : @channel.close
     self
   rescue e
+    @logger.error "error executing task #{@name}\n#{e.message}\n#{e.backtrace?.try &.join("\n")}"
     @state = :exception
     @payload = e.message || "error executing task"
     @backtrace = e.backtrace? || DEFAULT_BACKTR
@@ -71,8 +75,8 @@ class EngineDriver::Task
     if @response_required && result.responds_to?(:to_json)
       begin
         @payload = [result].to_json
-      rescue
-        # TODO:: log the error
+      rescue e
+        @logger.warn "unable to convert result to JSON\n#{e.message}\n#{e.backtrace?.try &.join("\n")}"
       end
     end
 
@@ -90,7 +94,13 @@ class EngineDriver::Task
   def retry
     return if @wait == false || @channel.closed?
 
-    # TODO:: log the retry
+    @logger.info do
+      if @name
+        "retrying command #{@name.inspect} due to timeout"
+      else
+        "retrying command due to timeout"
+      end
+    end
 
     @retries -= 1
     if @retries >= 0

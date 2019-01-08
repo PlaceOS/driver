@@ -169,7 +169,7 @@ abstract class EngineDriver
         {% end %}
         end
 
-        raise "unknown method"
+        raise "execute request for unknown method: #{self.__exec__}"
       end
     end
   end

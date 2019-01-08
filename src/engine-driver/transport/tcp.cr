@@ -4,10 +4,13 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
   # timeouts in seconds
   def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, &@received : (Bytes, EngineDriver::Task?) -> Nil)
     @terminated = false
+    @logger = @queue.logger
   end
 
+  @logger : ::Logger
   @socket : TCPSocket?
   property :received
+  getter :logger
 
   def connect(connect_timeout : Int32 = 10)
     return if @terminated
@@ -62,8 +65,7 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     end
   rescue IO::Error | Errno
   rescue error
-    # TODO:: log errors properly
-    puts "error consuming IO\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+    @logger.error "error consuming IO\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
   ensure
     connect
   end
@@ -77,20 +79,10 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
       end
     end
 
+    # See spec for how this callback is expected to be used
     @received.call(data, @queue.current)
 
-    # This should be performed in the callback:
-    # d = driver
-    # if d && d.responds_to?(:received)
-    # d.received(data, @queue.current)
-    # else
-    #  # TODO:: log errors properly
-    #  puts "no received function provided for #{self.class}"
-    # end
-
-
   rescue error
-    # TODO:: log errors properly
-    puts "error processing received data\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+    @logger.error "error processing received data\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
   end
 end
