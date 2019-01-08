@@ -29,7 +29,7 @@ class EngineDriver::Subscriptions
     channel.receive?
   end
 
-  getter :running
+  getter :running, :logger
 
   def terminate(terminate = true)
     @terminated = terminate

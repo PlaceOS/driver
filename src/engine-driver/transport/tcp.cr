@@ -81,7 +81,6 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
 
     # See spec for how this callback is expected to be used
     @received.call(data, @queue.current)
-
   rescue error
     @logger.error "error processing received data\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
   end

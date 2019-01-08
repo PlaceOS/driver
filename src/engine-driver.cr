@@ -53,7 +53,7 @@ abstract class EngineDriver
   macro inherited
     macro finished
         __build_helpers__
-        {% CONCRETE_DRIVERS[@type.name.id] = (@type.name.id.stringify + "::KlassExecutor").id %}
+        {% CONCRETE_DRIVERS[@type] = [@type.methods, (@type.name.id.stringify + "::KlassExecutor").id] %}
     end
   end
 
