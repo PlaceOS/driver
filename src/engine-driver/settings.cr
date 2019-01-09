@@ -5,7 +5,7 @@ class EngineDriver::Settings
     @json = JSON.parse(settings)
   end
 
-  getter :json
+  property :json
 
   def get
     with self yield

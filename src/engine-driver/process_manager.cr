@@ -35,26 +35,77 @@ class EngineDriver::ProcessManager
   end
 
   def stop(request : Protocol::Request)
-    module_id = request.id
-    driver = @loaded.delete module_id
-    return unless driver
-
-    driver.terminate
+    driver = @loaded.delete request.id
+    driver.try &.terminate
     nil
   rescue error
     @logger.error "stopping driver #{DriverManager.driver_class} (#{request.id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
   end
 
   def update(request : Protocol::Request)
+    driver = @loaded[request.id]?
+    driver.try &.update(request.payload)
+    nil
   end
 
-  def exec(request : Protocol::Request)
+  def exec(request : Protocol::Request) : Protocol::Request
+    driver = @loaded[request.id]?
+    return nil unless driver
+
+    request.cmd = "result"
+
+    begin
+      exec_request = request.payload
+      result = driver.execute exec_request
+
+      # If a task is being returned then we want to wait for the result
+      if result.is_a?(Task)
+        result.response_required!
+        outcome = result.get
+
+        request.payload = outcome.payload
+
+        case outcome.result
+        when :success
+        when :abort
+          request.error = "Abort"
+        when :exception
+          request.payload = outcome.payload
+          request.error = outcome.error
+          request.backtrace = outcome.backtrace
+        when :unknown
+          @logger.fatal "unexpected result: #{outcome.result}"
+        else
+          @logger.fatal "unexpected result: #{outcome.result}"
+        end
+      elsif result.responds_to?(:to_json)
+        begin
+          request.payload = result.to_json
+        rescue error
+          request.payload = "null"
+          driver.logger.info { "unable to convert result to json executing #{exec_request} on #{DriverManager.driver_class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}" }
+        end
+      else
+        request.payload = "null"
+      end
+    rescue error
+      driver.logger.error "executing #{exec_request} on #{DriverManager.driver_class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+      request.set_error(error)
+    end
+
+    request
   end
 
-  def debug(request : Protocol::Request)
+  def debug(_request)
+    driver = @loaded[request.id]?
+    driver.try &.logger.debugging = true
+    nil
   end
 
-  def ignore(request : Protocol::Request)
+  def ignore(_request)
+    driver = @loaded[request.id]?
+    driver.try &.logger.debugging = false
+    nil
   end
 
   def terminate
@@ -62,9 +113,11 @@ class EngineDriver::ProcessManager
     @input.close
 
     # Shutdown all the connections gracefully
-    @subscriptions.terminate
     @loaded.each &.terminate
     @loaded.clear
+
+    # We now want to stop the subscription loop
+    @subscriptions.terminate
     nil
   end
 end

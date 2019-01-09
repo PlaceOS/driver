@@ -14,8 +14,9 @@ describe EngineDriver::Queue do
 
     result.should eq({
       result:    :success,
-      payload:   "[1234]",
+      payload:   "1234",
       backtrace: [] of String,
+      error:     nil,
     })
 
     # Slightly different way to indicate if a response is required
@@ -30,8 +31,9 @@ describe EngineDriver::Queue do
 
     result.should eq({
       result:    :success,
-      payload:   "[1234]",
+      payload:   "1234",
       backtrace: [] of String,
+      error:     nil,
     })
   end
 
@@ -48,8 +50,9 @@ describe EngineDriver::Queue do
 
     result.should eq({
       result:    :success,
-      payload:   "[null]",
+      payload:   "null",
       backtrace: [] of String,
+      error:     nil,
     })
   end
 
@@ -66,8 +69,9 @@ describe EngineDriver::Queue do
 
     result.should eq({
       result:    :success,
-      payload:   "[null]",
+      payload:   "null",
       backtrace: [] of String,
+      error:     nil,
     })
   end
 
@@ -86,15 +90,17 @@ describe EngineDriver::Queue do
     result = t2.get
     result.should eq({
       result:    :success,
-      payload:   "[100]",
+      payload:   "100",
       backtrace: [] of String,
+      error:     nil,
     })
 
     result = t1.get
     result.should eq({
       result:    :success,
-      payload:   "[50]",
+      payload:   "50",
       backtrace: [] of String,
+      error:     nil,
     })
 
     queue.terminate
@@ -118,8 +124,9 @@ describe EngineDriver::Queue do
 
     result.should eq({
       result:    :success,
-      payload:   "[1234]",
+      payload:   "1234",
       backtrace: [] of String,
+      error:     nil,
     })
   end
 
@@ -142,6 +149,7 @@ describe EngineDriver::Queue do
       result:    :abort,
       payload:   "retries failed",
       backtrace: [] of String,
+      error:     nil,
     })
   end
 

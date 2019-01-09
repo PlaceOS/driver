@@ -3,7 +3,7 @@ require "tasker"
 require "json"
 
 class EngineDriver::Task
-  DEFAULT_RESULT = "[null]"
+  DEFAULT_RESULT = "null"
   DEFAULT_BACKTR = [] of String
 
   def initialize(
@@ -24,16 +24,18 @@ class EngineDriver::Task
     @state = :unknown
     @payload = DEFAULT_RESULT
     @backtrace = DEFAULT_BACKTR
+    @error_class = nil
   end
 
   @logger : ::Logger
   @timer : Tasker::Task?
   @processing : Proc(Bytes, Nil)?
-  getter :last_executed, :state, :payload, :backtrace, :logger
+  @error_class : String?
+  getter :last_executed, :state, :payload, :backtrace, :error_class, :logger
   property :processing
 
   def result
-    {result: @state, payload: @payload, backtrace: @backtrace}
+    {result: @state, payload: @payload, backtrace: @backtrace, error: @error_class}
   end
 
   # Are we intending to provide this result to a third party?
@@ -54,6 +56,7 @@ class EngineDriver::Task
     @state = :exception
     @payload = e.message || "error executing task"
     @backtrace = e.backtrace? || DEFAULT_BACKTR
+    @error_class = e.class.to_s
     @channel.close
     self
   end
@@ -74,7 +77,7 @@ class EngineDriver::Task
 
     if @response_required && result.responds_to?(:to_json)
       begin
-        @payload = [result].to_json
+        @payload = result.to_json
       rescue e
         @logger.warn "unable to convert result to JSON\n#{e.message}\n#{e.backtrace?.try &.join("\n")}"
       end

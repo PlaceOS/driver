@@ -52,33 +52,48 @@ class EngineDriver::DriverManager
     define_new_driver
   end
 
-  getter :logger, module_id
+  getter :logger, :module_id
 
   def start
-    if @driver.responds_to?(:on_load)
+    driver = @driver
+    if driver.responds_to?(:on_load)
       begin
-        @driver.on_load
+        driver.on_load
       rescue error
-        @logger.error "an error occured in the on_unload function of #{@driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+        @logger.error "in the on_load function of #{driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
       end
       @transport.connect
     end
   end
 
-  def stop
+  def terminate
     @transport.terminate
-    if @driver.responds_to?(:on_unload)
+    driver = @driver
+    if driver.responds_to?(:on_unload)
       begin
-        @driver.on_unload
+        driver.on_unload
       rescue error
-        @logger.error "an error occured in the on_unload function of #{@driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+        @logger.error "in the on_unload function of #{driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
       end
     end
   end
 
+  def update(settings)
+    @settings.json = JSON.parse(settings)
+    driver = @driver
+    driver.on_update if driver.responds_to?(:on_update)
+  rescue error
+    @logger.error "during settings update of #{@driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+  end
+
+  def execute(json)
+    executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.from_json(json)
+    executor.execute(@driver)
+  end
+
   private def connection(state : Bool) : Nil
+    driver = @driver
     begin
-      driver = @driver
       if state
         @state_mutex.synchronize do
           driver[:connected] = true
@@ -91,7 +106,7 @@ class EngineDriver::DriverManager
         end
       end
     rescue error
-      @logger.warn "error changing connected state #{@driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+      @logger.warn "error changing connected state #{driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
     end
   end
 
