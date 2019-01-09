@@ -31,7 +31,7 @@ class Helper
   def self.queue
     std_out = IO::Memory.new
     logger = ::Logger.new(std_out)
-    EngineDriver::Queue.new(logger)
+    EngineDriver::Queue.new(logger) {}
   end
 
   # A basic engine driver for testing

@@ -160,4 +160,22 @@ describe EngineDriver::Queue do
     result[:payload].should eq("error")
     (result[:backtrace].size > 0).should eq(true)
   end
+
+  it "should allow for connected state to be updated" do
+    std_out = IO::Memory.new
+    logger = ::Logger.new(std_out)
+    connected = false
+    queue = EngineDriver::Queue.new(logger) { |state| connected = state }
+
+    connected.should eq(false)
+    queue.online = true
+    connected.should eq(true)
+    queue.online = false
+    connected.should eq(false)
+
+    # Since we already update connected state via the queue, we might as well
+    # make this the path for manually updating the state in a driver
+    queue.set_connected(true)
+    connected.should eq(true)
+  end
 end

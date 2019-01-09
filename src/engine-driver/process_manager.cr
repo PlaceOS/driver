@@ -6,7 +6,7 @@ class EngineDriver::ProcessManager
     @protocol = EngineDriver::Protocol.instance(@input, output)
     @logger = @subscriptions.logger
 
-    @loaded = [] of DriverManager
+    @loaded = {} of String => DriverManager
 
     @protocol.register :start { |request| start(request) }
     @protocol.register :stop { |request| stop(request) }
@@ -23,12 +23,26 @@ class EngineDriver::ProcessManager
 
   def start(request : Protocol::Request)
     module_id = request.id
+    return if @loaded[module_id]?
+
     model = EngineDriver::DriverModel.from_json(request.payload.not_nil!)
     driver = DriverManager.new module_id, model
-    driver
+    @loaded[module_id] = driver
+    nil
+  rescue error
+    @logger.error "starting driver #{DriverManager.driver_class} (#{request.id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+    request.set_error(error)
   end
 
   def stop(request : Protocol::Request)
+    module_id = request.id
+    driver = @loaded.delete module_id
+    return unless driver
+
+    driver.terminate
+    nil
+  rescue error
+    @logger.error "stopping driver #{DriverManager.driver_class} (#{request.id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
   end
 
   def update(request : Protocol::Request)
@@ -44,7 +58,10 @@ class EngineDriver::ProcessManager
   end
 
   def terminate
+    # Stop the core protocol handler (no more bets)
     @input.close
+
+    # Shutdown all the connections gracefully
     @subscriptions.terminate
     @loaded.each &.terminate
     @loaded.clear

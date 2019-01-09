@@ -3,7 +3,7 @@ require "tasker"
 require "json"
 
 class EngineDriver::Queue
-  def initialize(@logger : ::Logger)
+  def initialize(@logger : ::Logger, &@connected_callback : Bool -> Nil)
     @queue = Priority::Queue(Task).new
 
     # Task defaults
@@ -28,10 +28,18 @@ class EngineDriver::Queue
   getter :online, :logger
 
   def online=(state : Bool)
+    state_changed = state != @online
     @online = state
+    @connected_callback.call(state) if state_changed
     if @online && @waiting && @queue.size > 0
       spawn { @channel.send nil }
     end
+  end
+
+  # A helper method for setting the connected state, without effecting queue
+  # processing. UDP device not responding, incorrect login etc
+  def set_connected(state)
+    @connected_callback.call(state)
   end
 
   def add(

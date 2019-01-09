@@ -18,6 +18,13 @@ class EngineDriver::Protocol
       error: String?,
       backtrace: Array(String)?
     )
+
+    def set_error(error)
+      self.payload = error.message
+      self.error = error.class.to_s
+      self.backtrace = error.backtrace?
+      self
+    end
   end
 
   def initialize(input = STDIN, output = STDERR)
