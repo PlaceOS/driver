@@ -6,7 +6,7 @@ describe EngineDriver::Logger do
     std_out = IO::Memory.new
 
     # By default debug messages are ignored
-    logger = EngineDriver::Logger.new("mod-123", proto, std_out)
+    logger = EngineDriver::Logger.new("mod-123", std_out, proto)
     logger.debug "this should do nothing"
 
     (std_out.size > 0).should eq(false)
@@ -40,7 +40,7 @@ describe EngineDriver::Logger do
     std_out = IO::Memory.new
 
     # By default debug messages are ignored
-    logger = EngineDriver::Logger.new("mod-123", proto, std_out)
+    logger = EngineDriver::Logger.new("mod-123", std_out, proto)
     in_block = false
     logger.debug {
       in_block = true

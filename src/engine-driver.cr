@@ -177,3 +177,17 @@ end
 
 require "./engine-driver/*"
 require "./engine-driver/**"
+
+# Launch the process manager by default, this can be overriten for testing
+if EngineDriver::BootCtrl.auto_start
+  process = EngineDriver::ProcessManager.new
+
+  # Detect ctr-c to shutdown gracefully
+  Signal::INT.trap do |signal|
+    puts " > terminating gracefully"
+    spawn { process.terminate }
+    signal.ignore
+  end
+
+  process.terminated.receive?
+end

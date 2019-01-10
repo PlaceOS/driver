@@ -1,15 +1,47 @@
 require "spec"
+require "../src/engine-driver/boot_ctrl"
+
+EngineDriver::BootCtrl.auto_start = false
+
 require "../src/engine-driver"
 
 class Helper
   # Creates the input / output IO required to test protocol functions
   def self.protocol
-    inputr, inputw = IO.pipe
-    input = IO::Stapled.new(inputr, inputw, true)
-    outputr, outputw = IO.pipe
-    output = IO::Stapled.new(outputr, outputw, true)
-    proto = EngineDriver::Protocol.new(inputr, outputw)
+    input = IO::Stapled.new(*IO.pipe, true)
+    output = IO::Stapled.new(*IO.pipe, true)
+    proto = EngineDriver::Protocol.new(input, output)
     {proto, input, output}
+  end
+
+  macro process
+    input = IO::Stapled.new(*IO.pipe, true)
+    output = IO::Stapled.new(*IO.pipe, true)
+    logs = IO::Stapled.new(*IO.pipe, true)
+    process = EngineDriver::ProcessManager.new(logs, input, output)
+    process.loaded.size.should eq 0
+
+    driver_id = "mod_1234"
+
+    # Start a driver
+    json = {
+      id: driver_id,
+      cmd: "start",
+      payload: %({
+        "ip": "localhost",
+        "port": 23,
+        "udp": false,
+        "makebreak": false,
+        "role": 1,
+        "settings": {"test": {"number": 123}}
+      })
+    }.to_json
+    input.write_bytes json.bytesize
+    input.write json.to_slice
+
+    sleep 0.01
+
+    {process, input, output, logs, driver_id}
   end
 
   # Starts a simple TCP server for testing IO
@@ -61,6 +93,14 @@ class Helper
       num
     end
 
+    def raise_error
+      raise ArgumentError.new("you fool!")
+    end
+
+    def not_json
+      ArgumentError.new("you fool!")
+    end
+
     def received(data, task)
       response = IO::Memory.new(data).to_s
       task.try &.success(response)
@@ -70,7 +110,7 @@ class Helper
   macro new_driver(klass, module_id)
     %settings = Helper.settings
     %queue = Helper.queue
-    %logger = EngineDriver::Logger.new({{module_id}}, EngineDriver::Protocol.instance)
+    %logger = EngineDriver::Logger.new({{module_id}})
     %driver = nil
     %transport = EngineDriver::TransportTCP.new(%queue, "localhost", 1234) do |data, task|
       d = %driver.not_nil!

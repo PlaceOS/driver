@@ -49,10 +49,14 @@ class EngineDriver::Protocol
     spawn { self.consume_io }
   end
 
-  def self.instance(input = STDIN, output = STDERR) : EngineDriver::Protocol
-    inst = @@instance
-    return inst if inst
+  # For process manager
+  def self.new_instance(input = STDIN, output = STDERR) : EngineDriver::Protocol
     @@instance = ::EngineDriver::Protocol.new(input, output)
+  end
+
+  # For other classes
+  def self.instance(input = STDIN, output = STDERR) : EngineDriver::Protocol
+    @@instance.not_nil!
   end
 
   def register(type, &block : Request -> Request?)

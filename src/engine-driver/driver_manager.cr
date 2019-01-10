@@ -1,7 +1,7 @@
 class EngineDriver::DriverManager
-  def initialize(@module_id : String, @model : DriverModel)
+  def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT)
     @settings = Settings.new @model.settings.to_json
-    @logger = EngineDriver::Logger.new(@module_id)
+    @logger = EngineDriver::Logger.new(@module_id, logger_io)
     @queue = Queue.new(@logger) { |state| connection(state) }
 
     @state_mutex = Mutex.new
@@ -52,7 +52,7 @@ class EngineDriver::DriverManager
     define_new_driver
   end
 
-  getter :logger, :module_id
+  getter :logger, :module_id, :settings
 
   def start
     driver = @driver
@@ -79,7 +79,7 @@ class EngineDriver::DriverManager
   end
 
   def update(settings)
-    @settings.json = JSON.parse(settings)
+    @settings.json = JSON.parse(settings.not_nil!)
     driver = @driver
     driver.on_update if driver.responds_to?(:on_update)
   rescue error

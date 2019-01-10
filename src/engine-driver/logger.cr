@@ -1,8 +1,8 @@
 require "logger"
 
 class EngineDriver::Logger < Logger
-  def initialize(module_id : String, @protocol = Protocol.instance, io = STDOUT)
-    super(io)
+  def initialize(module_id : String, logger_io = STDOUT, @protocol = Protocol.instance)
+    super(logger_io)
     @debugging = false
     @progname = module_id
     self.level = Logger::WARN

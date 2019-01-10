@@ -3,9 +3,9 @@ require "logger"
 class EngineDriver::Subscriptions
   SYSTEM_ORDER_UPDATE = "lookup-change"
 
-  def initialize
+  def initialize(logger_io = STDOUT)
     @terminated = false
-    @logger = ::Logger.new(STDOUT)
+    @logger = ::Logger.new(logger_io)
 
     # Mutex for indirect subscriptions as it involves two hashes, a redis lookup
     # and the possibility of an index change. The redis lookup pauses the

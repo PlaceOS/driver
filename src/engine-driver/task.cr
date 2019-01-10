@@ -75,9 +75,9 @@ class EngineDriver::Task
   def success(result = nil)
     @state = :success
 
-    if @response_required && result.responds_to?(:to_json)
+    if @response_required
       begin
-        @payload = result.to_json
+        @payload = result.try_to_json("null")
       rescue e
         @logger.warn "unable to convert result to JSON\n#{e.message}\n#{e.backtrace?.try &.join("\n")}"
       end
