@@ -1,4 +1,5 @@
 require "spec"
+require "promise"
 require "../src/engine-driver/boot_ctrl"
 
 EngineDriver::BootCtrl.auto_start = false
@@ -14,7 +15,7 @@ class Helper
     {proto, input, output}
   end
 
-  macro process
+  def self.process
     input = IO::Stapled.new(*IO.pipe, true)
     output = IO::Stapled.new(*IO.pipe, true)
     logs = IO::Stapled.new(*IO.pipe, true)
@@ -93,6 +94,24 @@ class Helper
       num
     end
 
+    # using tasks and futures
+    def perform_task(name : String)
+      queue &.success("hello #{name}")
+    end
+
+    def error_task
+      queue { raise ArgumentError.new("oops") }
+    end
+
+    def future_add(a : Int32, b : Int32)
+      Promise.defer { sleep 0.01; a + b }
+    end
+
+    def future_error
+      Promise.defer { raise ArgumentError.new("nooooo") }
+    end
+
+    # Other possibilities
     def raise_error
       raise ArgumentError.new("you fool!")
     end

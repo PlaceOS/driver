@@ -58,6 +58,8 @@ class EngineDriver::Queue
       spawn { @channel.send nil } if @waiting
     elsif name
       @queue.push priority, task
+    else
+      spawn { task.abort("transport is currently offline") }
     end
 
     # Task returned so response_required! can be called as required

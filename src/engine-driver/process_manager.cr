@@ -62,24 +62,39 @@ class EngineDriver::ProcessManager
       result = driver.execute exec_request
 
       # If a task is being returned then we want to wait for the result
-      if result.is_a?(Task)
+      case result
+      when Task
         result.response_required!
         outcome = result.get
 
         request.payload = outcome.payload
 
-        case outcome.result
+        case outcome.state
         when :success
         when :abort
           request.error = "Abort"
         when :exception
           request.payload = outcome.payload
-          request.error = outcome.error
+          request.error = outcome.error_class
           request.backtrace = outcome.backtrace
         when :unknown
-          @logger.fatal "unexpected result: #{outcome.result}"
+          @logger.fatal "unexpected result: #{outcome.state} - #{outcome.payload}, #{outcome.error_class}, #{outcome.backtrace.join("\n")}"
         else
-          @logger.fatal "unexpected result: #{outcome.result}"
+          @logger.fatal "unexpected result: #{outcome.state}"
+        end
+      when .responds_to?(:get)
+        # Handle futures and promises
+        begin
+          result = result.get
+          begin
+            request.payload = result.try_to_json("null")
+          rescue error
+            request.payload = "null"
+            driver.logger.info { "unable to convert result to json executing #{exec_request} on #{DriverManager.driver_class} (#{request.id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}" }
+          end
+        rescue error
+          driver.logger.error "executing #{exec_request} on #{DriverManager.driver_class} (#{request.id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+          request.set_error(error)
         end
       else
         begin

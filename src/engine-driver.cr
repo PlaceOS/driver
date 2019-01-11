@@ -15,7 +15,7 @@ abstract class EngineDriver
   end
 
   # Access to the various components
-  HELPERS = %w(queue transport logger settings)
+  HELPERS = %w(transport logger settings)
   {% for name in HELPERS %}
     def {{name.id}}
       @__{{name.id}}__
@@ -44,6 +44,16 @@ abstract class EngineDriver
 
   macro setting?(klass, *types)
     @__settings__.get { setting?({{klass}}, {{*types}}) }
+  end
+
+  # Queuing
+  def queue(*args, &block : Task -> Nil)
+    @__queue__.add(*args, &block)
+  end
+
+  # Transport
+  def send(*args)
+    transport.send *args
   end
 
   # Keep track of loaded driver classes. Should only be one.

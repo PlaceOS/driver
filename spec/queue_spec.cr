@@ -12,12 +12,10 @@ describe EngineDriver::Queue do
     result = t.get
     queue.terminate
 
-    result.should eq({
-      result:    :success,
-      payload:   "1234",
-      backtrace: [] of String,
-      error:     nil,
-    })
+    result.state.should eq :success
+    result.payload.should eq "1234"
+    result.backtrace.should eq([] of String)
+    result.error_class.should eq nil
 
     # Slightly different way to indicate if a response is required
     queue = Helper.queue
@@ -29,12 +27,10 @@ describe EngineDriver::Queue do
     result = t.get :response_required
     queue.terminate
 
-    result.should eq({
-      result:    :success,
-      payload:   "1234",
-      backtrace: [] of String,
-      error:     nil,
-    })
+    result.state.should eq :success
+    result.payload.should eq "1234"
+    result.backtrace.should eq([] of String)
+    result.error_class.should eq nil
   end
 
   it "should process task with default response" do
@@ -48,12 +44,10 @@ describe EngineDriver::Queue do
     result = t.get
     queue.terminate
 
-    result.should eq({
-      result:    :success,
-      payload:   "null",
-      backtrace: [] of String,
-      error:     nil,
-    })
+    result.state.should eq :success
+    result.payload.should eq "null"
+    result.backtrace.should eq([] of String)
+    result.error_class.should eq nil
   end
 
   it "should process task with default response" do
@@ -67,12 +61,10 @@ describe EngineDriver::Queue do
     result = t.get
     queue.terminate
 
-    result.should eq({
-      result:    :success,
-      payload:   "null",
-      backtrace: [] of String,
-      error:     nil,
-    })
+    result.state.should eq :success
+    result.payload.should eq "null"
+    result.backtrace.should eq([] of String)
+    result.error_class.should eq nil
   end
 
   it "should process multiple tasks" do
@@ -88,20 +80,16 @@ describe EngineDriver::Queue do
     }.response_required!
 
     result = t2.get
-    result.should eq({
-      result:    :success,
-      payload:   "100",
-      backtrace: [] of String,
-      error:     nil,
-    })
+    result.state.should eq :success
+    result.payload.should eq "100"
+    result.backtrace.should eq([] of String)
+    result.error_class.should eq nil
 
     result = t1.get
-    result.should eq({
-      result:    :success,
-      payload:   "50",
-      backtrace: [] of String,
-      error:     nil,
-    })
+    result.state.should eq :success
+    result.payload.should eq "50"
+    result.backtrace.should eq([] of String)
+    result.error_class.should eq nil
 
     queue.terminate
   end
@@ -122,12 +110,10 @@ describe EngineDriver::Queue do
 
     count.should eq(3)
 
-    result.should eq({
-      result:    :success,
-      payload:   "1234",
-      backtrace: [] of String,
-      error:     nil,
-    })
+    result.state.should eq :success
+    result.payload.should eq "1234"
+    result.backtrace.should eq([] of String)
+    result.error_class.should eq nil
   end
 
   it "should fail a task with abort if retries fail" do
@@ -145,12 +131,10 @@ describe EngineDriver::Queue do
 
     count.should eq(4)
 
-    result.should eq({
-      result:    :abort,
-      payload:   "retries failed",
-      backtrace: [] of String,
-      error:     nil,
-    })
+    result.state.should eq :abort
+    result.payload.should eq "retries failed"
+    result.backtrace.should eq([] of String)
+    result.error_class.should eq nil
   end
 
   it "should return an exception if an error occurs running the task" do
@@ -164,9 +148,9 @@ describe EngineDriver::Queue do
     result = t.get
     queue.terminate
 
-    result[:result].should eq(:exception)
-    result[:payload].should eq("error")
-    (result[:backtrace].size > 0).should eq(true)
+    result.state.should eq :exception
+    result.payload.should eq "error"
+    (result.backtrace.size > 0).should eq(true)
   end
 
   it "should allow for connected state to be updated" do

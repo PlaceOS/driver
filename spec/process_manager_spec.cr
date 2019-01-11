@@ -173,4 +173,127 @@ describe EngineDriver::ProcessManager do
     process.terminated.receive?
     process.loaded.size.should eq 0
   end
+
+  it "should work with functions returning queue tasks" do
+    process, input, output, logs, driver_id = Helper.process
+    process.loaded.size.should eq 1
+
+    # execute a task response
+    json = {
+      id: driver_id,
+      cmd: "exec",
+      payload: %({
+        "__exec__": "perform_task",
+        "perform_task": {
+          "name": "steve"
+        }
+      })
+    }.to_json
+    input.write_bytes json.bytesize
+    input.write json.to_slice
+
+    process.loaded[driver_id].queue.online = true
+
+    raw_data = Bytes.new(4096)
+    bytes_read = output.read(raw_data)
+
+    # Check response was returned
+    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out.id.should eq(driver_id)
+    req_out.cmd.should eq("result")
+    req_out.payload.should eq(%("hello steve"))
+
+    # execute a task response
+    json = {
+      id: driver_id,
+      cmd: "exec",
+      payload: %({
+        "__exec__": "future_add",
+        "future_add": {
+          "a": 5,
+          "b": 6
+        }
+      })
+    }.to_json
+    input.write_bytes json.bytesize
+    input.write json.to_slice
+
+    process.loaded[driver_id].queue.online = true
+
+    raw_data = Bytes.new(4096)
+    bytes_read = output.read(raw_data)
+
+    # Check response was returned
+    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out.id.should eq(driver_id)
+    req_out.cmd.should eq("result")
+    req_out.payload.should eq(%(11))
+
+    # execute an erroring task response
+    json = {
+      id: driver_id,
+      cmd: "exec",
+      payload: %({
+        "__exec__": "error_task",
+        "error_task": {}
+      })
+    }.to_json
+    input.write_bytes json.bytesize
+    input.write json.to_slice
+
+    process.loaded[driver_id].queue.online = true
+
+    raw_data = Bytes.new(4096)
+    bytes_read = output.read(raw_data)
+
+    # Check response was returned
+    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out.id.should eq(driver_id)
+    req_out.cmd.should eq("result")
+    req_out.payload.should eq("oops")
+    req_out.error.should eq("ArgumentError")
+    (req_out.backtrace.not_nil!.size > 0).should eq(true)
+
+    # execute an erroring future response
+    json = {
+      id: driver_id,
+      cmd: "exec",
+      payload: %({
+        "__exec__": "future_error",
+        "future_error": {}
+      })
+    }.to_json
+    input.write_bytes json.bytesize
+    input.write json.to_slice
+
+    process.loaded[driver_id].queue.online = true
+
+    raw_data = Bytes.new(4096)
+    bytes_read = output.read(raw_data)
+
+    # Check response was returned
+    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out.id.should eq(driver_id)
+    req_out.cmd.should eq("result")
+    req_out.payload.should eq("nooooo")
+    req_out.error.should eq("ArgumentError")
+    (req_out.backtrace.not_nil!.size > 0).should eq(true)
+
+    # Check error was logged
+    raw_data = Bytes.new(4096)
+    bytes_read = logs.read(raw_data)
+    String.new(raw_data[4, bytes_read - 4]).includes?("nooooo").should eq(true)
+
+    # Ensure it terminates properly
+    json = {
+      id: "t",
+      cmd: "terminate"
+    }.to_json
+    input.write_bytes json.bytesize
+    input.write json.to_slice
+
+    process.loaded.size.should eq 1
+    process.terminated.receive?
+    process.loaded.size.should eq 0
+  end
 end

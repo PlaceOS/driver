@@ -34,10 +34,6 @@ class EngineDriver::Task
   getter :last_executed, :state, :payload, :backtrace, :error_class, :logger
   property :processing
 
-  def result
-    {result: @state, payload: @payload, backtrace: @backtrace, error: @error_class}
-  end
-
   # Are we intending to provide this result to a third party?
   def response_required!
     @response_required = true
@@ -64,7 +60,7 @@ class EngineDriver::Task
   def get(response_required = false)
     response_required! if response_required
     @channel.receive?
-    result
+    self
   end
 
   def delay_required?

@@ -52,7 +52,7 @@ class EngineDriver::DriverManager
     define_new_driver
   end
 
-  getter :logger, :module_id, :settings
+  getter :logger, :module_id, :settings, :queue
 
   def start
     driver = @driver
