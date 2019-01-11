@@ -2,12 +2,16 @@
 require "retriable/core_ext/kernel"
 
 abstract class EngineDriver
+  module Proxy
+  end
+
   def initialize(
     @__module_id__ : String,
     @__settings__ : EngineDriver::Settings,
     @__queue__ : EngineDriver::Queue,
     @__transport__ : EngineDriver::Transport,
-    @__logger__ : EngineDriver::Logger
+    @__logger__ : EngineDriver::Logger,
+    @__schedule__ = EngineDriver::Proxy::Scheduler.new
   )
     @__status__ = EngineDriver::Status.new
     @__storage__ = EngineDriver::Storage.new(@__module_id__)
@@ -15,7 +19,7 @@ abstract class EngineDriver
   end
 
   # Access to the various components
-  HELPERS = %w(transport logger settings)
+  HELPERS = %w(transport logger settings schedule)
   {% for name in HELPERS %}
     def {{name.id}}
       @__{{name.id}}__

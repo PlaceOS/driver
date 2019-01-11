@@ -26,8 +26,8 @@ class Helper
 
     # Start a driver
     json = {
-      id: driver_id,
-      cmd: "start",
+      id:      driver_id,
+      cmd:     "start",
       payload: %({
         "ip": "localhost",
         "port": 23,
@@ -35,7 +35,7 @@ class Helper
         "makebreak": false,
         "role": 1,
         "settings": {"test": {"number": 123}}
-      })
+      }),
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice

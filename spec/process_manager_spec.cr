@@ -1,7 +1,6 @@
 require "./helper"
 
 describe EngineDriver::ProcessManager do
-
   # * Start
   # * Execute (simple) + response
   # * Enable debugging
@@ -10,20 +9,20 @@ describe EngineDriver::ProcessManager do
   # * Stop driver
   # * Terminate
   it "should start and stop a process without issue" do
-    process, input, output, logs, driver_id = Helper.process
+    process, input, output, _, driver_id = Helper.process
     process.loaded.size.should eq 1
 
     # execute a simple request (not a task response)
     json = {
-      id: driver_id,
-      cmd: "exec",
+      id:      driver_id,
+      cmd:     "exec",
       payload: %({
         "__exec__": "add",
         "add": {
           "a": 1,
           "b": 2
         }
-      })
+      }),
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
@@ -40,8 +39,8 @@ describe EngineDriver::ProcessManager do
 
     # Enable debugging
     json = {
-      id: driver_id,
-      cmd: "debug"
+      id:  driver_id,
+      cmd: "debug",
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
@@ -52,8 +51,8 @@ describe EngineDriver::ProcessManager do
 
     # Disable debugging
     json = {
-      id: driver_id,
-      cmd: "ignore"
+      id:  driver_id,
+      cmd: "ignore",
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
@@ -64,9 +63,9 @@ describe EngineDriver::ProcessManager do
 
     # Update settings
     json = {
-      id: driver_id,
-      cmd: "update",
-      payload: %({"test": {"number": 1234}})
+      id:      driver_id,
+      cmd:     "update",
+      payload: %({"test": {"number": 1234}}),
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
@@ -77,8 +76,8 @@ describe EngineDriver::ProcessManager do
 
     # Stop a driver
     json = {
-      id: driver_id,
-      cmd: "stop"
+      id:  driver_id,
+      cmd: "stop",
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
@@ -89,8 +88,8 @@ describe EngineDriver::ProcessManager do
 
     # Ensure it terminates properly
     json = {
-      id: "t",
-      cmd: "terminate"
+      id:  "t",
+      cmd: "terminate",
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
@@ -110,12 +109,12 @@ describe EngineDriver::ProcessManager do
 
     # Execute something that errors
     json = {
-      id: driver_id,
-      cmd: "exec",
+      id:      driver_id,
+      cmd:     "exec",
       payload: %({
         "__exec__": "raise_error",
         "raise_error": {}
-      })
+      }),
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
@@ -139,12 +138,12 @@ describe EngineDriver::ProcessManager do
 
     # Execute something that can't be serialised
     json = {
-      id: driver_id,
-      cmd: "exec",
+      id:      driver_id,
+      cmd:     "exec",
       payload: %({
         "__exec__": "not_json",
         "not_json": {}
-      })
+      }),
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
@@ -163,8 +162,8 @@ describe EngineDriver::ProcessManager do
 
     # Ensure it terminates properly
     json = {
-      id: "t",
-      cmd: "terminate"
+      id:  "t",
+      cmd: "terminate",
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
@@ -180,14 +179,14 @@ describe EngineDriver::ProcessManager do
 
     # execute a task response
     json = {
-      id: driver_id,
-      cmd: "exec",
+      id:      driver_id,
+      cmd:     "exec",
       payload: %({
         "__exec__": "perform_task",
         "perform_task": {
           "name": "steve"
         }
-      })
+      }),
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
@@ -205,15 +204,15 @@ describe EngineDriver::ProcessManager do
 
     # execute a task response
     json = {
-      id: driver_id,
-      cmd: "exec",
+      id:      driver_id,
+      cmd:     "exec",
       payload: %({
         "__exec__": "future_add",
         "future_add": {
           "a": 5,
           "b": 6
         }
-      })
+      }),
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
@@ -231,12 +230,12 @@ describe EngineDriver::ProcessManager do
 
     # execute an erroring task response
     json = {
-      id: driver_id,
-      cmd: "exec",
+      id:      driver_id,
+      cmd:     "exec",
       payload: %({
         "__exec__": "error_task",
         "error_task": {}
-      })
+      }),
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
@@ -256,12 +255,12 @@ describe EngineDriver::ProcessManager do
 
     # execute an erroring future response
     json = {
-      id: driver_id,
-      cmd: "exec",
+      id:      driver_id,
+      cmd:     "exec",
       payload: %({
         "__exec__": "future_error",
         "future_error": {}
-      })
+      }),
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
@@ -286,8 +285,8 @@ describe EngineDriver::ProcessManager do
 
     # Ensure it terminates properly
     json = {
-      id: "t",
-      cmd: "terminate"
+      id:  "t",
+      cmd: "terminate",
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
