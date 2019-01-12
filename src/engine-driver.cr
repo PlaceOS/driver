@@ -26,10 +26,19 @@ abstract class EngineDriver
     end
   {% end %}
 
-  # Status helpers
+  # Status helpers #}
   def []=(key, value)
-    json = @__status__.set_json(key, value)
-    @__storage__[key] = json
+    key = key.to_s
+    json_data, did_change = @__status__.set_json(key, value)
+    if did_change
+      # using spawn so execution flow isn't interrupted.
+      # ensures that setting a key and then reading it back as the next
+      # operation will always result in the expected value
+      spawn { @__storage__[key] = json_data }
+      @__logger__.debug { "status updated: #{key} = #{value}" }
+    else
+      @__logger__.debug { "no change for: #{key} = #{value}" }
+    end
     value
   end
 
@@ -39,6 +48,10 @@ abstract class EngineDriver
 
   def []?(key)
     @__status__.fetch_json?(key)
+  end
+
+  def signal_status(key)
+    spawn { @__storage__.signal_status(key) }
   end
 
   # Settings helpers

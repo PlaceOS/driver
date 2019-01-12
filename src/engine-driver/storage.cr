@@ -39,6 +39,17 @@ class EngineDriver::Storage < Hash(String, String)
     json_value
   end
 
+  def signal_status(status_name)
+    status_name = status_name.to_s
+    json_value = self[status_name]?
+    if json_value
+      pipeline.publish("#{hash_key}\x02#{status_name}", json_value)
+    else
+      pipeline.publish("#{hash_key}\x02#{status_name}", "null")
+    end
+    json_value
+  end
+
   def fetch(key)
     key = key.to_s
     entry = @redis.hget(hash_key, key)

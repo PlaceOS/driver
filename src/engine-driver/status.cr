@@ -1,6 +1,14 @@
 class EngineDriver::Status < Hash(String, String)
   def set_json(key, value)
-    self[key.to_s] = value.to_json
+    key = key.to_s
+    current_value = self[key]?
+    new_value = value.to_json
+    if current_value == new_value
+      {current_value, false}
+    else
+      self[key.to_s] = new_value
+      {new_value, true}
+    end
   end
 
   def fetch_json(key) : JSON::Any
