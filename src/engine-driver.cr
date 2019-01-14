@@ -73,6 +73,11 @@ abstract class EngineDriver
     transport.send *args
   end
 
+  # utilities
+  def wake_device(mac_address, subnet = "255.255.255.255", port = 9)
+    EngineDriver::Utilities.wake_device(mac_address, subnet, port)
+  end
+
   # Keep track of loaded driver classes. Should only be one.
   CONCRETE_DRIVERS = {} of Nil => Nil
 
