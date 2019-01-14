@@ -38,7 +38,9 @@ class EngineDriver::Subscriptions::IndirectSubscription < EngineDriver::Subscrip
     module_id = @module_id
     return module_id if module_id
 
-    module_id = EngineDriver::Storage.get("lookup\x02#{@system_id}\x02#{@module_name}\x02#{@index}")
+    lookup = EngineDriver::Storage.new(@system_id, "system")
+    module_id = lookup["#{@module_name}\x02#{@index}"]?
+
     if module_id
       @module_id = module_id
       @storage = EngineDriver::Storage.new(module_id)

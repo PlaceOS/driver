@@ -54,11 +54,12 @@ describe EngineDriver::Subscriptions do
     sub_passed = nil
     message_passed = nil
     channel = Channel(Nil).new
+    redis = EngineDriver::Storage.redis_pool
 
     # Ensure keys don't already exist
-    lookup_key = "lookup\x02sys-123\x02Display\x021"
-    redis = EngineDriver::Storage.redis_pool
-    redis.del lookup_key
+    sys_lookup = EngineDriver::Storage.new("sys-123", "system")
+    lookup_key = "Display\x021"
+    sys_lookup.delete lookup_key
     storage = EngineDriver::Storage.new("mod-1234")
     storage.delete("power")
 
@@ -74,7 +75,7 @@ describe EngineDriver::Subscriptions do
     subscription.module_id.should eq(nil)
 
     # Create the lookup and signal the change
-    redis.set(lookup_key, "mod-1234")
+    sys_lookup[lookup_key] = "mod-1234"
     redis.publish "lookup-change", "sys-123"
 
     sleep 0.05
@@ -89,7 +90,7 @@ describe EngineDriver::Subscriptions do
     sub_passed.should eq(subscription)
 
     storage.delete("power")
-    redis.del lookup_key
+    sys_lookup.delete lookup_key
     subs.terminate
   end
 
@@ -98,11 +99,12 @@ describe EngineDriver::Subscriptions do
     sub_passed = nil
     message_passed = nil
     channel = Channel(Nil).new
+    redis = EngineDriver::Storage.redis_pool
 
     # Ensure keys don't already exist
-    lookup_key = "lookup\x02sys-1234\x02Display\x021"
-    redis = EngineDriver::Storage.redis_pool
-    redis.del lookup_key
+    sys_lookup = EngineDriver::Storage.new("sys-1234", "system")
+    lookup_key = "Display\x021"
+    sys_lookup.delete lookup_key
     storage = EngineDriver::Storage.new("mod-12345")
     storage.delete("power")
 
@@ -118,8 +120,8 @@ describe EngineDriver::Subscriptions do
     subscription.module_id.should eq(nil)
 
     # Create the lookup and signal the change
-    redis.set(lookup_key, "mod-12345")
-    redis.publish "lookup-change", "sys-1234"
+    sys_lookup[lookup_key] = "mod-12345"
+    redis.publish "lookup-change", "sys-12345"
 
     sleep 0.05
 
@@ -153,7 +155,7 @@ describe EngineDriver::Subscriptions do
     sub_passed.should eq(subscription)
 
     storage.delete("power")
-    redis.del lookup_key
+    sys_lookup.delete lookup_key
     subs.terminate
   end
 end

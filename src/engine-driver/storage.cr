@@ -13,13 +13,13 @@ class EngineDriver::Storage < Hash(String, String)
     redis.get(key.to_s)
   end
 
-  KEY_PREFIX = "status"
+  DEFAULT_PREFIX = "status"
 
-  def initialize(@module_id : String)
+  def initialize(@module_id : String, prefix = DEFAULT_PREFIX)
     super()
     @@instance ||= Redis::PooledClient.new
     @redis = @@instance.not_nil!
-    @hash_key = "#{KEY_PREFIX}\x02#{@module_id}"
+    @hash_key = "#{prefix}\x02#{@module_id}"
   end
 
   @redis : Redis::PooledClient
