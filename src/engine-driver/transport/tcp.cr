@@ -35,6 +35,10 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     @socket.try &.close
   end
 
+  def disconnect
+    @socket.try &.close
+  end
+
   def send(message) : Int32
     socket = @socket
     return 0 if socket.nil? || socket.closed?

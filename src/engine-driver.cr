@@ -78,6 +78,19 @@ abstract class EngineDriver
     EngineDriver::Utilities.wake_device(mac_address, subnet, port)
   end
 
+  def set_connected_state(online, status_only = true)
+    online = !!online
+    if status_only
+      @__queue__.set_connected(online)
+    else
+      @__queue__.online = online
+    end
+  end
+
+  def disconnect
+    @__transport__.disconnect
+  end
+
   # Keep track of loaded driver classes. Should only be one.
   CONCRETE_DRIVERS = {} of Nil => Nil
 
