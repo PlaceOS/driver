@@ -1,6 +1,6 @@
 
 class EngineDriver::Proxy::Subscriptions
-  def initialize(@subscriber : EngineDriver::Subscriptions)
+  def initialize(@subscriber : EngineDriver::Subscriptions = EngineDriver::Subscriptions.new)
     @subscriptions = [] of EngineDriver::Subscriptions::Subscription
     @terminated = false
   end

@@ -12,7 +12,7 @@ abstract class EngineDriver
     @__transport__ : Transport,
     @__logger__ : EngineDriver::Logger,
     @__schedule__ = Proxy::Scheduler.new,
-    @__subscriptions__ = Proxy::Subscriptions.new(Subscriptions.new)
+    @__subscriptions__ = Proxy::Subscriptions.new
   )
     @__status__ = Status.new
     @__storage__ = Storage.new(@__module_id__)
