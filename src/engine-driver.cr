@@ -7,19 +7,20 @@ abstract class EngineDriver
 
   def initialize(
     @__module_id__ : String,
-    @__settings__ : EngineDriver::Settings,
-    @__queue__ : EngineDriver::Queue,
-    @__transport__ : EngineDriver::Transport,
+    @__settings__ : Settings,
+    @__queue__ : Queue,
+    @__transport__ : Transport,
     @__logger__ : EngineDriver::Logger,
-    @__schedule__ = EngineDriver::Proxy::Scheduler.new
+    @__schedule__ = Proxy::Scheduler.new,
+    @__subscriptions__ = Proxy::Subscriptions.new(Subscriptions.new)
   )
-    @__status__ = EngineDriver::Status.new
-    @__storage__ = EngineDriver::Storage.new(@__module_id__)
+    @__status__ = Status.new
+    @__storage__ = Storage.new(@__module_id__)
     @__storage__.clear
   end
 
   # Access to the various components
-  HELPERS = %w(transport logger settings schedule)
+  HELPERS = %w(transport logger settings schedule subscriptions)
   {% for name in HELPERS %}
     def {{name.id}}
       @__{{name.id}}__

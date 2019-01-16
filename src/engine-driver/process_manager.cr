@@ -30,7 +30,7 @@ class EngineDriver::ProcessManager
     return if @loaded[module_id]?
 
     model = EngineDriver::DriverModel.from_json(request.payload.not_nil!)
-    driver = DriverManager.new module_id, model, @logger_io
+    driver = DriverManager.new module_id, model, @logger_io, @subscriptions
     @loaded[module_id] = driver
     nil
   rescue error

@@ -3,6 +3,7 @@ require "tasker"
 class EngineDriver::Proxy::Scheduler
   class TaskWrapper
     def initialize(@task : Tasker::Task, @schedules : Array(TaskWrapper))
+      @terminated = false
     end
 
     PROXY = %w(created trigger_count last_scheduled next_scheduled next_epoch trigger get)
@@ -12,12 +13,14 @@ class EngineDriver::Proxy::Scheduler
       end
     {% end %}
 
-    def cancel(reason = "Task canceled")
+    def cancel(reason = "Task canceled", terminate = false)
+      @terminated = true if terminate
       @schedules.delete(self)
       @task.cancel reason
     end
 
     def resume
+      raise "schedule proxy terminated" if @terminated
       @schedules << self unless @schedules.includes?(self)
       @task.resume
     end
@@ -26,6 +29,7 @@ class EngineDriver::Proxy::Scheduler
   def initialize(@logger = ::Logger.new(STDOUT))
     @scheduler = Tasker.instance
     @schedules = [] of TaskWrapper
+    @terminated = false
   end
 
   @scheduler : Tasker
@@ -35,6 +39,7 @@ class EngineDriver::Proxy::Scheduler
   end
 
   def at(time, immediate = false, &block : -> _)
+    raise "schedule proxy terminated" if @terminated
     spawn { run_now(block) } if immediate
     wrapped = nil
     task = @scheduler.at(time) do
@@ -47,6 +52,7 @@ class EngineDriver::Proxy::Scheduler
   end
 
   def in(time, immediate = false, &block : -> _)
+    raise "schedule proxy terminated" if @terminated
     spawn { run_now(block) } if immediate
     wrapped = nil
     task = @scheduler.at(time) do
@@ -59,6 +65,7 @@ class EngineDriver::Proxy::Scheduler
   end
 
   def every(time, immediate = false, &block : -> _)
+    raise "schedule proxy terminated" if @terminated
     spawn { run_now(block) } if immediate
     task = @scheduler.every(time) { run_now(block) }
     wrap = TaskWrapper.new(task, @schedules)
@@ -67,6 +74,7 @@ class EngineDriver::Proxy::Scheduler
   end
 
   def cron(string, immediate = false, &block : -> _)
+    raise "schedule proxy terminated" if @terminated
     spawn { run_now(block) } if immediate
     task = @scheduler.every(time) { run_now(block) }
     wrap = TaskWrapper.new(task, @schedules)
@@ -74,10 +82,15 @@ class EngineDriver::Proxy::Scheduler
     wrap
   end
 
+  def terminate
+    @terminated = true
+    clear
+  end
+
   def clear
     schedules = @schedules
     @schedules = [] of TaskWrapper
-    schedules.each &.cancel
+    schedules.each &.cancel(terminate: @terminated)
   end
 
   private def run_now(block)

@@ -1,9 +1,10 @@
 class EngineDriver::DriverManager
-  def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT)
+  def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT, subscriptions = Subscriptions.new)
     @settings = Settings.new @model.settings.to_json
     @logger = EngineDriver::Logger.new(@module_id, logger_io)
     @queue = Queue.new(@logger) { |state| connection(state) }
     @schedule = EngineDriver::Proxy::Scheduler.new(@logger)
+    @subscriptions = Proxy::Subscriptions.new(subscriptions)
 
     @state_mutex = Mutex.new
 
@@ -40,7 +41,7 @@ class EngineDriver::DriverManager
   macro finished
     macro define_new_driver
       macro new_driver
-        {{EngineDriver::CONCRETE_DRIVERS.keys.first}}.new(@module_id, @settings, @queue, @transport, @logger, @schedule)
+        {{EngineDriver::CONCRETE_DRIVERS.keys.first}}.new(@module_id, @settings, @queue, @transport, @logger, @schedule, @subscriptions)
       end
 
       @driver : {{EngineDriver::CONCRETE_DRIVERS.keys.first}}
@@ -77,8 +78,8 @@ class EngineDriver::DriverManager
         @logger.error "in the on_unload function of #{driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
       end
     end
-    @schedule.clear
-    spawn { @schedule.clear }
+    @schedule.terminate
+    @subscriptions.terminate
   end
 
   def update(settings)
