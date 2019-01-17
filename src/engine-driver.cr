@@ -19,6 +19,8 @@ abstract class EngineDriver
     @__storage__.clear
   end
 
+  @__system__ : Proxy::System?
+
   # Access to the various components
   HELPERS = %w(transport logger settings schedule subscriptions)
   {% for name in HELPERS %}
@@ -53,6 +55,15 @@ abstract class EngineDriver
 
   def signal_status(key)
     spawn { @__storage__.signal_status(key) }
+  end
+
+  def system : Proxy::System
+    sys = @__system__
+    return sys if sys
+
+    system_model = @__driver_model__.control_system
+    raise "not directly associated with a system" unless system_model
+    @__system__ = Proxy::System.new(system_model, @__subscriptions__)
   end
 
   # Settings helpers
