@@ -37,7 +37,7 @@ class EngineDriver::Proxy::System
       modules << value if key.split("\x02")[0] == module_name
     end
 
-    
+
   end
 
   # TODO:: need to consider how to implement this
@@ -46,8 +46,12 @@ class EngineDriver::Proxy::System
   end
 
   # Manages subscribing to all the non-local subscriptions
-  def subscribe(system_id, module_name, index, status, &callback : (EngineDriver::Subscriptions::IndirectSubscription, String) -> Nil)
-    @subscriptions.subscribe(system_id, module_name, index, status, &callback)
+  def subscribe(module_name, index, status = nil, &callback : (EngineDriver::Subscriptions::IndirectSubscription, String) -> Nil) : EngineDriver::Subscriptions::IndirectSubscription
+    if status.nil?
+      status = index
+      module_name, index = get_parts(module_name)
+    end
+    @subscriptions.subscribe(@system_id, module_name, index, status, &callback)
   end
 
   def config

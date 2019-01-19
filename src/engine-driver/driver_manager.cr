@@ -51,7 +51,7 @@ class EngineDriver::DriverManager
       end
 
       def self.driver_executor
-        {{EngineDriver::CONCRETE_DRIVERS.keys.first}}::KlassExecutor
+        {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}
       end
     end
 

@@ -86,6 +86,20 @@ abstract class EngineDriver
     transport.send *args
   end
 
+  # Subscriptions and channels
+  def subscribe(status, &callback : (Subscriptions::DirectSubscription, String) -> Nil) : Subscriptions::DirectSubscription
+    @__subscriptions__.subscribe(@__module_id__, status.to_s, &callback)
+  end
+
+  def publish(channel, message)
+    @__storage__.redis.publish("engine\x02#{channel}", message.to_s)
+    message
+  end
+
+  def monitor(channel, &callback : (Subscriptions::ChannelSubscription, String) -> Nil) : Subscriptions::ChannelSubscription
+    @__subscriptions__.channel(channel.to_s, &callback)
+  end
+
   # utilities
   def wake_device(mac_address, subnet = "255.255.255.255", port = 9)
     EngineDriver::Utilities.wake_device(mac_address, subnet, port)
