@@ -1,5 +1,6 @@
 # https://github.com/Sija/retriable.cr#kernel-extension
 require "retriable/core_ext/kernel"
+require "option_parser"
 
 abstract class EngineDriver
   module Proxy
@@ -198,6 +199,28 @@ abstract class EngineDriver
         @@functions = list.gsub(/\s/, "").gsub(",}", "}")
       end
 
+      @@metadata : String?
+      def self.metadata : String
+        metadata = @@metadata
+        return metadata if metadata
+
+        ignore = ["Reference", "Object", "EngineDriver"]
+
+        details = {
+          functions: self.functions,
+          implements: {{@type.ancestors}}.map(&.to_s).reject { |obj| ignore.includes?(obj) }
+        }
+
+        @@metadata = details.to_json
+      end
+
+      # TODO::
+      def self.defaults : String
+        # defaults: (this will indicate default port, module name etc)
+        # settings: (this is free form JSON)
+        ""
+      end
+
       # Once serialised, we want to execute the request on the class
       def execute(klass : {{@type.id}})
         case self.__exec__
@@ -235,16 +258,39 @@ end
 require "./engine-driver/*"
 require "./engine-driver/**"
 
-# Launch the process manager by default, this can be overriten for testing
-if EngineDriver::BootCtrl.auto_start
-  process = EngineDriver::ProcessManager.new
+macro finished
+  exec_process_manager = false
 
-  # Detect ctr-c to shutdown gracefully
-  Signal::INT.trap do |signal|
-    puts " > terminating gracefully"
-    spawn { process.terminate }
-    signal.ignore
+  # Command line options
+  OptionParser.parse(ARGV.dup) do |parser|
+    parser.banner = "Usage: #{PROGRAM_NAME} [arguments]"
+
+    parser.on("-m", "--metadata", "output driver metadata") do
+      puts {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.metadata
+      exit 0
+    end
+
+    parser.on("-p", "--process", "starts the process manager (expects to have been launched by engine core)") do
+      exec_process_manager = true
+    end
+
+    parser.on("-h", "--help", "show this help") do
+      puts parser
+      exit 0
+    end
   end
 
-  process.terminated.receive?
+  # Launch the process manager by default, this can be overriten for testing
+  if exec_process_manager
+    process = EngineDriver::ProcessManager.new
+
+    # Detect ctr-c to shutdown gracefully
+    Signal::INT.trap do |signal|
+      puts " > terminating gracefully"
+      spawn { process.terminate }
+      signal.ignore
+    end
+
+    process.terminated.receive?
+  end
 end

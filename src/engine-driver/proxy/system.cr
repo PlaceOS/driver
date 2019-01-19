@@ -1,8 +1,10 @@
+require "json"
 
 class EngineDriver::Proxy::System
   def initialize(@model : DriverModel::ControlSystem, @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new)
     @system_id = @model.id
     @system = EngineDriver::Storage.new(@system_id, "system")
+    @redis = EngineDriver::Storage.redis_pool
   end
 
   @system_id : String
@@ -14,12 +16,28 @@ class EngineDriver::Proxy::System
   # TODO:: driver proxy
   def get(module_name, index = nil)
     module_name, index = get_parts(module_name) unless index
+    module_id = @system["#{module_name}\x02#{index}"]?
+    metadata = @redis.get("interface\x02#{module_id}") if module_id
+    metadata = if module_id && metadata
+      Hash(String, Hash(String, String)).from_json metadata
+    else
+      # return a hollow proxy - we don't want to error
+      # code can execute against a non-existance driver
+      Hash(String, Hash(String, String)).new
+    end
 
+    #
   end
 
   # TODO:: driver proxy
   def all(module_name)
+    module_name = module_name.to_s
+    modules = [] of String
+    @system.each do |key, value|
+      modules << value if key.split("\x02")[0] == module_name
+    end
 
+    
   end
 
   # TODO:: need to consider how to implement this

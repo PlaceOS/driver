@@ -3,7 +3,7 @@ require "redis"
 class EngineDriver::Storage < Hash(String, String)
   @@instance : Redis::PooledClient?
 
-  def self.redis_pool
+  def self.redis_pool : Redis::PooledClient
     # TODO:: provide redis connection details
     @@instance ||= Redis::PooledClient.new
   end

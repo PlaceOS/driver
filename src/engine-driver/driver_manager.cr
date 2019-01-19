@@ -49,6 +49,10 @@ class EngineDriver::DriverManager
       def self.driver_class
         {{EngineDriver::CONCRETE_DRIVERS.keys.first}}
       end
+
+      def self.driver_executor
+        {{EngineDriver::CONCRETE_DRIVERS.keys.first}}::KlassExecutor
+      end
     end
 
     define_new_driver

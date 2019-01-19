@@ -1,5 +1,4 @@
 require "json"
-require "./boot_ctrl"
 
 class EngineDriver::ProcessManager
   def initialize(@logger_io = STDOUT, @input = STDIN, output = STDERR)

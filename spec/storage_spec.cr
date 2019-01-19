@@ -28,6 +28,15 @@ describe EngineDriver::Storage do
     store.keys.should eq(["test", "other"])
     store.values.should eq(["null", "1234"])
 
+    vals = ["test", "null", "other", "1234"]
+    store.each do |key, value|
+      keyc = vals.shift
+      valuec = vals.shift
+
+      key.should eq(keyc)
+      value.should eq(valuec)
+    end
+
     store.empty?.should eq(false)
 
     store.clear

@@ -12,6 +12,13 @@ class EngineDriver::DriverModel
     )
   end
 
+  class Metadata
+    JSON.mapping(
+      functions: Hash(String, Hash(String, String)),
+      implements: Array(String)
+    )
+  end
+
   enum Role
     SSH
     RAW

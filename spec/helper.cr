@@ -1,9 +1,5 @@
 require "spec"
 require "promise"
-require "../src/engine-driver/boot_ctrl"
-
-EngineDriver::BootCtrl.auto_start = false
-
 require "../src/engine-driver"
 
 class Helper
