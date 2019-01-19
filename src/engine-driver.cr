@@ -205,13 +205,13 @@ abstract class EngineDriver
         return metadata if metadata
 
         ignore = ["Reference", "Object", "EngineDriver"]
+        implements = {{@type.ancestors.map(&.stringify)}}.reject { |obj| ignore.includes?(obj) }
+        details = %({
+          "functions": #{self.functions},
+          "implements": #{implements.to_json}
+        }).gsub(/\s/, "")
 
-        details = {
-          functions: self.functions,
-          implements: {{@type.ancestors}}.map(&.to_s).reject { |obj| ignore.includes?(obj) }
-        }
-
-        @@metadata = details.to_json
+        @@metadata = details
       end
 
       # TODO::
@@ -294,3 +294,5 @@ macro finished
     process.terminated.receive?
   end
 end
+
+nil
