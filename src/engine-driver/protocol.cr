@@ -55,7 +55,7 @@ class EngineDriver::Protocol
   end
 
   # For other classes
-  def self.instance(input = STDIN, output = STDERR) : EngineDriver::Protocol
+  def self.instance : EngineDriver::Protocol
     @@instance.not_nil!
   end
 

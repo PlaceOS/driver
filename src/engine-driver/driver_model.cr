@@ -14,7 +14,7 @@ class EngineDriver::DriverModel
 
   class Metadata
     JSON.mapping(
-      functions: Hash(String, Hash(String, String)),
+      functions: Hash(String, Hash(String, Array(String))),
       implements: Array(String)
     )
   end

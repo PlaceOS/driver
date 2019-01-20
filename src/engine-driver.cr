@@ -163,7 +163,11 @@ abstract class EngineDriver
                 {% if !arg.restriction %}
                   "Public method '{{@type.id}}.{{method.name}}' has no type specified for argument '{{arg.name}}'"
                 {% else %}
-                  {{arg.name}}: {{arg.restriction}},
+                  {% if arg.default_value.is_a?(Nop) %}
+                    {{arg.name}}: {{arg.restriction}},
+                  {% else %}
+                    {{arg.name}}: {{arg.restriction}}?,
+                  {% end %}
                 {% end %}
             {% end %}
           {% end %}
@@ -204,7 +208,11 @@ abstract class EngineDriver
 
             {{method.name.stringify}}: {
               {% for arg in args %}
-                {{arg.name.stringify}}: {{arg.restriction.stringify}},
+                {% if arg.default_value.is_a?(Nop) %}
+                  {{arg.name.stringify}}: [{{arg.restriction.stringify}}],
+                {% else %}
+                  {{arg.name.stringify}}: [{{arg.restriction.stringify}}, "#{{{arg.default_value}}.to_json}"],
+                {% end %}
               {% end %}
             },
           {% end %}})
@@ -255,7 +263,11 @@ abstract class EngineDriver
               obj = self.{{method.name}}.not_nil!
               args = {
                 {% for arg in args %}
-                  {{arg.name}}: obj.{{arg.name}},
+                  {% if arg.default_value.is_a?(Nop) %}
+                    {{arg.name}}: obj.{{arg.name}},
+                  {% else %}
+                    {{arg.name}}: obj.{{arg.name}} || {{arg.default_value}},
+                  {% end %}
                 {% end %}
               }
               return klass.{{method.name}} **args

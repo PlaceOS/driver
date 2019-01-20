@@ -38,7 +38,7 @@ class Helper
       queue { raise ArgumentError.new("oops") }
     end
 
-    def future_add(a : Int32, b : Int32)
+    def future_add(a : Int32, b : Int32 = 200)
       Promise.defer { sleep 0.01; a + b }
     end
 

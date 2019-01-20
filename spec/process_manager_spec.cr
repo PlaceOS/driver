@@ -228,6 +228,31 @@ describe EngineDriver::ProcessManager do
     req_out.cmd.should eq("result")
     req_out.payload.should eq(%(11))
 
+    # execute a task with a default value
+    json = {
+      id:      driver_id,
+      cmd:     "exec",
+      payload: %({
+        "__exec__": "future_add",
+        "future_add": {
+          "a": 5
+        }
+      }),
+    }.to_json
+    input.write_bytes json.bytesize
+    input.write json.to_slice
+
+    process.loaded[driver_id].queue.online = true
+
+    raw_data = Bytes.new(4096)
+    bytes_read = output.read(raw_data)
+
+    # Check response was returned
+    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out.id.should eq(driver_id)
+    req_out.cmd.should eq("result")
+    req_out.payload.should eq(%(205))
+
     # execute an erroring task response
     json = {
       id:      driver_id,
