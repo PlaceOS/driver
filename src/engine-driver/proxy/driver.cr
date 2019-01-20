@@ -21,12 +21,8 @@ class EngineDriver::Proxy::Driver
     @status.fetch_json?(status)
   end
 
-  def implements?(interface)
-    @metadata.implements.includes? interface.to_s
-  end
-
-  def responds_to?(function)
-    !@metadata.functions[function.to_s].nil?
+  def implements?(interface) : Bool
+    @metadata.implements.includes?(interface.to_s) || !@metadata.functions[function.to_s].nil?
   end
 
   # TODO:: don't raise errors directly.
