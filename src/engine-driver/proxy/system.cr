@@ -9,24 +9,32 @@ class EngineDriver::Proxy::System
 
   @system_id : String
 
-  def [](module_id)
-    get(module_id)
+  def [](module_name)
+    get_driver(*get_parts(module_name))
   end
 
-  # TODO:: driver proxy
-  def get(module_name, index = nil)
-    module_name, index = get_parts(module_name) unless index
+  def get(module_name)
+    get_driver(*get_parts(module_name))
+  end
+
+  def get(module_name, index)
+    get_driver(module_name.to_s, index.to_i)
+  end
+
+  private def get_driver(module_name : String, index : Int32) : EngineDriver::Proxy::Driver
     module_id = @system["#{module_name}\x02#{index}"]?
     metadata = @redis.get("interface\x02#{module_id}") if module_id
     metadata = if module_id && metadata
-      Hash(String, Hash(String, String)).from_json metadata
+      EngineDriver::DriverModel::Metadata.from_json metadata
     else
       # return a hollow proxy - we don't want to error
       # code can execute against a non-existance driver
-      Hash(String, Hash(String, String)).new
+      EngineDriver::DriverModel::Metadata.new
     end
 
-    #
+    module_id ||= "driver index unavailable"
+
+    EngineDriver::Proxy::Driver.new(module_name, index, module_id, self, metadata)
   end
 
   # TODO:: driver proxy
@@ -37,10 +45,11 @@ class EngineDriver::Proxy::System
       modules << value if key.split("\x02")[0] == module_name
     end
 
-
+    # TODO:: requests proxy
   end
 
   # TODO:: need to consider how to implement this
+  # probably use a redis notification, coordination to occur on engine core
   def load_complete(&callback)
 
   end

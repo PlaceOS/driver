@@ -13,6 +13,11 @@ class EngineDriver::DriverModel
   end
 
   class Metadata
+    def initialize
+      @functions = {} of String => Hash(String, Array(String))
+      @implements = [] of String
+    end
+
     JSON.mapping(
       functions: Hash(String, Hash(String, Array(String))),
       implements: Array(String)

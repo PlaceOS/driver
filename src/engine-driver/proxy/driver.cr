@@ -91,7 +91,7 @@ class EngineDriver::Proxy::Driver
       # TODO:: need to create a promise where we can obtain the result
       EngineDriver::Protocol.instance.send(request)
     else
-      raise "undefined method '#{function_name}' for #{@module_name}_#{@index}"
+      raise "undefined method '#{function_name}' for #{@module_name}_#{@index} (#{@module_id})"
     end
   end
 end
