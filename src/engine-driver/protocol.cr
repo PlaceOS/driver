@@ -46,6 +46,7 @@ class EngineDriver::Protocol
       ignore:    [] of Request -> Request?,
       result:    [] of Request -> Request?,
     }
+    @tracking = {} of String => Channel::Buffered(Request)
     spawn { self.consume_io }
   end
 
@@ -116,6 +117,19 @@ class EngineDriver::Protocol
       req.payload = raw ? payload.to_s : payload.to_json
     end
     send req
+  end
+
+  @@id = 0_u64
+  def get_response(command, payload = nil) : Nil
+    id = @@id.to_s
+    @@id += 1
+
+    req = Request.new(id, command.to_s)
+    req.payload = payload.to_json if payload
+    @tracking[id] = channel = Channel::Buffered(Request).new(1)
+
+    send req
+    channel
   end
 
   private def send(request)

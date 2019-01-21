@@ -1,7 +1,35 @@
 require "json"
+require "promise"
 
 class EngineDriver::Proxy::Driver
-  @@id = 0_u64
+  abstract class Response
+    abstract def get : JSON::Any
+  end
+
+  class Future < Response
+    def initialize(@channel)
+    end
+
+    def get : JSON::Any
+      result = @channel.receive
+
+      if error = result.error
+        backtrace = result.backtrace || [] of String
+        raise EngineDriver::RemoteException.new(result.payload, error, backtrace)
+      else
+        JSON.parse(result.payload)
+      end
+    end
+  end
+
+  class Error < Response
+    def initialize(@exception : Exception)
+    end
+
+    def get : JSON::Any
+      raise @exception
+    end
+  end
 
   def initialize(
     @module_name : String,
@@ -29,21 +57,25 @@ class EngineDriver::Proxy::Driver
   # Ensure they are logged and raise if the response is requested
   macro method_missing(call)
     function_name = {{call.name.id.stringify}}
-
     function = @metadata.functions[function_name]?
-    if function
-      # obtain the arguments provided
-      arguments = {{call.args}}
-      {% if call.named_args.size > 0 %}
-        named_args = {
-          {% for arg, index in call.named_args %}
-            {{arg.name.stringify.id}}: {{arg.value}},
-          {% end %}
-        }
-      {% else %}
-        named_args = {} of String => String
-      {% end %}
 
+    # obtain the arguments provided
+    arguments = {{call.args}}
+    {% if call.named_args.size > 0 %}
+      named_args = {
+        {% for arg, index in call.named_args %}
+          {{arg.name.stringify.id}}: {{arg.value}},
+        {% end %}
+      }
+    {% else %}
+      named_args = {} of String => String
+    {% end %}
+
+    Promise.defer { __exec_request__(function_name, function, arguments, named_args).get }
+  end
+
+  private def __exec_request__(function_name, function, arguments, named_args) : Response
+    if function
       # Check if there is an argument mismatch }
       num_args = arguments.size + named_args.size
       funcsize = function.size
@@ -80,18 +112,13 @@ class EngineDriver::Proxy::Driver
         args[arg_name] = value
       end
 
-      # Create the request
-      @@id += 1
-      request = EngineDriver::Protocol::Request.new(
-        @@id.to_s,
-        "exec",
-        request.to_json
-      )
-
-      # TODO:: need to create a promise where we can obtain the result
-      EngineDriver::Protocol.instance.send(request)
+      # parse the execute response
+      channel = EngineDriver::Protocol.instance.get_response("exec", request)
+      Future.new(channel)
     else
       raise "undefined method '#{function_name}' for #{@module_name}_#{@index} (#{@module_id})"
     end
+  rescue error
+    Error.new(error)
   end
 end
