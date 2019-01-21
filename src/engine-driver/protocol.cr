@@ -120,7 +120,8 @@ class EngineDriver::Protocol
   end
 
   @@id = 0_u64
-  def get_response(command, payload = nil) : Nil
+
+  def expect_response(command, payload = nil) : Nil
     id = @@id.to_s
     @@id += 1
 

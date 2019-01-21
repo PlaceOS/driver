@@ -28,13 +28,13 @@ class EngineDriver::Utilities
   def self.wake_device(mac_address, subnet = "255.255.255.255", port = 9)
     address = Socket::Address.parse("ip://#{subnet}:#{port}/")
     udp = case address.family
-    when Socket::Family::INET6
-      upd_v6
-    when Socket::Family::INET
-      upd_v4
-    else
-      raise "Unsupported subnet type: #{address.family} (#{address.family.value})"
-    end
+          when Socket::Family::INET6
+            upd_v6
+          when Socket::Family::INET
+            upd_v4
+          else
+            raise "Unsupported subnet type: #{address.family} (#{address.family.value})"
+          end
 
     mac_address = mac_address.gsub(/(0x|[^0-9A-Fa-f])*/, "").scan(/.{2}/).map(&.[0]).join("")
     magicpacket = "ff" * 6 + mac_address * 16

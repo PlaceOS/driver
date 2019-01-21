@@ -1,13 +1,18 @@
 require "json"
 
 class EngineDriver::Proxy::System
-  def initialize(@model : DriverModel::ControlSystem, @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new)
+  def initialize(
+    @model : DriverModel::ControlSystem,
+    @logger : ::Logger = ::Logger.new(STDOUT),
+    @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new
+  )
     @system_id = @model.id
     @system = EngineDriver::Storage.new(@system_id, "system")
     @redis = EngineDriver::Storage.redis_pool
   end
 
   @system_id : String
+  getter :logger
 
   def [](module_name)
     get_driver(*get_parts(module_name))
@@ -25,12 +30,12 @@ class EngineDriver::Proxy::System
     module_id = @system["#{module_name}\x02#{index}"]?
     metadata = @redis.get("interface\x02#{module_id}") if module_id
     metadata = if module_id && metadata
-      EngineDriver::DriverModel::Metadata.from_json metadata
-    else
-      # return a hollow proxy - we don't want to error
-      # code can execute against a non-existance driver
-      EngineDriver::DriverModel::Metadata.new
-    end
+                 EngineDriver::DriverModel::Metadata.from_json metadata
+               else
+                 # return a hollow proxy - we don't want to error
+                 # code can execute against a non-existance driver
+                 EngineDriver::DriverModel::Metadata.new
+               end
 
     module_id ||= "driver index unavailable"
 
@@ -48,10 +53,23 @@ class EngineDriver::Proxy::System
     # TODO:: requests proxy
   end
 
-  # TODO:: need to consider how to implement this
-  # probably use a redis notification, coordination to occur on engine core
-  def load_complete(&callback)
+  # coordination to occur on engine core
+  def load_complete(&callback : (EngineDriver::Subscriptions::ChannelSubscription, String) -> Nil)
+    channel = "engine_load_complete"
+    subscription = @subscriptions.channel(channel, &callback)
 
+    spawn do
+      ready = @redis.get("engine_cluster_state") == "ready"
+      if ready
+        begin
+          callback.call(subscription, channel)
+        rescue error
+          @logger.error "error in subscription callback\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+        end
+      end
+    end
+
+    subscription
   end
 
   # Manages subscribing to all the non-local subscriptions

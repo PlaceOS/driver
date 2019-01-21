@@ -7,7 +7,7 @@ class EngineDriver::Proxy::Driver
   end
 
   class Future < Response
-    def initialize(@channel)
+    def initialize(@channel, @logger)
     end
 
     def get : JSON::Any
@@ -15,7 +15,9 @@ class EngineDriver::Proxy::Driver
 
       if error = result.error
         backtrace = result.backtrace || [] of String
-        raise EngineDriver::RemoteException.new(result.payload, error, backtrace)
+        exception = EngineDriver::RemoteException.new(result.payload, error, backtrace)
+        @logger.warn "#{exception.message}\n#{exception.backtrace?.try &.join("\n")}"
+        raise exception
       else
         JSON.parse(result.payload)
       end
@@ -53,7 +55,7 @@ class EngineDriver::Proxy::Driver
     @metadata.implements.includes?(interface.to_s) || !@metadata.functions[function.to_s].nil?
   end
 
-  # TODO:: don't raise errors directly.
+  # Don't raise errors directly.
   # Ensure they are logged and raise if the response is requested
   macro method_missing(call)
     function_name = {{call.name.id.stringify}}
@@ -80,7 +82,7 @@ class EngineDriver::Proxy::Driver
       num_args = arguments.size + named_args.size
       funcsize = function.size
       if num_args > funcsize
-        raise "wrong number of arguments for '#{function_name}' (given #{num_args}, expected #{funcsize})"
+        raise "wrong number of arguments for '#{function_name}' on #{@module_name}_#{@index} - #{@module_id} (given #{num_args}, expected #{funcsize})"
       elsif num_args < funcsize
         defaults = 0
 
@@ -90,14 +92,14 @@ class EngineDriver::Proxy::Driver
         end
 
         minargs = funcsize - defaults
-        raise "wrong number of arguments for '#{function_name}' (given #{num_args}, expected #{minargs}..#{funcsize})" if num_args < minargs
+        raise "wrong number of arguments for '#{function_name}' on #{@module_name}_#{@index} - #{@module_id} (given #{num_args}, expected #{minargs}..#{funcsize})" if num_args < minargs
       end
 
       # Build the request payload
       args = {} of String => String
       request = {
-        "__exec__" => function_name,
-        function_name => args
+        "__exec__"    => function_name,
+        function_name => args,
       }
 
       # Apply the arguments
@@ -113,12 +115,13 @@ class EngineDriver::Proxy::Driver
       end
 
       # parse the execute response
-      channel = EngineDriver::Protocol.instance.get_response("exec", request)
-      Future.new(channel)
+      channel = EngineDriver::Protocol.instance.expect_response("exec", request)
+      Future.new(channel, @system.logger)
     else
       raise "undefined method '#{function_name}' for #{@module_name}_#{@index} (#{@module_id})"
     end
   rescue error
+    @system.logger.warn "#{error.message}\n#{error.backtrace?.try &.join("\n")}"
     Error.new(error)
   end
 end

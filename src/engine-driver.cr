@@ -64,7 +64,7 @@ abstract class EngineDriver
 
     system_model = @__driver_model__.control_system
     raise "not directly associated with a system" unless system_model
-    @__system__ = Proxy::System.new(system_model, @__subscriptions__)
+    @__system__ = Proxy::System.new(system_model, @__logger__, @__subscriptions__)
   end
 
   # Settings helpers
