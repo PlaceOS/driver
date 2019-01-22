@@ -93,4 +93,58 @@ describe EngineDriver::Proxy::Driver do
     mod_store.delete("power")
     storage.delete "Display\x021"
   end
+
+  it "should subscribe to status updates" do
+    cs = EngineDriver::DriverModel::ControlSystem.from_json(%(
+        {
+          "id": "sys-1234",
+          "name": "Tesing System",
+          "email": "name@email.com",
+          "capacity": 20,
+          "features": "in-house-pc projector",
+          "bookable": true
+        }
+    ))
+
+    subs = EngineDriver::Proxy::Subscriptions.new
+    system = EngineDriver::Proxy::System.new cs
+    # Create some virtual systems
+    storage = EngineDriver::Storage.new(cs.id, "system")
+    storage["Display\x021"] = "mod-1234"
+
+    redis = EngineDriver::Storage.redis_pool
+    in_callback = false
+    sub_passed = nil
+    message_passed = nil
+    channel = Channel(Nil).new
+
+    mod_store = EngineDriver::Storage.new("mod-1234")
+    mod_store.delete("power")
+
+    subscription = system[:Display_1].subscribe(:power) do |sub, value|
+      sub_passed = sub
+      message_passed = value
+      in_callback = true
+      channel.close
+    end
+
+    # Subscription should not exist yet - i.e. no lookup
+    subscription.module_id.should eq("mod-1234")
+    sleep 0.05
+
+    # Update the status
+    mod_store["power"] = true
+    channel.receive?
+
+    in_callback.should eq(true)
+    message_passed.should eq("true")
+    sub_passed.should eq(subscription)
+
+    # Test ability to access module state
+    system[:Display_1]["power"].as_bool == true
+
+    subs.terminate
+    mod_store.delete("power")
+    storage.delete "Display\x021"
+  end
 end
