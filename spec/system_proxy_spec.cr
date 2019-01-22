@@ -29,7 +29,7 @@ describe EngineDriver::Proxy::System do
         }
     ))
 
-    system = EngineDriver::Proxy::System.new cs
+    system = EngineDriver::Proxy::System.new cs, "reply_id"
 
     system.id.should eq("sys-1234")
     system.name.should eq("Tesing System")
@@ -70,7 +70,7 @@ describe EngineDriver::Proxy::System do
     ))
 
     subs = EngineDriver::Proxy::Subscriptions.new
-    system = EngineDriver::Proxy::System.new cs
+    system = EngineDriver::Proxy::System.new cs, "reply_id"
     # Create some virtual systems
     storage = EngineDriver::Storage.new(cs.id, "system")
     storage["Display\x021"] = "mod-1234"

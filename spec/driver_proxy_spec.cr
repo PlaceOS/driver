@@ -13,7 +13,7 @@ describe EngineDriver::Proxy::Driver do
         }
     ))
 
-    system = EngineDriver::Proxy::System.new cs
+    system = EngineDriver::Proxy::System.new cs, "reply_id"
     system.id.should eq("sys-1236")
 
     # Create a virtual systems
@@ -52,6 +52,8 @@ describe EngineDriver::Proxy::Driver do
     bytes_read = output.read(raw_data)
     req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.payload.should eq(%({"__exec__":"function1","function1":{}}))
+    req_out.reply.should eq("reply_id")
+    req_out.id.should eq("mod-1234")
 
     # Attempt to execute a function that doesn't exist
     result = system[:Display_1].function8
@@ -107,7 +109,7 @@ describe EngineDriver::Proxy::Driver do
     ))
 
     subs = EngineDriver::Proxy::Subscriptions.new
-    system = EngineDriver::Proxy::System.new cs
+    system = EngineDriver::Proxy::System.new cs, "reply_id"
     # Create some virtual systems
     storage = EngineDriver::Storage.new(cs.id, "system")
     storage["Display\x021"] = "mod-1234"

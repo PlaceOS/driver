@@ -13,7 +13,7 @@ describe EngineDriver::Proxy::Drivers do
         }
     ))
 
-    system = EngineDriver::Proxy::System.new cs
+    system = EngineDriver::Proxy::System.new cs, "reply_id"
     system.id.should eq("sys-1236")
 
     # Create a virtual systems
@@ -68,11 +68,13 @@ describe EngineDriver::Proxy::Drivers do
     req_out = EngineDriver::Protocol::Request.from_json(String.new(message[4, message.bytesize - 4]))
     req_out.payload.should eq(%({"__exec__":"function1","function1":{}}))
     req_out.id.should eq("mod-999")
+    req_out.reply.should eq("reply_id")
 
     message = messages[1]
     req_out = EngineDriver::Protocol::Request.from_json(String.new(message[4, message.bytesize - 4]))
     req_out.payload.should eq(%({"__exec__":"function1","function1":{}}))
     req_out.id.should eq("mod-888")
+    req_out.reply.should eq("reply_id")
 
     storage.clear
   end

@@ -3,6 +3,7 @@ require "json"
 class EngineDriver::Proxy::System
   def initialize(
     @model : DriverModel::ControlSystem,
+    @reply_id : String,
     @logger : ::Logger = ::Logger.new(STDOUT),
     @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new
   )
@@ -42,7 +43,7 @@ class EngineDriver::Proxy::System
 
     module_id ||= "driver index unavailable"
 
-    Proxy::Driver.new(module_name, index, module_id, self, metadata)
+    Proxy::Driver.new(@reply_id, module_name, index, module_id, self, metadata)
   end
 
   # TODO:: grab modules implementing(Powerable) for example
@@ -65,7 +66,7 @@ class EngineDriver::Proxy::System
                      # code can execute against a non-existance driver
                      DriverModel::Metadata.new
                    end
-        drivers << Proxy::Driver.new(module_name, index.to_i, module_id, self, metadata)
+        drivers << Proxy::Driver.new(@reply_id, module_name, index.to_i, module_id, self, metadata)
       end
     end
 
