@@ -2,10 +2,7 @@ require "json"
 require "promise"
 
 class EngineDriver::Proxy::Drivers
-  def initialize(
-    @system : EngineDriver::Proxy::System,
-    @drivers : Array(EngineDriver::Proxy::Driver)
-  )
+  def initialize(@drivers : Array(EngineDriver::Proxy::Driver))
   end
 
   def [](index : Int32) : EngineDriver::Proxy::Driver
@@ -14,6 +11,10 @@ class EngineDriver::Proxy::Drivers
 
   def []?(index : Int32) : EngineDriver::Proxy::Driver?
     @drivers[index]?
+  end
+
+  def size
+    @drivers.size
   end
 
   # This deliberately prevents compilation if called from driver code

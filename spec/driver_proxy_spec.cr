@@ -1,7 +1,7 @@
 require "./helper"
 
 describe EngineDriver::Proxy::Driver do
-  it "indicate if a module / driver exists in a system" do
+  it "should execute functions on remote drivers" do
     cs = EngineDriver::DriverModel::ControlSystem.from_json(%(
         {
           "id": "sys-1236",
@@ -90,8 +90,8 @@ describe EngineDriver::Proxy::Driver do
     req_out.payload.should eq(%({"__exec__":"function3","function3":{"arg1":null,"arg2":12345}}))
 
     redis.del("interface\x02mod-1234")
-    mod_store.delete("power")
-    storage.delete "Display\x021"
+    mod_store.clear
+    storage.clear
   end
 
   it "should subscribe to status updates" do
@@ -144,7 +144,7 @@ describe EngineDriver::Proxy::Driver do
     system[:Display_1]["power"].as_bool == true
 
     subs.terminate
-    mod_store.delete("power")
-    storage.delete "Display\x021"
+    mod_store.clear
+    storage.clear
   end
 end

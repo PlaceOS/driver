@@ -33,27 +33,43 @@ class EngineDriver::Proxy::System
     module_id = @system["#{module_name}\x02#{index}"]?
     metadata = @redis.get("interface\x02#{module_id}") if module_id
     metadata = if module_id && metadata
-                 EngineDriver::DriverModel::Metadata.from_json metadata
+                 DriverModel::Metadata.from_json metadata
                else
                  # return a hollow proxy - we don't want to error
                  # code can execute against a non-existance driver
-                 EngineDriver::DriverModel::Metadata.new
+                 DriverModel::Metadata.new
                end
 
     module_id ||= "driver index unavailable"
 
-    EngineDriver::Proxy::Driver.new(module_name, index, module_id, self, metadata)
+    Proxy::Driver.new(module_name, index, module_id, self, metadata)
   end
 
-  # TODO:: driver proxy
-  def all(module_name)
+  # TODO:: grab modules implementing(Powerable) for example
+  def all(module_name) : EngineDriver::Proxy::Drivers
     module_name = module_name.to_s
-    modules = [] of String
-    @system.each do |key, value|
-      modules << value if key.split("\x02")[0] == module_name
+    drivers = [] of Proxy::Driver
+
+    @system.keys.each do |key|
+      parts = key.split("\x02")
+      mod_name = parts[0]
+      index = parts[1]
+
+      if mod_name == module_name
+        module_id = @system[key]
+        metadata = @redis.get("interface\x02#{module_id}")
+        metadata = if module_id && metadata
+                     DriverModel::Metadata.from_json metadata
+                   else
+                     # return a hollow proxy - we don't want to error
+                     # code can execute against a non-existance driver
+                     DriverModel::Metadata.new
+                   end
+        drivers << Proxy::Driver.new(module_name, index.to_i, module_id, self, metadata)
+      end
     end
 
-    # TODO:: requests proxy
+    EngineDriver::Proxy::Drivers.new(drivers)
   end
 
   # coordination to occur on engine core

@@ -8,12 +8,14 @@ class EngineDriver::Protocol
   # JSON decoding    0.140000   0.270000   0.410000 (  0.137979)
   # Should be a simple change.
   class Request
-    def initialize(@id, @cmd, @payload = nil, @error = nil, @backtrace = nil)
+    def initialize(@id, @cmd, @payload = nil, @error = nil, @backtrace = nil, @seq = nil)
     end
 
+    # TODO:: add return address for replies (core routing)
     JSON.mapping(
       id: String,
       cmd: String,
+      seq: UInt64?,
       payload: String?,
       error: String?,
       backtrace: Array(String)?
@@ -123,14 +125,14 @@ class EngineDriver::Protocol
     send req
   end
 
-  @@id = 0_u64
+  @@seq = 0_u64
 
-  def expect_response(command, payload = nil, raw = false) : Channel::Buffered(Request)
+  def expect_response(id, command, payload = nil, raw = false) : Channel::Buffered(Request)
     # TODO:: this requires a timeout
-    id = @@id.to_s
-    @@id += 1
+    seq = @@seq
+    @@seq += 1
 
-    req = Request.new(id, command.to_s)
+    req = Request.new(id, command.to_s, seq: seq)
     if payload
       req.payload = raw ? payload.to_s : payload.to_json
     end

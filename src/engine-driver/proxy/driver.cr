@@ -134,7 +134,7 @@ class EngineDriver::Proxy::Driver
       end
 
       # parse the execute response
-      channel = EngineDriver::Protocol.instance.expect_response("exec", request, raw: true)
+      channel = EngineDriver::Protocol.instance.expect_response(@module_id, "exec", request, raw: true)
       Future.new(channel, @system.logger)
     else
       raise "undefined method '#{function_name}' for #{@module_name}_#{@index} (#{@module_id})"
