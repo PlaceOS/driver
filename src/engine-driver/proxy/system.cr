@@ -23,10 +23,13 @@ class EngineDriver::Proxy::System
   end
 
   def get(module_name, index)
-    get_driver(module_name.to_s, index.to_i)
+    get_driver(module_name, index)
   end
 
-  private def get_driver(module_name : String, index : Int32) : EngineDriver::Proxy::Driver
+  private def get_driver(module_name, index) : EngineDriver::Proxy::Driver
+    module_name = module_name.to_s
+    index = index.to_i
+
     module_id = @system["#{module_name}\x02#{index}"]?
     metadata = @redis.get("interface\x02#{module_id}") if module_id
     metadata = if module_id && metadata
@@ -55,14 +58,13 @@ class EngineDriver::Proxy::System
 
   # coordination to occur on engine core
   def load_complete(&callback : (EngineDriver::Subscriptions::ChannelSubscription, String) -> Nil)
-    channel = "engine_load_complete"
-    subscription = @subscriptions.channel(channel, &callback)
+    subscription = @subscriptions.channel("engine_load_complete", &callback)
 
     spawn do
       ready = @redis.get("engine_cluster_state") == "ready"
       if ready
         begin
-          callback.call(subscription, channel)
+          callback.call(subscription, "ready")
         rescue error
           @logger.error "error in subscription callback\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
         end

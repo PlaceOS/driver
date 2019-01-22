@@ -55,6 +55,10 @@ class EngineDriver::Protocol
     @@instance = ::EngineDriver::Protocol.new(input, output)
   end
 
+  def self.new_instance(instance : EngineDriver::Protocol) : EngineDriver::Protocol
+    @@instance = instance
+  end
+
   # For other classes
   def self.instance : EngineDriver::Protocol
     @@instance.not_nil!
@@ -121,12 +125,14 @@ class EngineDriver::Protocol
 
   @@id = 0_u64
 
-  def expect_response(command, payload = nil) : Nil
+  def expect_response(command, payload = nil, raw = false) : Channel::Buffered(Request)
     id = @@id.to_s
     @@id += 1
 
     req = Request.new(id, command.to_s)
-    req.payload = payload.to_json if payload
+    if payload
+      req.payload = raw ? payload.to_s : payload.to_json
+    end
     @tracking[id] = channel = Channel::Buffered(Request).new(1)
 
     send req

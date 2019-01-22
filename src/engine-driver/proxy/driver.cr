@@ -7,7 +7,7 @@ class EngineDriver::Proxy::Driver
   end
 
   class Future < Response
-    def initialize(@channel, @logger)
+    def initialize(@channel : Channel::Buffered(Protocol::Request), @logger : ::Logger)
     end
 
     def get : JSON::Any
@@ -19,7 +19,7 @@ class EngineDriver::Proxy::Driver
         @logger.warn "#{exception.message}\n#{exception.backtrace?.try &.join("\n")}"
         raise exception
       else
-        JSON.parse(result.payload)
+        JSON.parse(result.payload.not_nil!)
       end
     end
   end
@@ -44,15 +44,29 @@ class EngineDriver::Proxy::Driver
   end
 
   def [](status)
-    @status.fetch_json(status)
+    value = @status[status]
+    JSON.parse(value)
   end
 
   def []?(status)
-    @status.fetch_json?(status)
+    value = @status[status]?
+    JSON.parse(value) if value
+  end
+
+  # This deliberately prevents compilation if called from driver code
+  def []=(status, value)
+    {{ "Remote drivers are read only. Please use the public interface to modify state".id }}
   end
 
   def implements?(interface) : Bool
-    @metadata.implements.includes?(interface.to_s) || !@metadata.functions[function.to_s].nil?
+    @metadata.implements.includes?(interface.to_s) || !@metadata.functions[interface.to_s]?.nil?
+  end
+
+  # All subscriptions to external drivers should be indirect as the driver might
+  # be swapped into a completely different system - whilst we've looked up the id
+  # of this instance of a driver, it's expected that this object is short lived
+  def subscribe(status, &callback : (EngineDriver::Subscriptions::IndirectSubscription, String) -> Nil) : EngineDriver::Subscriptions::IndirectSubscription
+    @system.subscribe(@module_name, @index, status, &callback)
   end
 
   # Don't raise errors directly.
@@ -62,8 +76,8 @@ class EngineDriver::Proxy::Driver
     function = @metadata.functions[function_name]?
 
     # obtain the arguments provided
-    arguments = {{call.args}}
-    {% if call.named_args.size > 0 %}
+    arguments = {{call.args}} {% if call.args.size == 0 %} of String {% end %}
+    {% if !call.named_args.is_a?(Nop) && call.named_args.size > 0 %}
       named_args = {
         {% for arg, index in call.named_args %}
           {{arg.name.stringify.id}}: {{arg.value}},
@@ -96,26 +110,29 @@ class EngineDriver::Proxy::Driver
       end
 
       # Build the request payload
-      args = {} of String => String
-      request = {
-        "__exec__"    => function_name,
-        function_name => args,
-      }
+      request = String.build do |str|
+        str << %({"__exec__":") << function_name << %(",") << function_name << %(":{)
 
-      # Apply the arguments
-      index = 0
-      function.each_key do |arg_name|
-        value = named_args[arg_name]?
-        if value.nil?
-          value = args[index]?
-          index += 1
+        # Apply the arguments
+        index = 0
+        named_keys = named_args.keys.map &.to_s
+        function.each_key do |arg_name|
+          value = if named_keys.includes?(arg_name)
+                    named_args[arg_name]?
+                  else
+                    index += 1
+                    arguments[index - 1]?
+                  end
+
+          str << '"' << arg_name << %(":) << value.to_json << ','
         end
-
-        args[arg_name] = value
+        # remove the trailing comma
+        str.back(1) if function.size > 0
+        str << "}}"
       end
 
       # parse the execute response
-      channel = EngineDriver::Protocol.instance.expect_response("exec", request)
+      channel = EngineDriver::Protocol.instance.expect_response("exec", request, raw: true)
       Future.new(channel, @system.logger)
     else
       raise "undefined method '#{function_name}' for #{@module_name}_#{@index} (#{@module_id})"

@@ -56,4 +56,60 @@ describe EngineDriver::Proxy::System do
     system.count("Display").should eq(3)
     system.count(:Switcher).should eq(1)
   end
+
+  it "should subscribe to module status" do
+    cs = EngineDriver::DriverModel::ControlSystem.from_json(%(
+        {
+          "id": "sys-1234",
+          "name": "Tesing System",
+          "email": "name@email.com",
+          "capacity": 20,
+          "features": "in-house-pc projector",
+          "bookable": true
+        }
+    ))
+
+    subs = EngineDriver::Proxy::Subscriptions.new
+    system = EngineDriver::Proxy::System.new cs
+    # Create some virtual systems
+    storage = EngineDriver::Storage.new(cs.id, "system")
+    storage["Display\x021"] = "mod-1234"
+    storage["Display\x022"] = "mod-5678"
+    storage["Display\x023"] = "mod-9000"
+    storage["Switcher\x021"] = "mod-9999"
+
+    redis = EngineDriver::Storage.redis_pool
+    in_callback = false
+    sub_passed = nil
+    message_passed = nil
+    channel = Channel(Nil).new
+
+    mod_store = EngineDriver::Storage.new("mod-5678")
+    mod_store.delete("power")
+
+    subscription = system.subscribe(:Display_2, :power) do |sub, value|
+      sub_passed = sub
+      message_passed = value
+      in_callback = true
+      channel.close
+    end
+
+    # Subscription should not exist yet - i.e. no lookup
+    subscription.module_id.should eq("mod-5678")
+    sleep 0.05
+
+    # Update the status
+    mod_store["power"] = true
+    channel.receive?
+
+    in_callback.should eq(true)
+    message_passed.should eq("true")
+    sub_passed.should eq(subscription)
+
+    # Test ability to access module state
+    system[:Display_2]["power"].as_bool == true
+
+    subs.terminate
+    mod_store.delete("power")
+  end
 end
