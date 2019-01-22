@@ -126,6 +126,7 @@ class EngineDriver::Protocol
   @@id = 0_u64
 
   def expect_response(command, payload = nil, raw = false) : Channel::Buffered(Request)
+    # TODO:: this requires a timeout
     id = @@id.to_s
     @@id += 1
 

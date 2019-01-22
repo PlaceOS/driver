@@ -87,6 +87,8 @@ class EngineDriver::Proxy::Driver
       named_args = {} of String => String
     {% end %}
 
+    # Execute is deferred so execution flow isn't interruped. }
+    # Can use `.get` to syncronise
     Promise.defer { __exec_request__(function_name, function, arguments, named_args).get }
   end
 
