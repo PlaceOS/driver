@@ -78,7 +78,6 @@ describe EngineDriver::Proxy::System do
     storage["Display\x023"] = "mod-9000"
     storage["Switcher\x021"] = "mod-9999"
 
-    redis = EngineDriver::Storage.redis_pool
     in_callback = false
     sub_passed = nil
     message_passed = nil

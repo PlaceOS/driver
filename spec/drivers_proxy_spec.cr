@@ -21,7 +21,8 @@ describe EngineDriver::Proxy::Drivers do
     storage.clear
     storage["Display\x021"] = "mod-999"
     storage["Display\x022"] = "mod-888"
-    storage.size.should eq(2)
+    storage["Switcher\x021"] = "mod-444"
+    storage.size.should eq(3)
     storage.empty?.should eq(false)
     system.exists?(:Display_1).should eq(true)
     system.exists?(:Display_2).should eq(true)
@@ -29,20 +30,39 @@ describe EngineDriver::Proxy::Drivers do
     # Create the driver metadata
     redis = EngineDriver::Storage.redis_pool
     meta = EngineDriver::DriverModel::Metadata.new({
-        "function1" => {} of String => Array(String),
-        "function2" => {"arg1" => ["Int32"]},
-        "function3" => {"arg1" => ["Int32", "200"], "arg2" => ["Int32"]},
+      "function1" => {} of String => Array(String),
+      "function2" => {"arg1" => ["Int32"]},
+      "function3" => {"arg1" => ["Int32", "200"], "arg2" => ["Int32"]},
     }, ["Functoids"])
     redis.set("interface\x02mod-999", meta.to_json)
     redis.set("interface\x02mod-888", meta.to_json)
 
+    meta = EngineDriver::DriverModel::Metadata.new({
+      "function1" => {} of String => Array(String),
+    })
+    redis.set("interface\x02mod-444", meta.to_json)
+
     # Check if implements check works
-    system.modules.should eq(["Display"])
+    system.modules.should eq(["Display", "Switcher"])
     system.all(:Display).size.should eq(2)
+    system.all(:Switcher).size.should eq(1)
+    system.all(:Booking).size.should eq(0)
     system.all(:Display).implements?(:function0).should eq(false)
     system.all(:Display).implements?(:function1).should eq(true)
     system.all(:Display).implements?(:Functoids).should eq(true)
     system.all(:Display).implements?(:RandomInterfaceNotLocal).should eq(false)
+
+    system.implementing(:function1).size.should eq(3)
+    system.implementing(:function2).size.should eq(2)
+    system.implementing(:Functoids).size.should eq(2)
+
+    # Check if enumeration works
+    count = 0
+    system.all(:Display).each { |driver| driver.module_name; count += 1 }
+    count.should eq(2)
+
+    system.all(:Display).each_with_index { |_, index| count = index }
+    count.should eq(1)
 
     # Grab the protocol output
     proto, _, output = Helper.protocol

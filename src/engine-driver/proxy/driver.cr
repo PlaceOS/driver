@@ -44,6 +44,8 @@ class EngineDriver::Proxy::Driver
     @status = EngineDriver::Storage.new(@module_id)
   end
 
+  getter :module_name, :index
+
   def [](status)
     value = @status[status]
     JSON.parse(value)
@@ -60,7 +62,7 @@ class EngineDriver::Proxy::Driver
   end
 
   def implements?(interface) : Bool
-    @metadata.implements.includes?(interface.to_s) || !@metadata.functions[interface.to_s]?.nil?
+    @metadata.implements.includes?(interface.to_s) || !!@metadata.functions[interface.to_s]?
   end
 
   # All subscriptions to external drivers should be indirect as the driver might

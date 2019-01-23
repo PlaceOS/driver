@@ -27,9 +27,9 @@ describe EngineDriver::Proxy::Driver do
 
     redis = EngineDriver::Storage.redis_pool
     meta = EngineDriver::DriverModel::Metadata.new({
-        "function1" => {} of String => Array(String),
-        "function2" => {"arg1" => ["Int32"]},
-        "function3" => {"arg1" => ["Int32", "200"], "arg2" => ["Int32"]},
+      "function1" => {} of String => Array(String),
+      "function2" => {"arg1" => ["Int32"]},
+      "function3" => {"arg1" => ["Int32", "200"], "arg2" => ["Int32"]},
     }, ["Functoids"])
     redis.set("interface\x02mod-1234", meta.to_json)
 
@@ -72,7 +72,7 @@ describe EngineDriver::Proxy::Driver do
     end
 
     # Execute a remote function with arguments
-    result = system[:Display_1].function2(12345)
+    result = system[:Display_1].function2(12_345)
     result.is_a?(Promise::DeferredPromise(JSON::Any))
 
     # Check the exec request
@@ -82,7 +82,7 @@ describe EngineDriver::Proxy::Driver do
     req_out.payload.should eq(%({"__exec__":"function2","function2":{"arg1":12345}}))
 
     # Execute a remote function with named arguments
-    result = system[:Display_1].function3(arg2: 12345)
+    result = system[:Display_1].function3(arg2: 12_345)
     result.is_a?(Promise::DeferredPromise(JSON::Any))
 
     # Check the exec request
@@ -114,7 +114,6 @@ describe EngineDriver::Proxy::Driver do
     storage = EngineDriver::Storage.new(cs.id, "system")
     storage["Display\x021"] = "mod-1234"
 
-    redis = EngineDriver::Storage.redis_pool
     in_callback = false
     sub_passed = nil
     message_passed = nil

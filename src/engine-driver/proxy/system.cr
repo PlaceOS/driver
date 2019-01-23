@@ -46,7 +46,6 @@ class EngineDriver::Proxy::System
     Proxy::Driver.new(@reply_id, module_name, index, module_id, self, metadata)
   end
 
-  # TODO:: grab modules implementing(Powerable) for example
   def all(module_name) : EngineDriver::Proxy::Drivers
     module_name = module_name.to_s
     drivers = [] of Proxy::Driver
@@ -67,6 +66,28 @@ class EngineDriver::Proxy::System
                      DriverModel::Metadata.new
                    end
         drivers << Proxy::Driver.new(@reply_id, module_name, index.to_i, module_id, self, metadata)
+      end
+    end
+
+    EngineDriver::Proxy::Drivers.new(drivers)
+  end
+
+  # grabs all modules implementing(Powerable) for example
+  def implementing(interface) : EngineDriver::Proxy::Drivers
+    interface = interface.to_s
+    drivers = [] of Proxy::Driver
+
+    @system.keys.each do |key|
+      parts = key.split("\x02")
+      mod_name = parts[0]
+      index = parts[1]
+
+      module_id = @system[key]
+      metadata = @redis.get("interface\x02#{module_id}")
+      if module_id && metadata
+        data = DriverModel::Metadata.from_json metadata
+        next unless data.implements.includes?(interface) || data.functions[interface]?
+        drivers << Proxy::Driver.new(@reply_id, mod_name, index.to_i, module_id, self, data)
       end
     end
 

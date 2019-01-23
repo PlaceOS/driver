@@ -2,6 +2,8 @@ require "json"
 require "promise"
 
 class EngineDriver::Proxy::Drivers
+  include Enumerable(EngineDriver::Proxy::Driver)
+
   def initialize(@drivers : Array(EngineDriver::Proxy::Driver))
   end
 
@@ -15,6 +17,12 @@ class EngineDriver::Proxy::Drivers
 
   def size
     @drivers.size
+  end
+
+  def each
+    @drivers.each do |driver|
+      yield driver
+    end
   end
 
   # This deliberately prevents compilation if called from driver code
