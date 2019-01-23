@@ -5,7 +5,7 @@ describe EngineDriver::Utilities do
     server = UDPSocket.new
     server.bind "0.0.0.0", 1234
 
-    EngineDriver::Utilities.wake_device("f0:18:98:25:bd:4f", port: 1234)
+    EngineDriver::Utilities::WakeOnLAN.wake_device("f0:18:98:25:bd:4f", port: 1234)
 
     raw_data = Bytes.new(2048)
     bytes_read = server.read(raw_data)

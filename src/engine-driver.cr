@@ -6,6 +6,9 @@ abstract class EngineDriver
   module Proxy
   end
 
+  module Utilities
+  end
+
   def initialize(
     @__module_id__ : String,
     @__settings__ : Settings,
@@ -102,7 +105,7 @@ abstract class EngineDriver
 
   # utilities
   def wake_device(mac_address, subnet = "255.255.255.255", port = 9)
-    EngineDriver::Utilities.wake_device(mac_address, subnet, port)
+    EngineDriver::Utilities::WakeOnLAN.wake_device(mac_address, subnet, port)
   end
 
   def set_connected_state(online, status_only = true)
@@ -236,13 +239,6 @@ abstract class EngineDriver
         @@metadata = details
       end
 
-      # TODO::
-      def self.defaults : String
-        # defaults: (this will indicate default port, module name etc)
-        # settings: (this is free form JSON)
-        ""
-      end
-
       # Once serialised, we want to execute the request on the class
       def execute(klass : {{@type.id}})
         case self.__exec__
@@ -293,6 +289,11 @@ macro finished
 
     parser.on("-m", "--metadata", "output driver metadata") do
       puts {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.metadata
+      exit 0
+    end
+
+    parser.on("-d", "--defaults", "output driver defaults") do
+      puts EngineDriver::Utilities::Discovery.defaults
       exit 0
     end
 

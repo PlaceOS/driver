@@ -4,6 +4,21 @@ require "promise"
 class Helper
   # A basic engine driver for testing
   class TestDriver < EngineDriver
+    generic_name :Driver
+    descriptive_name "Driver model Test"
+    description "This is the driver used for testing"
+    tcp_port 22
+    makebreak!
+    default_settings({
+      name: "Room 123",
+      username: "steve",
+      password: "$encrypt",
+      complex: {
+        crazy_deep: 1223
+      }
+    })
+
+
     # This checks that any private methods are allowed
     private def test_private_ok(io)
       puts io

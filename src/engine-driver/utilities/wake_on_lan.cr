@@ -1,4 +1,4 @@
-class EngineDriver::Utilities
+class EngineDriver::Utilities::WakeOnLAN
   @@udp_server_v4 : UDPSocket?
   @@udp_server_v6 : UDPSocket?
 
