@@ -233,7 +233,8 @@ abstract class EngineDriver
         implements = {{@type.ancestors.map(&.stringify)}}.reject { |obj| ignore.includes?(obj) }
         details = %({
           "functions": #{self.functions},
-          "implements": #{implements.to_json}
+          "implements": #{implements.to_json},
+          "requirements": #{Utilities::Discovery.requirements.to_json}
         }).gsub(/\s/, "")
 
         @@metadata = details

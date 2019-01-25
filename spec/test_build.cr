@@ -18,6 +18,11 @@ class Helper
       }
     })
 
+    accessor main_lcd : Display_1, implementing: Powerable
+    accessor switcher : Switcher
+    accessor camera : Array(Camera), implementing: [Powerable, Moveable]
+    accessor blinds : Array(Blind)?
+    accessor screen : Screen?
 
     # This checks that any private methods are allowed
     private def test_private_ok(io)
