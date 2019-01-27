@@ -41,7 +41,7 @@ class EngineDriver::DriverManager
   macro finished
     macro define_new_driver
       macro new_driver
-        {{EngineDriver::CONCRETE_DRIVERS.keys.first}}.new(@module_id, @settings, @queue, @transport, @logger, @schedule, @subscriptions)
+        {{EngineDriver::CONCRETE_DRIVERS.keys.first}}.new(@module_id, @settings, @queue, @transport, @logger, @schedule, @subscriptions, @model)
       end
 
       @driver : {{EngineDriver::CONCRETE_DRIVERS.keys.first}}
@@ -62,14 +62,13 @@ class EngineDriver::DriverManager
 
   def start
     driver = @driver
-    if driver.responds_to?(:on_load)
-      begin
-        driver.on_load
-      rescue error
-        @logger.error "in the on_load function of #{driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
-      end
-      @transport.connect
+    begin
+      driver.on_load if driver.responds_to?(:on_load)
+      driver.__apply_bindings__
+    rescue error
+      @logger.error "in the on_load function of #{driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
     end
+    @transport.connect
   end
 
   def terminate : Nil

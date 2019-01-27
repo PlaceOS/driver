@@ -31,6 +31,7 @@ class EngineDriver::ProcessManager
     model = EngineDriver::DriverModel.from_json(request.payload.not_nil!)
     driver = DriverManager.new module_id, model, @logger_io, @subscriptions
     @loaded[module_id] = driver
+    driver.start
     nil
   rescue error
     @logger.error "starting driver #{DriverManager.driver_class} (#{request.id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"

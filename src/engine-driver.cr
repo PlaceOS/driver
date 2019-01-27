@@ -16,7 +16,8 @@ abstract class EngineDriver
     @__transport__ : Transport,
     @__logger__ : EngineDriver::Logger,
     @__schedule__ = Proxy::Scheduler.new,
-    @__subscriptions__ = Proxy::Subscriptions.new
+    @__subscriptions__ = Proxy::Subscriptions.new,
+    @__driver_model__ = DriverModel.from_json(%({"udp":false,"makebreak":false,"settings":{},"role":1}))
   )
     @__status__ = Status.new
     @__storage__ = Storage.new(@__module_id__)
@@ -24,6 +25,7 @@ abstract class EngineDriver
   end
 
   @__system__ : Proxy::System?
+  @__driver_model__ : DriverModel
 
   # Access to the various components
   HELPERS = %w(transport logger settings schedule subscriptions)
@@ -127,8 +129,9 @@ abstract class EngineDriver
   # Remote execution helpers
   macro inherited
     macro finished
-        __build_helpers__
-        {% CONCRETE_DRIVERS[@type] = [@type.methods, (@type.name.id.stringify + "::KlassExecutor").id] %}
+      __build_helpers__
+      {% CONCRETE_DRIVERS[@type] = [@type.methods, (@type.name.id.stringify + "::KlassExecutor").id] %}
+      __build_apply_bindings__
     end
   end
 

@@ -10,12 +10,12 @@ class Helper
     tcp_port 22
     makebreak!
     default_settings({
-      name: "Room 123",
+      name:     "Room 123",
       username: "steve",
       password: "$encrypt",
-      complex: {
-        crazy_deep: 1223
-      }
+      complex:  {
+        crazy_deep: 1223,
+      },
     })
 
     accessor main_lcd : Display_1, implementing: Powerable
@@ -23,6 +23,16 @@ class Helper
     accessor camera : Array(Camera), implementing: [Powerable, Moveable]
     accessor blinds : Array(Blind)?
     accessor screen : Screen?
+
+    # cross module binding
+    bind Display_1, :power, :power_changed
+
+    # internal binding
+    bind :power, :power_changed
+
+    private def power_changed(subscription, new_value)
+      puts new_value
+    end
 
     # This checks that any private methods are allowed
     private def test_private_ok(io)
