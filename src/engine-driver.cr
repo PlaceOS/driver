@@ -129,12 +129,15 @@ abstract class EngineDriver
   # Remote execution helpers
   macro inherited
     macro finished
-      __build_helpers__
-      {% CONCRETE_DRIVERS[@type] = [@type.methods, (@type.name.id.stringify + "::KlassExecutor").id] %}
-      __build_apply_bindings__
+      {% if !@type.abstract? %}
+        __build_helpers__
+        {% CONCRETE_DRIVERS[@type] = [@type.methods, (@type.name.id.stringify + "::KlassExecutor").id] %}
+        __build_apply_bindings__
+      {% end %}
     end
   end
 
+  IGNORE_KLASSES = ["EngineDriver", "Reference", "Object", "Spec::ObjectExtensions", "Colorize::ObjectExtensions"]
   RESERVED_METHODS = {} of Nil => Nil
   {% RESERVED_METHODS["received"] = true %}
   {% RESERVED_METHODS["[]?"] = true %}
@@ -145,6 +148,9 @@ abstract class EngineDriver
 
   macro __build_helpers__
     {% methods = @type.methods %}
+    {% klasses = @type.ancestors.reject { |a| IGNORE_KLASSES.includes?(a.stringify) } %}
+    # {{klasses.map &.stringify}} <- in case we need to filter out more classes
+    {% klasses.map { |a| methods = methods + a.methods } %}
     {% methods = methods.reject { |method| RESERVED_METHODS[method.name.stringify] } %}
     {% methods = methods.reject { |method| method.visibility != :public } %}
     {% methods = methods.reject { |method| method.accepts_block? } %}
@@ -232,8 +238,7 @@ abstract class EngineDriver
         metadata = @@metadata
         return metadata if metadata
 
-        ignore = ["Reference", "Object", "EngineDriver"]
-        implements = {{@type.ancestors.map(&.stringify)}}.reject { |obj| ignore.includes?(obj) }
+        implements = {{@type.ancestors.map(&.stringify)}}.reject { |obj| IGNORE_KLASSES.includes?(obj) }
         details = %({
           "functions": #{self.functions},
           "implements": #{implements.to_json},

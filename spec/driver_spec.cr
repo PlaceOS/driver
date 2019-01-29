@@ -29,7 +29,7 @@ describe EngineDriver::DriverManager do
     ))
     executor.execute(driver).should eq(0)
 
-    {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.functions.should eq(%({"add":{"a":["Int32"],"b":["Int32"]},"splat_add":{},"perform_task":{"name":["String"]},"error_task":{},"future_add":{"a":["Int32"],"b":["Int32","200"]},"future_error":{},"raise_error":{},"not_json":{}}))
+    {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.functions.should eq(%({"add":{"a":["Int32"],"b":["Int32"]},"splat_add":{},"perform_task":{"name":["String"]},"error_task":{},"future_add":{"a":["Int32"],"b":["Int32","200"]},"future_error":{},"raise_error":{},"not_json":{},"implemented_in_base_class":{}}))
   end
 
   it "should initialize an instance of driver manager" do

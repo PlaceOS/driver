@@ -2,8 +2,14 @@ require "../src/engine-driver"
 require "promise"
 
 class Helper
+  abstract class HelperBase < EngineDriver
+    def implemented_in_base_class
+      puts "woot!"
+    end
+  end
+
   # A basic engine driver for testing
-  class TestDriver < EngineDriver
+  class TestDriver < HelperBase
     generic_name :Driver
     descriptive_name "Driver model Test"
     description "This is the driver used for testing"
