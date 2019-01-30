@@ -8,6 +8,12 @@ class Helper
     end
   end
 
+  module IncludedAble
+    def you_had_me_at_hello
+      "hello"
+    end
+  end
+
   # A basic engine driver for testing
   class TestDriver < HelperBase
     generic_name :Driver
@@ -24,6 +30,7 @@ class Helper
       },
     })
 
+    accessor thing : Thing, implementing: IncludedAble
     accessor main_lcd : Display_1, implementing: Powerable
     accessor switcher : Switcher
     accessor camera : Array(Camera), implementing: [Powerable, Moveable]

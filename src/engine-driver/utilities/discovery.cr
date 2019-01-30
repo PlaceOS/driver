@@ -53,9 +53,11 @@ abstract class EngineDriver
 
   # Creates helper methods for accessing proxy objects
   macro accessor(name, implementing = nil)
+    # ntype is the type of the name attribute. i.e. Display
     {% ntype = name.type %}
     {% optional = false %}
     {% collection = false %}
+    {% methods = [] of Crystal::Macros::TypeNode %}
 
     {% if ntype.is_a?(Union) %}
       # Anything with a ? goes here: Array(Int32)? + Int32?
@@ -84,19 +86,42 @@ abstract class EngineDriver
     # Ensure implementing is an Array
     {% if implementing %}
       {% if !implementing.is_a?(ArrayLiteral) %}
-        {% implementing = [implementing.id.stringify] %}
-      {% else %}
-        {% implementing = implementing.map(&.id.stringify) %}
+        {% implementing = [implementing] %}
       {% end %}
+
+      # Attempt to inspect the modules so we can have compile time checking
+      {% compiler_enforced = true %}
+      {% for type in implementing %}
+        {% klass = type.resolve? %}
+        {% if klass %}
+          {% methods = methods + klass.methods %}
+          {% klasses = klass.ancestors.reject { |a| IGNORE_KLASSES.includes?(a.stringify) } %}
+          {% klasses.map { |a| methods = methods + a.methods } %}
+        {% else %}
+          {% compiler_enforced = false %}
+        {% end %}
+      {% end %}
+
+      {% if compiler_enforced %}
+        {% methods = methods.reject { |method| RESERVED_METHODS[method.name.stringify] } %}
+        {% methods = methods.reject { |method| method.visibility != :public } %}
+        {% methods = methods.reject { |method| method.accepts_block? } %}
+      {% else %}
+        {% methods = [] of Crystal::Macros::TypeNode %}
+      {% end %}
+
+      # {{methods.map &.name.stringify}} <- How does this look?
+
+      {% implements = implementing.map(&.id.stringify) %}
     {% else %}
-      {% implementing = "[] of String".id %}
+      {% implements = "[] of String".id %}
     {% end %}
 
     # non optional requirements to be recorded
     {% if !optional %}
       %requirements = Utilities::Discovery.requirements
       %existing = %requirements[{{ntype}}]? || [] of String
-      %existing += {{implementing}}
+      %existing += {{implements}}
       %existing.uniq!
       %requirements[{{ntype}}] = %existing
     {% end %}
