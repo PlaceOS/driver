@@ -31,8 +31,7 @@ class EngineDriver::DriverManager
                    raise "not implemented"
                  when DriverModel::Role::LOGIC
                    # nothing required to be done here
-                   # TODO:: needs a dummy transport
-                   raise "not implemented"
+                   EngineDriver::TransportLogic.new(@queue)
                  else
                    raise "unknown role for driver #{@module_id}"
                  end

@@ -36,13 +36,14 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     end
   end
 
-  def start_tls
+  def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = @tls)
     return if @tls_started
     socket = @socket
     raise "cannot start tls while disconnected" if socket.nil? || socket.closed?
 
     # we can re-use the context
-    tls = @tls || OpenSSL::SSL::Context::Client.new
+    tls = context || OpenSSL::SSL::Context::Client.new
+    tls.verify_mode = verify_mode
     @tls = tls
 
     # upgrade the socket to TLS
@@ -64,7 +65,7 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     return 0 if socket.nil? || socket.closed?
     data = message.to_slice
     socket.write data
-    return data.size
+    data.size
   end
 
   def send(message, task : EngineDriver::Task, &block : Bytes -> Nil) : Int32
@@ -73,7 +74,7 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     task.processing = block
     data = message.to_slice
     socket.write data
-    return data.size
+    data.size
   end
 
   private def consume_io
