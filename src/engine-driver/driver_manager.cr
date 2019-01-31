@@ -14,6 +14,7 @@ class EngineDriver::DriverManager
                  when DriverModel::Role::RAW
                    ip = @model.ip.not_nil!
                    udp = @model.udp
+                   tls = @model.tls
                    port = @model.port.not_nil!
                    makebreak = @model.makebreak
 
@@ -22,13 +23,15 @@ class EngineDriver::DriverManager
                    elsif makebreak
                      raise "not implemented"
                    else
-                     EngineDriver::TransportTCP.new(@queue, ip, port) do |data, task|
+                     EngineDriver::TransportTCP.new(@queue, ip, port, tls) do |data, task|
                        received(data, task)
                      end
                    end
                  when DriverModel::Role::HTTP
                    raise "not implemented"
                  when DriverModel::Role::LOGIC
+                   # nothing required to be done here
+                   # TODO:: needs a dummy transport
                    raise "not implemented"
                  else
                    raise "unknown role for driver #{@module_id}"

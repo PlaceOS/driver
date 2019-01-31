@@ -36,6 +36,7 @@ class EngineDriver::DriverModel
     control_system: ControlSystem?,
     ip: String?,
     udp: Bool,
+    tls: Bool,
     port: Int32?,
     makebreak: Bool,
     uri: String?,

@@ -17,7 +17,7 @@ abstract class EngineDriver
     @__logger__ : EngineDriver::Logger,
     @__schedule__ = Proxy::Scheduler.new,
     @__subscriptions__ = Proxy::Subscriptions.new,
-    @__driver_model__ = DriverModel.from_json(%({"udp":false,"makebreak":false,"settings":{},"role":1}))
+    @__driver_model__ = DriverModel.from_json(%({"udp":false,"tls":false,"makebreak":false,"settings":{},"role":1}))
   )
     @__status__ = Status.new
     @__storage__ = Storage.new(@__module_id__)

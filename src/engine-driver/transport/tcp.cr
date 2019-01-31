@@ -2,13 +2,15 @@ require "socket"
 
 class EngineDriver::TransportTCP < EngineDriver::Transport
   # timeouts in seconds
-  def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, &@received : (Bytes, EngineDriver::Task?) -> Nil)
+  def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, @start_tls = false, &@received : (Bytes, EngineDriver::Task?) -> Nil)
     @terminated = false
+    @tls_started = false
     @logger = @queue.logger
   end
 
   @logger : ::Logger
-  @socket : TCPSocket?
+  @socket : IO?
+  @tls : OpenSSL::SSL::Context::Client?
   property :received
   getter :logger
 
@@ -19,8 +21,12 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     end
 
     retry max_interval: 10.seconds do
-      socket = @socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
+      @socket = socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
       socket.tcp_nodelay = true
+      socket.sync = true
+
+      @tls_started = false
+      start_tls if @start_tls
 
       # Enable queuing
       @queue.online = true
@@ -28,6 +34,20 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
       # Start consuming data from the socket
       spawn { consume_io }
     end
+  end
+
+  def start_tls
+    return if @tls_started
+    socket = @socket
+    raise "cannot start tls while disconnected" if socket.nil? || socket.closed?
+
+    # we can re-use the context
+    tls = @tls || OpenSSL::SSL::Context::Client.new
+    @tls = tls
+
+    # upgrade the socket to TLS
+    @socket = OpenSSL::SSL::Socket::Client.new(socket, context: tls, sync_close: true, hostname: @ip)
+    @tls_started = true
   end
 
   def terminate

@@ -28,6 +28,7 @@ class Helper
         "ip": "localhost",
         "port": 23,
         "udp": false,
+        "tls": false,
         "makebreak": false,
         "role": 1,
         "settings": {"test": {"number": 123}}
