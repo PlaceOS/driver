@@ -137,7 +137,7 @@ abstract class EngineDriver
     end
   end
 
-  IGNORE_KLASSES = ["EngineDriver", "Reference", "Object", "Spec::ObjectExtensions", "Colorize::ObjectExtensions"]
+  IGNORE_KLASSES   = ["EngineDriver", "Reference", "Object", "Spec::ObjectExtensions", "Colorize::ObjectExtensions"]
   RESERVED_METHODS = {} of Nil => Nil
   {% RESERVED_METHODS["received"] = true %}
   {% RESERVED_METHODS["[]?"] = true %}

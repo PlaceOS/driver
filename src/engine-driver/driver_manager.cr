@@ -19,7 +19,9 @@ class EngineDriver::DriverManager
                    makebreak = @model.makebreak
 
                    if udp
-                     raise "not implemented"
+                     EngineDriver::TransportUDP.new(@queue, ip, port, tls) do |data, task|
+                       received(data, task)
+                     end
                    elsif makebreak
                      raise "not implemented"
                    else
