@@ -25,8 +25,8 @@ class EngineDriver::Utilities::WakeOnLAN
     udp
   end
 
-  def self.wake_device(mac_address, subnet = "255.255.255.255", port = 9)
-    address = Socket::Address.parse("ip://#{subnet}:#{port}/")
+  def self.wake_device(mac_address, subnet = "255.255.255.255", port = 9, address : Socket::Address? = nil)
+    address = address || Socket::Address.parse("ip://#{subnet}:#{port}/")
     udp = case address.family
           when Socket::Family::INET6
             upd_v6
