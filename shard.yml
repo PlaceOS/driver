@@ -19,7 +19,8 @@ dependencies:
   retriable:
     github: Sija/retriable.cr
   ssh2:
-    github: datanoise/ssh2.cr
+    github: spider-gazelle/ssh2.cr
+    branch: master
 
 development_dependencies:
   ameba:

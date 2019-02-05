@@ -28,17 +28,22 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
     end
 
     retry max_interval: 10.seconds do
-      @socket = socket = UDPSocket.new
-      socket.connect(@ip, @port)
+      begin
+        @socket = socket = UDPSocket.new
+        socket.connect(@ip, @port)
 
-      @tls_started = false
-      start_tls if @start_tls
+        @tls_started = false
+        start_tls if @start_tls
 
-      # Enable queuing
-      @queue.online = true
+        # Enable queuing
+        @queue.online = true
 
-      # Start consuming data from the socket
-      spawn { consume_io }
+        # Start consuming data from the socket
+        spawn { consume_io }
+      rescue error
+        @logger.info { "connecting to device\n#{error.message}\n#{error.backtrace?.try &.join("\n")}" }
+        raise error
+      end
     end
   end
 
@@ -75,7 +80,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
     return 0 if socket.nil? || socket.closed?
     data = message.to_slice
     socket.write data
-    data.size
+    data.bytesize
   end
 
   def send(message, task : EngineDriver::Task, &block : Bytes -> Nil) : Int32
@@ -84,7 +89,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
     task.processing = block
     data = message.to_slice
     socket.write data
-    data.size
+    data.bytesize
   end
 
   private def consume_io
@@ -103,20 +108,5 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
     @logger.error "error consuming IO\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
   ensure
     connect
-  end
-
-  private def process(data) : Nil
-    # Check if the task provided a response processing block
-    if task = @queue.current
-      if processing = task.processing
-        processing.call(data)
-        return
-      end
-    end
-
-    # See spec for how this callback is expected to be used
-    @received.call(data, @queue.current)
-  rescue error
-    @logger.error "error processing received data\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
   end
 end
