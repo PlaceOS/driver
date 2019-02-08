@@ -1,7 +1,16 @@
+dist: xenial
 sudo: required
-language: crystal
+
 services: redis-server
+
 install:
+  - docker pull tutum/ubuntu:trusty
+  - docker run -d -p 2222:22 -e ROOT_PASS="somepassword" tutum/ubuntu:trusty
+  - sudo apt-get install libssh2-1-dev
   - shards install
+  - sleep 5
+
 script:
   - crystal spec
+
+language: crystal

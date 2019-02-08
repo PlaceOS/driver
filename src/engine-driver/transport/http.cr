@@ -88,8 +88,11 @@ class EngineDriver
     def connect(connect_timeout : Int32 = 10)
       return if @terminated
 
+      # Yeild here so this function has the same semantics as a connection
+      Fiber.yield
+
       # Enable queuing
-      spawn { @queue.online = true }
+      @queue.online = true
     end
 
     def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = @tls)
