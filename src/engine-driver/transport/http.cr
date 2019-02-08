@@ -2,17 +2,17 @@ require "socket"
 
 class EngineDriver::TransportHTTP < EngineDriver::Transport
   # timeouts in seconds
-  def initialize(@queue : EngineDriver::Queue, uri_base : String, @settings : ::EngineDriver::Settings, &@received : (Bytes, EngineDriver::Task?) -> Nil)
+  def initialize(@queue : EngineDriver::Queue, uri_base : String, @settings : ::EngineDriver::Settings)
     @terminated = false
     @logger = @queue.logger
     @tls = OpenSSL::SSL::Context::Client.new
     @uri_base = URI.parse(uri_base)
 
     base_query = @uri_base.query
+
+    @params_base = {} of String => String?
     if base_query && !base_query.empty?
-      @params_base = base_query.split('&').map(&.split('=')).each { |part| params[part[0]] = part[1]? }
-    else
-      @params_base = {} of String => String?
+      base_query.split('&').map(&.split('=')).each { |part| @params_base[part[0]] = part[1]? }
     end
 
     begin

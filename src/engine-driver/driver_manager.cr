@@ -15,7 +15,11 @@ class EngineDriver::DriverManager
 
     @transport = case @model.role
                  when DriverModel::Role::SSH
-                   raise "not implemented"
+                   ip = @model.ip.not_nil!
+                   port = @model.port.not_nil!
+                   EngineDriver::TransportSSH.new(@queue, ip, port, @settings) do |data, task|
+                     received(data, task)
+                   end
                  when DriverModel::Role::RAW
                    ip = @model.ip.not_nil!
                    udp = @model.udp
@@ -49,7 +53,7 @@ class EngineDriver::DriverManager
                      end
                    end
                  when DriverModel::Role::HTTP
-                   raise "not implemented"
+                   EngineDriver::TransportHTTP.new(@queue, @model.uri.not_nil!, @settings)
                  when DriverModel::Role::LOGIC
                    # nothing required to be done here
                    EngineDriver::TransportLogic.new(@queue)
