@@ -3,50 +3,44 @@ require "http"
 class EngineDriver
   # Implement the HTTP helpers
   protected def http(method, path, body : HTTP::Client::BodyType = nil,
-    params : Hash(String, String?) = {} of String => String?,
-    headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-    secure = false
-  ) : HTTP::Client::Response
+                     params : Hash(String, String?) = {} of String => String?,
+                     headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
+                     secure = false) : HTTP::Client::Response
     transport.http(method, path, body, params, headers, secure)
   end
 
   protected def get(path,
-    params : Hash(String, String?) = {} of String => String?,
-    headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-    secure = false
-  )
+                    params : Hash(String, String?) = {} of String => String?,
+                    headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
+                    secure = false)
     transport.http("GET", path, params: params, headers: headers, secure: secure)
   end
 
   protected def post(path, body : HTTP::Client::BodyType = nil,
-    params : Hash(String, String?) = {} of String => String?,
-    headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-    secure = false
-  )
+                     params : Hash(String, String?) = {} of String => String?,
+                     headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
+                     secure = false)
     transport.http("POST", path, body, params, headers, secure)
   end
 
   protected def put(path, body : HTTP::Client::BodyType = nil,
-    params : Hash(String, String?) = {} of String => String?,
-    headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-    secure = false
-  )
+                    params : Hash(String, String?) = {} of String => String?,
+                    headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
+                    secure = false)
     transport.http("PUT", path, body, params, headers, secure)
   end
 
   protected def patch(path, body : HTTP::Client::BodyType = nil,
-    params : Hash(String, String?) = {} of String => String?,
-    headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-    secure = false
-  )
+                      params : Hash(String, String?) = {} of String => String?,
+                      headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
+                      secure = false)
     transport.http("PATCH", path, body, params, headers, secure)
   end
 
   protected def delete(path,
-    params : Hash(String, String?) = {} of String => String?,
-    headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-    secure = false
-  )
+                       params : Hash(String, String?) = {} of String => String?,
+                       headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
+                       secure = false)
     transport.http("DELETE", path, params: params, headers: headers, secure: secure)
   end
 
@@ -103,10 +97,9 @@ class EngineDriver
     end
 
     def http(method, path, body : HTTP::Client::BodyType = nil,
-      params : Hash(String, String?) = {} of String => String?,
-      headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-      secure = false
-    ) : HTTP::Client::Response
+             params : Hash(String, String?) = {} of String => String?,
+             headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
+             secure = false) : HTTP::Client::Response
       raise "driver terminated" if @terminated
 
       scheme = @uri_base.scheme || "http"
