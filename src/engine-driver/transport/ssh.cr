@@ -86,10 +86,10 @@ class EngineDriver::TransportSSH < EngineDriver::Transport
             @shell = nil
           end
           @logger.warn "unable to negotiage a shell on SSH connection\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
-
-          # This will track the socket state when there is no shell
-          keepalive(settings.keepalive || 30)
         end
+
+        # This will track the socket state when there is no shell
+        keepalive(settings.keepalive || 30)
 
         # Enable queuing
         @queue.online = true
