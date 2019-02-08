@@ -98,6 +98,16 @@ class Helper
       ArgumentError.new("you fool!")
     end
 
+    # Test that HTTP methods compile
+    def test_http
+      get("/").status_code
+    end
+
+    # Test the SSH methods compile
+    def test_exec
+      exec("ls").gets_to_end
+    end
+
     def received(data, task)
       response = IO::Memory.new(data).to_s
       task.try &.success(response)

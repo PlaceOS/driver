@@ -87,8 +87,12 @@ abstract class EngineDriver
   end
 
   # Transport
-  def send(*args)
-    transport.send *args
+  def send(message) : Int32
+    transport.send message
+  end
+
+  def send(message, task : EngineDriver::Task, &block : Bytes -> Nil) : Int32
+    transport.send message, task, &block
   end
 
   # Subscriptions and channels
@@ -142,6 +146,7 @@ abstract class EngineDriver
   {% RESERVED_METHODS["received"] = true %}
   {% RESERVED_METHODS["[]?"] = true %}
   {% RESERVED_METHODS["[]"] = true %}
+  {% RESERVED_METHODS["send"] = true %}
   {% for name in HELPERS %}
     {% RESERVED_METHODS[name.id.stringify] = true %}
   {% end %}

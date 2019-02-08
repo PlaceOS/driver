@@ -6,6 +6,11 @@ abstract class EngineDriver::Transport
   abstract def start_tls(verify_mode : OpenSSL::SSL::VerifyMode, context : OpenSSL::SSL::Context) : Nil
   abstract def connect(connect_timeout : Int32)
 
+  # Only SSH implements exec
+  def exec(message) : SSH2::Channel
+    raise ::IO::EOFError.new("exec is only available to SSH transports")
+  end
+
   # Most devices have a HTTP service. Might as well make it easy to access.
   macro inherited
     def http(method, path, body : HTTP::Client::BodyType = nil,
