@@ -85,7 +85,7 @@ class EngineDriver::ProcessManager
       when .responds_to?(:get)
         # Handle futures and promises
         begin
-          result = result.get
+          result = result.not_nil!.get
           begin
             request.payload = result.try_to_json("null")
           rescue error
