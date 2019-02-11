@@ -1,6 +1,6 @@
 require "./helper"
 
-describe EngineDriver::TransportHTTP do
+describe EngineDriver::TransportSSH do
   it "should work with a received function" do
     queue = Helper.queue
     count = 0
@@ -19,8 +19,8 @@ describe EngineDriver::TransportHTTP do
     transport.connect
     queue.online.should eq(true)
 
-    task = queue.add { transport.send("ls\n") }.response_required!
-    task.get.payload.includes?("_upload.txt").should eq(true)
+    task = queue.add { transport.send("ls /\n") }.response_required!
+    task.get.payload.includes?("bin").should eq(true)
 
     # Close the connection
     transport.terminate
