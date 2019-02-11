@@ -70,7 +70,7 @@ describe EngineDriver::Proxy::Drivers do
 
     # Execute a remote function
     result = system.all(:Display).function1
-    result.is_a?(Promise::DeferredPromise(Array(JSON::Any)?))
+    result.is_a?(EngineDriver::Proxy::Drivers::Responses)
 
     # Check the exec request
     raw_data = Bytes.new(4096)

@@ -1,7 +1,37 @@
 require "json"
-require "promise"
 
 class EngineDriver::Proxy::Driver
+  abstract class Response
+    abstract def get : JSON::Any
+  end
+
+  class Future < Response
+    def initialize(@channel : Channel::Buffered(Protocol::Request), @logger : ::Logger)
+    end
+
+    def get : JSON::Any
+      result = @channel.receive
+
+      if error = result.error
+        backtrace = result.backtrace || [] of String
+        exception = EngineDriver::RemoteException.new(result.payload, error, backtrace)
+        @logger.warn "#{exception.message}\n#{exception.backtrace?.try &.join("\n")}"
+        raise exception
+      else
+        JSON.parse(result.payload.not_nil!)
+      end
+    end
+  end
+
+  class Error < Response
+    def initialize(@exception : Exception)
+    end
+
+    def get : JSON::Any
+      raise @exception
+    end
+  end
+
   def initialize(
     @reply_id : String,
     @module_name : String,
@@ -61,10 +91,10 @@ class EngineDriver::Proxy::Driver
 
     # Execute is deferred so execution flow isn't interruped. }
     # Can use `.get` to syncronise
-    Promise.defer { __exec_request__(function_name, function, arguments, named_args) }
+    __exec_request__(function_name, function, arguments, named_args)
   end
 
-  private def __exec_request__(function_name, function, arguments, named_args)
+  private def __exec_request__(function_name, function, arguments, named_args) : Response
     if function
       # Check if there is an argument mismatch }
       num_args = arguments.size + named_args.size
@@ -107,22 +137,12 @@ class EngineDriver::Proxy::Driver
 
       # parse the execute response
       channel = EngineDriver::Protocol.instance.expect_response(@module_id, @reply_id, "exec", request, raw: true)
-
-      result = channel.receive
-
-      if error = result.error
-        backtrace = result.backtrace || [] of String
-        exception = EngineDriver::RemoteException.new(result.payload, error, backtrace)
-        @system.logger.warn "#{exception.message}\n#{exception.backtrace?.try &.join("\n")}"
-        raise exception
-      else
-        JSON.parse(result.payload.not_nil!)
-      end
+      Future.new(channel, @system.logger)
     else
       raise "undefined method '#{function_name}' for #{@module_name}_#{@index} (#{@module_id})"
     end
   rescue error
     @system.logger.warn "#{error.message}\n#{error.backtrace?.try &.join("\n")}"
-    raise error
+    Error.new(error)
   end
 end

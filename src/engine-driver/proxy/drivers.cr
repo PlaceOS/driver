@@ -1,5 +1,4 @@
 require "json"
-require "promise"
 
 class EngineDriver::Proxy::Drivers
   include Enumerable(EngineDriver::Proxy::Driver)
@@ -50,12 +49,21 @@ class EngineDriver::Proxy::Drivers
     {{ "Can't subscribe to state on a collection of drivers".id }}
   end
 
+  class Responses
+    def initialize(@results : Array(Driver::Response))
+    end
+
+    def get : Array(JSON::Any)
+      @results.map &.get
+    end
+  end
+
   # Collect all the promises from the function calls and make them available to the user
   macro method_missing(call)
-    promises = @drivers.map do |driver|
+    results = @drivers.map do |driver|
       driver.{{call.name.id}}( {{*call.args}} {% if !call.named_args.is_a?(Nop) && call.named_args.size > 0 %}, {{**call.named_args}} {% end %} )
     end
 
-    Promise.all(promises)
+    Responses.new(results)
   end
 end
