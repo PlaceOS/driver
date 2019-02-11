@@ -83,8 +83,8 @@ class EngineDriver::ProcessManager
           @logger.fatal "unexpected result: #{outcome.state}"
         end
       when .responds_to?(:get)
-        # Handle futures and promises
-        handle_get(exec_request, driver, request, result)
+        # Handle futures and promises (nil check required on Linux)
+        handle_get(exec_request, driver, request, result) unless result == nil
       else
         begin
           request.payload = result.try_to_json("null")
