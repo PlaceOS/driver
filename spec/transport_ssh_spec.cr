@@ -13,7 +13,7 @@ describe EngineDriver::TransportSSH do
       # This would usually call: driver.received(data, task)
       response = IO::Memory.new(data).to_s
       count += 1
-      task.try &.success(response) if count == 3
+      task.try &.success(response) if count >= 3 && !response.includes?("root@")
     end
 
     transport.connect
