@@ -45,7 +45,7 @@ describe EngineDriver::Proxy::Driver do
 
     # Execute a remote function
     result = system[:Display_1].function1
-    result.is_a?(EngineDriver::Proxy::Driver::Response)
+    result.is_a?(Concurrent::Future(JSON::Any)).should eq(true)
 
     # Check the exec request
     raw_data = Bytes.new(4096)
@@ -57,7 +57,7 @@ describe EngineDriver::Proxy::Driver do
 
     # Attempt to execute a function that doesn't exist
     result = system[:Display_1].function8
-    result.is_a?(EngineDriver::Proxy::Driver::Response)
+    result.is_a?(Concurrent::Future(JSON::Any)).should eq(true)
 
     expect_raises(Exception) do
       result.get
@@ -65,7 +65,7 @@ describe EngineDriver::Proxy::Driver do
 
     # Attept to execute a function with invalid arguments
     result = system[:Display_1].function2
-    result.is_a?(EngineDriver::Proxy::Driver::Response)
+    result.is_a?(Concurrent::Future(JSON::Any)).should eq(true)
 
     expect_raises(Exception) do
       result.get
@@ -73,7 +73,7 @@ describe EngineDriver::Proxy::Driver do
 
     # Execute a remote function with arguments
     result = system[:Display_1].function2(12_345)
-    result.is_a?(EngineDriver::Proxy::Driver::Response)
+    result.is_a?(Concurrent::Future(JSON::Any)).should eq(true)
 
     # Check the exec request
     raw_data = Bytes.new(4096)
@@ -83,7 +83,7 @@ describe EngineDriver::Proxy::Driver do
 
     # Execute a remote function with named arguments
     result = system[:Display_1].function3(arg2: 12_345)
-    result.is_a?(EngineDriver::Proxy::Driver::Response)
+    result.is_a?(Concurrent::Future(JSON::Any)).should eq(true)
 
     # Check the exec request
     raw_data = Bytes.new(4096)

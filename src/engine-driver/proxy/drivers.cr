@@ -50,11 +50,16 @@ class EngineDriver::Proxy::Drivers
   end
 
   class Responses
-    def initialize(@results : Array(Driver::Response))
+    def initialize(@results : Array(Concurrent::Future(JSON::Any)))
     end
 
+    @computed : Array(JSON::Any)?
+
     def get : Array(JSON::Any)
-      @results.map &.get
+      computed = @computed
+      return computed if computed
+      @computed = computed = @results.map &.get
+      computed
     end
   end
 
@@ -64,6 +69,7 @@ class EngineDriver::Proxy::Drivers
       driver.{{call.name.id}}( {{*call.args}} {% if !call.named_args.is_a?(Nop) && call.named_args.size > 0 %}, {{**call.named_args}} {% end %} )
     end
 
+    #}# TODO: at some point in the future use a future here. Currently blows up the compiler
     Responses.new(results)
   end
 end
