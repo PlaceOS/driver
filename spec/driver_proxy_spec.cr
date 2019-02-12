@@ -40,7 +40,7 @@ describe EngineDriver::Proxy::Driver do
     system[:Display_1].implements?(:RandomInterfaceNotLocal).should eq(false)
 
     # Grab the protocol output
-    proto, _, output = Helper.protocol
+    proto, input, output = Helper.protocol
     EngineDriver::Protocol.new_instance proto
 
     # Execute a remote function
@@ -55,6 +55,15 @@ describe EngineDriver::Proxy::Driver do
     req_out.reply.should eq("reply_id")
     req_out.id.should eq("mod-1234")
 
+    # reply to the execute request
+    req_out.cmd = "result"
+    req_out.payload = "12345"
+    json_resp = req_out.to_json
+    input.write_bytes json_resp.bytesize
+    input.write json_resp.to_slice
+
+    result.get.should eq(12345)
+
     # Attempt to execute a function that doesn't exist
     result = system[:Display_1].function8
     result.is_a?(Concurrent::Future(JSON::Any)).should eq(true)
@@ -63,7 +72,7 @@ describe EngineDriver::Proxy::Driver do
       result.get
     end
 
-    # Attept to execute a function with invalid arguments
+    # Attempt to execute a function with invalid arguments
     result = system[:Display_1].function2
     result.is_a?(Concurrent::Future(JSON::Any)).should eq(true)
 
@@ -91,6 +100,32 @@ describe EngineDriver::Proxy::Driver do
     req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.payload.should eq(%({"__exec__":"function3","function3":{"arg1":null,"arg2":12345}}))
 
+    # Ensure timeouts work!!
+    result = system[:Display_1].function1
+    result.is_a?(Concurrent::Future(JSON::Any)).should eq(true)
+
+    # Check the exec request
+    raw_data = Bytes.new(4096)
+    bytes_read = output.read(raw_data)
+    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out.payload.should eq(%({"__exec__":"function1","function1":{}}))
+    req_out.reply.should eq("reply_id")
+    req_out.id.should eq("mod-1234")
+
+    sleep 0.5
+
+    # reply to the execute request
+    req_out.cmd = "result"
+    req_out.payload = "12345"
+    json_resp = req_out.to_json
+    input.write_bytes json_resp.bytesize
+    input.write json_resp.to_slice
+
+    expect_raises(EngineDriver::RemoteException) do
+      result.get
+    end
+
+    # CLEAN UP
     redis.del("interface\x02mod-1234")
     mod_store.clear
     storage.clear

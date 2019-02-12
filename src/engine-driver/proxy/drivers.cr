@@ -63,7 +63,7 @@ class EngineDriver::Proxy::Drivers
     end
   end
 
-  # Collect all the promises from the function calls and make them available to the user
+  # Collect all the futures from the function calls and make them available to the user
   macro method_missing(call)
     results = @drivers.map do |driver|
       driver.{{call.name.id}}( {{*call.args}} {% if !call.named_args.is_a?(Nop) && call.named_args.size > 0 %}, {{**call.named_args}} {% end %} )

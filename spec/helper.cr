@@ -7,7 +7,7 @@ class Helper
   def self.protocol
     input = IO::Stapled.new(*IO.pipe, true)
     output = IO::Stapled.new(*IO.pipe, true)
-    proto = EngineDriver::Protocol.new(input, output)
+    proto = EngineDriver::Protocol.new(input, output, 10.milliseconds)
     {proto, input, output}
   end
 

@@ -1,4 +1,6 @@
+require "set"
 require "json"
+require "tasker"
 require "tokenizer"
 
 class EngineDriver::Protocol
@@ -11,7 +13,6 @@ class EngineDriver::Protocol
     def initialize(@id, @cmd, @payload = nil, @error = nil, @backtrace = nil, @seq = nil, @reply = nil)
     end
 
-    # TODO:: add return address for replies (core routing)
     JSON.mapping(
       id: String,
       cmd: String,
@@ -30,7 +31,7 @@ class EngineDriver::Protocol
     end
   end
 
-  def initialize(input = STDIN, output = STDERR)
+  def initialize(input = STDIN, output = STDERR, timeout = 2.minutes)
     @io = IO::Stapled.new(input, output)
     @tokenizer = ::Tokenizer.new do |io|
       begin
@@ -47,10 +48,37 @@ class EngineDriver::Protocol
       exec:      [] of Request -> Request?,
       debug:     [] of Request -> Request?,
       ignore:    [] of Request -> Request?,
-      result:    [] of Request -> Request?,
     }
-    @tracking = {} of String => Channel::Buffered(Request)
+
+    # Tracks request IDs that expect responses
+    @tracking = {} of UInt64 => Channel::Buffered(Request)
+
+    # Timout handler
+    # Batched timeouts to reduce load. Any responses in these sets
+    @current_requests = {} of UInt64 => Request
+    @next_requests = {} of UInt64 => Request
+    @timeouts = Tasker.instance.every(timeout) do
+      current_requests = @current_requests
+      @current_requests = @next_requests
+      @next_requests = {} of UInt64 => Request
+
+      if !current_requests.empty?
+        error = IO::Timeout.new("request timed out")
+        current_requests.each_value do |request|
+          spawn { timeout(error, request) }
+        end
+      end
+    end
+
     spawn { self.consume_io }
+  end
+
+  @timeouts : Tasker::Task
+
+  def timeout(error, request)
+    request.set_error(error)
+    request.cmd = "result"
+    process(request)
   end
 
   # For process manager
@@ -97,9 +125,14 @@ class EngineDriver::Protocol
                   @callbacks[:ignore]
                 when "result"
                   # result of an executed request
-                  # id == request id
+                  # seq == request id
                   # payload or error response
-                  @callbacks[:result]
+                  seq = message.seq
+                  @current_requests.delete(seq)
+                  @next_requests.delete(seq)
+                  channel = @tracking.delete(seq)
+                  channel.try &.send(message)
+                  return
                 else
                   raise "unknown request cmd type"
                 end
@@ -129,7 +162,6 @@ class EngineDriver::Protocol
   @@seq = 0_u64
 
   def expect_response(id, reply_id, command, payload = nil, raw = false) : Channel::Buffered(Request)
-    # TODO:: this requires a timeout
     seq = @@seq
     @@seq += 1
 
@@ -137,7 +169,8 @@ class EngineDriver::Protocol
     if payload
       req.payload = raw ? payload.to_s : payload.to_json
     end
-    @tracking[id] = channel = Channel::Buffered(Request).new(1)
+    @tracking[seq] = channel = Channel::Buffered(Request).new(1)
+    @next_requests[seq] = req
 
     send req
     channel
@@ -172,5 +205,7 @@ class EngineDriver::Protocol
   rescue IO::Error
   rescue Errno
     # Input stream closed. This should only occur on termination
+  ensure
+    @timeouts.cancel
   end
 end
