@@ -32,8 +32,10 @@ class EngineDriver::ProcessManager
     driver = DriverManager.new module_id, model, @logger_io, @subscriptions
     @loaded[module_id] = driver
     driver.start
-    nil
+    request.payload = nil
+    request
   rescue error
+    # Driver was unable to be loaded.
     @logger.error "starting driver #{DriverManager.driver_class} (#{request.id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
     request.set_error(error)
   end
