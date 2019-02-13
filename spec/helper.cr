@@ -39,6 +39,14 @@ class Helper
 
     sleep 0.01
 
+    raw_data = Bytes.new(4096)
+    bytes_read = output.read(raw_data)
+
+    # Check start responded
+    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out.id.should eq(driver_id)
+    req_out.cmd.should eq("start")
+
     {process, input, output, logs, driver_id}
   end
 
