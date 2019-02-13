@@ -82,6 +82,10 @@ abstract class EngineDriver
     @__settings__.get { setting?({{klass}}, {{*types}}) }
   end
 
+  def define_setting(name, value)
+    EngineDriver::Protocol.instance.request(@__module_id__, "setting", {name, value})
+  end
+
   # Queuing
   def queue(*args, &block : Task -> Nil)
     @__queue__.add(*args, &block)
