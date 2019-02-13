@@ -109,5 +109,48 @@ For more examples see:
 
 ### Debug
 
+* Turns on debugging in the instance requested
+* Expects payload to contain:
+  * id: of the instance to debug
+* No reply is required
+
+Spec in
+
+* `./spec/process_manager_spec.cr`
+* `./spec/logger_spec.cr`
+
 
 ### Ignore
+
+* Turns off debugging in the instance requested
+* Expects payload to contain:
+  * id: of the instance to disable debugging
+* No reply is required
+
+Spec in
+
+* `./spec/process_manager_spec.cr`
+* `./spec/logger_spec.cr`
+
+
+## Debug notification (Driver -> Core)
+
+* Sends a debug message to core for routing to a client
+* Expects payload to contain:
+  * id: of the instance producing the message
+  * payload: JSON array [severity, message]
+* No reply is required
+
+Spec in `./spec/logger_spec.cr`
+
+
+## Save Setting (Driver -> Core)
+
+defined in `./src/engine-driver.cr`
+
+* Requests core saves a setting on behalf of the driver
+* Expects payload to contain:
+  * id: of the instance requesting the setting save
+  * payload: JSON that should be merged into the instances settings
+* No reply is required
+* NOTE:: this will trigger an update notification to occur
