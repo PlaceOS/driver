@@ -22,6 +22,7 @@ abstract class EngineDriver
     @__status__ = Status.new
     @__storage__ = Storage.new(@__module_id__)
     @__storage__.clear
+    @__storage__.redis.set("interface\x02#{@__module_id__}", {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.metadata)
   end
 
   @__system__ : Proxy::System?
