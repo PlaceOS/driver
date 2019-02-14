@@ -11,7 +11,7 @@ abstract class EngineDriver
 
   def initialize(
     @__module_id__ : String,
-    @__settings__ : Settings,
+    @__setting__ : Settings,
     @__queue__ : Queue,
     @__transport__ : Transport,
     @__logger__ : EngineDriver::Logger,
@@ -29,7 +29,7 @@ abstract class EngineDriver
   @__driver_model__ : DriverModel
 
   # Access to the various components
-  HELPERS = %w(transport logger settings schedule subscriptions)
+  HELPERS = %w(transport logger setting schedule subscriptions)
   {% for name in HELPERS %}
     def {{name.id}}
       @__{{name.id}}__
@@ -75,11 +75,11 @@ abstract class EngineDriver
 
   # Settings helpers
   macro setting(klass, *types)
-    @__settings__.get { setting({{klass}}, {{*types}}) }
+    @__setting__.get { setting({{klass}}, {{*types}}) }
   end
 
   macro setting?(klass, *types)
-    @__settings__.get { setting?({{klass}}, {{*types}}) }
+    @__setting__.get { setting?({{klass}}, {{*types}}) }
   end
 
   def define_setting(name, value)

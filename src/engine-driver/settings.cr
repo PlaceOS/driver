@@ -11,6 +11,24 @@ class EngineDriver::Settings
     with self yield
   end
 
+  def raw(*keys)
+    keys = keys.map &.to_s
+    @json.dig(*keys)
+  end
+
+  def raw?(*keys)
+    keys = keys.map &.to_s
+    @json.dig?(*keys)
+  end
+
+  def [](key)
+    @json[key.to_s]
+  end
+
+  def []?(key)
+    @json[key.to_s]?
+  end
+
   macro setting(klass, *keys)
     %keys = {{keys}}.map &.to_s
     %json = json.dig?(*%keys)

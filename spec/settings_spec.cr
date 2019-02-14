@@ -10,6 +10,22 @@ describe EngineDriver::Settings do
     settings.get { setting?(Int32, :integer) }.should eq(1234)
     settings.get { setting?(String, :string) }.should eq("hello")
     settings.get { setting?(String, :no_exist) }.should eq(nil)
+
+    settings[:integer].should eq(1234)
+    expect_raises(Exception) do
+      settings[:no_exist]
+    end
+
+    settings[:integer]?.should eq(1234)
+    settings[:no_exist]?.should eq(nil)
+
+    settings.raw(:integer).should eq(1234)
+    expect_raises(Exception) do
+      settings.raw(:no_exist)
+    end
+
+    settings.raw?(:integer).should eq(1234)
+    settings.raw?(:no_exist).should eq(nil)
   end
 
   it "should provide access to complex settings" do
@@ -29,5 +45,13 @@ describe EngineDriver::Settings do
     settings.get { setting(String, :hash, :hello) }.should eq("world")
     settings.get { setting?(String, :hash, :hello) }.should eq("world")
     settings.get { setting?(String, :hash, :no_exist) }.should eq(nil)
+
+    settings.raw(:hash, :hello).should eq("world")
+    expect_raises(Exception) do
+      settings.raw(:hash, :no_exist)
+    end
+
+    settings.raw?(:hash, :hello).should eq("world")
+    settings.raw?(:hash, :no_exist).should eq(nil)
   end
 end
