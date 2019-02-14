@@ -13,7 +13,8 @@ class EngineDriver::Task
     @timeout : Time::Span,
     @retries : Int32,
     @wait : Bool,
-    @name : String?
+    @name : String?,
+    @delay : Time::Span?
   )
     @response_required = false
     @last_executed = 0_i64
@@ -64,7 +65,8 @@ class EngineDriver::Task
   end
 
   def delay_required?
-    # TODO:: Check if any delays need to be performed
+    delay = @delay
+    sleep delay if delay
   end
 
   # result should support conversion to JSON

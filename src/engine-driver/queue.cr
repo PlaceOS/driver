@@ -11,6 +11,7 @@ class EngineDriver::Queue
     @timeout = 5.seconds
     @retries = 3
     @wait = true
+    @delay = nil
 
     # Queue controls
     @channel = Channel(Nil).new
@@ -24,6 +25,7 @@ class EngineDriver::Queue
   @current : Task?
   @previous : Task?
   @timeout : Time::Span
+  @delay : Time::Span?
   getter :current, :waiting
   getter :online, :logger
 
@@ -48,9 +50,10 @@ class EngineDriver::Queue
     retries = @retries,
     wait = @wait,
     name = nil,
+    delay = nil,
     &callback : (Task) -> Nil
   )
-    task = Task.new(self, callback, priority, timeout, retries, wait, name)
+    task = Task.new(self, callback, priority, timeout, retries, wait, name, delay)
 
     if @online
       @queue.push priority, task
