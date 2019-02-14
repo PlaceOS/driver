@@ -72,6 +72,7 @@ class EngineDriver::Task
   # result should support conversion to JSON
   def success(result = nil)
     @state = :success
+    @wait = false
 
     if @response_required
       begin
@@ -116,6 +117,7 @@ class EngineDriver::Task
   # Failed except we don't want to retry
   def abort(reason = nil)
     stop_timers
+    @wait = false
     @state = :abort
     @payload = reason.to_s if reason
     @channel.close
