@@ -1,6 +1,7 @@
 require "socket"
 require "openssl"
 
+# TODO:: remove once crystal lang 0.27.3+ is released
 lib LibSSL
   {% if compare_versions(OPENSSL_VERSION, "1.0.2") >= 0 %}
   	fun dtls_method = DTLS_method : SSLMethod
