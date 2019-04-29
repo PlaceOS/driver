@@ -150,12 +150,14 @@ class EngineDriver
     def disconnect
     end
 
-    def send(message) : Int32
-      0
+    def send(message)
+      raise "not available to HTTP drivers"
+      self
     end
 
-    def send(message, task : EngineDriver::Task, &block : Bytes -> Nil) : Int32
-      0
+    def send(message, task : EngineDriver::Task, &block : Bytes -> Nil)
+      raise "not available to HTTP drivers"
+      self
     end
   end
 end

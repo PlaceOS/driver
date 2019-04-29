@@ -65,21 +65,23 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     @socket.try &.close
   end
 
-  def send(message) : Int32
+  def send(message)
     socket = @socket
     return 0 if socket.nil? || socket.closed?
-    data = message.to_slice
-    socket.write data
-    data.bytesize
+    if message.responds_to? :to_io
+      socket.write_bytes(message)
+    elsif message.responds_to? :to_slice
+      data = message.to_slice
+      socket.write data
+    else
+      socket << message
+    end
+    self
   end
 
-  def send(message, task : EngineDriver::Task, &block : Bytes -> Nil) : Int32
-    socket = @socket
-    return 0 if socket.nil? || socket.closed?
+  def send(message, task : EngineDriver::Task, &block : Bytes -> Nil)
     task.processing = block
-    data = message.to_slice
-    socket.write data
-    data.bytesize
+    send(message)
   end
 
   private def consume_io

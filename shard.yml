@@ -18,6 +18,7 @@ dependencies:
     github: Sija/ipaddress.cr
   retriable:
     github: Sija/retriable.cr
+    branch: develop
   ssh2:
     github: spider-gazelle/ssh2.cr
     branch: master

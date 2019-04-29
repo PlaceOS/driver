@@ -1,11 +1,11 @@
-class EngineDriver::Utilities::WakeOnLAN
+module EngineDriver::Utilities::WakeOnLAN
   @@udp_server_v4 : UDPSocket?
   @@udp_server_v6 : UDPSocket?
 
   def self.upd_v4
     udp = @@udp_server_v4
     return udp if udp
-    udp = @@udp_server_v4 = UDPSocket.new Socket::Family::INET
+    @@udp_server_v4 = udp = UDPSocket.new Socket::Family::INET
     udp.broadcast = true
 
     # TODO:: allow for a custom port to be definie
@@ -16,7 +16,7 @@ class EngineDriver::Utilities::WakeOnLAN
   def self.upd_v6
     udp = @@udp_server_v6
     return udp if udp
-    udp = @@udp_server_v6 = UDPSocket.new Socket::Family::INET6
+    @@udp_server_v6 = udp = UDPSocket.new Socket::Family::INET6
     # iNet6 doesn't have broadcast - destination address should be FF02::1
     # https://msdn.microsoft.com/en-us/library/ff361877.aspx
 
