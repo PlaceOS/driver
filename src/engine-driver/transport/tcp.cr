@@ -32,6 +32,11 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
         # Enable queuing
         @queue.online = true
 
+        # We'll manually manage buffering.
+        # Classes that support `#write_bytes` may write to the IO multiple times
+        # however we don't want packets sent for every call to write
+        socket.sync = false
+
         # Start consuming data from the socket
         spawn { consume_io }
       rescue error
@@ -76,6 +81,7 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     else
       socket << message
     end
+    socket.flush
     self
   end
 
