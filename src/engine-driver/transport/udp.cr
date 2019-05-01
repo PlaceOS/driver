@@ -32,6 +32,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
       begin
         @socket = socket = UDPSocket.new
         socket.connect(@ip, @port)
+        socket.sync = true
 
         @tls_started = false
         start_tls if @start_tls
