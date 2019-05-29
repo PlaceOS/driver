@@ -15,7 +15,7 @@ abstract class EngineDriver::Transport
     raise ::IO::EOFError.new("exec is only available to SSH transports")
   end
 
-  # Most devices have a HTTP service. Might as well make it easy to access.
+  # Many devices have a HTTP service. Might as well make it easy to access.
   macro inherited
     def http(method, path, body : HTTP::Client::BodyType = nil,
       params : Hash(String, String?) = {} of String => String?,
@@ -23,19 +23,29 @@ abstract class EngineDriver::Transport
       secure = false
     ) : HTTP::Client::Response
       {% if @type.name.stringify == "EngineDriver::TransportLogic" %}
-        raise "HTTP requests are not possible against logic drivers"
+        raise "HTTP requests are not available in logic drivers"
       {% else %}
-        context = if secure
-          base_path = "https://#{@ip}"
-
-          if secure.is_a?(OpenSSL::SSL::Context::Client)
-            secure
-          else
-            OpenSSL::SSL::Context::Client.new.tap &.verify_mode = OpenSSL::SSL::VerifyMode::NONE
-          end
+        uri_config = @uri.try(&.strip)
+        if uri_config && !uri_config.empty?
+          base_path = uri_config
+          context = if base_path.starts_with?("https")
+                      OpenSSL::SSL::Context::Client.new.tap &.verify_mode = OpenSSL::SSL::VerifyMode::NONE
+                    else
+                      nil
+                    end
         else
-          base_path = "http://#{@ip}"
-          nil
+          context = if secure
+                      base_path = "https://#{@ip}"
+
+                      if secure.is_a?(OpenSSL::SSL::Context::Client)
+                        secure
+                      else
+                        OpenSSL::SSL::Context::Client.new.tap &.verify_mode = OpenSSL::SSL::VerifyMode::NONE
+                      end
+                    else
+                      base_path = "http://#{@ip}"
+                      nil
+                    end
         end
 
         # Build the new URI

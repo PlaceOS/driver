@@ -10,12 +10,13 @@ end
 
 class EngineDriver::TransportUDP < EngineDriver::Transport
   # timeouts in seconds
-  def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, @start_tls = false, &@received : (Bytes, EngineDriver::Task?) -> Nil)
+  def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, @start_tls = false, @uri = nil, &@received : (Bytes, EngineDriver::Task?) -> Nil)
     @terminated = false
     @tls_started = false
     @logger = @queue.logger
   end
 
+  @uri : String?
   @logger : ::Logger
   @socket : IO?
   @tls : OpenSSL::SSL::Context::Client?

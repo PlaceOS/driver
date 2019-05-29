@@ -3,6 +3,13 @@ require "json"
 require "tasker"
 require "tokenizer"
 
+STDIN.blocking = false
+STDIN.sync = true
+STDERR.blocking = false
+STDERR.sync = true
+STDOUT.blocking = false
+STDOUT.sync = true
+
 class EngineDriver::Protocol
   # NOTE:: potentially move to using https://github.com/jeromegn/protobuf.cr
   # 10_000 decodes
@@ -32,7 +39,7 @@ class EngineDriver::Protocol
   end
 
   def initialize(input = STDIN, output = STDERR, timeout = 2.minutes)
-    @io = IO::Stapled.new(input, output)
+    @io = IO::Stapled.new(input, output, true)
     @tokenizer = ::Tokenizer.new do |io|
       begin
         io.read_bytes(Int32) + 4

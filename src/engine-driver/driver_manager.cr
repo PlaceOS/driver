@@ -17,7 +17,7 @@ class EngineDriver::DriverManager
                  when DriverModel::Role::SSH
                    ip = @model.ip.not_nil!
                    port = @model.port.not_nil!
-                   EngineDriver::TransportSSH.new(@queue, ip, port, @settings) do |data, task|
+                   EngineDriver::TransportSSH.new(@queue, ip, port, @settings, @model.uri) do |data, task|
                      received(data, task)
                    end
                  when DriverModel::Role::RAW
@@ -35,20 +35,20 @@ class EngineDriver::DriverManager
                        if ipaddr.is_a?(IPAddress::IPv4) ? MulticastRangeV4.includes?(ipaddr) : MulticastRangeV6.includes?(ipaddr)
                          raise "not implemented"
                        else
-                         EngineDriver::TransportUDP.new(@queue, ip, port, tls) do |data, task|
+                         EngineDriver::TransportUDP.new(@queue, ip, port, tls, @model.uri) do |data, task|
                            received(data, task)
                          end
                        end
                      rescue ArgumentError
                        # Probably a DNS entry
-                       EngineDriver::TransportUDP.new(@queue, ip, port, tls) do |data, task|
+                       EngineDriver::TransportUDP.new(@queue, ip, port, tls, @model.uri) do |data, task|
                          received(data, task)
                        end
                      end
                    elsif makebreak
                      raise "not implemented"
                    else
-                     EngineDriver::TransportTCP.new(@queue, ip, port, tls) do |data, task|
+                     EngineDriver::TransportTCP.new(@queue, ip, port, tls, @model.uri) do |data, task|
                        received(data, task)
                      end
                    end

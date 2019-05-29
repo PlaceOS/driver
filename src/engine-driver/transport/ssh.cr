@@ -9,11 +9,12 @@ class EngineDriver
 
   class TransportSSH < Transport
     # timeouts in seconds
-    def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, @settings : ::EngineDriver::Settings, &@received : (Bytes, EngineDriver::Task?) -> Nil)
+    def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, @settings : ::EngineDriver::Settings, @uri = nil, &@received : (Bytes, EngineDriver::Task?) -> Nil)
       @terminated = false
       @logger = @queue.logger
     end
 
+    @uri : String?
     @logger : ::Logger
     @socket : TCPSocket?
     @session : SSH2::Session?
