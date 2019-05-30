@@ -1,6 +1,7 @@
 require "socket"
 require "promise"
 require "./mock_http"
+require "./responder"
 require "./status_helper"
 require "../protocol/request"
 
@@ -121,7 +122,7 @@ class EngineSpec
 
     # Request Response tracking
     @request_sequence = 0_u64
-    @requests = {} of UInt64 => Promise::DeferredPromise(JSON::Any?)
+    @requests = {} of UInt64 => Channel(EngineDriver::Protocol::Request)
   end
 
   @comms : TCPSocket?
@@ -161,16 +162,8 @@ class EngineSpec
             case request.cmd
             when "result"
               seq = request.seq
-              promise = @requests.delete(seq)
-              if promise
-                if request.error
-                  promise.reject(request.build_error)
-                elsif payload = request.payload
-                  promise.resolve(JSON.parse(payload))
-                else
-                  promise.resolve(nil)
-                end
-              end
+              responder = @requests.delete(seq)
+              responder.send(request) if responder
             end
           end
         rescue error
@@ -217,8 +210,8 @@ class EngineSpec
     }.to_json
 
     # Setup the tracking
-    response = Promise::DeferredPromise(JSON::Any?).new
-    @requests[@request_sequence] = response
+    response = Responder.new
+    @requests[@request_sequence] = response.channel
     @request_sequence += 1_u64
 
     # Send the request

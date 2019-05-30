@@ -8,8 +8,12 @@ describe EngineSpec do
 
     # Test spec'ing a driver
     EngineSpec.mock_driver("Helper::TestDriver", "./test_build") do
-      response = exec(:implemented_in_base_class).get
-      response.should eq(nil)
+      response = exec(:implemented_in_base_class)
+
+      # Waits for a response from the function
+      response.get.should eq(nil)
+
+      # Test the expected value was set in redis
       status[:test][0].should eq("bob")
     end
   end

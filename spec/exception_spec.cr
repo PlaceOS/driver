@@ -13,7 +13,7 @@ describe EngineDriver::RemoteException do
     queue.terminate
 
     error = EngineDriver::RemoteException.new(result.payload, result.error_class, result.backtrace)
-    error.message.should eq("Exception: error")
+    error.message.should eq("error (Exception)")
     error.backtrace.should eq(result.backtrace)
     (error.backtrace.size > 0).should eq(true)
   end
