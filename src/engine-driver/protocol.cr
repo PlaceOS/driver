@@ -2,6 +2,7 @@ require "set"
 require "json"
 require "tasker"
 require "tokenizer"
+require "./protocol/request"
 
 STDIN.blocking = false
 STDIN.sync = true
@@ -16,28 +17,6 @@ class EngineDriver::Protocol
   # Proto decoding   0.020000   0.040000   0.060000 (  0.020322)
   # JSON decoding    0.140000   0.270000   0.410000 (  0.137979)
   # Should be a simple change.
-  class Request
-    def initialize(@id, @cmd, @payload = nil, @error = nil, @backtrace = nil, @seq = nil, @reply = nil)
-    end
-
-    JSON.mapping(
-      id: String,
-      cmd: String,
-      seq: UInt64?,
-      reply: String?,
-      payload: String?,
-      error: String?,
-      backtrace: Array(String)?
-    )
-
-    def set_error(error)
-      self.payload = error.message
-      self.error = error.class.to_s
-      self.backtrace = error.backtrace?
-      self
-    end
-  end
-
   def initialize(input = STDIN, output = STDERR, timeout = 2.minutes)
     @io = IO::Stapled.new(input, output, true)
     @tokenizer = ::Tokenizer.new do |io|

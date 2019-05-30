@@ -4,6 +4,7 @@ require "promise"
 class Helper
   abstract class HelperBase < EngineDriver
     def implemented_in_base_class
+      self[:test] = ["bob"]
       puts "woot!"
     end
   end

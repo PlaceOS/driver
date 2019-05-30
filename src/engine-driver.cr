@@ -297,7 +297,10 @@ abstract class EngineDriver
 end
 
 require "./engine-driver/*"
-require "./engine-driver/**"
+require "./engine-driver/proxy/*"
+require "./engine-driver/subscriptions/*"
+require "./engine-driver/transport/*"
+require "./engine-driver/utilities/*"
 
 macro finished
   exec_process_manager = false
