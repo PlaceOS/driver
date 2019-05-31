@@ -30,6 +30,7 @@ class EngineSpec
 
     begin
       # Load the driver (inherit STDOUT for logging)
+      # -p is for protocol / process mode - expecting engine core
       spawn do
         begin
           exit_code = Process.run(
@@ -111,6 +112,7 @@ class EngineSpec
 
         spawn do
           sleep 1.seconds
+          puts "WARNING: driver process failed to terminate gracefully"
           wait_driver_close.close
         end
         wait_driver_close.receive
