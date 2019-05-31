@@ -1,6 +1,6 @@
 require "spec"
 require "socket"
-require "promise"
+require "tokenizer"
 require "./mock_http"
 require "./responder"
 require "./status_helper"
@@ -8,6 +8,11 @@ require "../protocol/request"
 
 # TODO:: Add verbose mode that outputs way too much information about the comms
 
+# An engine driver has 4 typical points of IO contact
+# 1. Engine driver protocol (engine-core's point of contact)
+# 2. The modules transport layer (module to device comms)
+# 3. An optional HTTP client
+# 4. Redis for state storage and subscriptions
 class EngineSpec
   SPEC_PORT = 0x45ae
   HTTP_PORT = SPEC_PORT + 1

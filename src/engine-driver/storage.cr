@@ -1,5 +1,7 @@
 require "redis"
 
+abstract class EngineDriver; end
+
 class EngineDriver::Storage < Hash(String, String)
   @@instance : Redis::PooledClient?
 

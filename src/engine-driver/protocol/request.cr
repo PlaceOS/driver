@@ -1,4 +1,4 @@
-class EngineDriver; end
+abstract class EngineDriver; end
 
 class EngineDriver::Protocol; end
 
