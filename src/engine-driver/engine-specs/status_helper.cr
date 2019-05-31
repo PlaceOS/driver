@@ -3,6 +3,7 @@ require "spec"
 require "../storage"
 
 class EngineSpec; end
+
 class EngineSpec::StatusHelper
   def initialize(module_id : String)
     @storage = EngineDriver::Storage.new(module_id)

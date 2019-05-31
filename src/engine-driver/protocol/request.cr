@@ -1,5 +1,5 @@
-
 class EngineDriver; end
+
 class EngineDriver::Protocol; end
 
 class EngineDriver::Protocol::Request

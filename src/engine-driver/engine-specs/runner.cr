@@ -1,3 +1,4 @@
+require "spec"
 require "socket"
 require "promise"
 require "./mock_http"
@@ -49,27 +50,27 @@ class EngineSpec
 
       # request a module instance be created by the driver
       json = {
-        id: DRIVER_ID,
-        cmd: "start",
+        id:      DRIVER_ID,
+        cmd:     "start",
         payload: {
           control_system: {
-            id: SYSTEM_ID,
-            name: "Spec Runner",
-            email: "spec@acaprojects.com",
+            id:       SYSTEM_ID,
+            name:     "Spec Runner",
+            email:    "spec@acaprojects.com",
             capacity: 4,
             features: "many modules",
-            bookable: true
+            bookable: true,
           },
-          ip: "127.0.0.1",
-          uri: "http://127.0.0.1:#{HTTP_PORT}",
-          udp: false,
-          tls: false,
-          port: SPEC_PORT,
+          ip:        "127.0.0.1",
+          uri:       "http://127.0.0.1:#{HTTP_PORT}",
+          udp:       false,
+          tls:       false,
+          port:      SPEC_PORT,
           makebreak: false,
-          role: 1,
+          role:      1,
           # TODO:: use defaults exported from drivers -d switch
-          settings: {} of String => JSON::Any
-        }.to_json
+          settings: {} of String => JSON::Any,
+        }.to_json,
       }.to_json
       io.write_bytes json.bytesize
       io.write json.to_slice
@@ -78,18 +79,26 @@ class EngineSpec
       # Wait for a connection
       spec.expect_reconnect
 
+      # request that debugging be enabled
+      json = {
+        id:  DRIVER_ID,
+        cmd: "debug",
+      }.to_json
+      io.write_bytes json.bytesize
+      io.write json.to_slice
+      io.flush
+
       # Run the spec
       with spec yield
-
     ensure
       # Shutdown the driver
       if exited
         puts "WARNING: driver process exited with: #{exit_code}"
       else
         json = {
-          id: DRIVER_ID,
-          cmd: "terminate",
-          payload: "{}"
+          id:      DRIVER_ID,
+          cmd:     "terminate",
+          payload: "{}",
         }.to_json
         io.write_bytes json.bytesize
         io.write json.to_slice
@@ -114,7 +123,7 @@ class EngineSpec
     end
 
     # setup structures for handling IO
-    @channel = Channel(TCPSocket).new
+    @new_connection = Channel(TCPSocket).new
     @server = TCPServer.new("127.0.0.1", SPEC_PORT)
 
     # Redis status
@@ -123,6 +132,10 @@ class EngineSpec
     # Request Response tracking
     @request_sequence = 0_u64
     @requests = {} of UInt64 => Channel(EngineDriver::Protocol::Request)
+
+    # Transmit tracking
+    @transmissions = [] of Bytes
+    @expected_transmissions = [] of Channel(Bytes)
   end
 
   @comms : TCPSocket?
@@ -135,7 +148,7 @@ class EngineSpec
 
   def __start_server__
     while client = @server.accept?
-      spawn @channel.send(client)
+      spawn @new_connection.send(client)
     end
   end
 
@@ -164,11 +177,40 @@ class EngineSpec
               seq = request.seq
               responder = @requests.delete(seq)
               responder.send(request) if responder
+            when "debug"
+              debug = JSON.parse(request.payload.not_nil!)
+              severity = debug[0].as_i
+              # Warnings and above will already be written to STDOUT
+              if severity < 2
+                text = debug[1].as_s
+                level = severity == 0 ? "DEBUG:" : "INFO:"
+                puts "#{level} #{text}"
+              end
             end
           end
         rescue error
           puts "error parsing request #{string.inspect}\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
         end
+      end
+    end
+  rescue IO::Error
+  rescue Errno
+    # Input stream closed. This should only occur on termination
+  end
+
+  def __process_transmissions__(connection : TCPSocket)
+    # 128kb buffer should be enough for anyone
+    raw_data = Bytes.new(1024 * 128)
+
+    while !connection.closed?
+      bytes_read = connection.read(raw_data)
+      break if bytes_read == 0 # IO was closed
+
+      data = raw_data[0, bytes_read]
+      if @expected_transmissions.empty?
+        @transmissions << data
+      else
+        @expected_transmissions.shift.send(data)
       end
     end
   rescue IO::Error
@@ -184,29 +226,33 @@ class EngineSpec
     # timeout
     spawn do
       sleep timeout
-      @channel.close unless connection
+      @new_connection.close unless connection
     end
 
-    @comms = connection = @channel.receive
-    connection.not_nil!
+    @comms = connection = socket = @new_connection.receive
+    spawn { __process_transmissions__(socket) }
+    socket
   rescue error : Channel::ClosedError
     raise "timeout waiting for module to connect"
   end
 
   def exec(function, **args)
+    # We want to clear any previous transmissions
+    @transmissions.clear
+
     # Build the request
     function = function.to_s
     json = {
-      id: DRIVER_ID,
+      id:  DRIVER_ID,
       cmd: "exec",
       seq: @request_sequence,
       # This would typically be routing information
       # like the module requesting this exec or the HTTP request ID etc
-      reply: "to_me",
+      reply:   "to_me",
       payload: {
         "__exec__" => function,
-        function => args
-      }.to_json
+        function   => args,
+      }.to_json,
     }.to_json
 
     # Setup the tracking
@@ -223,5 +269,61 @@ class EngineSpec
     # the promise value and just want to check some state updated
     sleep 1.milliseconds
     response
+  end
+
+  def should_send(data, timeout = 500.milliseconds)
+    sent = Bytes.new(0)
+
+    if @transmissions.empty
+      channel = Channel(Bytes).new(1)
+
+      # Timeout
+      spawn do
+        sleep timeout
+        channel.close if sent.empty?
+      end
+
+      @expected_transmissions << channel
+      begin
+        sent = channel.receive
+      ensure
+        @expected_transmissions.delete(channel)
+      end
+    else
+      sent = @transmissions.shift
+    end
+
+    # coerce expected send into a byte array
+    data = if data.responds_to? :to_io
+             io = IO::Memory.new
+             io.write_bytes data
+             io.to_slice
+           elsif data.responds_to? :to_slice
+             data.to_slice
+           else
+             data
+           end
+
+    # Check if it matches
+    sent.should eq(data)
+
+    self
+  end
+
+  def transmit(data)
+    data = if data.responds_to? :to_io
+             io = IO::Memory.new
+             io.write_bytes data
+             io.to_slice
+           elsif data.responds_to? :to_slice
+             data.to_slice
+           else
+             data
+           end
+    @comms.not_nil!.write data
+  end
+
+  def responds(data)
+    transmit(data)
   end
 end
