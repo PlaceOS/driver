@@ -6,6 +6,8 @@ require "./responder"
 require "./status_helper"
 require "../protocol/request"
 
+Spec.use_colors = false
+
 # TODO:: Add verbose mode that outputs way too much information about the comms
 
 # An engine driver has 4 typical points of IO contact
