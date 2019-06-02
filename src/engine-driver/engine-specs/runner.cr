@@ -6,8 +6,6 @@ require "./responder"
 require "./status_helper"
 require "../protocol/request"
 
-Spec.use_colors = false
-
 # TODO:: Add verbose mode that outputs way too much information about the comms
 
 # An engine driver has 4 typical points of IO contact
@@ -35,6 +33,7 @@ class EngineSpec
       # -p is for protocol / process mode - expecting engine core
       spawn do
         begin
+          puts "Launching driver: #{driver_exec}"
           exit_code = Process.run(
             driver_exec,
             {"-p"},
@@ -42,6 +41,7 @@ class EngineSpec
             output: STDOUT,
             error: stderr_writer
           ).exit_status
+          puts "Driver terminated with: #{exit_code}"
         ensure
           exited = true
           wait_driver_close.send(nil)
@@ -51,12 +51,14 @@ class EngineSpec
       Fiber.yield
 
       # Start comms
+      puts "... starting driver IO services"
       spec = EngineSpec.new(driver_name, io)
       spawn spec.__start_server__
       spawn spec.__start_http_server__
       spawn spec.__process_responses__
 
       # request a module instance be created by the driver
+      puts "... starting module"
       json = {
         id:      DRIVER_ID,
         cmd:     "start",
@@ -85,9 +87,12 @@ class EngineSpec
       io.flush
 
       # Wait for a connection
+      puts "... waiting for module"
       spec.expect_reconnect
+      puts "... module connected"
 
       # request that debugging be enabled
+      puts "... enabling debug output"
       json = {
         id:  DRIVER_ID,
         cmd: "debug",
@@ -97,12 +102,15 @@ class EngineSpec
       io.flush
 
       # Run the spec
+      puts "... starting spec"
       with spec yield
+      puts "... spec complete"
     ensure
       # Shutdown the driver
       if exited
         puts "WARNING: driver process exited with: #{exit_code}"
       else
+        puts "... terminating driver gracefully"
         json = {
           id:      DRIVER_ID,
           cmd:     "terminate",
@@ -192,8 +200,8 @@ class EngineSpec
               # Warnings and above will already be written to STDOUT
               if severity < 2
                 text = debug[1].as_s
-                level = severity == 0 ? "DEBUG:" : "INFO:"
-                puts "#{level} #{text}"
+                level = severity == 0 ? "DEBUG" : "INFO"
+                puts "level=#{level} message=#{text}"
               end
             end
           end
@@ -248,6 +256,8 @@ class EngineSpec
   def exec(function, **args)
     # We want to clear any previous transmissions
     @transmissions.clear
+
+    puts "-> spec calling: #{function} #{args}"
 
     # Build the request
     function = function.to_s
@@ -320,6 +330,8 @@ class EngineSpec
   end
 
   def transmit(data)
+    puts "-> transmitting: #{data.inspect}"
+
     data = if data.responds_to? :to_io
              io = IO::Memory.new
              io.write_bytes data

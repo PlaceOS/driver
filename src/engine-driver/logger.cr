@@ -6,6 +6,14 @@ class EngineDriver::Logger < Logger
     @debugging = false
     @progname = module_id
     self.level = Logger::WARN
+    self.formatter = Logger::Formatter.new do |severity, datetime, progname, message, io|
+      # method=DELETE path=/build/drivers%2Faca%2Fspec_helper.cr/ status=200 duration=32.65ms request_id=8a14cef3-15ea-4d2d-ad55-cff5799d4add
+
+      label = severity.unknown? ? "ANY" : severity.to_s
+      io << "level=" << label << " time="
+      datetime.to_rfc3339(io)
+      io << " progname=" << progname << " message=" << message
+    end
   end
 
   @protocol : Protocol
