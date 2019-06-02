@@ -92,7 +92,7 @@ class EngineSpec
       puts "... module connected"
 
       # request that debugging be enabled
-      puts "... enabling debug output"
+      puts "... enabling debugging output"
       json = {
         id:  DRIVER_ID,
         cmd: "debug",
