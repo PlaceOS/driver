@@ -29,7 +29,7 @@ abstract class EngineDriver
   @__driver_model__ : DriverModel
 
   # Access to the various components
-  HELPERS = %w(transport logger setting schedule subscriptions)
+  HELPERS = %w(transport logger queue setting schedule subscriptions)
   {% for name in HELPERS %}
     def {{name.id}}
       @__{{name.id}}__
@@ -93,7 +93,7 @@ abstract class EngineDriver
 
   # Transport
   def send(message, **opts)
-    queue(**opts) { |task| transport.send(message, task) }
+    queue(**opts) { |task| transport.send(message) }
   end
 
   def send(message, **opts, &block : (Bytes, EngineDriver::Task) -> Nil)
@@ -178,7 +178,13 @@ abstract class EngineDriver
         {% index = index + 1 %}
       {% end %}
 
-      class Method{{method.name.stringify.gsub(/\?/, "_question_mark").gsub(/\!/, "_exclamation_mark").camelcase.id}}
+      {% method_name = method.name.stringify %}
+      {% if method_name.includes?("?") %}
+        {% method_name = method_name.gsub(/\?/, "_question_mark_") %}
+      {% elsif method_name.includes?("!") %}
+        {% method_name = method_name.gsub(/\!/, "_exclamation_mark_") %}
+      {% end %}
+      class Method{{method_name.camelcase.id}}
         JSON.mapping(
           {% if args.size == 0 %}
              {} of String => String
@@ -209,7 +215,13 @@ abstract class EngineDriver
       JSON.mapping(
         __exec__: String,
         {% for method in methods %}
-            {{method.name}}: Method{{method.name.stringify.gsub(/\?/, "_question_mark").gsub(/\!/, "_exclamation_mark").camelcase.id}}?,
+          {% method_name = method.name.stringify %}
+          {% if method_name.includes?("?") %}
+            {% method_name = method_name.gsub(/\?/, "_question_mark_") %}
+          {% elsif method_name.includes?("!") %}
+            {% method_name = method_name.gsub(/\!/, "_exclamation_mark_") %}
+          {% end %}
+          {{method_name}}: Method{{method_name.camelcase.id}}?,
         {% end %}
       )
 
