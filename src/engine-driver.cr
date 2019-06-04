@@ -164,6 +164,8 @@ abstract class EngineDriver
     {% methods = methods.reject { |method| RESERVED_METHODS[method.name.stringify] } %}
     {% methods = methods.reject { |method| method.visibility != :public } %}
     {% methods = methods.reject { |method| method.accepts_block? } %}
+    # Filter out abstract methods
+    {% methods = methods.reject { |method| method.body.stringify.empty? } %}
 
     # Build a class that represents each method
     {% for method in methods %}
