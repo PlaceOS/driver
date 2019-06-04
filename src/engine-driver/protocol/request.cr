@@ -1,3 +1,5 @@
+require "../exception"
+
 abstract class EngineDriver; end
 
 class EngineDriver::Protocol; end

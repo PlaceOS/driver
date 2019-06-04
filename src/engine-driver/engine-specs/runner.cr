@@ -7,6 +7,8 @@ require "./status_helper"
 require "../protocol/request"
 
 # TODO:: Add verbose mode that outputs way too much information about the comms
+STDOUT.sync = true
+STDERR.sync = true
 
 # An engine driver has 4 typical points of IO contact
 # 1. Engine driver protocol (engine-core's point of contact)
@@ -103,7 +105,11 @@ class EngineSpec
 
       # Run the spec
       puts "... starting spec"
-      with spec yield
+      begin
+        with spec yield
+      rescue e
+        e.inspect_with_backtrace(STDOUT)
+      end
       puts "... spec complete"
     ensure
       # Shutdown the driver
@@ -133,9 +139,14 @@ class EngineSpec
   def initialize(@driver_name : String, @io : IO::Stapled)
     # setup structures for handling HTTP request emulation
     @received_http = [] of MockHTTP
+    @expected_http = [] of Channel(MockHTTP)
     @http_server = HTTP::Server.new do |context|
       request = MockHTTP.new(context)
-      @received_http << request
+      if @expected_http.empty?
+        @received_http << request
+      else
+        @expected_http.shift.send(request)
+      end
       request.wait_for_data
     end
 
@@ -293,13 +304,16 @@ class EngineSpec
   def should_send(data, timeout = 500.milliseconds)
     sent = Bytes.new(0)
 
-    if @transmissions.empty
+    if @transmissions.empty?
       channel = Channel(Bytes).new(1)
 
       # Timeout
       spawn do
         sleep timeout
-        channel.close if sent.empty?
+        if sent.empty?
+          channel.close
+          puts "-> timeout waiting for expected data"
+        end
       end
 
       @expected_transmissions << channel
@@ -346,5 +360,53 @@ class EngineSpec
 
   def responds(data)
     transmit(data)
+  end
+
+  def expect_http_request(timeout = 500.milliseconds)
+    mock_http = if @received_http.empty?
+                  temp_http = nil
+                  channel = Channel(MockHTTP).new(1)
+
+                  # Timeout
+                  spawn do
+                    sleep timeout
+                    if temp_http.nil?
+                      puts "-> timeout waiting for expected HTTP request"
+                      channel.close
+                    end
+                  end
+
+                  @expected_http << channel
+                  begin
+                    temp_http = channel.receive
+                  ensure
+                    @expected_http.delete(channel)
+                  end
+                else
+                  @received_http.shift
+                end
+
+    puts "-> expected HTTP request received"
+
+    # Make a copy of the body for debugging later
+    io = mock_http.context.request.body
+    request_body = begin
+      io ? String.new(io.peek || Bytes.new(0)) : ""
+    rescue
+      io ? io.peek.inspect : ""
+    end
+
+    # Process the request
+    begin
+      yield mock_http.context.request, mock_http.context.response
+    rescue e
+      puts "-> ------"
+      puts "   unhandled error processing request:\n#{mock_http.context.request.inspect}"
+      puts "   request body:\n#{request_body}"
+      puts "-> ------"
+      raise e
+    end
+    mock_http.complete_request
+    self
   end
 end
