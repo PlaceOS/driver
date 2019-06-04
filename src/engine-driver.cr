@@ -285,11 +285,17 @@ abstract class EngineDriver
             {% index = index + 1 %}
           {% end %}
 
-          when {{method.name.stringify}}
+          {% method_name = method.name.stringify %}
+          {% if method_name.includes?("?") %}
+            {% method_name = method_name.gsub(/\?/, "_question_mark_") %}
+          {% elsif method_name.includes?("!") %}
+            {% method_name = method_name.gsub(/\!/, "_exclamation_mark_") %}
+          {% end %}
+          when {{method_name}}
             {% if args.size == 0 %}
               return klass.{{method.name}}
             {% else %}
-              obj = self.{{method.name}}.not_nil!
+              obj = self.{{method_name.id}}.not_nil!
               args = {
                 {% for arg in args %}
                   {% if arg.default_value.is_a?(Nop) %}
