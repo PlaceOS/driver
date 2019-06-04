@@ -155,7 +155,7 @@ class EngineDriver
       self
     end
 
-    def send(message, task : EngineDriver::Task, &block : Bytes -> Nil)
+    def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil)
       raise "not available to HTTP drivers"
       self
     end

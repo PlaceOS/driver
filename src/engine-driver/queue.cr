@@ -29,6 +29,9 @@ class EngineDriver::Queue
   getter :current, :waiting
   getter :online, :logger
 
+  # for modifying defaults
+  property :priority, :timeout, :retries, :wait, :delay
+
   def online=(state : Bool)
     state_changed = state != @online
     @online = state

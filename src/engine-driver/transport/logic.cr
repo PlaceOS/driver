@@ -18,11 +18,11 @@ class EngineDriver::TransportLogic < EngineDriver::Transport
   def disconnect
   end
 
-  def send(message) : Int32
-    0
+  def send(message)
+    self
   end
 
-  def send(message, task : EngineDriver::Task, &block : Bytes -> Nil) : Int32
-    0
+  def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil)
+    self
   end
 end

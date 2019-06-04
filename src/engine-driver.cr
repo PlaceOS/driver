@@ -87,17 +87,17 @@ abstract class EngineDriver
   end
 
   # Queuing
-  def queue(*args, &block : Task -> Nil)
-    @__queue__.add(*args, &block)
+  def queue(**opts, &block : Task -> Nil)
+    @__queue__.add(**opts, &block)
   end
 
   # Transport
-  def send(message) : Int32
-    transport.send message
+  def send(message, **opts)
+    queue(**opts) { |task| transport.send(message, task) }
   end
 
-  def send(message, task : EngineDriver::Task, &block : Bytes -> Nil) : Int32
-    transport.send message, task, &block
+  def send(message, **opts, &block : (Bytes, EngineDriver::Task) -> Nil)
+    queue(**opts) { |task| transport.send(message, task, &block) }
   end
 
   # Subscriptions and channels
@@ -178,7 +178,7 @@ abstract class EngineDriver
         {% index = index + 1 %}
       {% end %}
 
-      class Method{{method.name.stringify.camelcase.id}}
+      class Method{{method.name.stringify.gsub(/\?/, "_question_mark").gsub(/\!/, "_exclamation_mark").camelcase.id}}
         JSON.mapping(
           {% if args.size == 0 %}
              {} of String => String
@@ -209,7 +209,7 @@ abstract class EngineDriver
       JSON.mapping(
         __exec__: String,
         {% for method in methods %}
-            {{method.name}}: Method{{method.name.stringify.camelcase.id}}?,
+            {{method.name}}: Method{{method.name.stringify.gsub(/\?/, "_question_mark").gsub(/\!/, "_exclamation_mark").camelcase.id}}?,
         {% end %}
       )
 

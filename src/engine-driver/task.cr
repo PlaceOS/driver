@@ -30,7 +30,7 @@ class EngineDriver::Task
 
   @logger : ::Logger
   @timer : Tasker::Task?
-  @processing : Proc(Bytes, Nil)?
+  @processing : Proc(Bytes, Task, Nil)?
   @error_class : String?
   getter :last_executed, :state, :payload, :backtrace, :error_class, :logger
   property :processing
