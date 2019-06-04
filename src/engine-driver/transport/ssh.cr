@@ -53,6 +53,10 @@ class EngineDriver
         return unless socket.closed?
       end
 
+      # Clear any buffered data before we re-connect
+      tokenizer = @tokenizer
+      tokenizer.clear if tokenizer
+
       retry max_interval: 10.seconds do
         supported_methods = nil
 

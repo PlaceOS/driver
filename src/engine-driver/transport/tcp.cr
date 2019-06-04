@@ -21,6 +21,10 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
       return unless socket.closed?
     end
 
+    # Clear any buffered data before we re-connect
+    tokenizer = @tokenizer
+    tokenizer.clear if tokenizer
+
     retry max_interval: 10.seconds do
       begin
         @socket = socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
