@@ -145,10 +145,11 @@ class EngineDriver::DriverManager
   end
 
   private def received(data, task)
-    if @driver.responds_to? :received
-      @driver.received(data, task)
+    driver = @driver
+    if driver.responds_to? :received
+      driver.received(data, task)
     else
-      @logger.warn "no received function provided for #{@driver.class} (#{@module_id})"
+      @logger.warn "no received function provided for #{driver.class} (#{@module_id})"
       task.try &.abort("no received function provided")
     end
   end
