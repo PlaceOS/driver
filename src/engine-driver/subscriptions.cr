@@ -3,9 +3,19 @@ require "logger"
 class EngineDriver::Subscriptions
   SYSTEM_ORDER_UPDATE = "lookup-change"
 
-  def initialize(logger_io = STDOUT)
+  def initialize(logger_io = STDOUT, module_id = "")
     @terminated = false
     @logger = ::Logger.new(logger_io)
+    @logger.progname = module_id
+    @logger.formatter = Logger::Formatter.new do |severity, datetime, progname, message, io|
+      label = severity.unknown? ? "ANY" : severity.to_s
+      io << String.build do |str|
+        str << "level=" << label << " time="
+        datetime.to_rfc3339(str)
+        str << " progname=" << progname if progname && !progname.empty?
+        str << " message=" << message
+      end
+    end
 
     # Mutex for indirect subscriptions as it involves two hashes, a redis lookup
     # and the possibility of an index change. The redis lookup pauses the

@@ -338,7 +338,16 @@ class EngineSpec
            end
 
     # Check if it matches
-    sent.should eq(data)
+    if sent.size > data.size
+      sent[0...data.size].should eq(data)
+      if @expected_transmissions.empty?
+        @transmissions << data
+      else
+        @expected_transmissions.shift.send(sent[data.size..-1])
+      end
+    else
+      sent.should eq(data)
+    end
 
     self
   end
@@ -356,6 +365,8 @@ class EngineSpec
              data
            end
     @comms.not_nil!.write data
+    sleep 10.milliseconds
+    nil
   end
 
   def responds(data)

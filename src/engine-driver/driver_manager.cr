@@ -9,7 +9,7 @@ class EngineDriver::DriverManager
     @logger = EngineDriver::Logger.new(@module_id, logger_io)
     @queue = Queue.new(@logger) { |state| connection(state) }
     @schedule = EngineDriver::Proxy::Scheduler.new(@logger)
-    @subscriptions = Proxy::Subscriptions.new(subscriptions)
+    @subscriptions = Proxy::Subscriptions.new(subscriptions, @module_id)
 
     @state_mutex = Mutex.new
 
@@ -145,11 +145,11 @@ class EngineDriver::DriverManager
   end
 
   private def received(data, task)
-    {% if EngineDriver::CONCRETE_DRIVERS.values.first[0].reject { |method| method.name.stringify != "received" }.size > 0 %}
+    if @driver.responds_to? :received
       @driver.received(data, task)
-    {% else %}
+    else
       @logger.warn "no received function provided for #{@driver.class} (#{@module_id})"
       task.try &.abort("no received function provided")
-    {% end %}
+    end
   end
 end
