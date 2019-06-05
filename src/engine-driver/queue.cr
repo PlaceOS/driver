@@ -53,7 +53,7 @@ class EngineDriver::Queue
     retries = @retries,
     wait = @wait,
     name = nil,
-    delay = nil,
+    delay = @delay,
     &callback : (Task) -> Nil
   )
     task = Task.new(self, callback, priority, timeout, retries, wait, name, delay)
