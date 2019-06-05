@@ -35,6 +35,10 @@ class EngineDriver::Task
   getter :last_executed, :state, :payload, :backtrace, :error_class, :logger
   property :processing
 
+  # Drivers can monkey patch task if the request is required to process the response
+  # @request_payload : Bytes?
+  # property :request_payload
+
   # Are we intending to provide this result to a third party?
   def response_required!
     @response_required = true

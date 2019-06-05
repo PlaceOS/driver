@@ -93,11 +93,17 @@ abstract class EngineDriver
 
   # Transport
   def send(message, **opts)
-    queue(**opts) { |task| transport.send(message) }
+    queue(**opts) do |task|
+      task.request_payload = message if task.responds_to?(:request_payload)
+      transport.send(message)
+    end
   end
 
   def send(message, **opts, &block : (Bytes, EngineDriver::Task) -> Nil)
-    queue(**opts) { |task| transport.send(message, task, &block) }
+    queue(**opts) do |task|
+      task.request_payload = message if task.responds_to?(:request_payload)
+      transport.send(message, task, &block)
+    end
   end
 
   # Subscriptions and channels
