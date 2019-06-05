@@ -66,9 +66,7 @@ class EngineDriver::ProcessManager
       # If a task is being returned then we want to wait for the result
       case result
       when Task
-        result.response_required!
-        outcome = result.get
-
+        outcome = result.get(:response_required)
         request.payload = outcome.payload
 
         case outcome.state

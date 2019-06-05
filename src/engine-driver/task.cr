@@ -22,7 +22,7 @@ class EngineDriver::Task
 
     @logger = @queue.logger
 
-    @state = :unknown
+    @state = @wait ? :unknown : :success
     @payload = DEFAULT_RESULT
     @backtrace = DEFAULT_BACKTR
     @error_class = nil
