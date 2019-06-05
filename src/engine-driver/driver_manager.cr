@@ -4,12 +4,12 @@ class EngineDriver::DriverManager
   MulticastRangeV4 = IPAddress.new("224.0.0.0/4")
   MulticastRangeV6 = IPAddress.new("ff00::/8")
 
-  def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT, subscriptions = Subscriptions.new)
+  def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT, subscriptions = Subscriptions.new(module_id: @module_id))
     @settings = Settings.new @model.settings.to_json
     @logger = EngineDriver::Logger.new(@module_id, logger_io)
     @queue = Queue.new(@logger) { |state| connection(state) }
     @schedule = EngineDriver::Proxy::Scheduler.new(@logger)
-    @subscriptions = Proxy::Subscriptions.new(subscriptions, @module_id)
+    @subscriptions = Proxy::Subscriptions.new(subscriptions)
 
     @state_mutex = Mutex.new
 
