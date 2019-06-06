@@ -51,8 +51,8 @@ class EngineDriver::Settings
   macro setting?(klass, *keys)
     %keys = {{keys}}.map &.to_s
     %json = json.dig?(*%keys)
-    # Explicitly check for null here as this is a valid return value for ?
-    if %json && %json != "null"
+    # Explicitly check for nil here as this is a valid return value for ?
+    if %json && %json != nil
       begin
         extract {{klass}}, %json
       rescue ex : TypeCastError
