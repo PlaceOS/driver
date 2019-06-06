@@ -379,7 +379,7 @@ class EngineSpec
            end
     @comms.not_nil!.write data
     sleep 10.milliseconds
-    nil
+    self
   end
 
   def responds(data)
@@ -431,6 +431,7 @@ class EngineSpec
       raise e
     end
     mock_http.complete_request
+    sleep 10.milliseconds
     self
   end
 end
