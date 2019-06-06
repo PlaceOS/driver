@@ -155,6 +155,11 @@ abstract class EngineDriver
   IGNORE_KLASSES   = ["EngineDriver", "Reference", "Object", "Spec::ObjectExtensions", "Colorize::ObjectExtensions"]
   RESERVED_METHODS = {} of Nil => Nil
   {% RESERVED_METHODS["received"] = true %}
+  {% RESERVED_METHODS["connected"] = true %}
+  {% RESERVED_METHODS["disconnected"] = true %}
+  {% RESERVED_METHODS["on_load"] = true %}
+  {% RESERVED_METHODS["on_update"] = true %}
+  {% RESERVED_METHODS["on_unload"] = true %}
   {% RESERVED_METHODS["[]?"] = true %}
   {% RESERVED_METHODS["[]"] = true %}
   {% RESERVED_METHODS["send"] = true %}
