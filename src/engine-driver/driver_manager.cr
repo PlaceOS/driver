@@ -4,8 +4,9 @@ class EngineDriver::DriverManager
   MulticastRangeV4 = IPAddress.new("224.0.0.0/4")
   MulticastRangeV6 = IPAddress.new("ff00::/8")
 
-  def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT, subscriptions = Subscriptions.new(module_id: @module_id))
-    @settings = Settings.new @model.settings.to_json
+  def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT, subscriptions = nil)
+    subscriptions ||= Subscriptions.new(module_id: @module_id)
+    @settings = Settings.new @model.settings
     @logger = EngineDriver::Logger.new(@module_id, logger_io)
     @queue = Queue.new(@logger) { |state| connection(state) }
     @schedule = EngineDriver::Proxy::Scheduler.new(@logger)
@@ -113,7 +114,7 @@ class EngineDriver::DriverManager
   end
 
   def update(settings)
-    @settings.json = JSON.parse(settings.not_nil!)
+    @settings.json = JSON.parse(settings.not_nil!).as_h
     driver = @driver
     driver.on_update if driver.responds_to?(:on_update)
   rescue error

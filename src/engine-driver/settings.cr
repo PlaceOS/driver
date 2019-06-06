@@ -2,9 +2,13 @@ require "json"
 
 class EngineDriver::Settings
   def initialize(settings : String)
-    @json = JSON.parse(settings)
+    @json = JSON.parse(settings).as_h
   end
 
+  def initialize(@json : Hash(String, JSON::Any))
+  end
+
+  @json : Hash(String, JSON::Any)
   property :json
 
   def get
