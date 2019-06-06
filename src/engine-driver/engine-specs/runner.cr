@@ -1,9 +1,9 @@
-require "spec"
 require "socket"
 require "tokenizer"
 require "./mock_http"
 require "./responder"
 require "./status_helper"
+require "spec/expectations"
 require "../protocol/request"
 
 # TODO:: Add verbose mode that outputs way too much information about the comms
