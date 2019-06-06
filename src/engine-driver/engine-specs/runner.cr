@@ -60,14 +60,15 @@ class EngineSpec
       spawn spec.__process_responses__
 
       puts "... requesting default settings"
-      io = IO::Memory.new
+      defaults_io = IO::Memory.new
       Process.run(
         driver_exec, {"-d"},
         input: Process::Redirect::Close,
-        output: io,
+        output: defaults_io,
         error: Process::Redirect::Close
       )
-      defaults = JSON.parse(io.to_s.strip)
+      defaults = JSON.parse(JSON.parse(defaults_io.to_s.strip)["default_settings"].as_s)
+      puts "... got default settings: #{defaults.inspect}"
 
       # request a module instance be created by the driver
       puts "... starting module"
@@ -91,7 +92,7 @@ class EngineSpec
           makebreak: false,
           role:      1,
           # use defaults as defined in the driver
-          settings: defaults["default_settings"],
+          settings: defaults,
         }.to_json,
       }.to_json
       io.write_bytes json.bytesize
