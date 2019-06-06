@@ -59,6 +59,16 @@ class EngineSpec
       spawn spec.__start_http_server__
       spawn spec.__process_responses__
 
+      puts "... requesting default settings"
+      io = IO::Memory.new
+      Process.run(
+        driver_exec, {"-d"},
+        input: Process::Redirect::Close,
+        output: io,
+        error: Process::Redirect::Close
+      )
+      defaults = JSON.parse(io.to_s.strip)
+
       # request a module instance be created by the driver
       puts "... starting module"
       json = {
@@ -80,8 +90,8 @@ class EngineSpec
           port:      SPEC_PORT,
           makebreak: false,
           role:      1,
-          # TODO:: use defaults exported from drivers -d switch
-          settings: {} of String => JSON::Any,
+          # use defaults as defined in the driver
+          settings: defaults["default_settings"],
         }.to_json,
       }.to_json
       io.write_bytes json.bytesize
