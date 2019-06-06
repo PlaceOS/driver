@@ -1,6 +1,6 @@
 require "json"
-require "spec"
 require "../storage"
+require "spec/expectations"
 
 class EngineSpec; end
 
