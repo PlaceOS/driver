@@ -1,5 +1,7 @@
 require "json"
 require "../storage"
+require "spec/dsl"
+require "spec/methods"
 require "spec/expectations"
 
 class EngineSpec; end

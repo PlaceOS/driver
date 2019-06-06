@@ -3,6 +3,8 @@ require "tokenizer"
 require "./mock_http"
 require "./responder"
 require "./status_helper"
+require "spec/dsl"
+require "spec/methods"
 require "spec/expectations"
 require "../protocol/request"
 
