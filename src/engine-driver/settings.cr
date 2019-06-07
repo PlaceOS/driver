@@ -85,10 +85,11 @@ class EngineDriver::Settings
     {% end %}
     {% if !found %}
       # support Enum value names
-      if {{klass}}.responds_to?(:parse)
-        {{klass}}.parse({{json}}.to_json)
+      %klass = {{klass}}
+      if %klass.responds_to?(:parse)
+        %klass.parse({{json}}.to_json)
       else
-        {{klass}}.from_json({{json}}.to_json)
+        %klass.from_json({{json}}.to_json)
       end
     {% end %}
   end
