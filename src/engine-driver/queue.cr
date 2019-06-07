@@ -41,6 +41,28 @@ class EngineDriver::Queue
     end
   end
 
+  # removes all jobs currently in the queue
+  def clear(abort_current = false)
+    old_queue = @queue
+    @queue = Priority::Queue(Task).new
+
+    # Abort any currently running tasks
+    if abort_current
+      if current = @current
+        current.abort("queue cleared")
+      end
+    end
+
+    # Abort all the queued tasks
+    size = old_queue.size
+    (0...size).each do
+      task = old_queue.pop.value
+      task.abort("queue cleared")
+    end
+
+    self
+  end
+
   # A helper method for setting the connected state, without effecting queue
   # processing. UDP device not responding, incorrect login etc
   def set_connected(state)
