@@ -1,4 +1,5 @@
 require "http"
+require "./http_proxy"
 
 class EngineDriver
   # Implement the HTTP helpers
