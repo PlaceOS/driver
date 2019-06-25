@@ -77,7 +77,7 @@ class Helper
     %queue = Helper.queue
     %logger = EngineDriver::Logger.new({{module_id}})
     %driver = nil
-    %transport = EngineDriver::TransportTCP.new(%queue, "localhost", 1234) do |data, task|
+    %transport = EngineDriver::TransportTCP.new(%queue, "localhost", 1234, ::EngineDriver::Settings.new("{}")) do |data, task|
       d = %driver.not_nil!
       if d.responds_to?(:received)
         d.received(data, task)

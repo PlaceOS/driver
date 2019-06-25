@@ -5,7 +5,7 @@ describe EngineDriver::TransportTCP do
     Helper.tcp_server
 
     queue = Helper.queue
-    transport = EngineDriver::TransportTCP.new(queue, "localhost", 1234) do |data, task|
+    transport = EngineDriver::TransportTCP.new(queue, "localhost", 1234, ::EngineDriver::Settings.new("{}")) do |data, task|
       # This would usually call: driver.received(data, task)
       response = IO::Memory.new(data).to_s
       task.try &.success(response)
@@ -28,7 +28,7 @@ describe EngineDriver::TransportTCP do
     Helper.tcp_server
 
     queue = Helper.queue
-    transport = EngineDriver::TransportTCP.new(queue, "localhost", 1234) do |data, task|
+    transport = EngineDriver::TransportTCP.new(queue, "localhost", 1234, ::EngineDriver::Settings.new("{}")) do |data, task|
       # This would usually call: driver.received(data, task)
       response = IO::Memory.new(data).to_s
       task.try &.success(response)

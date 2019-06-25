@@ -3,8 +3,10 @@ require "socket"
 require "base64"
 require "openssl"
 
+class EngineDriver; end
+
 # Based on https://github.com/net-ssh/net-ssh/blob/master/lib/net/ssh/proxy/http.rb
-class HTTPProxy
+class EngineDriver::HTTPProxy
   # The hostname or IP address of the HTTP proxy.
   getter proxy_host : String
 
@@ -13,7 +15,6 @@ class HTTPProxy
 
   # The map of additional options that were given to the object at
   # initialization.
-  getter options : Hash(Symbol, String)
   getter tls : OpenSSL::SSL::Context::Client?
 
   # Create a new socket factory that tunnels via the given host and
@@ -23,12 +24,14 @@ class HTTPProxy
   #
   # * :user => the user name to use when authenticating to the proxy
   # * :password => the password to use when authenticating
-  def initialize(@proxy_host, @proxy_port = 80, @options = {} of Symbol => String)
+  def initialize(host, port = 80, @auth : NamedTuple(username: String, password: String)? = nil)
+    @proxy_host = host
+    @proxy_port = port
   end
 
   # Return a new socket connected to the given host and port via the
   # proxy that was requested when the socket factory was instantiated.
-  def open(host, port, tls = nil, connection_options = {} of Symbol => Float64 | Nil)
+  def open(host, port, tls = nil, **connection_options)
     dns_timeout = connection_options.fetch(:dns_timeout, nil)
     connect_timeout = connection_options.fetch(:connect_timeout, nil)
     read_timeout = connection_options.fetch(:read_timeout, nil)
@@ -39,9 +42,9 @@ class HTTPProxy
 
     socket << "CONNECT #{host}:#{port} HTTP/1.0\r\n"
 
-    if options[:user]?
-      credentials = Base64.strict_encode("#{options[:user]}:#{options[:password]}")
-      credentials = "#{credentials}\n".gsub(/\s/, "")
+    if auth = @auth
+      credentials = Base64.strict_encode("#{auth[:username]}:#{auth[:password]}")
+      credentials = credentials.gsub(/\s/, "")
       socket << "Proxy-Authorization: Basic #{credentials}\r\n"
     end
 
@@ -86,22 +89,28 @@ class HTTPProxy
   end
 end
 
-class HTTPClient < ::HTTP::Client
+class EngineDriver::HTTPClient < ::HTTP::Client
   def set_proxy(proxy : HTTPProxy)
+    socket = @socket
+    return if socket && !socket.closed?
+
     begin
-      @socket = proxy.open(host: @host, port: @port, tls: @tls, connection_options: proxy_connection_options)
+      @socket = proxy.open(@host, @port, @tls, **proxy_connection_options)
     rescue IO::Error
       @socket = nil
     end
   end
 
   def proxy_connection_options
-    opts = {} of Symbol => Float64 | Nil
+    {
+      dns_timeout: @dns_timeout,
+      connect_timeout: @connect_timeout,
+      read_timeout: @read_timeout
+    }
+  end
 
-    opts[:dns_timeout] = @dns_timeout
-    opts[:connect_timeout] = @connect_timeout
-    opts[:read_timeout] = @read_timeout
-
-    return opts
+  def check_socket_valid
+    socket = @socket
+    @socket = nil if socket && socket.closed?
   end
 end

@@ -1,4 +1,5 @@
 require "tokenizer"
+require "./transport/http_proxy"
 
 abstract class EngineDriver::Transport
   abstract def send(message)
@@ -18,11 +19,11 @@ abstract class EngineDriver::Transport
 
   # Many devices have a HTTP service. Might as well make it easy to access.
   macro inherited
-    def http(method, path, body : HTTP::Client::BodyType = nil,
+    def http(method, path, body : ::HTTP::Client::BodyType = nil,
       params : Hash(String, String?) = {} of String => String?,
       headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-      secure = false
-    ) : HTTP::Client::Response
+      secure = false, concurrent = true
+    ) : ::HTTP::Client::Response
       {% if @type.name.stringify == "EngineDriver::TransportLogic" %}
         raise "HTTP requests are not available in logic drivers"
       {% else %}
@@ -57,9 +58,32 @@ abstract class EngineDriver::Transport
         headers = headers.is_a?(Hash) ? HTTP::Headers.new.tap { |head| headers.map { |key, value| head[key] = value } } : headers
 
         # Make the request
-        HTTP::Client.exec(method.to_s.upcase, uri, headers, body, tls: context)
+        client = new_http_client(uri, context)
+        client.exec(method.to_s.upcase, uri.full_path, headers, body)
       {% end %}
     end
+
+    {% if @type.name.stringify != "EngineDriver::TransportLogic" %}
+      protected def new_http_client(uri, context)
+        client = HTTPClient.new(uri, context)
+
+        # Ensure client socket has not been closed
+        client.before_request { client.check_socket_valid }
+
+        # Apply basic auth settings
+        if auth = @settings.get { setting?(NamedTuple(username: String, password: String), :basic_auth) }
+          client.basic_auth **auth
+        end
+
+        # Apply proxy settings
+        if proxy_config = @settings.get { setting?(NamedTuple(host: String, port: Int32, auth: NamedTuple(username: String, password: String)?), :proxy) }
+          proxy = HTTPProxy.new(**proxy_config)
+          client.before_request { client.set_proxy(proxy) }
+        end
+
+        client
+      end
+    {% end %}
   end
 
   protected def process(data) : Nil

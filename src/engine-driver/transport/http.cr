@@ -3,46 +3,46 @@ require "./http_proxy"
 
 class EngineDriver
   # Implement the HTTP helpers
-  protected def http(method, path, body : HTTP::Client::BodyType = nil,
+  protected def http(method, path, body : ::HTTP::Client::BodyType = nil,
                      params : Hash(String, String?) = {} of String => String?,
                      headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-                     secure = false) : HTTP::Client::Response
-    transport.http(method, path, body, params, headers, secure)
+                     secure = false, concurrent = false) : ::HTTP::Client::Response
+    transport.http(method, path, body, params, headers, secure, concurrent)
   end
 
   protected def get(path,
                     params : Hash(String, String?) = {} of String => String?,
                     headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-                    secure = false)
-    transport.http("GET", path, params: params, headers: headers, secure: secure)
+                    secure = false, concurrent = false)
+    transport.http("GET", path, params: params, headers: headers, secure: secure, concurrent: concurrent)
   end
 
-  protected def post(path, body : HTTP::Client::BodyType = nil,
+  protected def post(path, body : ::HTTP::Client::BodyType = nil,
                      params : Hash(String, String?) = {} of String => String?,
                      headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-                     secure = false)
-    transport.http("POST", path, body, params, headers, secure)
+                     secure = false, concurrent = false)
+    transport.http("POST", path, body, params, headers, secure, concurrent)
   end
 
-  protected def put(path, body : HTTP::Client::BodyType = nil,
+  protected def put(path, body : ::HTTP::Client::BodyType = nil,
                     params : Hash(String, String?) = {} of String => String?,
                     headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-                    secure = false)
-    transport.http("PUT", path, body, params, headers, secure)
+                    secure = false, concurrent = false)
+    transport.http("PUT", path, body, params, headers, secure, concurrent)
   end
 
-  protected def patch(path, body : HTTP::Client::BodyType = nil,
+  protected def patch(path, body : ::HTTP::Client::BodyType = nil,
                       params : Hash(String, String?) = {} of String => String?,
                       headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-                      secure = false)
-    transport.http("PATCH", path, body, params, headers, secure)
+                      secure = false, concurrent = false)
+    transport.http("PATCH", path, body, params, headers, secure, concurrent)
   end
 
   protected def delete(path,
                        params : Hash(String, String?) = {} of String => String?,
                        headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-                       secure = false)
-    transport.http("DELETE", path, params: params, headers: headers, secure: secure)
+                       secure = false, concurrent = false)
+    transport.http("DELETE", path, params: params, headers: headers, secure: secure, concurrent: concurrent)
   end
 
   # Implement transport
@@ -51,8 +51,9 @@ class EngineDriver
     def initialize(@queue : EngineDriver::Queue, uri_base : String, @settings : ::EngineDriver::Settings)
       @terminated = false
       @logger = @queue.logger
-      @tls = OpenSSL::SSL::Context::Client.new
+      @tls = new_tls_context
       @uri_base = URI.parse(uri_base)
+      @http_client_mutex = Mutex.new
 
       base_query = @uri_base.query
 
@@ -61,22 +62,15 @@ class EngineDriver
         base_query.split('&').map(&.split('=')).each { |part| @params_base[part[0]] = part[1]? }
       end
 
-      begin
-        if mode = @settings.get { setting?(Int32, :https_verify) }
-          # TODO:: use strings and parse here crystal-lang/crystal#7382
-          # @tls.verify_mode = OpenSSL::SSL::VerifyMode.parse(mode)
-          @tls.verify_mode = OpenSSL::SSL::VerifyMode.from_value(mode)
-        else
-          @tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
-        end
-      rescue error
-        @logger.warn "issue configuring verify mode\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
-        @tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
-      end
+      context = uri_base.starts_with?("https") ? @tls : nil
+      @client = new_http_client(@uri_base, context)
     end
 
     @params_base : Hash(String, String?)
     @logger : ::Logger
+    @tls : OpenSSL::SSL::Context::Client
+    @client : HTTP::Client
+
     property :received
     getter :logger
 
@@ -94,13 +88,43 @@ class EngineDriver
       tls = context || OpenSSL::SSL::Context::Client.new
       tls.verify_mode = verify_mode
       @tls = tls
+
+      # Re-create the client with the new TLS configuration
+      @client = new_http_client(@uri_base, @tls)
       true
     end
 
-    def http(method, path, body : HTTP::Client::BodyType = nil,
+    def new_tls_context(verify_mode : OpenSSL::SSL::VerifyMode? = nil) : OpenSSL::SSL::Context::Client
+      tls = OpenSSL::SSL::Context::Client.new
+      if verify_mode
+        tls.verify_mode = verify_mode
+      else
+        begin
+          if mode = @settings.get { setting?(Int32, :https_verify) }
+            # TODO:: use strings and parse here crystal-lang/crystal#7382
+            # @tls.verify_mode = OpenSSL::SSL::VerifyMode.parse(mode)
+            tls.verify_mode = OpenSSL::SSL::VerifyMode.from_value(mode)
+          else
+            tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
+          end
+        rescue error
+          @logger.warn "issue configuring verify mode\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+          tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
+        end
+      end
+      tls
+    end
+
+    protected def with_shared_client
+      @http_client_mutex.synchronize do
+        yield @client
+      end
+    end
+
+    def http(method, path, body : ::HTTP::Client::BodyType = nil,
              params : Hash(String, String?) = {} of String => String?,
              headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-             secure = false) : HTTP::Client::Response
+             secure = false, concurrent = false) : ::HTTP::Client::Response
       raise "driver terminated" if @terminated
 
       scheme = @uri_base.scheme || "http"
@@ -110,9 +134,6 @@ class EngineDriver
       port = @uri_base.port
       port = port ? ":#{port}" : ""
       base_path = @uri_base.path || ""
-
-      # Does this request require a TLS context?
-      context = (scheme.try &.ends_with?('s')) ? @tls : nil
 
       # Grab a base path that we can pair with the passed in path
       base_path = base_path[0..-2] if scheme.ends_with?('/')
@@ -141,7 +162,18 @@ class EngineDriver
       headers = headers.is_a?(Hash) ? HTTP::Headers.new.tap { |head| headers.map { |key, value| head[key] = value } } : headers
 
       # Make the request
-      HTTP::Client.exec(method.to_s.upcase, uri, headers, body, tls: context)
+      if concurrent
+        # Does this request require a TLS context?
+        context = (scheme.try &.ends_with?('s')) ? new_tls_context : nil
+        client = new_http_client(uri, context)
+        client.exec(method.to_s.upcase, uri.full_path, headers, body)
+      else
+        # Only a single request can occur at a time
+        # crystal does not provide any queuing mechanism so this mutex does the trick
+        with_shared_client do |client|
+          client.exec(method.to_s.upcase, uri.full_path, headers, body)
+        end
+      end
     end
 
     def terminate
