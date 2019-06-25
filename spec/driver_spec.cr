@@ -2,12 +2,12 @@ require "./helper"
 
 describe EngineDriver::DriverManager do
   it "should initialize a driver" do
-    driver = Helper.new_driver(Helper::TestDriver, "mod-987")
+    driver = Helper.new_driver(Helper::TestDriver, "mod-987", Helper.protocol[0])
     driver.is_a?(EngineDriver).should eq(true)
   end
 
   it "should initialize a concrete driver and execute on it" do
-    driver = Helper.new_driver({{EngineDriver::CONCRETE_DRIVERS.keys.first}}, "mod-999")
+    driver = Helper.new_driver({{EngineDriver::CONCRETE_DRIVERS.keys.first}}, "mod-999", Helper.protocol[0])
     driver.is_a?(EngineDriver).should eq(true)
 
     executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.from_json(%(
@@ -53,6 +53,7 @@ describe EngineDriver::DriverManager do
   end
 
   it "should initialize an instance of driver manager" do
+    EngineDriver::Protocol.new_instance(Helper.protocol[0]) unless EngineDriver::Protocol.instance?
     model = EngineDriver::DriverModel.from_json(%({
       "ip": "localhost",
       "port": 23,

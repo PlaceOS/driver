@@ -81,6 +81,10 @@ class EngineDriver::Protocol
     @@instance.not_nil!
   end
 
+  def self.instance? : EngineDriver::Protocol?
+    @@instance
+  end
+
   def register(type, &block : Request -> Request?)
     @callbacks[type] << block
   end

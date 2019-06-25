@@ -1,9 +1,6 @@
 require "ipaddress"
 
 class EngineDriver::DriverManager
-  MulticastRangeV4 = IPAddress.new("224.0.0.0/4")
-  MulticastRangeV6 = IPAddress.new("ff00::/8")
-
   def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT, subscriptions = nil)
     subscriptions ||= Subscriptions.new(module_id: @module_id)
     @settings = Settings.new @model.settings
@@ -29,22 +26,8 @@ class EngineDriver::DriverManager
                    makebreak = @model.makebreak
 
                    if udp
-                     begin
-                       ipaddr = IPAddress.new(ip)
-
-                       # Check for multicast ranges
-                       if ipaddr.is_a?(IPAddress::IPv4) ? MulticastRangeV4.includes?(ipaddr) : MulticastRangeV6.includes?(ipaddr)
-                         raise "not implemented"
-                       else
-                         EngineDriver::TransportUDP.new(@queue, ip, port, @settings, tls, @model.uri) do |data, task|
-                           received(data, task)
-                         end
-                       end
-                     rescue ArgumentError
-                       # Probably a DNS entry
-                       EngineDriver::TransportUDP.new(@queue, ip, port, @settings, tls, @model.uri) do |data, task|
-                         received(data, task)
-                       end
+                     EngineDriver::TransportUDP.new(@queue, ip, port, @settings, tls, @model.uri) do |data, task|
+                       received(data, task)
                      end
                    elsif makebreak
                      raise "not implemented"

@@ -1,14 +1,10 @@
 require "socket"
 require "openssl"
 
-# TODO:: remove once crystal lang 0.27.3+ is released
-lib LibSSL
-  {% if compare_versions(OPENSSL_VERSION, "1.0.2") >= 0 %}
-  	fun dtls_method = DTLS_method : SSLMethod
-  {% end %}
-end
-
 class EngineDriver::TransportUDP < EngineDriver::Transport
+  MulticastRangeV4 = IPAddress.new("224.0.0.0/4")
+  MulticastRangeV6 = IPAddress.new("ff00::/8")
+
   # timeouts in seconds
   def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, @settings : ::EngineDriver::Settings, @start_tls = false, @uri = nil, &@received : (Bytes, EngineDriver::Task?) -> Nil)
     @terminated = false
@@ -47,6 +43,20 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
         # Classes that support `#write_bytes` may write to the IO multiple times
         # however we don't want packets sent for every call to write
         socket.sync = false
+
+        # Join multicast group if the in the correct range
+        begin
+          ipaddr = IPAddress.new(@ip)
+          if ipaddr.is_a?(IPAddress::IPv4) ? MulticastRangeV4.includes?(ipaddr) : MulticastRangeV6.includes?(ipaddr)
+            socket.join_group(Socket::IPAddress.new(@ip, @port))
+
+            if hops = @settings.get { setting?(UInt8, :multicast_hops) }
+              socket.multicast_hops = hops
+            end
+          end
+        rescue ArgumentError
+          # @ip is a hostname
+        end
 
         # Start consuming data from the socket
         spawn { consume_io }

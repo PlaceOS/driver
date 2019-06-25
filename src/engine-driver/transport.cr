@@ -84,6 +84,13 @@ abstract class EngineDriver::Transport
         client
       end
     {% end %}
+
+    def enable_multicast_loop(state = true)
+      {% if @type.name.stringify == "EngineDriver::TransportUDP" %}
+        @socket.try &.multicast_loopback = state
+      {% end %}
+      state
+    end
   end
 
   protected def process(data) : Nil

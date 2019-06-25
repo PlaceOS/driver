@@ -72,10 +72,14 @@ class Helper
     EngineDriver::Queue.new(logger) { }
   end
 
-  macro new_driver(klass, module_id)
+  macro new_driver(klass, module_id, protocol = nil)
     %settings = Helper.settings
     %queue = Helper.queue
-    %logger = EngineDriver::Logger.new({{module_id}})
+    {% if protocol %}
+      %logger = EngineDriver::Logger.new({{module_id}}, protocol: {{protocol}})
+    {% else %}
+      %logger = EngineDriver::Logger.new({{module_id}})
+    {% end %}
     %driver = nil
     %transport = EngineDriver::TransportTCP.new(%queue, "localhost", 1234, ::EngineDriver::Settings.new("{}")) do |data, task|
       d = %driver.not_nil!
