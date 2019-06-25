@@ -29,10 +29,8 @@ class EngineDriver::DriverManager
                      EngineDriver::TransportUDP.new(@queue, ip, port, @settings, tls, @model.uri) do |data, task|
                        received(data, task)
                      end
-                   elsif makebreak
-                     raise "not implemented"
                    else
-                     EngineDriver::TransportTCP.new(@queue, ip, port, @settings, tls, @model.uri) do |data, task|
+                     EngineDriver::TransportTCP.new(@queue, ip, port, @settings, tls, @model.uri, makebreak) do |data, task|
                        received(data, task)
                      end
                    end

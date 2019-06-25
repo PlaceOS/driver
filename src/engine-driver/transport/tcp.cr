@@ -2,7 +2,8 @@ require "socket"
 
 class EngineDriver::TransportTCP < EngineDriver::Transport
   # timeouts in seconds
-  def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, @settings : ::EngineDriver::Settings, @start_tls = false, @uri = nil, &@received : (Bytes, EngineDriver::Task?) -> Nil)
+  def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, @settings : ::EngineDriver::Settings, @start_tls = false, @uri = nil, @makebreak = false, &@received : (Bytes, EngineDriver::Task?) -> Nil)
+    # TODO:: makebreak needs a little more consideration around setting connected / disconnected status
     @terminated = false
     @tls_started = false
     @logger = @queue.logger
@@ -25,30 +26,36 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     tokenizer = @tokenizer
     tokenizer.clear if tokenizer
 
-    retry max_interval: 10.seconds do
-      begin
-        @socket = socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
-        socket.tcp_nodelay = true
-        socket.sync = true
-
-        @tls_started = false
-        start_tls if @start_tls
-
-        # Enable queuing
-        @queue.online = true
-
-        # We'll manually manage buffering.
-        # Classes that support `#write_bytes` may write to the IO multiple times
-        # however we don't want packets sent for every call to write
-        socket.sync = false
-
-        # Start consuming data from the socket
-        spawn { consume_io }
-      rescue error
-        @logger.info { "connecting to device\n#{error.message}\n#{error.backtrace?.try &.join("\n")}" }
-        raise error
+    if @makebreak
+      start_socket(connect_timeout)
+    else
+      retry max_interval: 10.seconds do
+        start_socket(connect_timeout)
       end
     end
+  end
+
+  private def start_socket(connect_timeout)
+    @socket = socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
+    socket.tcp_nodelay = true
+    socket.sync = true
+
+    @tls_started = false
+    start_tls if @start_tls
+
+    # Enable queuing
+    @queue.online = true
+
+    # We'll manually manage buffering.
+    # Classes that support `#write_bytes` may write to the IO multiple times
+    # however we don't want packets sent for every call to write
+    socket.sync = false
+
+    # Start consuming data from the socket
+    spawn { consume_io }
+  rescue error
+    @logger.info { "connecting to device\n#{error.message}\n#{error.backtrace?.try &.join("\n")}" }
+    raise error
   end
 
   def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = @tls)
@@ -76,6 +83,8 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
   end
 
   def send(message)
+    connect if @makebreak
+
     socket = @socket
     return 0 if socket.nil? || socket.closed?
     if message.responds_to? :to_io
@@ -110,6 +119,6 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
   rescue error
     @logger.error "error consuming IO\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
   ensure
-    connect
+    connect unless @makebreak
   end
 end
