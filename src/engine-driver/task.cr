@@ -32,8 +32,9 @@ class EngineDriver::Task
   @timer : Tasker::Task?
   @processing : Proc(Bytes, Task, Nil)?
   @error_class : String?
-  getter :last_executed, :state, :payload, :backtrace, :error_class, :logger
-  property :processing
+  getter last_executed, state, payload, backtrace, error_class, logger
+  getter name, delay, wait
+  property processing, retries, priority
 
   # Drivers can monkey patch task if the request is required to process the response
   # @request_payload : Bytes?
