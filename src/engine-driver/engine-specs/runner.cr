@@ -106,6 +106,7 @@ class EngineSpec
       io.flush
 
       if makebreak
+        puts "... starting in makebreak! mode"
         # Give the module some time to startup
         sleep 200.milliseconds
       else
