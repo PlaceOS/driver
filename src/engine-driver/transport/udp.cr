@@ -2,8 +2,8 @@ require "socket"
 require "openssl"
 
 class EngineDriver::TransportUDP < EngineDriver::Transport
-  MulticastRangeV4 = IPAddress.new("224.0.0.0/4")
-  MulticastRangeV6 = IPAddress.new("ff00::/8")
+  MULTICASTRANGEV4 = IPAddress.new("224.0.0.0/4")
+  MULTICASTRANGEV6 = IPAddress.new("ff00::/8")
 
   # timeouts in seconds
   def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, @settings : ::EngineDriver::Settings, @start_tls = false, @uri = nil, &@received : (Bytes, EngineDriver::Task?) -> Nil)
@@ -47,7 +47,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
         # Join multicast group if the in the correct range
         begin
           ipaddr = IPAddress.new(@ip)
-          if ipaddr.is_a?(IPAddress::IPv4) ? MulticastRangeV4.includes?(ipaddr) : MulticastRangeV6.includes?(ipaddr)
+          if ipaddr.is_a?(IPAddress::IPv4) ? MULTICASTRANGEV4.includes?(ipaddr) : MULTICASTRANGEV6.includes?(ipaddr)
             socket.join_group(Socket::IPAddress.new(@ip, @port))
 
             if hops = @settings.get { setting?(UInt8, :multicast_hops) }

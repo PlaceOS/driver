@@ -58,7 +58,7 @@ class EngineDriver::HTTPProxy
         socket = tls_socket
       end
 
-      return socket
+      socket
     else
       socket.close
       raise IO::Error.new(resp.inspect)
@@ -85,7 +85,7 @@ class EngineDriver::HTTPProxy
     rescue
     end
 
-    return resp
+    resp
   end
 end
 
@@ -103,9 +103,9 @@ class EngineDriver::HTTPClient < ::HTTP::Client
 
   def proxy_connection_options
     {
-      dns_timeout: @dns_timeout,
+      dns_timeout:     @dns_timeout,
       connect_timeout: @connect_timeout,
-      read_timeout: @read_timeout
+      read_timeout:    @read_timeout,
     }
   end
 

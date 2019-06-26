@@ -139,7 +139,7 @@ class EngineDriver::Proxy::System
   # Grabs the number of a particular device type
   def count(module_name)
     module_name = module_name.to_s
-    @system.keys.map { |key| key.split("\x02")[0] }.reject { |key| key != module_name }.size
+    @system.keys.map { |key| key.split("\x02")[0] }.count { |key| key == module_name }
   end
 
   def name
