@@ -77,7 +77,12 @@ class EngineDriver::DriverManager
     rescue error
       @logger.error "in the on_load function of #{driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
     end
-    spawn { @transport.connect } unless @model.makebreak
+
+    if @model.makebreak
+      @queue.online = true
+    else
+      spawn { @transport.connect }
+    end
   end
 
   def terminate : Nil
@@ -90,6 +95,7 @@ class EngineDriver::DriverManager
         @logger.error "in the on_unload function of #{driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
       end
     end
+    @queue.terminate
     @schedule.terminate
     @subscriptions.terminate
   end
