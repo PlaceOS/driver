@@ -87,7 +87,11 @@ class EngineDriver::ProcessManager
         handle_get(exec_request, driver, request, result.not_nil!)
       else
         begin
-          request.payload = result.try_to_json("null")
+          if result.is_a?(Enum)
+            request.payload = result.to_s.to_json
+          else
+            request.payload = result.try_to_json("null")
+          end
         rescue error
           request.payload = "null"
           driver.logger.info { "unable to convert result to json executing #{exec_request} on #{DriverManager.driver_class} (#{request.id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}" }

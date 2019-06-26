@@ -255,10 +255,18 @@ abstract class EngineDriver
 
             {{method.name.stringify}}: {
               {% for arg in args %}
-                {% if arg.default_value.is_a?(Nop) %}
-                  {{arg.name.stringify}}: [{{arg.restriction.stringify}}],
+                {% if arg.restriction.resolve < ::Enum %}
+                  {% if arg.default_value.is_a?(Nop) %}
+                    {{arg.name.stringify}}: ["String"],
+                  {% else %}
+                    {{arg.name.stringify}}: ["String", "#{{{arg.default_value}}.to_s.to_json}"],
+                  {% end %}
                 {% else %}
-                  {{arg.name.stringify}}: [{{arg.restriction.stringify}}, "#{{{arg.default_value}}.to_json}"],
+                  {% if arg.default_value.is_a?(Nop) %}
+                    {{arg.name.stringify}}: [{{arg.restriction.stringify}}],
+                  {% else %}
+                    {{arg.name.stringify}}: [{{arg.restriction.stringify}}, "#{{{arg.default_value}}.to_json}"],
+                  {% end %}
                 {% end %}
               {% end %}
             },
@@ -309,10 +317,18 @@ abstract class EngineDriver
               obj = self.{{method_name.id}}.not_nil!
               args = {
                 {% for arg in args %}
-                  {% if arg.default_value.is_a?(Nop) %}
-                    {{arg.name}}: obj.{{arg.name}},
+                  {% if arg.restriction.resolve < ::Enum %}
+                    {% if arg.default_value.is_a?(Nop) %}
+                      {{arg.name}}: {{arg.restriction}}.parse(obj.{{arg.name}}.to_s),
+                    {% else %}
+                      {{arg.name}}: obj.{{arg.name}} ? {{arg.restriction}}.parse(obj.{{arg.name}}.to_s) || {{arg.default_value}},
+                    {% end %}
                   {% else %}
-                    {{arg.name}}: obj.{{arg.name}} || {{arg.default_value}},
+                    {% if arg.default_value.is_a?(Nop) %}
+                      {{arg.name}}: obj.{{arg.name}},
+                    {% else %}
+                      {{arg.name}}: obj.{{arg.name}} || {{arg.default_value}},
+                    {% end %}
                   {% end %}
                 {% end %}
               }

@@ -29,7 +29,19 @@ describe EngineDriver::DriverManager do
     ))
     executor.execute(driver).should eq(0)
 
+    # Test an enum heavy function
+    executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.from_json(%(
+        {
+          "__exec__": "switch_input",
+          "switch_input": {"input": "DisplayPort"}
+        }
+    ))
+    executor.execute(driver).should eq(Helper::TestDriver::Input::DisplayPort)
+
     {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.functions.should eq(%({
+      "switch_input":{
+        "input":["String"]
+      },
       "add":{
         "a":["Int32"],
         "b":["Int32"]

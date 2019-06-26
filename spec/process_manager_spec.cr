@@ -37,6 +37,28 @@ describe EngineDriver::ProcessManager do
     req_out.cmd.should eq("result")
     req_out.payload.should eq("3")
 
+    # execute an ENUM request (not a task response)
+    json = {
+      id:      driver_id,
+      cmd:     "exec",
+      payload: %({
+        "__exec__": "switch_input",
+        "switch_input": {"input": "DisplayPort"}
+      }),
+    }.to_json
+    input.write_bytes json.bytesize
+    input.write json.to_slice
+
+    sleep 0.01
+    raw_data = Bytes.new(4096)
+    bytes_read = output.read(raw_data)
+
+    # Check response was returned
+    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out.id.should eq(driver_id)
+    req_out.cmd.should eq("result")
+    req_out.payload.should eq("\"DisplayPort\"")
+
     # Enable debugging
     json = {
       id:  driver_id,

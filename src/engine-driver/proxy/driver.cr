@@ -97,7 +97,12 @@ class EngineDriver::Proxy::Driver
                     arguments[index - 1]?
                   end
 
-          str << '"' << arg_name << %(":) << value.to_json << ','
+          # Enums are special case
+          if value.is_a?(::Enum)
+            str << '"' << arg_name << %(":) << value.to_s.to_json << ','
+          else
+            str << '"' << arg_name << %(":) << value.to_json << ','
+          end
         end
         # remove the trailing comma
         str.back(1) if function.size > 0

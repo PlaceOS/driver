@@ -45,6 +45,17 @@ class Helper
     # internal binding
     bind :power, :power_changed
 
+    enum Input
+      HDMI
+      DisplayPort
+      HDBaseT
+    end
+
+    def switch_input(input : Input)
+      puts "switching to #{input}"
+      input
+    end
+
     private def power_changed(subscription, new_value)
       puts new_value
     end
