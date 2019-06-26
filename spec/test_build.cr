@@ -22,7 +22,7 @@ class Helper
     descriptive_name "Driver model Test"
     description "This is the driver used for testing"
     tcp_port 22
-    makebreak!
+
     default_settings({
       name:     "Room 123",
       username: "steve",

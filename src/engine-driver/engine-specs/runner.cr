@@ -23,7 +23,7 @@ class EngineSpec
   DRIVER_ID = "spec_runner"
   SYSTEM_ID = "spec_runner_system"
 
-  def self.mock_driver(driver_name : String, makebreak : Bool = false, driver_exec = ENV["SPEC_RUN_DRIVER"])
+  def self.mock_driver(driver_name : String, driver_exec = ENV["SPEC_RUN_DRIVER"])
     # Prepare driver IO
     stdin_reader, input = IO.pipe
     output, stderr_writer = IO.pipe
@@ -69,8 +69,12 @@ class EngineSpec
         output: defaults_io,
         error: Process::Redirect::Close
       )
-      defaults = JSON.parse(JSON.parse(defaults_io.to_s.strip)["default_settings"].as_s)
-      puts "... got default settings: #{defaults.inspect}"
+      defaults = JSON.parse(defaults_io.to_s.strip)
+      default_settings = JSON.parse(defaults["default_settings"].as_s)
+      puts "... got default settings: #{default_settings.inspect}"
+
+      # Check for makebreak
+      makebreak = !!(defaults["makebreak"]?.try &.as_bool)
 
       # request a module instance be created by the driver
       puts "... starting module"
@@ -94,7 +98,7 @@ class EngineSpec
           makebreak: makebreak,
           role:      1,
           # use defaults as defined in the driver
-          settings: defaults,
+          settings: default_settings,
         }.to_json,
       }.to_json
       io.write_bytes json.bytesize
@@ -371,6 +375,14 @@ class EngineSpec
   end
 
   def transmit(data)
+    comms = @comms
+    if comms && !comms.closed?
+    else
+      puts "-> WARN: Attempting to transmit: #{data.inspect}"
+      raise "module is currently disconnected, cannot transmit data"
+    end
+    return unless comms
+
     puts "-> transmitting: #{data.inspect}"
 
     data = if data.responds_to? :to_io
@@ -382,7 +394,7 @@ class EngineSpec
            else
              data
            end
-    @comms.not_nil!.write data
+    comms.write data
     sleep 10.milliseconds
     self
   end
