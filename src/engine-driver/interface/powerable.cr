@@ -1,8 +1,9 @@
 module EngineDriver::Interface; end
 
 # Compatible drivers will expose a status variable:
-# self[:power] = PowerState::On
-# which is exposed as the string "On"
+# self[:power] = true / false
+# The power state function allows one to sepecify a preferred level of off if
+# supported by the device
 module EngineDriver::Interface::Powerable
   abstract def power(state : Bool)
 
