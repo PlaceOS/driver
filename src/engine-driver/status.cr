@@ -2,7 +2,7 @@ class EngineDriver::Status < Hash(String, String)
   def set_json(key, value)
     key = key.to_s
     current_value = self[key]?
-    new_value = value.to_json
+    new_value = value.is_a?(::Enum) ? value.to_s.to_json : value.to_json
     if current_value == new_value
       {current_value, false}
     else
