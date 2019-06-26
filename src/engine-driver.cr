@@ -255,7 +255,7 @@ abstract class EngineDriver
 
             {{method.name.stringify}}: {
               {% for arg in args %}
-                {% if arg.restriction.resolve < ::Enum %}
+                {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}
                   {% if arg.default_value.is_a?(Nop) %}
                     {{arg.name.stringify}}: ["String"],
                   {% else %}
@@ -317,7 +317,7 @@ abstract class EngineDriver
               obj = self.{{method_name.id}}.not_nil!
               args = {
                 {% for arg in args %}
-                  {% if arg.restriction.resolve < ::Enum %}
+                  {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}
                     {% if arg.default_value.is_a?(Nop) %}
                       {{arg.name}}: {{arg.restriction}}.parse(obj.{{arg.name}}.to_s),
                     {% else %}

@@ -48,7 +48,7 @@ describe EngineDriver::DriverManager do
       },
       "splat_add":{},
       "perform_task":{
-        "name":["String"]
+        "name":["String|Int32"]
       },
       "error_task":{},
       "future_add":{

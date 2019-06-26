@@ -86,7 +86,7 @@ class Helper
     end
 
     # using tasks and futures
-    def perform_task(name : String)
+    def perform_task(name : String | Int32)
       queue &.success("hello #{name}")
     end
 
