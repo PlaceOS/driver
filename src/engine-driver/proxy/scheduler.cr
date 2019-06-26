@@ -55,7 +55,7 @@ class EngineDriver::Proxy::Scheduler
     raise "schedule proxy terminated" if @terminated
     spawn { run_now(block) } if immediate
     wrapped = nil
-    task = @scheduler.at(time) do
+    task = @scheduler.in(time) do
       @schedules.delete(wrapped.not_nil!)
       run_now(block)
     end
