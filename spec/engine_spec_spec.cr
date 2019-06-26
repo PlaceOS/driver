@@ -7,7 +7,7 @@ describe EngineSpec do
     `crystal build ./spec/test_build.cr`
 
     # Test spec'ing a driver
-    EngineSpec.mock_driver("Helper::TestDriver", "./test_build") do
+    EngineSpec.mock_driver("Helper::TestDriver", false, "./test_build") do
       transmit "testing\n"
       response = exec(:implemented_in_base_class)
 

@@ -23,7 +23,7 @@ class EngineSpec
   DRIVER_ID = "spec_runner"
   SYSTEM_ID = "spec_runner_system"
 
-  def self.mock_driver(driver_name : String, makebreak = false, driver_exec = ENV["SPEC_RUN_DRIVER"])
+  def self.mock_driver(driver_name : String, makebreak : Bool = false, driver_exec = ENV["SPEC_RUN_DRIVER"])
     # Prepare driver IO
     stdin_reader, input = IO.pipe
     output, stderr_writer = IO.pipe
