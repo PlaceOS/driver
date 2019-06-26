@@ -78,7 +78,7 @@ class EngineDriver::Queue
     delay = @delay,
     &callback : (Task) -> Nil
   )
-    task = Task.new(self, callback, priority, timeout, retries, wait, name, delay)
+    task = Task.new(self, callback, priority, timeout, retries, wait, name.try &.to_s, delay)
 
     if @online
       @queue.push priority, task
