@@ -23,7 +23,7 @@ class EngineSpec
   DRIVER_ID = "spec_runner"
   SYSTEM_ID = "spec_runner_system"
 
-  def self.mock_driver(driver_name : String, driver_exec = ENV["SPEC_RUN_DRIVER"])
+  def self.mock_driver(driver_name : String, makebreak = false, driver_exec = ENV["SPEC_RUN_DRIVER"])
     # Prepare driver IO
     stdin_reader, input = IO.pipe
     output, stderr_writer = IO.pipe
@@ -91,7 +91,7 @@ class EngineSpec
           udp:       false,
           tls:       false,
           port:      SPEC_PORT,
-          makebreak: false,
+          makebreak: makebreak,
           role:      1,
           # use defaults as defined in the driver
           settings: defaults,
@@ -101,10 +101,15 @@ class EngineSpec
       io.write json.to_slice
       io.flush
 
-      # Wait for a connection
-      puts "... waiting for module"
-      spec.expect_reconnect
-      puts "... module connected"
+      if makebreak
+        # Give the module some time to startup
+        sleep 200.milliseconds
+      else
+        # Wait for a connection
+        puts "... waiting for module"
+        spec.expect_reconnect
+        puts "... module connected"
+      end
 
       # request that debugging be enabled
       puts "... enabling debugging output"
