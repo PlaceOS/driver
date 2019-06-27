@@ -17,6 +17,8 @@ class EngineDriver::Protocol
   # Proto decoding   0.020000   0.040000   0.060000 (  0.020322)
   # JSON decoding    0.140000   0.270000   0.410000 (  0.137979)
   # Should be a simple change.
+  # Another option would be: https://github.com/Papierkorb/cannon
+  # which should be even more efficient
   def initialize(input = STDIN, output = STDERR, timeout = 2.minutes)
     @io = IO::Stapled.new(input, output, true)
     @tokenizer = ::Tokenizer.new do |io|
