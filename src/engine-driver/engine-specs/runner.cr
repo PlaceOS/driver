@@ -137,7 +137,8 @@ class EngineSpec
     ensure
       # Shutdown the driver
       if exited
-        puts "WARNING: driver process exited with: #{exit_code}"
+        puts "level=ERROR : driver process exited with: #{exit_code}"
+        puts "... please ensure `redis-server` is running locally" if exit_code == 256
       else
         puts "... terminating driver gracefully"
         json = {
@@ -151,7 +152,7 @@ class EngineSpec
 
         spawn do
           sleep 1.seconds
-          puts "WARNING: driver process failed to terminate gracefully"
+          puts "level=ERROR : driver process failed to terminate gracefully"
           wait_driver_close.close
         end
         wait_driver_close.receive
