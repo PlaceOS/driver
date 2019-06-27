@@ -6,21 +6,18 @@ class EngineDriver::Storage < Hash(String, String)
   @@instance : Redis::PooledClient?
 
   def self.redis_pool : Redis::PooledClient
-    # TODO:: provide redis connection details
-    @@instance ||= Redis::PooledClient.new
+    @@instance ||= Redis::PooledClient.new(url: ENV["REDIS_URL"]?)
   end
 
   def self.get(key)
-    redis = @@instance ||= Redis::PooledClient.new
-    redis.get(key.to_s)
+    redis_pool.get(key.to_s)
   end
 
   DEFAULT_PREFIX = "status"
 
   def initialize(@module_id : String, prefix = DEFAULT_PREFIX)
     super()
-    @@instance ||= Redis::PooledClient.new
-    @redis = @@instance.not_nil!
+    @redis = self.class.redis_pool
     @hash_key = "#{prefix}\x02#{@module_id}"
   end
 

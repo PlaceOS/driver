@@ -28,8 +28,8 @@ class EngineDriver::Subscriptions
     # System ID to subscriptions
     @redirections = {} of String => Array(EngineDriver::Subscriptions::IndirectSubscription)
 
-    # TODO:: provide redis connection details
-    @redis_subscribe = Redis.new
+    # Subscriptions need their own seperate client
+    @redis_subscribe = new_redis_client
 
     # Is the subscription loop running?
     @running = false
@@ -39,6 +39,11 @@ class EngineDriver::Subscriptions
     channel.receive?
   end
 
+  protected def new_redis_client
+    Redis.new(url: ENV["REDIS_URL"]?)
+  end
+
+  @redis_subscribe : Redis
   getter :running, :logger
 
   def terminate(terminate = true)
@@ -164,7 +169,7 @@ class EngineDriver::Subscriptions
         @running = false
 
         # We need to re-create the subscribe object for our sanity
-        @redis_subscribe = Redis.new unless @terminated
+        @redis_subscribe = new_redis_client unless @terminated
       end
     end
   end
