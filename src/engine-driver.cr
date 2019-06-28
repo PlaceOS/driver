@@ -185,67 +185,13 @@ abstract class EngineDriver
     # first or simplest match. So simpler to have a single method signature for
     # all public API methods
     class KlassExecutor
-      include JSON::Serializable
-      getter __exec__ : String
+      def initialize(json : String)
+        @lookup = Hash(String, JSON::Any).from_json(json)
+        @exec = @lookup["__exec__"].as_s
+      end
 
-      # Build a class that represents each method
-      {% for method in methods %}
-        {% index = 0 %}
-        {% args = [] of Crystal::Macros::Arg %}
-        {% for arg in method.args %}
-          {% if !method.splat_index || index < method.splat_index %}
-            {% args << arg %}
-          {% end %}
-          {% index = index + 1 %}
-        {% end %}
-
-        {% method_name = method.name.stringify %}
-        {% if method_name.includes?("?") %}
-          {% method_name = method_name.gsub(/\?/, "_question_mark_") %}
-        {% elsif method_name.includes?("!") %}
-          {% method_name = method_name.gsub(/\!/, "_exclamation_mark_") %}
-        {% end %}
-
-        {% if args.size > 0 %}
-          struct Method{{method_name.camelcase.id}}
-            include JSON::Serializable
-            {% for arg in args %}
-              {% if !arg.restriction %}
-                "Public method '{{@type.id}}.{{method.name}}' has no type specified for argument '{{arg.name}}'"
-              {% else %}
-                {% if arg.default_value.is_a?(Nop) %}
-                  getter {{arg.name}} : {{arg.restriction}}
-                {% else %}
-                  getter {{arg.name}} : {{arg.restriction}}?
-                {% end %}
-              {% end %}
-            {% end %}
-          end
-        {% end %}
-      {% end %}
-
-      {% for method in methods %}
-        {% index = 0 %}
-        {% args = [] of Crystal::Macros::Arg %}
-        {% for arg in method.args %}
-          {% if !method.splat_index || index < method.splat_index %}
-            {% args << arg %}
-          {% end %}
-          {% index = index + 1 %}
-        {% end %}
-
-        {% method_name = method.name.stringify %}
-        {% if method_name.includes?("?") %}
-          {% method_name = method_name.gsub(/\?/, "_question_mark_") %}
-        {% elsif method_name.includes?("!") %}
-          {% method_name = method_name.gsub(/\!/, "_exclamation_mark_") %}
-        {% end %}
-
-        {% if args.size > 0 %}
-          @[JSON::Field(key: {{method.name.stringify}})]
-          getter {{method_name.id}} : Method{{method_name.camelcase.id}}?
-        {% end %}
-      {% end %}
+      @lookup : Hash(String, JSON::Any)
+      @exec : String
 
       # provide introspection into available functions
       @@functions : String?
@@ -302,70 +248,70 @@ abstract class EngineDriver
         @@metadata = details
       end
 
-      # Once serialised, we want to execute the request on the class
-      def __execute__(klass : {{@type.id}})
-        ret_val = case self.__exec__
-                  {% for method in methods %}
-                    {% index = 0 %}
-                    {% args = [] of Crystal::Macros::Arg %}
-                    {% for arg in method.args %}
-                      {% if !method.splat_index || index < method.splat_index %}
-                        {% args << arg %}
-                      {% end %}
-                      {% index = index + 1 %}
-                    {% end %}
+      # EXECUTORS = {} of String => Proc(JSON::Any, {{@type.id}}, Task | String) | Proc(JSON::Any, {{@type.id}}, Task) | Proc(JSON::Any, {{@type.id}}, String)
 
-                    {% method_name = method.name.stringify %}
-                    {% if method_name.includes?("?") %}
-                      {% method_name = method_name.gsub(/\?/, "_question_mark_") %}
-                    {% elsif method_name.includes?("!") %}
-                      {% method_name = method_name.gsub(/\!/, "_exclamation_mark_") %}
-                    {% end %}
+      EXECUTORS = {
+        {% for method in methods %}
+          {% index = 0 %}
+          {% args = [] of Crystal::Macros::Arg %}
+          {% for arg in method.args %}
+            {% if !method.splat_index || index < method.splat_index %}
+              {% args << arg %}
+            {% end %}
+            {% index = index + 1 %}
+          {% end %}
 
-                  when {{method.name.stringify}}
-                      {% if args.size == 0 %}
-                        klass.{{method.name}}
-                      {% else %}
-                        obj = self.{{method_name.id}}.not_nil!
-                        klass.{{method.name}}(
-                          {% for arg in args %}
-                            {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}
-                              {% if arg.default_value.is_a?(Nop) %}
-                                {{arg.name}}: {{arg.restriction}}.parse(obj.{{arg.name}}.to_s),
-                              {% else %}
-                                {{arg.name}}: obj.{{arg.name}} ? {{arg.restriction}}.parse(obj.{{arg.name}}.to_s) || {{arg.default_value}},
-                              {% end %}
-                            {% else %}
-                              {% if arg.default_value.is_a?(Nop) %}
-                                {{arg.name}}: obj.{{arg.name}},
-                              {% else %}
-                                {{arg.name}}: obj.{{arg.name}} || {{arg.default_value}},
-                              {% end %}
-                            {% end %}
-                          {% end %}
-                        )
-                      {% end %}
-                    {% end %}
-                  else
-                    raise "execute request for unknown method: #{self.__exec__}"
-                  end
+          {{method.name.stringify}} => ->(json : JSON::Any, klass : {{@type.id}}) do
+            {% if args.size > 0 %}
+              tuple = {
+                {% for arg in args %}
+                  {% arg_name = arg.name.stringify %}
 
-        case ret_val
-        when Task
-          ret_val
-        when Enum
-          ret_val.to_s.to_json
-        when JSON::Serializable
-          ret_val.to_json
-        else
-          ret_val = ret_val.responds_to?(:get) ? ret_val.get : ret_val
-          begin
-            ret_val.try_to_json("null")
-          rescue error
-            klass.logger.info { "unable to convert result to json executing #{self.__exec__} on #{klass.class}\n#{error.inspect_with_backtrace}" }
-            "null"
-          end
-        end
+                  {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}
+                    {% if arg.default_value.is_a?(Nop) %}
+                      {{arg.name}}: ({{arg.restriction}}).parse(json[{{arg_name}}].as_s),
+                    {% else %}
+                      {{arg.name}}: json[{{arg_name}}]? != nil ? ({{arg.restriction}}).parse(json[{{arg_name}}].as_s) || {{arg.default_value}},
+                    {% end %}
+                  {% else %}
+                    {% if arg.default_value.is_a?(Nop) %}
+                      {{arg.name}}: ({{arg.restriction}}).from_json(json[{{arg_name}}].to_json),
+                    {% else %}
+                      {{arg.name}}: json[{{arg_name}}]? ? ({{arg.restriction}}).from_json(json[{{arg_name}}].to_json) : {{arg.default_value}},
+                    {% end %}
+                  {% end %}
+                {% end %}
+              }
+              ret_val = klass.{{method.name}}(**tuple)
+            {% else %}
+              ret_val = klass.{{method.name}}
+            {% end %}
+
+            case ret_val
+            when Task
+              ret_val
+            when Enum
+              ret_val.to_s.to_json
+            when JSON::Serializable
+              ret_val.to_json
+            else
+              ret_val = ret_val.responds_to?(:get) ? ret_val.get : ret_val
+              begin
+                ret_val.try_to_json("null")
+              rescue error
+                klass.logger.info { "unable to convert result to json executing #{{{method.name.stringify}}} on #{{{@type.id.stringify}}}\n#{error.inspect_with_backtrace}" }
+                "null"
+              end
+            end
+          end,
+        {% end %}
+      }
+
+      def execute(klass : {{@type.id}}) : Task | String
+        json = @lookup[@exec]
+        executor = EXECUTORS[@exec]?
+        raise "execute requested for unknown method: #{@exec}" unless executor
+        executor.call(json, klass)
       end
     end
   end

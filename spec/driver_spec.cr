@@ -10,7 +10,7 @@ describe EngineDriver::DriverManager do
     driver = Helper.new_driver({{EngineDriver::CONCRETE_DRIVERS.keys.first}}, "mod-999", Helper.protocol[0])
     driver.is_a?(EngineDriver).should eq(true)
 
-    executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.from_json(%(
+    executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
         {
           "__exec__": "add",
           "add": {
@@ -19,24 +19,24 @@ describe EngineDriver::DriverManager do
           }
         }
     ))
-    executor.__execute__(driver).should eq("3")
+    executor.execute(driver).should eq("3")
 
-    executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.from_json(%(
+    executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
         {
           "__exec__": "splat_add",
           "splat_add": {}
         }
     ))
-    executor.__execute__(driver).should eq("0")
+    executor.execute(driver).should eq("0")
 
     # Test an enum heavy function
-    executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.from_json(%(
+    executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
         {
           "__exec__": "switch_input",
           "switch_input": {"input": "DisplayPort"}
         }
     ))
-    executor.__execute__(driver).should eq(%("DisplayPort"))
+    executor.execute(driver).should eq(%("DisplayPort"))
 
     {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.functions.should eq(%({
       "switch_input":{
