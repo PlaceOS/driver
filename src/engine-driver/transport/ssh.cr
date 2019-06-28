@@ -25,17 +25,18 @@ class EngineDriver
     getter :logger
 
     class Settings
-      JSON.mapping(
-        term: String?,
-        keepalive: Int32?,
+      include JSON::Serializable
 
-        username: String,
-        password: String?,
-        passphrase: String?,
-        private_key: String?,
-        # We should be able to remove this by generating the public from the private
-        public_key: String?
-      )
+      property term : String?
+      property keepalive : Int32?
+
+      property username : String
+      property password : String?
+      property passphrase : String?
+      property private_key : String?
+
+      # We should be able to remove this by generating the public from the private
+      property public_key : String?
     end
 
     def exec(message) : SSH2::Channel

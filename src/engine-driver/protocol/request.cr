@@ -5,18 +5,18 @@ abstract class EngineDriver; end
 class EngineDriver::Protocol; end
 
 class EngineDriver::Protocol::Request
+  include JSON::Serializable
+
   def initialize(@id, @cmd, @payload = nil, @error = nil, @backtrace = nil, @seq = nil, @reply = nil)
   end
 
-  JSON.mapping(
-    id: String,
-    cmd: String,
-    seq: UInt64?,
-    reply: String?,
-    payload: String?,
-    error: String?,
-    backtrace: Array(String)?
-  )
+  property id : String
+  property cmd : String
+  property seq : UInt64?
+  property reply : String?
+  property payload : String?
+  property error : String?
+  property backtrace : Array(String)?
 
   def set_error(error)
     self.payload = error.message

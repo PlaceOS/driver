@@ -1,28 +1,30 @@
 require "json"
 
 class EngineDriver::DriverModel
+  include JSON::Serializable
+
   class ControlSystem
-    JSON.mapping(
-      id: String,
-      name: String,
-      email: String,
-      capacity: Int32,
-      features: String,
-      bookable: Bool
-    )
+    include JSON::Serializable
+
+    property id : String
+    property name : String
+    property email : String
+    property capacity : Int32
+    property features : String
+    property bookable : Bool
   end
 
   class Metadata
+    include JSON::Serializable
+
     def initialize(
       @functions = {} of String => Hash(String, Array(String)),
       @implements = [] of String
     )
     end
 
-    JSON.mapping(
-      functions: Hash(String, Hash(String, Array(String))),
-      implements: Array(String)
-    )
+    property functions : Hash(String, Hash(String, Array(String)))
+    property implements : Array(String)
   end
 
   enum Role
@@ -32,15 +34,13 @@ class EngineDriver::DriverModel
     LOGIC
   end
 
-  JSON.mapping(
-    control_system: ControlSystem?,
-    ip: String?,
-    udp: Bool,
-    tls: Bool,
-    port: Int32?,
-    makebreak: Bool,
-    uri: String?,
-    settings: Hash(String, JSON::Any),
-    role: Role
-  )
+  property control_system : ControlSystem?
+  property ip : String?
+  property udp : Bool
+  property tls : Bool
+  property port : Int32?
+  property makebreak : Bool
+  property uri : String?
+  property settings : Hash(String, JSON::Any)
+  property role : Role
 end
