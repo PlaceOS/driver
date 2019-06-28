@@ -19,7 +19,7 @@ describe EngineDriver::DriverManager do
           }
         }
     ))
-    executor.execute(driver).should eq(3)
+    executor.execute(driver).should eq("3")
 
     executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.from_json(%(
         {
@@ -27,7 +27,7 @@ describe EngineDriver::DriverManager do
           "splat_add": {}
         }
     ))
-    executor.execute(driver).should eq(0)
+    executor.execute(driver).should eq("0")
 
     # Test an enum heavy function
     executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.from_json(%(
@@ -36,7 +36,7 @@ describe EngineDriver::DriverManager do
           "switch_input": {"input": "DisplayPort"}
         }
     ))
-    executor.execute(driver).should eq(Helper::TestDriver::Input::DisplayPort)
+    executor.execute(driver).should eq(%("DisplayPort"))
 
     {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.functions.should eq(%({
       "switch_input":{

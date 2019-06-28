@@ -289,44 +289,62 @@ abstract class EngineDriver
 
       # Once serialised, we want to execute the request on the class
       def execute(klass : {{@type.id}})
-        case self.__exec__
-        {% for method in methods %}
-          {% index = 0 %}
-          {% args = [] of Crystal::Macros::Arg %}
-          {% for arg in method.args %}
-            {% if !method.splat_index || index < method.splat_index %}
-              {% args << arg %}
-            {% end %}
-            {% index = index + 1 %}
-          {% end %}
+        ret_val = case self.__exec__
+                  {% for method in methods %}
+                    {% index = 0 %}
+                    {% args = [] of Crystal::Macros::Arg %}
+                    {% for arg in method.args %}
+                      {% if !method.splat_index || index < method.splat_index %}
+                        {% args << arg %}
+                      {% end %}
+                      {% index = index + 1 %}
+                    {% end %}
 
-        when {{method.name.stringify}}
-            {% if args.size == 0 %}
-              return klass.{{method.name}}
-            {% else %}
-              obj = self.{{method.name}}.not_nil!
-              return klass.{{method.name}}(
-                {% for arg in args %}
-                  {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}
-                    {% if arg.default_value.is_a?(Nop) %}
-                      {{arg.name}}: {{arg.restriction}}.parse(obj.{{arg.name}}.to_s),
-                    {% else %}
-                      {{arg.name}}: obj.{{arg.name}} ? {{arg.restriction}}.parse(obj.{{arg.name}}.to_s) || {{arg.default_value}},
+                  when {{method.name.stringify}}
+                      {% if args.size == 0 %}
+                        klass.{{method.name}}
+                      {% else %}
+                        obj = self.{{method.name}}.not_nil!
+                        klass.{{method.name}}(
+                          {% for arg in args %}
+                            {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}
+                              {% if arg.default_value.is_a?(Nop) %}
+                                {{arg.name}}: {{arg.restriction}}.parse(obj.{{arg.name}}.to_s),
+                              {% else %}
+                                {{arg.name}}: obj.{{arg.name}} ? {{arg.restriction}}.parse(obj.{{arg.name}}.to_s) || {{arg.default_value}},
+                              {% end %}
+                            {% else %}
+                              {% if arg.default_value.is_a?(Nop) %}
+                                {{arg.name}}: obj.{{arg.name}},
+                              {% else %}
+                                {{arg.name}}: obj.{{arg.name}} || {{arg.default_value}},
+                              {% end %}
+                            {% end %}
+                          {% end %}
+                        )
+                      {% end %}
                     {% end %}
-                  {% else %}
-                    {% if arg.default_value.is_a?(Nop) %}
-                      {{arg.name}}: obj.{{arg.name}},
-                    {% else %}
-                      {{arg.name}}: obj.{{arg.name}} || {{arg.default_value}},
-                    {% end %}
-                  {% end %}
-                {% end %}
-              )
-            {% end %}
-          {% end %}
+                  else
+                    raise "execute request for unknown method: #{self.__exec__}"
+                  end
+
+        case ret_val
+        when Task
+          ret_val
+        when .responds_to?(:get)
+          ret_val
+        when .is_a?(Enum)
+          ret_val.to_s.to_json
+        when .is_a?(JSON::Serializable)
+          ret_val.to_json
+        else
+          begin
+            ret_val.try_to_json("null")
+          rescue error
+            klass.logger.info { "unable to convert result to json executing #{self.__exec__} on #{klass.class}\n#{error.inspect_with_backtrace}" }
+            "null"
+          end
         end
-
-        raise "execute request for unknown method: #{self.__exec__}"
       end
     end
   end
