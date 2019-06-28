@@ -242,7 +242,8 @@ abstract class EngineDriver
         {% end %}
 
         {% if args.size > 0 %}
-          getter {{method.name}} : Method{{method_name.camelcase.id}}?
+          @[JSON::Field(key: {{method.name.stringify}})]
+          getter {{method_name.id}} : Method{{method_name.camelcase.id}}?
         {% end %}
       {% end %}
 
@@ -302,7 +303,7 @@ abstract class EngineDriver
       end
 
       # Once serialised, we want to execute the request on the class
-      def execute(klass : {{@type.id}})
+      def __execute__(klass : {{@type.id}})
         ret_val = case self.__exec__
                   {% for method in methods %}
                     {% index = 0 %}
@@ -314,11 +315,18 @@ abstract class EngineDriver
                       {% index = index + 1 %}
                     {% end %}
 
+                    {% method_name = method.name.stringify %}
+                    {% if method_name.includes?("?") %}
+                      {% method_name = method_name.gsub(/\?/, "_question_mark_") %}
+                    {% elsif method_name.includes?("!") %}
+                      {% method_name = method_name.gsub(/\!/, "_exclamation_mark_") %}
+                    {% end %}
+
                   when {{method.name.stringify}}
                       {% if args.size == 0 %}
                         klass.{{method.name}}
                       {% else %}
-                        obj = self.{{method.name}}.not_nil!
+                        obj = self.{{method_name.id}}.not_nil!
                         klass.{{method.name}}(
                           {% for arg in args %}
                             {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}

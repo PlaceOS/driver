@@ -110,7 +110,7 @@ class EngineDriver::DriverManager
 
   def execute(json)
     executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.from_json(json)
-    executor.execute(@driver)
+    executor.__execute__(@driver)
   end
 
   private def connection(state : Bool) : Nil
