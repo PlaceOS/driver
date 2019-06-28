@@ -206,6 +206,23 @@ abstract class EngineDriver
 
           {{method.name.stringify}} => ->(json : JSON::Any, klass : {{@type.id}}) do
             {% if args.size > 0 %}
+
+              # Support argument lists
+              if json.raw.is_a?(Array)
+                arg_names = { {{*args.map { |arg| arg.name.stringify } }} }
+                args = json.as_a
+
+                raise "wrong number of arguments for '#{{{method.name.stringify}}}' (given #{args.size}, expected #{arg_names.size})" if args.size > arg_names.size
+
+                hash = {} of String => JSON::Any
+                json.as_a.each_with_index do |value, index|
+                  hash[arg_names[index]] = value
+                end
+
+                json = hash
+              end
+
+              # Support named arguments
               tuple = {
                 {% for arg in args %}
                   {% arg_name = arg.name.stringify %}

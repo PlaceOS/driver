@@ -21,6 +21,15 @@ describe EngineDriver::DriverManager do
     ))
     executor.execute(driver).should eq("3")
 
+    # Check that argument arrays can be accepted too
+    executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
+        {
+          "__exec__": "add",
+          "add": [2, 3]
+        }
+    ))
+    executor.execute(driver).should eq("5")
+
     executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
         {
           "__exec__": "splat_add",
