@@ -178,42 +178,6 @@ abstract class EngineDriver
     # Filter out abstract methods
     {% methods = methods.reject { |method| method.body.stringify.empty? } %}
 
-    # Build a class that represents each method
-    {% for method in methods %}
-      {% index = 0 %}
-      {% args = [] of Crystal::Macros::Arg %}
-      {% for arg in method.args %}
-        {% if !method.splat_index || index < method.splat_index %}
-          {% args << arg %}
-        {% end %}
-        {% index = index + 1 %}
-      {% end %}
-
-      {% method_name = method.name.stringify %}
-      {% if method_name.includes?("?") %}
-        {% method_name = method_name.gsub(/\?/, "_question_mark_") %}
-      {% elsif method_name.includes?("!") %}
-        {% method_name = method_name.gsub(/\!/, "_exclamation_mark_") %}
-      {% end %}
-
-      {% if args.size > 0 %}
-        struct Method{{method_name.camelcase.id}}
-          include JSON::Serializable
-          {% for arg in args %}
-            {% if !arg.restriction %}
-              "Public method '{{@type.id}}.{{method.name}}' has no type specified for argument '{{arg.name}}'"
-            {% else %}
-              {% if arg.default_value.is_a?(Nop) %}
-                getter {{arg.name}} : {{arg.restriction}}
-              {% else %}
-                getter {{arg.name}} : {{arg.restriction}}?
-              {% end %}
-            {% end %}
-          {% end %}
-        end
-      {% end %}
-    {% end %}
-
     # A class that handles executing every public method defined
     # NOTE:: currently doesn't handle multiple methods signatures (except block
     # and no block). Technically we could add the support however the JSON
@@ -223,6 +187,42 @@ abstract class EngineDriver
     class KlassExecutor
       include JSON::Serializable
       getter __exec__ : String
+
+      # Build a class that represents each method
+      {% for method in methods %}
+        {% index = 0 %}
+        {% args = [] of Crystal::Macros::Arg %}
+        {% for arg in method.args %}
+          {% if !method.splat_index || index < method.splat_index %}
+            {% args << arg %}
+          {% end %}
+          {% index = index + 1 %}
+        {% end %}
+
+        {% method_name = method.name.stringify %}
+        {% if method_name.includes?("?") %}
+          {% method_name = method_name.gsub(/\?/, "_question_mark_") %}
+        {% elsif method_name.includes?("!") %}
+          {% method_name = method_name.gsub(/\!/, "_exclamation_mark_") %}
+        {% end %}
+
+        {% if args.size > 0 %}
+          struct Method{{method_name.camelcase.id}}
+            include JSON::Serializable
+            {% for arg in args %}
+              {% if !arg.restriction %}
+                "Public method '{{@type.id}}.{{method.name}}' has no type specified for argument '{{arg.name}}'"
+              {% else %}
+                {% if arg.default_value.is_a?(Nop) %}
+                  getter {{arg.name}} : {{arg.restriction}}
+                {% else %}
+                  getter {{arg.name}} : {{arg.restriction}}?
+                {% end %}
+              {% end %}
+            {% end %}
+          end
+        {% end %}
+      {% end %}
 
       {% for method in methods %}
         {% index = 0 %}
@@ -353,13 +353,12 @@ abstract class EngineDriver
         case ret_val
         when Task
           ret_val
-        when .responds_to?(:get)
-          ret_val
-        when .is_a?(Enum)
+        when Enum
           ret_val.to_s.to_json
-        when .is_a?(JSON::Serializable)
+        when JSON::Serializable
           ret_val.to_json
         else
+          ret_val = ret_val.responds_to?(:get) ? ret_val.get : ret_val
           begin
             ret_val.try_to_json("null")
           rescue error
@@ -419,5 +418,3 @@ macro finished
     process.terminated.receive?
   end
 end
-
-nil

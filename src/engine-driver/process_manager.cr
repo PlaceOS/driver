@@ -82,11 +82,8 @@ class EngineDriver::ProcessManager
         else
           @logger.fatal "unexpected result: #{outcome.state}"
         end
-      when .responds_to?(:get)
-        # Handle futures and promises
-        handle_get(exec_request, driver, request, result.not_nil!)
       else
-        request.payload = result.as(String)
+        request.payload = result
       end
     rescue error
       msg = "executing #{exec_request} on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}"
@@ -95,19 +92,6 @@ class EngineDriver::ProcessManager
     end
 
     request
-  end
-
-  def handle_get(exec_request, driver, request, result)
-    ret_val = result.get
-    begin
-      request.payload = ret_val.try_to_json("null")
-    rescue error
-      request.payload = "null"
-      driver.logger.info { "unable to convert result to json executing #{exec_request} on #{DriverManager.driver_class} (#{request.id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}" }
-    end
-  rescue error
-    driver.logger.error "executing #{exec_request} on #{DriverManager.driver_class} (#{request.id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
-    request.set_error(error)
   end
 
   def debug(request : Protocol::Request) : Nil
