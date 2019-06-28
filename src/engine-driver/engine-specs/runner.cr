@@ -295,7 +295,6 @@ class EngineSpec
     puts "-> spec calling: #{function} #{args}"
 
     # Build the request
-    function = function.to_s.gsub("?", "_question_mark_").gsub("!", "_exclamation_mark_")
     json = {
       id:  DRIVER_ID,
       cmd: "exec",

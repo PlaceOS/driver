@@ -189,31 +189,22 @@ abstract class EngineDriver
         {% index = index + 1 %}
       {% end %}
 
-      {% method_name = method.name.stringify %}
-      {% if method_name.includes?("?") %}
-        {% method_name = method_name.gsub(/\?/, "_question_mark_") %}
-      {% elsif method_name.includes?("!") %}
-        {% method_name = method_name.gsub(/\!/, "_exclamation_mark_") %}
-      {% end %}
-      class Method{{method_name.camelcase.id}}
-        JSON.mapping(
-          {% if args.size == 0 %}
-             {} of String => String
-          {% else %}
-             {% for arg in args %}
-                {% if !arg.restriction %}
-                  "Public method '{{@type.id}}.{{method.name}}' has no type specified for argument '{{arg.name}}'"
-                {% else %}
-                  {% if arg.default_value.is_a?(Nop) %}
-                    {{arg.name}}: {{arg.restriction}},
-                  {% else %}
-                    {{arg.name}}: {{arg.restriction}}?,
-                  {% end %}
-                {% end %}
+      {% if args.size > 0 %}
+        class Method{{method.name.stringify.camelcase.id}}
+          include JSON::Serializable
+          {% for arg in args %}
+            {% if !arg.restriction %}
+              "Public method '{{@type.id}}.{{method.name}}' has no type specified for argument '{{arg.name}}'"
+            {% else %}
+              {% if arg.default_value.is_a?(Nop) %}
+                getter {{arg.name}} : {{arg.restriction}}
+              {% else %}
+                getter {{arg.name}} : {{arg.restriction}}?
+              {% end %}
             {% end %}
           {% end %}
-        )
-      end
+        end
+      {% end %}
     {% end %}
 
     # A class that handles executing every public method defined
@@ -223,18 +214,23 @@ abstract class EngineDriver
     # first or simplest match. So simpler to have a single method signature for
     # all public API methods
     class KlassExecutor
-      JSON.mapping(
-        __exec__: String,
-        {% for method in methods %}
-          {% method_name = method.name.stringify %}
-          {% if method_name.includes?("?") %}
-            {% method_name = method_name.gsub(/\?/, "_question_mark_") %}
-          {% elsif method_name.includes?("!") %}
-            {% method_name = method_name.gsub(/\!/, "_exclamation_mark_") %}
+      include JSON::Serializable
+      getter __exec__ : String
+
+      {% for method in methods %}
+        {% index = 0 %}
+        {% args = [] of Crystal::Macros::Arg %}
+        {% for arg in method.args %}
+          {% if !method.splat_index || index < method.splat_index %}
+            {% args << arg %}
           {% end %}
-          {{method_name}}: Method{{method_name.camelcase.id}}?,
+          {% index = index + 1 %}
         {% end %}
-      )
+
+        {% if args.size > 0 %}
+          getter {{method.name}} : Method{{method.name.stringify.camelcase.id}}?
+        {% end %}
+      {% end %}
 
       # provide introspection into available functions
       @@functions : String?
@@ -304,18 +300,12 @@ abstract class EngineDriver
             {% index = index + 1 %}
           {% end %}
 
-          {% method_name = method.name.stringify %}
-          {% if method_name.includes?("?") %}
-            {% method_name = method_name.gsub(/\?/, "_question_mark_") %}
-          {% elsif method_name.includes?("!") %}
-            {% method_name = method_name.gsub(/\!/, "_exclamation_mark_") %}
-          {% end %}
-          when {{method_name}}
+        when {{method.name.stringify}}
             {% if args.size == 0 %}
               return klass.{{method.name}}
             {% else %}
-              obj = self.{{method_name.id}}.not_nil!
-              args = {
+              obj = self.{{method.name}}.not_nil!
+              return klass.{{method.name}}(
                 {% for arg in args %}
                   {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}
                     {% if arg.default_value.is_a?(Nop) %}
@@ -331,10 +321,9 @@ abstract class EngineDriver
                     {% end %}
                   {% end %}
                 {% end %}
-              }
-              return klass.{{method.name}} **args
+              )
             {% end %}
-        {% end %}
+          {% end %}
         end
 
         raise "execute request for unknown method: #{self.__exec__}"
