@@ -189,8 +189,15 @@ abstract class EngineDriver
         {% index = index + 1 %}
       {% end %}
 
+      {% method_name = method.name.stringify %}
+      {% if method_name.includes?("?") %}
+        {% method_name = method_name.gsub(/\?/, "_question_mark_") %}
+      {% elsif method_name.includes?("!") %}
+        {% method_name = method_name.gsub(/\!/, "_exclamation_mark_") %}
+      {% end %}
+
       {% if args.size > 0 %}
-        class Method{{method.name.stringify.camelcase.id}}
+        struct Method{{method_name.camelcase.id}}
           include JSON::Serializable
           {% for arg in args %}
             {% if !arg.restriction %}
@@ -227,8 +234,15 @@ abstract class EngineDriver
           {% index = index + 1 %}
         {% end %}
 
+        {% method_name = method.name.stringify %}
+        {% if method_name.includes?("?") %}
+          {% method_name = method_name.gsub(/\?/, "_question_mark_") %}
+        {% elsif method_name.includes?("!") %}
+          {% method_name = method_name.gsub(/\!/, "_exclamation_mark_") %}
+        {% end %}
+
         {% if args.size > 0 %}
-          getter {{method.name}} : Method{{method.name.stringify.camelcase.id}}?
+          getter {{method.name}} : Method{{method_name.camelcase.id}}?
         {% end %}
       {% end %}
 
