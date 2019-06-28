@@ -193,63 +193,6 @@ abstract class EngineDriver
       @lookup : Hash(String, JSON::Any)
       @exec : String
 
-      # provide introspection into available functions
-      @@functions : String?
-      def self.functions : String
-        functions = @@functions
-        return functions if functions
-
-          list = %({
-          {% for method in methods %}
-            {% index = 0 %}
-            {% args = [] of Crystal::Macros::Arg %}
-            {% for arg in method.args %}
-              {% if !method.splat_index || index < method.splat_index %}
-                {% args << arg %}
-              {% end %}
-              {% index = index + 1 %}
-            {% end %}
-
-            {{method.name.stringify}}: {
-              {% for arg in args %}
-                {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}
-                  {% if arg.default_value.is_a?(Nop) %}
-                    {{arg.name.stringify}}: ["String"],
-                  {% else %}
-                    {{arg.name.stringify}}: ["String", "#{{{arg.default_value}}.to_s.to_json}"],
-                  {% end %}
-                {% else %}
-                  {% if arg.default_value.is_a?(Nop) %}
-                    {{arg.name.stringify}}: [{{arg.restriction.stringify}}],
-                  {% else %}
-                    {{arg.name.stringify}}: [{{arg.restriction.stringify}}, "#{{{arg.default_value}}.to_json}"],
-                  {% end %}
-                {% end %}
-              {% end %}
-            },
-          {% end %}})
-
-        # Remove whitespace, remove all ',' followed by a '}'
-        @@functions = list.gsub(/\s/, "").gsub(",}", "}")
-      end
-
-      @@metadata : String?
-      def self.metadata : String
-        metadata = @@metadata
-        return metadata if metadata
-
-        implements = {{@type.ancestors.map(&.stringify)}}.reject { |obj| IGNORE_KLASSES.includes?(obj) }
-        details = %({
-          "functions": #{self.functions},
-          "implements": #{implements.to_json},
-          "requirements": #{Utilities::Discovery.requirements.to_json}
-        }).gsub(/\s/, "")
-
-        @@metadata = details
-      end
-
-      # EXECUTORS = {} of String => Proc(JSON::Any, {{@type.id}}, Task | String) | Proc(JSON::Any, {{@type.id}}, Task) | Proc(JSON::Any, {{@type.id}}, String)
-
       EXECUTORS = {
         {% for method in methods %}
           {% index = 0 %}
@@ -312,6 +255,74 @@ abstract class EngineDriver
         executor = EXECUTORS[@exec]?
         raise "execute requested for unknown method: #{@exec}" unless executor
         executor.call(json, klass)
+      end
+
+      # provide introspection into available functions
+      @@functions : String?
+      def self.functions : String
+        functions = @@functions
+        return functions if functions
+
+        list = String.build do |str|
+          str << "{"
+          {% for method in methods %}
+            {% index = 0 %}
+            {% args = [] of Crystal::Macros::Arg %}
+            {% for arg in method.args %}
+              {% if !method.splat_index || index < method.splat_index %}
+                {% args << arg %}
+              {% end %}
+              {% index = index + 1 %}
+            {% end %}
+
+            str << '"'
+            str << {{method.name.stringify}}
+            str << %(": {)
+              {% for arg in args %}
+                str << '"'
+                str << {{arg.name.stringify}}
+
+                {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}
+                  {% if arg.default_value.is_a?(Nop) %}
+                    str << %(": ["String"],)
+                  {% else %}
+                    str << %(": ["String", ")
+                    str << {{arg.default_value}}.to_s.to_json
+                    str << %("],)
+                  {% end %}
+                {% else %}
+                  str << %(": [")
+                  str << {{arg.restriction.stringify}}
+                  {% if !arg.default_value.is_a?(Nop) %}
+                    str << %(", ")
+                    str << {{arg.default_value}}.to_json
+                  {% end %}
+                  str << %("],)
+                {% end %}
+              {% end %}
+            str << "},"
+          {% end %}
+          str << "}"
+        end
+
+        # Remove whitespace, remove all ',' followed by a '}'
+        @@functions = funcs = list.gsub(/\s/, "").gsub(",}", "}")
+        funcs
+      end
+
+      @@metadata : String?
+      def self.metadata : String
+        metadata = @@metadata
+        return metadata if metadata
+
+        implements = {{@type.ancestors.map(&.stringify)}}.reject { |obj| IGNORE_KLASSES.includes?(obj) }
+        details = %({
+          "functions": #{self.functions},
+          "implements": #{implements.to_json},
+          "requirements": #{Utilities::Discovery.requirements.to_json}
+        }).gsub(/\s/, "")
+
+        @@metadata = details
       end
     end
   end
