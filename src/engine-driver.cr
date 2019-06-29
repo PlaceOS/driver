@@ -259,7 +259,7 @@ abstract class EngineDriver
               begin
                 ret_val.try_to_json("null")
               rescue error
-                klass.logger.info { "unable to convert result to json executing #{{{method.name.stringify}}} on #{{{@type.id.stringify}}}\n#{error.inspect_with_backtrace}" }
+                klass.logger.info { "unable to convert result to json executing #{{{method.name.stringify}}} on #{klass.class}\n#{error.inspect_with_backtrace}" }
                 "null"
               end
             end
@@ -270,7 +270,7 @@ abstract class EngineDriver
       def execute(klass : {{@type.id}}) : Task | String
         json = @lookup[@exec]
         executor = EXECUTORS[@exec]?
-        raise "execute requested for unknown method: #{@exec}" unless executor
+        raise "execute requested for unknown method: #{@exec} on #{klass.class}" unless executor
         executor.call(json, klass)
       end
 
