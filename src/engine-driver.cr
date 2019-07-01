@@ -330,7 +330,7 @@ abstract class EngineDriver
 
         {% for method in methods %}
           {% if method.annotation(Security) %}
-            level = {{method.annotation(Security)[0]}}.as(::EngineDriver::Level).to_s
+            level = {{method.annotation(Security)[0]}}.as(::EngineDriver::Level).to_s.downcase
             array = sec[level]? || [] of String
             array << {{method.name.stringify}}
             sec[level] = array
