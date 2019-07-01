@@ -9,6 +9,14 @@ abstract class EngineDriver
   module Utilities
   end
 
+  annotation Security
+  end
+
+  enum Level
+    Support
+    Administrator
+  end
+
   def initialize(
     @__module_id__ : String,
     @__setting__ : Settings,
@@ -313,6 +321,26 @@ abstract class EngineDriver
         funcs
       end
 
+      @@security : String?
+      def self.security : String
+        security = @@security
+        return security if security
+
+        sec = {} of String => Array(String)
+
+        {% for method in methods %}
+          {% if method.annotation(Security) %}
+            level = {{method.annotation(Security)[0]}}.as(::EngineDriver::Level).to_s
+            array = sec[level]? || [] of String
+            array << {{method.name.stringify}}
+            sec[level] = array
+          {% end %}
+        {% end %}
+
+        @@security = sec = sec.to_json
+        sec
+      end
+
       @@metadata : String?
       def self.metadata : String
         metadata = @@metadata
@@ -322,7 +350,8 @@ abstract class EngineDriver
         details = %({
           "functions": #{self.functions},
           "implements": #{implements.to_json},
-          "requirements": #{Utilities::Discovery.requirements.to_json}
+          "requirements": #{Utilities::Discovery.requirements.to_json},
+          "security": #{self.security}
         }).gsub(/\s/, "")
 
         @@metadata = details

@@ -78,6 +78,7 @@ class Helper
     end
 
     # Public API will ignore splat arguments
+    @[Security(Level::Support)]
     def splat_add(*splat, **dsplat)
       num = 0
       splat.each { |o| num + o }
@@ -86,6 +87,7 @@ class Helper
     end
 
     # using tasks and futures
+    @[Security(Level::Administrator)]
     def perform_task(name : String | Int32)
       queue &.success("hello #{name}")
     end
