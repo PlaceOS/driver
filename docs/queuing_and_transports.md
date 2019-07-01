@@ -59,11 +59,34 @@ Transports are queue aware, in that they check if there is a currently processin
 ```crystal
 queue name: :power, delay: 30.milliseconds, priority: 99 do |task|
   # Using the send helper method (implemented by all transports except HTTP)
-  send "data", task do |response|
+  transport.send "data", task do |response|
     task.success if String.new(response) == "great"
   end
 end
 
+```
+
+The helper method `send` transparently uses the queue in the same way as the example above.
+
+```crystal
+# equivalent to the code block above
+send "data", name: :power, delay: 30.milliseconds, priority: 99 do |response, task|
+  task.success if String.new(response) == "great"
+end
+```
+
+When using the received function
+
+```crystal
+# equivalent to the code blocks above
+
+def send_data
+  send "data", name: :power, delay: 30.milliseconds, priority: 99
+end
+
+def received(response, task)
+  task.success if String.new(response) == "great"
+end
 ```
 
 
