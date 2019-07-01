@@ -209,7 +209,7 @@ abstract class EngineDriver
 
               # Support argument lists
               if json.raw.is_a?(Array)
-                arg_names = { {{*args.map { |arg| arg.name.stringify } }} }
+                arg_names = { {{*args.map { |arg| arg.name.stringify }}} }
                 args = json.as_a
 
                 raise "wrong number of arguments for '#{{{method.name.stringify}}}' (given #{args.size}, expected #{arg_names.size})" if args.size > arg_names.size
@@ -280,8 +280,7 @@ abstract class EngineDriver
         functions = @@functions
         return functions if functions
 
-        list = String.build do |str|
-          str << "{"
+        @@functions = funcs = {
           {% for method in methods %}
             {% index = 0 %}
             {% args = [] of Crystal::Macros::Arg %}
@@ -292,38 +291,25 @@ abstract class EngineDriver
               {% index = index + 1 %}
             {% end %}
 
-            str << '"'
-            str << {{method.name.stringify}}
-            str << %(": {)
+            {{method.name.stringify}} => {
               {% for arg in args %}
-                str << '"'
-                str << {{arg.name.stringify}}
-
-                {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}
-                  {% if arg.default_value.is_a?(Nop) %}
-                    str << %(": ["String"],)
+                {{arg.name.stringify}} => [
+                  {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}
+                    "String",
+                    {% if !arg.default_value.is_a?(Nop) %}
+                      {{arg.default_value}}.to_s
+                    {% end %}
                   {% else %}
-                    str << %(": ["String", ")
-                    str << {{arg.default_value}}.to_s.to_json
-                    str << %("],)
+                    {{arg.restriction.stringify}},
+                    {% if !arg.default_value.is_a?(Nop) %}
+                      {{arg.default_value}}
+                    {% end %}
                   {% end %}
-                {% else %}
-                  str << %(": [")
-                  str << {{arg.restriction.stringify}}
-                  {% if !arg.default_value.is_a?(Nop) %}
-                    str << %(", ")
-                    str << {{arg.default_value}}.to_json
-                  {% end %}
-                  str << %("],)
-                {% end %}
+                ],
               {% end %}
-            str << "},"
+            }{% if args.size == 0 %} of String => Array(String){% end %},
           {% end %}
-          str << "}"
-        end
-
-        # Remove whitespace, remove all ',' followed by a '}'
-        @@functions = funcs = list.gsub(/\s/, "").gsub(",}", "}")
+        }.to_json
         funcs
       end
 

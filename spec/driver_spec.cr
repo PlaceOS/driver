@@ -57,12 +57,12 @@ describe EngineDriver::DriverManager do
       },
       "splat_add":{},
       "perform_task":{
-        "name":["String|Int32"]
+        "name":["String | Int32"]
       },
       "error_task":{},
       "future_add":{
         "a":["Int32"],
-        "b":["Int32","200"]
+        "b":["Int32", 200]
       },
       "future_error":{},
       "raise_error":{},
@@ -70,7 +70,7 @@ describe EngineDriver::DriverManager do
       "test_http":{},
       "test_exec":{},
       "implemented_in_base_class":{}
-    }).gsub(/\s/, ""))
+    }).gsub(/\s/, "").gsub(/\|/, " | "))
   end
 
   it "should initialize an instance of driver manager" do
