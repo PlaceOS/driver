@@ -13,6 +13,16 @@ A simple overview of how the system coordinates actions and where data is stored
 
 So HSET "system\x02system_id", "Display\x023" => driver_id
 
+* Use the existing helper at `require "engine-driver/storage"`
+
+```crystal
+status = EngineDriver::Storage.new(system_id, prefix: "system")
+module_name = "Display"
+index = 1
+system["#{module_name}\x02#{index}"]? => "module_id" / nil
+system["#{module_name}\x02#{index}"] => "module_id" / raise KeyError.new("not found")
+```
+
 
 ### Obtain the status of a driver (i.e. driver_id => power)
 
@@ -22,14 +32,39 @@ So HSET "system\x02system_id", "Display\x023" => driver_id
 
 So HSET "status\x02module_id", "power" => true / false
 
+* Use the existing helper at `require "engine-driver/storage"`
+
+```crystal
+status = EngineDriver::Storage.new(module_id)
+status["power"]? => true / false / nil
+status["power"] => true / false / raise KeyError.new("not found")
+```
+
 
 ### Monitor the status of a driver
 
 * Use `require "engine-driver/proxy/subscriptions"` to monitor subscriptions for each websocket connection
 * Always use system ID, module name (i.e. Display_1) and status name to subscribe
 
-This is an indirect subscription, allowing seamless module re-orderiing without re-subscription.
+This is an indirect subscription, allowing seamless module re-ordering without re-subscription.
 The proxy class simplifies management of each websockets subscriptions
+
+```crystal
+# Should only be a single instance of this class per-process
+@@subscriptions = EngineDriver::Subscriptions.new
+
+# One instance of the subscription proxy per-websocket
+subscriber = EngineDriver::Proxy::Subscriptions.new(@@subscriptions)
+subscription_reference = subscriber.subscribe(system_id, module_name, index, status_name) do |sub_reference, message|
+  # message is always a JSON string (can be passed directly to the front-end)
+end
+
+# To stop listening to an individual subscription
+subscriber.unsubscribe(subscription_reference)
+
+# When a websocket is terminated
+subscriber.terminate
+```
 
 
 ### Execute a function on a module
@@ -78,3 +113,21 @@ Example metadata
   }
 }
 ```
+
+
+## Engine Core
+
+Should perform the following operations:
+
+1. Monitor and ensure all repositories are loaded (these folders should persist a container restart)
+2. Monitor and compile all drivers that are in use (as required)
+3. Register with hound dog to re-balance the system
+4. Launch drivers that are in use
+5. Build system hashes in redis (consistent hash of system id == instance in charge of building that data structure)
+5. Start modules on those drivers (once all drivers are running)
+   * See `core_control_protocol.md`
+   * Also `engine-driver/engine-specs/runner.cr`
+6. Mark self as ready
+7. Once all Engine Core instances are ready, engine core leader to signal system ready
+   * Use a channel called `system`
+   * `EngineDriver::Storage.redis_pool.publish("engine\x02system", "ready")`
