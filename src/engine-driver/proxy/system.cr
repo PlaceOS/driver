@@ -27,6 +27,24 @@ class EngineDriver::Proxy::System
     get_driver(module_name, index)
   end
 
+  # Retrieve module metadata from redis
+  #
+  def self.module_id?(system_id, module_name, index) : String?
+    EngineDriver::Storage.new(system_id, "system")["#{module_name}\x02#{index}"]?
+  end
+
+  # Retrieve module metadata from redis
+  #
+  def self.driver_metadata?(system_id, module_name, index) : DriverModel::Metadata?
+    # Pull module_id from System redis
+    module_id = self.module_id?(system_id, module_name, index)
+
+    if module_id
+      raw = EngineDriver::Storage.get("interface\x02#{module_id}")
+      DriverModel::Metadata.from_json raw_metadata if raw
+    end
+  end
+
   private def get_driver(module_name, index) : EngineDriver::Proxy::Driver
     module_name = module_name.to_s
     index = index.to_i
