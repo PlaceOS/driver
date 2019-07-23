@@ -19,12 +19,20 @@ class EngineDriver::DriverModel
 
     def initialize(
       @functions = {} of String => Hash(String, Array(String)),
-      @implements = [] of String
+      @implements = [] of String,
+      @requirements = {} of String => Array(String),
+      @security = {} of String => Array(String)
     )
     end
 
+    # Functions available on module, map of function name to args
     property functions : Hash(String, Hash(String, Array(String)))
+    # Interfaces implemented by module
     property implements : Array(String)
+    # Module requirements, map of module name to required interfaces
+    property requirements : Hash(String, Array(String))
+    # Function access control, map of access level to function names
+    property security : Hash(String, Array(String))
   end
 
   enum Role
