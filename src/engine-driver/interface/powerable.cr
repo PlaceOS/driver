@@ -13,6 +13,7 @@ module EngineDriver::Interface::Powerable
     FullOff
   end
 
+  # override this to implement FullOff if it is available for the device
   def power_state(state : PowerState)
     case state
     when PowerState::On
