@@ -8,6 +8,8 @@ module EngineDriver::Interface::Moveable
     Down
     Left
     Right
+    In
+    Out
   end
 
   abstract def move(position : MoveablePosition, index : Int32 | String = 0)
