@@ -14,7 +14,8 @@ class EngineDriver::Task
     @retries : Int32,
     @wait : Bool,
     @name : String?,
-    @delay : Time::Span?
+    @delay : Time::Span?,
+    @clear_queue : Bool = false
   )
     @response_required = false
     @last_executed = 0_i64
@@ -34,7 +35,7 @@ class EngineDriver::Task
   @error_class : String?
   getter last_executed, state, payload, backtrace, error_class, logger
   getter name, delay, wait
-  property processing, retries, priority
+  property processing, retries, priority, clear_queue
 
   # Drivers can monkey patch task if the request is required to process the response
   # @request_payload : Bytes?

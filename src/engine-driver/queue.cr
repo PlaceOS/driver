@@ -76,9 +76,10 @@ class EngineDriver::Queue
     wait = @wait,
     name = nil,
     delay = @delay,
+    clear_queue = false,
     &callback : (Task) -> Nil
   )
-    task = Task.new(self, callback, priority, timeout, retries, wait, name.try &.to_s, delay)
+    task = Task.new(self, callback, priority, timeout, retries, wait, name.try &.to_s, delay, clear_queue)
 
     if @online
       @queue.push priority, task
@@ -125,6 +126,9 @@ class EngineDriver::Queue
       task = @queue.pop.value
       @current = task
       task.execute!.get
+
+      # clear the queue as required
+      clear if task.clear_queue
 
       # Task complete
       @previous = @current
