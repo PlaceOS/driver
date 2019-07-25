@@ -6,7 +6,7 @@ class EngineDriver::Status < Hash(String, String)
     if current_value == new_value
       {current_value, false}
     else
-      self[key.to_s] = new_value
+      self[key] = new_value
       {new_value, true}
     end
   end
