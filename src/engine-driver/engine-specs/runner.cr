@@ -131,6 +131,7 @@ class EngineSpec
       begin
         with spec yield
       rescue e
+        puts "level=ERROR : unhandled exception in spec"
         e.inspect_with_backtrace(STDOUT)
       end
       puts "... spec complete"
@@ -352,11 +353,12 @@ class EngineSpec
       channel = Channel(Bytes).new(1)
 
       # Timeout
+      tdata = data
       spawn do
         sleep timeout
         if sent.empty?
           channel.close
-          puts "level=ERROR : timeout waiting for expected data"
+          puts "level=ERROR : timeout waiting for expected data\n-> expecting: #{tdata.inspect}"
         end
       end
 
