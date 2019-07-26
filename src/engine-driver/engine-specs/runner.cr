@@ -288,7 +288,31 @@ class EngineSpec
     raise "timeout waiting for module to connect"
   end
 
+  def exec(function, *args)
+    resp = __exec__(function, args)
+    sleep 1.milliseconds
+    resp
+  end
+
   def exec(function, **args)
+    resp = __exec__(function, args)
+    sleep 1.milliseconds
+    resp
+  end
+
+  def exec(function, *args)
+    resp = __exec__(function, args)
+    yield resp
+    resp
+  end
+
+  def exec(function, **args)
+    resp = __exec__(function, args)
+    yield resp
+    resp
+  end
+
+  def __exec__(function, args)
     # We want to clear any previous transmissions
     @transmissions.clear
 
@@ -318,9 +342,6 @@ class EngineSpec
     @io.write json.to_slice
     @io.flush
 
-    # The sleep here is for the lazy who don't want to explicitly track
-    # the promise value and just want to check some state updated
-    sleep 1.milliseconds
     response
   end
 
@@ -350,7 +371,7 @@ class EngineSpec
     end
 
     # coerce expected send into a byte array
-    data = if data.responds_to? :to_io
+    raw_data = if data.responds_to? :to_io
              io = IO::Memory.new
              io.write_bytes data
              io.to_slice
@@ -361,21 +382,34 @@ class EngineSpec
            end
 
     # Check if it matches
-    if sent.size > data.size
-      sent[0...data.size].should eq(data)
-      if @expected_transmissions.empty?
-        @transmissions << data
+    begin
+      if sent.size > raw_data.size
+        sent[0...raw_data.size].should eq(raw_data)
+        if @expected_transmissions.empty?
+          @transmissions << raw_data
+        else
+          @expected_transmissions.shift.send(sent[raw_data.size..-1])
+        end
       else
-        @expected_transmissions.shift.send(sent[data.size..-1])
+        sent.should eq(raw_data)
       end
-    else
-      sent.should eq(data)
+    rescue e : Spec::AssertionFailed
+      # Print out some human friendly results
+      begin
+        puts "level=ERROR : expected vs received"
+        puts "... #{String.new(raw_data)}"
+        puts "... #{String.new(sent)}"
+      rescue
+        # We shouldn't worry if the data isn't UTF8 compatible
+        # The error will display the byte data
+      end
+      raise e
     end
 
     self
   end
 
-  def transmit(data)
+  def transmit(data, pause = 10.milliseconds)
     comms = @comms
     if comms && !comms.closed?
     else
@@ -396,7 +430,7 @@ class EngineSpec
              data
            end
     comms.write data
-    sleep 10.milliseconds
+    sleep pause
     self
   end
 
