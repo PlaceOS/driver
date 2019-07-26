@@ -132,7 +132,7 @@ describe EngineDriver::Queue do
     count.should eq(4)
 
     result.state.should eq :abort
-    result.payload.should eq "retries failed"
+    result.payload.should eq "retry limit reached (due to timeout)"
     result.backtrace.should eq([] of String)
     result.error_class.should eq nil
   end

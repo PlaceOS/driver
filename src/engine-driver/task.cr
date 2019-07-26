@@ -20,6 +20,8 @@ class EngineDriver::Task
     @response_required = false
     @last_executed = 0_i64
     @channel = Channel(Nil).new
+    # Was the process retried?
+    @complete = Channel::Buffered(Bool).new(1)
 
     @logger = @queue.logger
 
@@ -61,6 +63,8 @@ class EngineDriver::Task
     @backtrace = e.backtrace? || DEFAULT_BACKTR
     @error_class = e.class.to_s
     @channel.close
+    @complete.send true
+    @complete.close
     self
   end
 
@@ -68,6 +72,11 @@ class EngineDriver::Task
     response_required! if response_required
     @channel.receive?
     self
+  end
+
+  # This is used by the queue to manage the task
+  def __get
+    @complete.receive?
   end
 
   def delay_required?
@@ -89,6 +98,8 @@ class EngineDriver::Task
     end
 
     @channel.close
+    @complete.send true
+    @complete.close
     self
   end
 
@@ -99,24 +110,23 @@ class EngineDriver::Task
   end
 
   # Possible failure or device busy.
-  def retry
+  def retry(reason = nil)
     return if @wait == false || @channel.closed?
-
-    @logger.info do
-      if @name
-        "retrying command #{@name.inspect} due to timeout"
-      else
-        "retrying command due to timeout"
-      end
-    end
 
     @retries -= 1
     if @retries >= 0
+      @logger.info do
+        if @name
+          "retrying command #{@name.inspect} #{reason}"
+        else
+          "retrying command #{reason}"
+        end
+      end
+
       stop_timers
-      delay_required?
-      execute!
+      @complete.send false
     else
-      abort("retries failed")
+      reason ? abort("retry limit reached (#{reason})") : abort("retry limit reached")
     end
   end
 
@@ -127,6 +137,8 @@ class EngineDriver::Task
     @state = :abort
     @payload = reason.to_s if reason
     @channel.close
+    @complete.send true
+    @complete.close
     self
   end
 
@@ -134,7 +146,7 @@ class EngineDriver::Task
     stop_timers if @timer
     @timer = Tasker.instance.in(@timeout) do
       @timer = nil
-      self.retry
+      self.retry("due to timeout")
     end
   end
 

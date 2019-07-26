@@ -18,6 +18,7 @@ class EngineDriver::Queue
     @terminated = false
     @waiting = false
     @online = false
+    @retry_bonus = 20
 
     spawn { process! }
   end
@@ -30,7 +31,7 @@ class EngineDriver::Queue
   getter :online, :logger
 
   # for modifying defaults
-  property :priority, :timeout, :retries, :wait, :delay
+  property :priority, :timeout, :retries, :wait, :delay, :retry_bonus
 
   def online=(state : Bool)
     state_changed = state != @online
@@ -79,20 +80,9 @@ class EngineDriver::Queue
     clear_queue = false,
     &callback : (Task) -> Nil
   )
-    task = Task.new(self, callback, priority, timeout, retries, wait, name.try &.to_s, delay, clear_queue)
-
-    if @online
-      @queue.push priority, task
-      # Spawn so the channel send occurs next tick
-      spawn { @channel.send nil } if @waiting
-    elsif name
-      @queue.push priority, task
-    else
-      spawn { task.abort("transport is currently offline") }
-    end
-
     # Task returned so response_required! can be called as required
-    task
+    task = Task.new(self, callback, priority, timeout, retries, wait, name.try &.to_s, delay, clear_queue)
+    queue_task(priority, task)
   end
 
   def terminate
@@ -125,14 +115,33 @@ class EngineDriver::Queue
       # Perform tasks
       task = @queue.pop.value
       @current = task
-      task.execute!.get
+      complete = task.execute!.__get
 
-      # clear the queue as required
-      clear if task.clear_queue
-
-      # Task complete
+      # track delays etc
       @previous = @current
       @current = nil
+
+      if complete
+        # clear the queue as required
+        clear if task.clear_queue
+      else
+        # re-queue the current task
+        priority = task.priority + @retry_bonus
+        queue_task(priority, task)
+      end
     end
+  end
+
+  protected def queue_task(priority, task)
+    if @online
+      @queue.push priority, task
+      # Spawn so the channel send occurs next tick
+      spawn { @channel.send nil } if @waiting
+    elsif task.name
+      @queue.push priority, task
+    else
+      spawn { task.abort("transport is currently offline") }
+    end
+    task
   end
 end
