@@ -335,7 +335,7 @@ class EngineSpec
         sleep timeout
         if sent.empty?
           channel.close
-          puts "-> timeout waiting for expected data"
+          puts "level=ERROR : timeout waiting for expected data"
         end
       end
 
@@ -379,7 +379,7 @@ class EngineSpec
     comms = @comms
     if comms && !comms.closed?
     else
-      puts "-> WARN: Attempting to transmit: #{data.inspect}"
+      puts "level=WARN : Attempting to transmit: #{data.inspect}"
       raise "module is currently disconnected, cannot transmit data"
     end
     return unless comms
@@ -413,7 +413,7 @@ class EngineSpec
                   spawn do
                     sleep timeout
                     if temp_http.nil?
-                      puts "-> timeout waiting for expected HTTP request"
+                      puts "level=ERROR : timeout waiting for expected HTTP request"
                       channel.close
                     end
                   end
