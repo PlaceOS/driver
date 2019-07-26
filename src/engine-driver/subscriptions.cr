@@ -1,4 +1,6 @@
 require "logger"
+require "redis"
+require "retriable/core_ext/kernel"
 
 class EngineDriver::Subscriptions
   SYSTEM_ORDER_UPDATE = "lookup-change"
@@ -226,3 +228,5 @@ class EngineDriver::Subscriptions
     end
   end
 end
+
+require "./subscriptions/*"

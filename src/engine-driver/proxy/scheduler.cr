@@ -1,5 +1,7 @@
 require "tasker"
 
+require "../driver_manager"
+
 class EngineDriver::Proxy::Scheduler
   class TaskWrapper
     def initialize(@task : Tasker::Task, @schedules : Array(TaskWrapper))

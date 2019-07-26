@@ -1,5 +1,7 @@
 require "json"
 
+require "../driver_model"
+
 class EngineDriver::Proxy::System
   def initialize(
     @model : DriverModel::ControlSystem,
@@ -35,14 +37,19 @@ class EngineDriver::Proxy::System
 
   # Retrieve module metadata from redis
   #
-  def self.driver_metadata?(system_id, module_name, index) : DriverModel::Metadata?
+  def self.driver_metadata?(system_id, module_name, index) : EngineDriver::DriverModel::Metadata?
     # Pull module_id from System redis
     module_id = self.module_id?(system_id, module_name, index)
 
-    if module_id
-      raw = EngineDriver::Storage.get("interface\x02#{module_id}")
-      DriverModel::Metadata.from_json raw_metadata if raw
-    end
+    module_id.try(&->self.driver_metadata?(String))
+  end
+
+  # Retrieve module metadata from redis, bypassing module_id lookup
+  #
+  def self.driver_metadata?(module_id) : EngineDriver::DriverModel::Metadata?
+    EngineDriver::Storage
+      .get("interface\x02#{module_id}")
+      .try(&->DriverModel::Metadata.from_json(String))
   end
 
   private def get_driver(module_name, index) : EngineDriver::Proxy::Driver

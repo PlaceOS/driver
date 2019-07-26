@@ -1,5 +1,7 @@
 require "json"
 
+require "./driver"
+
 class EngineDriver::Proxy::Drivers
   include Enumerable(EngineDriver::Proxy::Driver)
 
