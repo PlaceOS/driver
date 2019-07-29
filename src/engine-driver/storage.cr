@@ -5,8 +5,16 @@ abstract class EngineDriver; end
 class EngineDriver::Storage < Hash(String, String)
   @@instance : Redis::PooledClient?
 
+  REDIS_URL = ENV["REDIS_URL"]?
+  REDIS_HOST = ENV["REDIS_HOST"]? || "localhost"
+  REDIS_PORT = (ENV["REDIS_PORT"]? || 6379).to_i
+
   def self.redis_pool : Redis::PooledClient
-    @@instance ||= Redis::PooledClient.new(url: ENV["REDIS_URL"]?)
+    if REDIS_URL
+      @@instance ||= Redis::PooledClient.new(url: REDIS_URL)
+    else
+      @@instance ||= Redis::PooledClient.new(host: REDIS_HOST, port: REDIS_PORT)
+    end
   end
 
   def self.get(key)
