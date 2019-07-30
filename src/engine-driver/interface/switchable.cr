@@ -1,19 +1,13 @@
 module EngineDriver::Interface; end
 
-module EngineDriver::Interface::InputSelection
+module EngineDriver::Interface::InputSelection(Input)
   # Switches all outputs to the requested input
   # Special case `switch_to 0` should mute all the outputs, if supported
-  abstract def switch_to(input : Int32 | String)
+  abstract def switch_to(input : Input)
 end
 
-module EngineDriver::Interface::Switchable
-  include EngineDriver::Interface::InputSelection
-
-  # { layer => { input => [output1, output2] } }
-  alias SelectiveSwitch = Hash(String, Hash(Int32 | String, Array(Int32 | String)))
-
-  # {input => [output1, output2]}
-  alias FullSwitch = Hash(Int32 | String, Array(Int32 | String))
+module EngineDriver::Interface::Switchable(Input, Output)
+  include EngineDriver::Interface::InputSelection(Input)
 
   enum SwitchLayer
     Audio
@@ -22,5 +16,13 @@ module EngineDriver::Interface::Switchable
     Data2
   end
 
-  abstract def switch(map : FullSwitch | SelectiveSwitch)
+  macro included
+    # { layer => { input => [output1, output2] } }
+    alias SelectiveSwitch = Hash(String, Hash(Input, Array(Output)))
+
+    # {input => [output1, output2]}
+    alias FullSwitch = Hash(Input, Array(Output))
+  end
+
+  abstract def switch(map : Hash(Input, Array(Output)) | Hash(String, Hash(Input, Array(Output))))
 end

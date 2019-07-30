@@ -346,7 +346,7 @@ abstract class EngineDriver
         metadata = @@metadata
         return metadata if metadata
 
-        implements = {{@type.ancestors.map(&.stringify)}}.reject { |obj| IGNORE_KLASSES.includes?(obj) }
+        implements = {{@type.ancestors.map(&.stringify.split("(")[0])}}.reject { |obj| IGNORE_KLASSES.includes?(obj) }
         details = %({
           "functions": #{self.functions},
           "implements": #{implements.to_json},
