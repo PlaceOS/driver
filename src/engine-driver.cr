@@ -239,7 +239,7 @@ abstract class EngineDriver
                     {% if arg.default_value.is_a?(Nop) %}
                       {{arg.name}}: ({{arg.restriction}}).parse(json[{{arg_name}}].as_s),
                     {% else %}
-                      {{arg.name}}: json[{{arg_name}}]? != nil ? ({{arg.restriction}}).parse(json[{{arg_name}}].as_s) || {{arg.default_value}},
+                      {{arg.name}}: json[{{arg_name}}]? != nil ? ({{arg.restriction}}).parse(json[{{arg_name}}].as_s) : {{arg.default_value}},
                     {% end %}
                   {% else %}
                     {% if arg.default_value.is_a?(Nop) %}
