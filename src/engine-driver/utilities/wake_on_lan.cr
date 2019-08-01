@@ -8,8 +8,8 @@ module EngineDriver::Utilities::WakeOnLAN
     @@udp_server_v4 = udp = UDPSocket.new Socket::Family::INET
     udp.broadcast = true
 
-    # TODO:: allow for a custom port to be defined
-    udp.bind "0.0.0.0", 0
+    # allow for a custom port to be defined
+    udp.bind "0.0.0.0", ENV["ENGINE_WOL_PORT"]?.try(&.to_i) || 0
     udp
   end
 
@@ -20,8 +20,8 @@ module EngineDriver::Utilities::WakeOnLAN
     # iNet6 doesn't have broadcast - destination address should be FF02::1
     # https://msdn.microsoft.com/en-us/library/ff361877.aspx
 
-    # TODO:: allow for a custom port to be defined
-    udp.bind "::", 0
+    # allow for a custom port to be defined
+    udp.bind "::", ENV["ENGINE_WOL_PORT"]?.try(&.to_i) || 0
     udp
   end
 
