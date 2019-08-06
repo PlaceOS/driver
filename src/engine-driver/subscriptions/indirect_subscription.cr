@@ -4,7 +4,7 @@ class EngineDriver::Subscriptions::IndirectSubscription < EngineDriver::Subscrip
   def initialize(@system_id : String, @module_name : String, @index : Int32, @status : String, &@callback : (IndirectSubscription, String) ->)
   end
 
-  def callback(logger : ::Logger, message : String)
+  def callback(logger : ::Logger, message : String) : Nil
     # Error handling is the responsibility of the callback
     # This is fine as this should only be used internally
     @callback.call(self, message)
@@ -17,13 +17,13 @@ class EngineDriver::Subscriptions::IndirectSubscription < EngineDriver::Subscrip
 
   getter :system_id, :module_name, :index, :module_id, :status
 
-  def subscribe_to
+  def subscribe_to : String?
     if get_module_id
       "#{@storage.not_nil!.hash_key}\x02#{@status}"
     end
   end
 
-  def current_value
+  def current_value : String?
     get_module_id
     if storage = @storage
       storage[@status]?

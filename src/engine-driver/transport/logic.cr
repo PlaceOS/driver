@@ -4,25 +4,25 @@ class EngineDriver::TransportLogic < EngineDriver::Transport
   def initialize(@queue : EngineDriver::Queue)
   end
 
-  def start_tls(verify_mode, context)
+  def start_tls(verify_mode, context) : Nil
   end
 
-  def terminate
+  def terminate : Nil
   end
 
-  def connect(connect_timeout : Int32 = 0)
+  def connect(connect_timeout : Int32 = 0) : Nil
     # This ensures all drivers set connected == true
     @queue.online = true
   end
 
-  def disconnect
+  def disconnect : Nil
   end
 
-  def send(message)
+  def send(message) : EngineDriver::TransportLogic
     self
   end
 
-  def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil)
+  def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil) : EngineDriver::TransportLogic
     self
   end
 end

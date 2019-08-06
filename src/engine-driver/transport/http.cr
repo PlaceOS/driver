@@ -74,7 +74,7 @@ class EngineDriver
     property :received
     getter :logger
 
-    def connect(connect_timeout : Int32 = 10)
+    def connect(connect_timeout : Int32 = 10) : Nil
       return if @terminated
 
       # Yeild here so this function has the same semantics as a connection
@@ -84,14 +84,13 @@ class EngineDriver
       @queue.online = true
     end
 
-    def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = @tls)
+    def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = @tls) : Nil
       tls = context || OpenSSL::SSL::Context::Client.new
       tls.verify_mode = verify_mode
       @tls = tls
 
       # Re-create the client with the new TLS configuration
       @client = new_http_client(@uri_base, @tls)
-      true
     end
 
     def new_tls_context(verify_mode : OpenSSL::SSL::VerifyMode? = nil) : OpenSSL::SSL::Context::Client
@@ -192,18 +191,18 @@ class EngineDriver
       end
     end
 
-    def terminate
+    def terminate : Nil
       @terminated = true
     end
 
-    def disconnect
+    def disconnect : Nil
     end
 
-    def send(message)
+    def send(message) : TransportHTTP
       raise "not available to HTTP drivers"
     end
 
-    def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil)
+    def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil) : TransportHTTP
       raise "not available to HTTP drivers"
     end
   end

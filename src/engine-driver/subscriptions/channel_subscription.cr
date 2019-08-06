@@ -4,7 +4,7 @@ class EngineDriver::Subscriptions::ChannelSubscription < EngineDriver::Subscript
   def initialize(@channel : String, &@callback : (ChannelSubscription, String) ->)
   end
 
-  def callback(logger : ::Logger, message : String)
+  def callback(logger : ::Logger, message : String) : Nil
     # Error handling is the responsibility of the callback
     # This is fine as this should only be used internally
     @callback.call(self, message)
@@ -14,11 +14,11 @@ class EngineDriver::Subscriptions::ChannelSubscription < EngineDriver::Subscript
 
   getter :channel
 
-  def subscribe_to
+  def subscribe_to : String?
     "engine\x02#{@channel}"
   end
 
-  def current_value
+  def current_value : String?
     nil
   end
 end

@@ -47,7 +47,7 @@ class EngineDriver
       channel
     end
 
-    def connect(connect_timeout : Int32 = 10)
+    def connect(connect_timeout : Int32 = 10) : Nil
       return if @terminated
 
       if socket = @socket
@@ -134,12 +134,12 @@ class EngineDriver
       end
     end
 
-    def terminate
+    def terminate : Nil
       @terminated = true
       disconnect
     end
 
-    def disconnect
+    def disconnect : Nil
       # Create local copies as reconnect could be called while we are still disconnecting
       shell = @shell
       session = @session
@@ -160,9 +160,9 @@ class EngineDriver
       end
     end
 
-    def send(message)
+    def send(message) : TransportSSH
       socket = @shell
-      return 0 if socket.nil? || socket.closed?
+      return self if socket.nil? || socket.closed?
       if message.responds_to? :to_io
         socket.write_bytes(message)
       elsif message.responds_to? :to_slice
@@ -174,7 +174,7 @@ class EngineDriver
       self
     end
 
-    def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil)
+    def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil) : TransportSSH
       task.processing = block
       send(message)
     end
@@ -198,8 +198,7 @@ class EngineDriver
       connect
     end
 
-    def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = nil)
-      true
+    def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = nil) : Nil
     end
   end
 end

@@ -27,7 +27,7 @@ class EngineDriver::Logger < Logger
       @protocol.request @progname, "debug", [severity, message]
     end
     return if severity < level || !@io
-    write(severity, Time.now, progname || @progname, message)
+    write(severity, Time.local, progname || @progname, message)
   end
 
   def log(severity, progname = nil)

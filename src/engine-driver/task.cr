@@ -53,7 +53,7 @@ class EngineDriver::Task
     return self if @channel.closed?
 
     @callback.call(self)
-    @last_executed = Time.now.to_unix_ms
+    @last_executed = Time.utc.to_unix_ms
     @wait ? start_timers : @channel.close
     self
   rescue e

@@ -5,7 +5,7 @@ class EngineDriver::Subscriptions::DirectSubscription < EngineDriver::Subscripti
     @storage = EngineDriver::Storage.new(@module_id)
   end
 
-  def callback(logger : ::Logger, message : String)
+  def callback(logger : ::Logger, message : String) : Nil
     # Error handling is the responsibility of the callback
     # This is fine as this should only be used internally
     @callback.call(self, message)
@@ -15,11 +15,11 @@ class EngineDriver::Subscriptions::DirectSubscription < EngineDriver::Subscripti
 
   getter :module_id, :status
 
-  def subscribe_to
+  def subscribe_to : String?
     "#{@storage.hash_key}\x02#{@status}"
   end
 
-  def current_value
+  def current_value : String?
     @storage[@status]?
   end
 end

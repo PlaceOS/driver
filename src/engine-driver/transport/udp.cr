@@ -21,7 +21,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
   property :received
   getter :logger
 
-  def connect(connect_timeout : Int32 = 10)
+  def connect(connect_timeout : Int32 = 10) : Nil
     return if @terminated
     if socket = @socket
       return unless socket.closed?
@@ -67,7 +67,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
     end
   end
 
-  def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = @tls)
+  def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = @tls) : Nil
     {% if compare_versions(LibSSL::OPENSSL_VERSION, "1.0.2") >= 0 %}
       return if @tls_started
       socket = @socket
@@ -86,16 +86,16 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
     {% end %}
   end
 
-  def terminate
+  def terminate : Nil
     @terminated = true
     @socket.try &.close
   end
 
-  def disconnect
+  def disconnect : Nil
     @socket.try &.close
   end
 
-  def send(message)
+  def send(message) : EngineDriver::TransportUDP
     socket = @socket
     return 0 if socket.nil? || socket.closed?
     if message.responds_to? :to_io
@@ -110,7 +110,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
     self
   end
 
-  def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil)
+  def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil) : EngineDriver::TransportUDP
     task.processing = block
     send(message)
   end

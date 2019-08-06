@@ -2,12 +2,12 @@ require "tokenizer"
 require "./transport/http_proxy"
 
 abstract class EngineDriver::Transport
-  abstract def send(message)
-  abstract def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil)
+  abstract def send(message) : EngineDriver::Transport
+  abstract def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil) : EngineDriver::Transport
   abstract def terminate : Nil
   abstract def disconnect : Nil
   abstract def start_tls(verify_mode : OpenSSL::SSL::VerifyMode, context : OpenSSL::SSL::Context) : Nil
-  abstract def connect(connect_timeout : Int32)
+  abstract def connect(connect_timeout : Int32) : Nil
 
   @tokenizer : ::Tokenizer? = nil
   property tokenizer : ::Tokenizer?

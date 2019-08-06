@@ -16,7 +16,7 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
   property :received
   getter :logger
 
-  def connect(connect_timeout : Int32 = 10)
+  def connect(connect_timeout : Int32 = 10) : Nil
     return if @terminated
     if socket = @socket
       return unless socket.closed?
@@ -58,7 +58,7 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     raise error
   end
 
-  def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = @tls)
+  def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = @tls) : Nil
     return if @tls_started
     socket = @socket
     raise "cannot start tls while disconnected" if socket.nil? || socket.closed?
@@ -73,20 +73,20 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     @tls_started = true
   end
 
-  def terminate
+  def terminate : Nil
     @terminated = true
     @socket.try &.close
   end
 
-  def disconnect
+  def disconnect : Nil
     @socket.try &.close
   end
 
-  def send(message)
+  def send(message) : EngineDriver::TransportTCP
     connect if @makebreak
 
     socket = @socket
-    return 0 if socket.nil? || socket.closed?
+    return self if socket.nil? || socket.closed?
     if message.responds_to? :to_io
       socket.write_bytes(message)
     elsif message.responds_to? :to_slice
@@ -99,7 +99,7 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     self
   end
 
-  def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil)
+  def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil) : EngineDriver::TransportTCP
     task.processing = block
     send(message)
   end
