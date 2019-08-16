@@ -374,14 +374,14 @@ class EngineSpec
 
     # coerce expected send into a byte array
     raw_data = if data.responds_to? :to_io
-             io = IO::Memory.new
-             io.write_bytes data
-             io.to_slice
-           elsif data.responds_to? :to_slice
-             data.to_slice
-           else
-             data
-           end
+                 io = IO::Memory.new
+                 io.write_bytes data
+                 io.to_slice
+               elsif data.responds_to? :to_slice
+                 data.to_slice
+               else
+                 data
+               end
 
     # Check if it matches
     begin

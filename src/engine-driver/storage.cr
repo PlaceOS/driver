@@ -5,7 +5,7 @@ abstract class EngineDriver; end
 class EngineDriver::Storage < Hash(String, String)
   @@instance : Redis::PooledClient?
 
-  REDIS_URL = ENV["REDIS_URL"]?
+  REDIS_URL  = ENV["REDIS_URL"]?
   REDIS_HOST = ENV["REDIS_HOST"]? || "localhost"
   REDIS_PORT = (ENV["REDIS_PORT"]? || 6379).to_i
 
