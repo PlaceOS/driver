@@ -68,6 +68,15 @@ abstract class EngineDriver
     @__status__.fetch_json?(key)
   end
 
+  macro status(klass, key)
+    {{klass}}.from_json(@__status__[{{key}}.to_s])
+  end
+
+  macro status?(klass, key)
+    %value = @__status__[{{key}}.to_s]?
+    {{klass}}.from_json(%value) if %value
+  end
+
   def signal_status(key)
     spawn { @__storage__.signal_status(key) }
   end

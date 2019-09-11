@@ -178,6 +178,7 @@ describe EngineDriver::Proxy::Driver do
 
     # Test ability to access module state
     system[:Display_1]["power"].as_bool == true
+    system[:Display_1].status(Bool, "power") == true
 
     subs.terminate
     mod_store.clear

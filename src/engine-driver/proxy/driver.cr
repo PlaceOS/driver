@@ -24,6 +24,15 @@ class EngineDriver::Proxy::Driver
     JSON.parse(value) if value
   end
 
+  def status(klass, key)
+    klass.from_json(@status[key.to_s])
+  end
+
+  def status?(klass, key)
+    value = @status[key.to_s]?
+    klass.from_json(value) if value
+  end
+
   # This deliberately prevents compilation if called from driver code
   def []=(status, value)
     {{ "Remote drivers are read only. Please use the public interface to modify state".id }}
