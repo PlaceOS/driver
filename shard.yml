@@ -6,7 +6,7 @@ dependencies:
     github: spider-gazelle/priority-queue
   redis:
     github: stefanwille/crystal-redis
-    version: "~> 2.2"
+    version: "2.2.1"
   tokenizer:
     github: spider-gazelle/tokenizer
   promise:
@@ -19,7 +19,6 @@ dependencies:
     github: Sija/ipaddress.cr
   retriable:
     github: Sija/retriable.cr
-    branch: develop
   ssh2:
     github: spider-gazelle/ssh2.cr
     branch: master
