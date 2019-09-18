@@ -52,7 +52,8 @@ class EngineSpec
         end
       end
 
-      Fiber.yield
+      # Wait for the driver to be ready
+      io.read_string(1)
 
       # Start comms
       puts "... starting driver IO services"
@@ -242,7 +243,7 @@ class EngineSpec
             end
           end
         rescue error
-          puts "error parsing request #{string.inspect}\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+          puts "error parsing request #{string.inspect}\n#{error.inspect_with_backtrace}"
         end
       end
     end

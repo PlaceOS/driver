@@ -123,7 +123,7 @@ class EngineDriver
             tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
           end
         rescue error
-          @logger.warn "issue configuring verify mode\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+          @logger.warn "issue configuring verify mode\n#{error.inspect_with_backtrace}"
           tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
         end
       end

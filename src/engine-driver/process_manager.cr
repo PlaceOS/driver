@@ -36,7 +36,7 @@ class EngineDriver::ProcessManager
     request
   rescue error
     # Driver was unable to be loaded.
-    @logger.error "starting driver #{DriverManager.driver_class} (#{request.id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+    @logger.error "starting driver #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}"
     request.set_error(error)
   end
 
@@ -44,7 +44,7 @@ class EngineDriver::ProcessManager
     driver = @loaded.delete request.id
     driver.try &.terminate
   rescue error
-    @logger.error "stopping driver #{DriverManager.driver_class} (#{request.id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+    @logger.error "stopping driver #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}"
   end
 
   def update(request : Protocol::Request) : Nil

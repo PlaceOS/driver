@@ -75,7 +75,7 @@ class EngineDriver::DriverManager
       driver.on_load if driver.responds_to?(:on_load)
       driver.__apply_bindings__
     rescue error
-      @logger.error "in the on_load function of #{driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+      @logger.error "in the on_load function of #{driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}"
     end
 
     if @model.makebreak
@@ -92,7 +92,7 @@ class EngineDriver::DriverManager
       begin
         driver.on_unload
       rescue error
-        @logger.error "in the on_unload function of #{driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+        @logger.error "in the on_unload function of #{driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}"
       end
     end
     @queue.terminate
@@ -105,7 +105,7 @@ class EngineDriver::DriverManager
     driver = @driver
     driver.on_update if driver.responds_to?(:on_update)
   rescue error
-    @logger.error "during settings update of #{@driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+    @logger.error "during settings update of #{@driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}"
   end
 
   def execute(json)
@@ -128,7 +128,7 @@ class EngineDriver::DriverManager
         end
       end
     rescue error
-      @logger.warn "error changing connected state #{driver.class} (#{@module_id})\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+      @logger.warn "error changing connected state #{driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}"
     end
   end
 

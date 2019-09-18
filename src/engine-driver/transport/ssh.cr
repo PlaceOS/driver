@@ -104,7 +104,7 @@ class EngineDriver
               shell.close
               @shell = nil
             end
-            @logger.warn "unable to negotiage a shell on SSH connection\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+            @logger.warn "unable to negotiage a shell on SSH connection\n#{error.inspect_with_backtrace}"
           end
 
           # This will track the socket state when there is no shell
@@ -115,7 +115,7 @@ class EngineDriver
         rescue error
           @logger.info {
             supported_methods = ", supported authentication methods: #{supported_methods}" if supported_methods
-            "connecting to device#{supported_methods}\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+            "connecting to device#{supported_methods}\n#{error.inspect_with_backtrace}"
           }
           raise error
         end
@@ -192,7 +192,7 @@ class EngineDriver
       end
     rescue IO::Error | Errno | SSH2::SessionError
     rescue error
-      @logger.error "error consuming IO\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+      @logger.error "error consuming IO\n#{error.inspect_with_backtrace}"
     ensure
       disconnect
       connect

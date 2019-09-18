@@ -61,7 +61,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
         # Start consuming data from the socket
         spawn { consume_io }
       rescue error
-        @logger.info { "connecting to device\n#{error.message}\n#{error.backtrace?.try &.join("\n")}" }
+        @logger.info { "connecting to device\n#{error.inspect_with_backtrace}" }
         raise error
       end
     end
@@ -128,7 +128,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
     end
   rescue IO::Error | Errno
   rescue error
-    @logger.error "error consuming IO\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+    @logger.error "error consuming IO\n#{error.inspect_with_backtrace}"
   ensure
     connect
   end

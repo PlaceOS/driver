@@ -129,7 +129,7 @@ class EngineDriver::Proxy::System
         begin
           callback.call(subscription, "ready")
         rescue error
-          @logger.error "error in subscription callback\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+          @logger.error "error in subscription callback\n#{error.inspect_with_backtrace}"
         end
       end
     end

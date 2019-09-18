@@ -138,7 +138,7 @@ class EngineDriver::Proxy::Driver
       raise "undefined method '#{function_name}' for #{@module_name}_#{@index} (#{@module_id})"
     end
   rescue error
-    @system.logger.warn "#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+    @system.logger.warn error.inspect_with_backtrace
     lazy { raise error; JSON.parse("") }
   end
 end

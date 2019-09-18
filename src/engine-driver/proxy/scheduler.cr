@@ -98,7 +98,7 @@ class EngineDriver::Proxy::Scheduler
   private def run_now(block)
     block.call
   rescue error
-    @logger.error "in scheduled task on #{DriverManager.driver_class}\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+    @logger.error "in scheduled task on #{DriverManager.driver_class}\n#{error.inspect_with_backtrace}"
     raise error
   end
 end
