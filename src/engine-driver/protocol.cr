@@ -20,7 +20,9 @@ class EngineDriver::Protocol
   # Another option would be: https://github.com/Papierkorb/cannon
   # which should be even more efficient
   def initialize(input = STDIN, output = STDERR, timeout = 2.minutes)
+    output.sync = false if output.responds_to?(:sync)
     @io = IO::Stapled.new(input, output, true)
+    @write_lock = Mutex.new
     @tokenizer = ::Tokenizer.new do |io|
       begin
         io.read_bytes(Int32) + 4
@@ -170,14 +172,21 @@ class EngineDriver::Protocol
 
   private def send(request)
     json = request.to_json
-    @io.write_bytes json.bytesize
-    @io.write json.to_slice
+    @write_lock.synchronize do
+      @io.write_bytes json.bytesize
+      @io.write json.to_slice
+      @io.flush
+    end
     request
   end
 
   # Reads IO off STDIN and extracts the request messages
   private def consume_io
     raw_data = Bytes.new(4096)
+
+    # provide a ready signal
+    @io.write_utf8("r".to_slice)
+    @io.flush
 
     while !@io.closed?
       bytes_read = @io.read(raw_data)
@@ -190,7 +199,7 @@ class EngineDriver::Protocol
           request = Request.from_json(string)
           spawn { process(request) }
         rescue error
-          puts "error parsing request #{string.inspect}\n#{error.message}\n#{error.backtrace?.try &.join("\n")}"
+          puts "error parsing request #{string.inspect}\n#{error.inspect_with_backtrace}"
         end
       end
     end

@@ -8,6 +8,7 @@ class Helper
     input = IO::Stapled.new(*IO.pipe, true)
     output = IO::Stapled.new(*IO.pipe, true)
     proto = EngineDriver::Protocol.new(input, output, 10.milliseconds)
+    output.read_string(1)
     {proto, input, output}
   end
 
@@ -17,6 +18,9 @@ class Helper
     logs = IO::Stapled.new(*IO.pipe, true)
     process = EngineDriver::ProcessManager.new(logs, input, output)
     process.loaded.size.should eq 0
+
+    # Wait for ready signal
+    output.read_string(1)
 
     driver_id = "mod_1234"
 
