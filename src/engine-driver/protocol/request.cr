@@ -12,8 +12,13 @@ class EngineDriver::Protocol::Request
 
   property id : String
   property cmd : String
+
+  # Used to track request and responses
   property seq : UInt64?
+
+  # For driver to driver comms to route the request back to the originating module
   property reply : String?
+
   property payload : String?
   property error : String?
   property backtrace : Array(String)?
