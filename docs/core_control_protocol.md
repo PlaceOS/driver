@@ -115,6 +115,7 @@ For more examples see:
 
 * `./spec/driver_spec.cr` (primary tests)
 * `./spec/process_manager_spec.cr`
+* `./spec/protocol_management_spec.cr`
 
 
 ### Debug
