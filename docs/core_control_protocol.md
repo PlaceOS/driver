@@ -88,7 +88,7 @@ Futures and Promises are resolved before being returned as a reply (`#get` calle
 There is a 2 minute timeout for responses, so functions expected to take longer should provide alternative means to
 obtain the response if it is required.
 
-Example payload format:
+Example named parameter payload format:
 
 ```json
 {
@@ -97,6 +97,16 @@ Example payload format:
     "argument1": 1,
     "argument2": 2
   }
+}
+
+```
+
+Example regular parameter payload format:
+
+```json
+{
+  "__exec__": "function_name",
+  "function_name": [1, 2]
 }
 
 ```

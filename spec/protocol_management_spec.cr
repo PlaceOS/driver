@@ -30,12 +30,19 @@ describe EngineDriver::Protocol::Management do
     }))
     manager.running?.should eq(true)
 
+    # Named params
     manager.execute("mod-management-test", %({
       "__exec__": "add",
       "add": {
         "a": 1,
         "b": 2
       }
+    })).should eq("3")
+
+    # Regular arguments
+    manager.execute("mod-management-test", %({
+      "__exec__": "add",
+      "add": [1, 2]
     })).should eq("3")
 
     manager.stop("mod-management-test")
