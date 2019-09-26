@@ -263,10 +263,10 @@ class EngineDriver::Protocol::Management
 
     @launch_count += 1
     @launch_time = Time.utc.to_unix
-    fetch_pid = Channel(Int32).new
+
+    fetch_pid = Promise.new(Int32)
     spawn { launch_driver(fetch_pid, stdin_reader, stderr_writer) }
-    @pid = fetch_pid.receive
-    fetch_pid.close
+    @pid = fetch_pid.get.as(Int32)
 
     # Start processing the output of the driver
     loaded = Promise.new(Nil)
@@ -294,7 +294,7 @@ class EngineDriver::Protocol::Management
       output: STDOUT,
       error: stderr_writer
     ) do |process|
-      fetch_pid.send process.pid
+      fetch_pid.resolve process.pid
     end
 
     status = $?
