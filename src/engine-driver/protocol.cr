@@ -41,7 +41,7 @@ class EngineDriver::Protocol
     }
 
     # Tracks request IDs that expect responses
-    @tracking = {} of UInt64 => Channel::Buffered(Request)
+    @tracking = {} of UInt64 => Channel(Request)
 
     # Timout handler
     # Batched timeouts to reduce load. Any responses in these sets
@@ -155,7 +155,7 @@ class EngineDriver::Protocol
 
   @@seq = 0_u64
 
-  def expect_response(id, reply_id, command, payload = nil, raw = false) : Channel::Buffered(Request)
+  def expect_response(id, reply_id, command, payload = nil, raw = false) : Channel(Request)
     seq = @@seq
     @@seq += 1
 
@@ -163,7 +163,7 @@ class EngineDriver::Protocol
     if payload
       req.payload = raw ? payload.to_s : payload.to_json
     end
-    @tracking[seq] = channel = Channel::Buffered(Request).new(1)
+    @tracking[seq] = channel = Channel(Request).new(1)
     @next_requests[seq] = req
 
     send req

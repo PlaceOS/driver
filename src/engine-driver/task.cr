@@ -21,7 +21,7 @@ class EngineDriver::Task
     @last_executed = 0_i64
     @channel = Channel(Nil).new
     # Was the process retried?
-    @complete = Channel::Buffered(Bool).new(1)
+    @complete = Channel(Bool).new(1)
 
     @logger = @queue.logger
 
