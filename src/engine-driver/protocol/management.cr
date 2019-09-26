@@ -28,6 +28,7 @@ class EngineDriver::Protocol::Management
     @last_exit_code = 0
     @launch_count = 0
     @launch_time = 0_i64
+    @pid = -1
 
     @sequence = 1_u64
     @modules = {} of String => String
@@ -39,12 +40,16 @@ class EngineDriver::Protocol::Management
   # Core should update this callback to route requests
   property on_exec : Proc(Request, Proc(Request, Nil), Nil) = ->(request : Request, callback : Proc(Request, Nil)) {}
 
-  getter :terminated, :logger
+  getter :terminated, :logger, pid
   getter :last_exit_code, :launch_count, :launch_time
   @io : IO::Stapled? = nil
 
   def running?
     !!@io
+  end
+
+  def module_instances
+    @modules.size
   end
 
   def terminate : Nil
@@ -258,8 +263,10 @@ class EngineDriver::Protocol::Management
 
     @launch_count += 1
     @launch_time = Time.utc.to_unix
-    spawn { launch_driver(stdin_reader, stderr_writer) }
-    Fiber.yield
+    fetch_pid = Channel(Int32).new
+    spawn { launch_driver(fetch_pid, stdin_reader, stderr_writer) }
+    @pid = fetch_pid.receive
+    fetch_pid.close
 
     # Start processing the output of the driver
     loaded = Promise.new(Nil)
@@ -279,15 +286,18 @@ class EngineDriver::Protocol::Management
   end
 
   # launches the driver and manages the process
-  private def launch_driver(stdin_reader, stderr_writer) : Nil
-    status = Process.run(
+  private def launch_driver(fetch_pid, stdin_reader, stderr_writer) : Nil
+    Process.run(
       @driver_path,
       {"-p"},
       input: stdin_reader,
       output: STDOUT,
       error: stderr_writer
-    )
+    ) do |process|
+      fetch_pid.send process.pid
+    end
 
+    status = $?
     last_exit_code = status.exit_status.to_s
     @logger.warn("driver process exited with #{last_exit_code}", @driver_path) unless status.success?
     @events.send(Request.new(last_exit_code, "exited"))
