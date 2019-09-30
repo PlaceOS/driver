@@ -57,13 +57,23 @@ class EngineDriver::Protocol::Management
   end
 
   def start(module_id : String, payload : String) : Nil
+    update = false
     promise = @request_lock.synchronize do
       prom = @starting[module_id]?
-      prom = @starting[module_id] = Promise.new(Nil) unless prom
+      # We want to ensure updates make it if they come in while loading
+      if prom
+        update = true
+      else
+        prom = @starting[module_id] = Promise.new(Nil)
+      end
       prom
     end
 
-    @events.send(Request.new(module_id, "start", payload))
+    if update
+      update(module_id, payload)
+    else
+      @events.send(Request.new(module_id, "start", payload))
+    end
     promise.get
   end
 
@@ -160,10 +170,10 @@ class EngineDriver::Protocol::Management
   private def start(request : Request) : Nil
     module_id = request.id
     if @modules[module_id]?
+      return update(request)
       if starting = @request_lock.synchronize { @starting.delete(module_id) }
         starting.resolve(nil)
       end
-      return
     end
 
     payload = request.payload.not_nil!
