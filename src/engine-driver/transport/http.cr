@@ -64,6 +64,7 @@ class EngineDriver
 
       context = uri_base.starts_with?("https") ? @tls : nil
       @client = new_http_client(@uri_base, context)
+      @processor.close
     end
 
     @params_base : Hash(String, String?)

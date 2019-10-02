@@ -10,6 +10,8 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
     @terminated = false
     @tls_started = false
     @logger = @queue.logger
+
+    spawn { process_data }
   end
 
   @uri : String?
@@ -88,6 +90,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
 
   def terminate : Nil
     @terminated = true
+    @processor.close
     @socket.try &.close
   end
 
@@ -123,7 +126,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
         break if bytes_read == 0 # IO was closed
 
         data = raw_data[0, bytes_read]
-        spawn { process(data) }
+        @processor.send data
       end
     end
   rescue IO::Error | Errno

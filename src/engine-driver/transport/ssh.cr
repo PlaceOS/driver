@@ -12,6 +12,8 @@ class EngineDriver
     def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, @settings : ::EngineDriver::Settings, @uri = nil, &@received : (Bytes, EngineDriver::Task?) -> Nil)
       @terminated = false
       @logger = @queue.logger
+
+      spawn { process_data }
     end
 
     @uri : String?
@@ -136,6 +138,7 @@ class EngineDriver
 
     def terminate : Nil
       @terminated = true
+      @processor.close
       disconnect
     end
 
@@ -187,7 +190,7 @@ class EngineDriver
           break if bytes_read == 0 # IO was closed
 
           data = raw_data[0, bytes_read]
-          spawn { process(data) }
+          @processor.send data
         end
       end
     rescue IO::Error | Errno | SSH2::SessionError

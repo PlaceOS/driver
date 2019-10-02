@@ -10,6 +10,7 @@ abstract class EngineDriver::Transport
   abstract def connect(connect_timeout : Int32) : Nil
 
   @tokenizer : ::Tokenizer? = nil
+  @processor : ::Channel(Bytes) = ::Channel(Bytes).new(8)
   property tokenizer : ::Tokenizer?
 
   # Only SSH implements exec
@@ -93,16 +94,25 @@ abstract class EngineDriver::Transport
     end
   end
 
-  protected def process(data) : Nil
-    if tokenize = @tokenizer
-      messages = tokenize.extract(data)
-      if messages.size == 1
-        process_message(messages[0])
-      else
-        messages.each { |message| spawn { process_message(message) } }
+  protected def process_data : Nil
+    loop do
+      data = @processor.receive?
+      break unless data
+
+      begin
+        if tokenize = @tokenizer
+          messages = tokenize.extract(data)
+          if messages.size == 1
+            process_message(messages[0])
+          else
+            messages.each { |message| process_message(message) }
+          end
+        else
+          process_message(data)
+        end
+      rescue error
+        @logger.error "error processing data\n#{error.inspect_with_backtrace}"
       end
-    else
-      process_message(data)
     end
   end
 
