@@ -7,8 +7,6 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     @terminated = false
     @tls_started = false
     @logger = @queue.logger
-
-    spawn { process_data }
   end
 
   @uri : String?
@@ -54,7 +52,7 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     socket.sync = false
 
     # Start consuming data from the socket
-    spawn { consume_io }
+    spawn(same_thread: true) { consume_io }
   rescue error
     @logger.info { "connecting to device\n#{error.inspect_with_backtrace}" }
     raise error
@@ -77,7 +75,6 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
 
   def terminate : Nil
     @terminated = true
-    @processor.close
     @socket.try &.close
   end
 
@@ -115,7 +112,7 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
         break if bytes_read == 0 # IO was closed
 
         data = raw_data[0, bytes_read]
-        @processor.send data
+        spawn(same_thread: true) { process data }
       end
     end
   rescue IO::Error | Errno

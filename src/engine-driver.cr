@@ -52,7 +52,7 @@ abstract class EngineDriver
       # using spawn so execution flow isn't interrupted.
       # ensures that setting a key and then reading it back as the next
       # operation will always result in the expected value
-      spawn { @__storage__[key] = json_data }
+      spawn(same_thread: true) { @__storage__[key] = json_data }
       @__logger__.debug { "status updated: #{key} = #{value}" }
     else
       @__logger__.debug { "no change for: #{key} = #{value}" }
@@ -78,7 +78,7 @@ abstract class EngineDriver
   end
 
   def signal_status(key)
-    spawn { @__storage__.signal_status(key) }
+    spawn(same_thread: true) { @__storage__.signal_status(key) }
   end
 
   def system : Proxy::System

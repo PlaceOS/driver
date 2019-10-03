@@ -43,32 +43,28 @@ class EngineDriver::Protocol
     # Tracks request IDs that expect responses
     @tracking = {} of UInt64 => Channel(Request)
 
+    # Send outgoing data
+    @producer = ::Channel(Tuple(Request, Channel(Request)?)?).new(32)
+
+    # Processes the incomming data
+    @processor = ::Channel(Request).new(32)
+
     # Timout handler
     # Batched timeouts to reduce load. Any responses in these sets
     @current_requests = {} of UInt64 => Request
     @next_requests = {} of UInt64 => Request
-    @timeouts = Tasker.instance.every(timeout) do
-      current_requests = @current_requests
-      @current_requests = @next_requests
-      @next_requests = {} of UInt64 => Request
 
-      if !current_requests.empty?
-        error = IO::Timeout.new("request timed out")
-        current_requests.each_value do |request|
-          spawn { timeout(error, request) }
-        end
-      end
-    end
-
+    spawn { self.process }
     spawn { self.consume_io }
+    spawn { self.produce_io(timeout) }
   end
 
-  @timeouts : Tasker::Task
+  @timeouts : Tasker::Task? = nil
 
   def timeout(error, request)
     request.set_error(error)
     request.cmd = "result"
-    process(request)
+    @processor.send request
   end
 
   # For process manager
@@ -93,56 +89,63 @@ class EngineDriver::Protocol
     @callbacks[type] << block
   end
 
-  def process(message)
-    callbacks = case message.cmd
-                when "start"
-                  # New instance of id == mod_id
-                  # payload == module details
-                  @callbacks[:start]
-                when "stop"
-                  # Stop instance of id
-                  @callbacks[:stop]
-                when "update"
-                  # New settings for id
-                  @callbacks[:update]
-                when "terminate"
-                  # Stop all the modules and exit the process
-                  @callbacks[:terminate]
-                when "exec"
-                  # Run payload on id
-                  @callbacks[:exec]
-                when "debug"
-                  # enable debugging on id
-                  @callbacks[:debug]
-                when "ignore"
-                  # stop debugging on id
-                  @callbacks[:ignore]
-                when "result"
-                  # result of an executed request
-                  # seq == request id
-                  # payload or error response
-                  seq = message.seq
-                  @current_requests.delete(seq)
-                  @next_requests.delete(seq)
-                  channel = @tracking.delete(seq)
-                  channel.try &.send(message)
-                  return
-                else
-                  raise "unknown request cmd type"
-                end
+  def process
+    loop do
+      message = @processor.receive?
+      break unless message
 
-    callbacks.each do |callback|
-      response = callback.call(message)
-      if response
-        send(response)
-        break
+      begin
+        callbacks = case message.cmd
+                    when "start"
+                      # New instance of id == mod_id
+                      # payload == module details
+                      @callbacks[:start]
+                    when "stop"
+                      # Stop instance of id
+                      @callbacks[:stop]
+                    when "update"
+                      # New settings for id
+                      @callbacks[:update]
+                    when "terminate"
+                      # Stop all the modules and exit the process
+                      @callbacks[:terminate]
+                    when "exec"
+                      # Run payload on id
+                      @callbacks[:exec]
+                    when "debug"
+                      # enable debugging on id
+                      @callbacks[:debug]
+                    when "ignore"
+                      # stop debugging on id
+                      @callbacks[:ignore]
+                    when "result"
+                      # result of an executed request
+                      # seq == request id
+                      # payload or error response
+                      seq = message.seq
+                      @current_requests.delete(seq)
+                      @next_requests.delete(seq)
+                      channel = @tracking.delete(seq)
+                      channel.try &.send(message)
+                      return
+                    else
+                      raise "unknown request cmd type"
+                    end
+
+        callbacks.each do |callback|
+          response = callback.call(message)
+          if response
+            @producer.send({response, nil})
+            break
+          end
+        end
+      rescue error
+        message.payload = nil
+        message.error = error.message
+        message.backtrace = error.backtrace?
+        @producer.send({message, nil})
       end
     end
-  rescue error
-    message.payload = nil
-    message.error = error.message
-    message.backtrace = error.backtrace?
-    send(message)
   end
 
   def request(id, command, payload = nil, raw = false)
@@ -150,34 +153,61 @@ class EngineDriver::Protocol
     if payload
       req.payload = raw ? payload.to_s : payload.to_json
     end
-    send req
+    @producer.send({req, nil})
+    req
+  end
+
+  def expect_response(id, reply_id, command, payload = nil, raw = false) : Channel(Request)
+    req = Request.new(id, command.to_s, reply: reply_id)
+    if payload
+      req.payload = raw ? payload.to_s : payload.to_json
+    end
+    channel = Channel(Request).new(1)
+
+    @producer.send({req, channel})
+    channel
   end
 
   @@seq = 0_u64
 
-  def expect_response(id, reply_id, command, payload = nil, raw = false) : Channel(Request)
-    seq = @@seq
-    @@seq += 1
+  private def produce_io(timeout)
+    # Ensures all outgoing event processing is done on the same thread
+    spawn(same_thread: true) do
+      @timeouts = Tasker.instance.every(timeout) do
+        current_requests = @current_requests
+        @current_requests = @next_requests
+        @next_requests = {} of UInt64 => Request
 
-    req = Request.new(id, command.to_s, seq: seq, reply: reply_id)
-    if payload
-      req.payload = raw ? payload.to_s : payload.to_json
+        if !current_requests.empty?
+          error = IO::Timeout.new("request timed out")
+          current_requests.each_value do |request|
+            timeout(error, request)
+          end
+        end
+      end
     end
-    @tracking[seq] = channel = Channel(Request).new(1)
-    @next_requests[seq] = req
 
-    send req
-    channel
-  end
+    # Process outgoing requests
+    loop do
+      req_data = @producer.receive?
+      break unless req_data
 
-  private def send(request)
-    json = request.to_json
-    @write_lock.synchronize do
+      request, channel = req_data
+
+      # Expects a response
+      if channel
+        seq = @@seq
+        @@seq += 1
+
+        @tracking[seq] = channel
+        @next_requests[seq] = request
+      end
+
+      json = request.to_json
       @io.write_bytes json.bytesize
       @io.write json.to_slice
       @io.flush
     end
-    request
   end
 
   # Reads IO off STDIN and extracts the request messages
@@ -196,8 +226,7 @@ class EngineDriver::Protocol
         string = nil
         begin
           string = String.new(message[4, message.bytesize - 4])
-          request = Request.from_json(string)
-          spawn { process(request) }
+          @processor.send Request.from_json(string)
         rescue error
           puts "error parsing request #{string.inspect}\n#{error.inspect_with_backtrace}"
         end
@@ -207,6 +236,8 @@ class EngineDriver::Protocol
   rescue Errno
     # Input stream closed. This should only occur on termination
   ensure
-    @timeouts.cancel
+    @producer.close
+    @processor.close
+    @timeouts.try &.cancel
   end
 end

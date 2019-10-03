@@ -31,7 +31,9 @@ class EngineDriver::ProcessManager
     model = EngineDriver::DriverModel.from_json(request.payload.not_nil!)
     driver = DriverManager.new module_id, model, @logger_io, @subscriptions
     @loaded[module_id] = driver
-    driver.start
+
+    # Drivers can all run on a different thread
+    spawn { driver.start }
     request.payload = nil
     request
   rescue error
@@ -42,14 +44,20 @@ class EngineDriver::ProcessManager
 
   def stop(request : Protocol::Request) : Nil
     driver = @loaded.delete request.id
-    driver.try &.terminate
-  rescue error
-    @logger.error "stopping driver #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}"
+    if driver
+      promise = Promise.new(Nil)
+      driver.requests.send({promise, request})
+      promise.get
+    end
   end
 
   def update(request : Protocol::Request) : Nil
     driver = @loaded[request.id]?
-    driver.try &.update(request.payload)
+    if driver
+      promise = Promise.new(Nil)
+      driver.requests.send({promise, request})
+      promise.get
+    end
   end
 
   def exec(request : Protocol::Request) : Protocol::Request
@@ -58,39 +66,15 @@ class EngineDriver::ProcessManager
     begin
       raise "driver not available" unless driver
 
-      request.cmd = "result"
-
-      exec_request = request.payload.not_nil!
-      result = driver.execute exec_request
-
-      # If a task is being returned then we want to wait for the result
-      case result
-      when Task
-        outcome = result.get(:response_required)
-        request.payload = outcome.payload
-
-        case outcome.state
-        when :success
-        when :abort
-          request.error = "Abort"
-        when :exception
-          request.payload = outcome.payload
-          request.error = outcome.error_class
-          request.backtrace = outcome.backtrace
-        when :unknown
-          @logger.fatal "unexpected result: #{outcome.state} - #{outcome.payload}, #{outcome.error_class}, #{outcome.backtrace.join("\n")}"
-        else
-          @logger.fatal "unexpected result: #{outcome.state}"
-        end
-      else
-        request.payload = result
-      end
+      promise = Promise.new(Nil)
+      driver.requests.send({promise, request})
+      promise.get
     rescue error
-      msg = "executing #{exec_request} on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}"
-      driver ? driver.logger.error(msg) : @logger.error(msg)
+      @logger.error("executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}")
       request.set_error(error)
     end
 
+    request.cmd = "result"
     request
   end
 
@@ -109,7 +93,12 @@ class EngineDriver::ProcessManager
     @input.close
 
     # Shutdown all the connections gracefully
-    @loaded.each_value &.terminate
+    req = Protocol::Request.new("", "stop")
+    @loaded.each_value do |driver|
+      promise = Promise.new(Nil)
+      driver.requests.send({promise, req})
+      promise.get
+    end
     @loaded.clear
 
     # We now want to stop the subscription loop

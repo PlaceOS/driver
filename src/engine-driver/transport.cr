@@ -9,9 +9,7 @@ abstract class EngineDriver::Transport
   abstract def start_tls(verify_mode : OpenSSL::SSL::VerifyMode, context : OpenSSL::SSL::Context) : Nil
   abstract def connect(connect_timeout : Int32) : Nil
 
-  @tokenizer : ::Tokenizer? = nil
-  @processor : ::Channel(Bytes) = ::Channel(Bytes).new(8)
-  property tokenizer : ::Tokenizer?
+  property tokenizer : ::Tokenizer? = nil
 
   # Only SSH implements exec
   def exec(message) : SSH2::Channel
@@ -94,26 +92,19 @@ abstract class EngineDriver::Transport
     end
   end
 
-  protected def process_data : Nil
-    loop do
-      data = @processor.receive?
-      break unless data
-
-      begin
-        if tokenize = @tokenizer
-          messages = tokenize.extract(data)
-          if messages.size == 1
-            process_message(messages[0])
-          else
-            messages.each { |message| process_message(message) }
-          end
-        else
-          process_message(data)
-        end
-      rescue error
-        @logger.error "error processing data\n#{error.inspect_with_backtrace}"
+  private def process(data : Bytes) : Nil
+    if tokenize = @tokenizer
+      messages = tokenize.extract(data)
+      if messages.size == 1
+        process_message(messages[0])
+      else
+        messages.each { |message| process_message(message) }
       end
+    else
+      process_message(data)
     end
+  rescue error
+    @logger.error "error processing data\n#{error.inspect_with_backtrace}"
   end
 
   private def process_message(data)
