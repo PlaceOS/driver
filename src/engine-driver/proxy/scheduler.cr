@@ -42,7 +42,7 @@ class EngineDriver::Proxy::Scheduler
 
   def at(time, immediate = false, &block : -> _)
     raise "schedule proxy terminated" if @terminated
-    spawn { run_now(block) } if immediate
+    spawn(same_thread: true) { run_now(block) } if immediate
     wrapped = nil
     task = @scheduler.at(time) do
       @schedules.delete(wrapped.not_nil!)
@@ -55,7 +55,7 @@ class EngineDriver::Proxy::Scheduler
 
   def in(time, immediate = false, &block : -> _)
     raise "schedule proxy terminated" if @terminated
-    spawn { run_now(block) } if immediate
+    spawn(same_thread: true) { run_now(block) } if immediate
     wrapped = nil
     task = @scheduler.in(time) do
       @schedules.delete(wrapped.not_nil!)
@@ -68,7 +68,7 @@ class EngineDriver::Proxy::Scheduler
 
   def every(time, immediate = false, &block : -> _)
     raise "schedule proxy terminated" if @terminated
-    spawn { run_now(block) } if immediate
+    spawn(same_thread: true) { run_now(block) } if immediate
     task = @scheduler.every(time) { run_now(block) }
     wrap = TaskWrapper.new(task, @schedules)
     @schedules << wrap
@@ -77,7 +77,7 @@ class EngineDriver::Proxy::Scheduler
 
   def cron(string, immediate = false, &block : -> _)
     raise "schedule proxy terminated" if @terminated
-    spawn { run_now(block) } if immediate
+    spawn(same_thread: true) { run_now(block) } if immediate
     task = @scheduler.every(time) { run_now(block) }
     wrap = TaskWrapper.new(task, @schedules)
     @schedules << wrap

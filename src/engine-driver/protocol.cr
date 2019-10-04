@@ -54,9 +54,8 @@ class EngineDriver::Protocol
     @current_requests = {} of UInt64 => Request
     @next_requests = {} of UInt64 => Request
 
-    spawn { self.process }
-    spawn { self.consume_io }
     spawn { self.produce_io(timeout) }
+    spawn { self.consume_io }
   end
 
   @timeouts : Tasker::Task? = nil
@@ -127,7 +126,7 @@ class EngineDriver::Protocol
                       @next_requests.delete(seq)
                       channel = @tracking.delete(seq)
                       channel.try &.send(message)
-                      return
+                      next
                     else
                       raise "unknown request cmd type"
                     end
@@ -163,24 +162,25 @@ class EngineDriver::Protocol
       req.payload = raw ? payload.to_s : payload.to_json
     end
     channel = Channel(Request).new(1)
-
     @producer.send({req, channel})
     channel
   end
 
   @@seq = 0_u64
 
-  private def produce_io(timeout)
+  private def produce_io(timeout_period)
+    spawn(same_thread: true) { self.process }
+
     # Ensures all outgoing event processing is done on the same thread
     spawn(same_thread: true) do
-      @timeouts = Tasker.instance.every(timeout) do
-        current_requests = @current_requests
+      @timeouts = Tasker.instance.every(timeout_period) do
+        current_requests = @current_requests.values
         @current_requests = @next_requests
         @next_requests = {} of UInt64 => Request
 
         if !current_requests.empty?
           error = IO::Timeout.new("request timed out")
-          current_requests.each_value do |request|
+          current_requests.each do |request|
             timeout(error, request)
           end
         end
@@ -198,6 +198,7 @@ class EngineDriver::Protocol
       if channel
         seq = @@seq
         @@seq += 1
+        request.seq = seq
 
         @tracking[seq] = channel
         @next_requests[seq] = request

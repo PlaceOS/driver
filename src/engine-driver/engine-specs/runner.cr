@@ -35,7 +35,7 @@ class EngineSpec
     begin
       # Load the driver (inherit STDOUT for logging)
       # -p is for protocol / process mode - expecting engine core
-      spawn do
+      spawn(same_thread: true) do
         begin
           puts "Launching driver: #{driver_exec}"
           exit_code = Process.run(
@@ -58,9 +58,9 @@ class EngineSpec
       # Start comms
       puts "... starting driver IO services"
       spec = EngineSpec.new(driver_name, io)
-      spawn spec.__start_server__
-      spawn spec.__start_http_server__
-      spawn spec.__process_responses__
+      spawn(same_thread: true) { spec.__start_server__ }
+      spawn(same_thread: true) { spec.__start_http_server__ }
+      spawn(same_thread: true) { spec.__process_responses__ }
 
       puts "... requesting default settings"
       defaults_io = IO::Memory.new
@@ -152,7 +152,7 @@ class EngineSpec
         io.write json.to_slice
         io.flush
 
-        spawn do
+        spawn(same_thread: true) do
           sleep 1.seconds
           puts "level=ERROR : driver process failed to terminate gracefully"
           wait_driver_close.close
@@ -202,7 +202,7 @@ class EngineSpec
 
   def __start_server__
     while client = @server.accept?
-      spawn @new_connection.send(client)
+      spawn(same_thread: true) { @new_connection.send(client.as(TCPSocket)) }
     end
   end
 
@@ -225,7 +225,7 @@ class EngineSpec
         begin
           string = String.new(message[4, message.bytesize - 4])
           request = EngineDriver::Protocol::Request.from_json(string)
-          spawn do
+          spawn(same_thread: true) do
             case request.cmd
             when "result"
               seq = request.seq
@@ -278,13 +278,13 @@ class EngineSpec
     connection = nil
 
     # timeout
-    spawn do
+    spawn(same_thread: true) do
       sleep timeout
       @new_connection.close unless connection
     end
 
     @comms = connection = socket = @new_connection.receive
-    spawn { __process_transmissions__(socket) }
+    spawn(same_thread: true) { __process_transmissions__(socket) }
     socket
   rescue error : Channel::ClosedError
     raise "timeout waiting for module to connect"
@@ -355,7 +355,7 @@ class EngineSpec
 
       # Timeout
       tdata = data
-      spawn do
+      spawn(same_thread: true) do
         sleep timeout
         if sent.empty?
           channel.close
@@ -447,7 +447,7 @@ class EngineSpec
                   channel = Channel(MockHTTP).new(1)
 
                   # Timeout
-                  spawn do
+                  spawn(same_thread: true) do
                     sleep timeout
                     if temp_http.nil?
                       puts "level=ERROR : timeout waiting for expected HTTP request"

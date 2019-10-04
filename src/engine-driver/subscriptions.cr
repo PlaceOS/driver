@@ -2,6 +2,7 @@ require "logger"
 require "redis"
 require "retriable/core_ext/kernel"
 
+# TODO:: we need to be scheduling these onto the correct thread
 class EngineDriver::Subscriptions
   SYSTEM_ORDER_UPDATE = "lookup-change"
 
@@ -37,7 +38,7 @@ class EngineDriver::Subscriptions
     @running = false
 
     channel = Channel(Nil).new
-    spawn { monitor_changes(channel) }
+    spawn(same_thread: true) { monitor_changes(channel) }
     channel.receive?
   end
 
@@ -133,7 +134,7 @@ class EngineDriver::Subscriptions
         # This will run on redis reconnect
         # We can't have this run in the subscribe block as the subscribe block
         # needs to return before we subscribe to further channels
-        spawn {
+        spawn(same_thread: true) {
           wait.receive?
           @mutex.synchronize {
             # re-subscribe to existing subscriptions here
@@ -159,7 +160,7 @@ class EngineDriver::Subscriptions
         # requires a block and subsequent ones throw an error with a block.
         @redis_subscribe.subscribe(SYSTEM_ORDER_UPDATE) do |on|
           on.message { |c, m| on_message(c, m) }
-          spawn { wait.close }
+          spawn(same_thread: true) { wait.close }
         end
 
         raise "no subscriptions, restarting loop" unless @terminated
@@ -213,7 +214,7 @@ class EngineDriver::Subscriptions
 
       # notify of current value
       if current_value = subscription.current_value
-        spawn { subscription.callback(@logger, current_value.not_nil!) }
+        spawn(same_thread: true) { subscription.callback(@logger, current_value.not_nil!) }
       end
     end
   end

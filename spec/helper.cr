@@ -57,7 +57,7 @@ class Helper
   # Starts a simple TCP server for testing IO
   def self.tcp_server : Nil
     server = TCPServer.new("localhost", 1234)
-    spawn do
+    spawn(same_thread: true) do
       client = server.accept?.not_nil!
       server.close
 

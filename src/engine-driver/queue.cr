@@ -20,7 +20,7 @@ class EngineDriver::Queue
     @online = false
     @retry_bonus = 20
 
-    spawn { process! }
+    spawn(same_thread: true) { process! }
   end
 
   @current : Task?
@@ -140,7 +140,7 @@ class EngineDriver::Queue
     elsif task.name
       @queue.push priority, task
     else
-      spawn { task.abort("transport is currently offline") }
+      spawn(same_thread: true) { task.abort("transport is currently offline") }
     end
     task
   end
