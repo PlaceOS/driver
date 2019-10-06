@@ -33,4 +33,8 @@ class EngineDriver::Protocol::Request
   def build_error
     EngineDriver::RemoteException.new(self.payload, self.error, self.backtrace || [] of String)
   end
+
+  # Not part of the JSON payload, so we don't need to re-parse a request
+  @[JSON::Field(ignore: true)]
+  property driver_model : ::EngineDriver::DriverModel? = nil
 end

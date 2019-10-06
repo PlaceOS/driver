@@ -87,7 +87,15 @@ describe EngineDriver::ProcessManager do
     json = {
       id:      driver_id,
       cmd:     "update",
-      payload: %({"test": {"number": 1234}}),
+      payload: %({
+        "ip": "localhost",
+        "port": 23,
+        "udp": false,
+        "tls": false,
+        "makebreak": false,
+        "role": 1,
+        "settings": {"test": {"number": 1234}}
+      }),
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice
@@ -95,6 +103,27 @@ describe EngineDriver::ProcessManager do
     process.loaded[driver_id].settings.json["test"]["number"].as_i.should eq(123)
     sleep 0.01
     process.loaded[driver_id].settings.json["test"]["number"].as_i.should eq(1234)
+
+    # Update settings where the IP address has changed
+    json = {
+      id:      driver_id,
+      cmd:     "update",
+      payload: %({
+        "ip": "127.0.0.1",
+        "port": 23,
+        "udp": false,
+        "tls": false,
+        "makebreak": false,
+        "role": 1,
+        "settings": {"test": {"number": 12345}}
+      }),
+    }.to_json
+    input.write_bytes json.bytesize
+    input.write json.to_slice
+
+    process.loaded[driver_id].settings.json["test"]["number"].as_i.should eq(1234)
+    sleep 0.01
+    process.loaded[driver_id].settings.json["test"]["number"].as_i.should eq(12345)
 
     # Stop a driver
     json = {

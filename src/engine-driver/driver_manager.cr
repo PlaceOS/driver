@@ -46,6 +46,8 @@ class EngineDriver::DriverManager
     @driver = new_driver
   end
 
+  getter model : ::EngineDriver::DriverModel
+
   # This hack is required to "dynamically" load the user defined class
   # The compiler is somewhat fragile when it comes to initializers
   macro finished
@@ -108,8 +110,8 @@ class EngineDriver::DriverManager
 
   # TODO:: Core is sending the whole model object - so we should determine if
   # we should stop and start
-  def update(settings)
-    @settings.json = JSON.parse(settings.not_nil!).as_h
+  def update(driver_model)
+    @settings.json = driver_model.settings
     driver = @driver
     driver.on_update if driver.responds_to?(:on_update)
   rescue error
@@ -163,7 +165,7 @@ class EngineDriver::DriverManager
             request.set_error(error)
           end
         when "update"
-          update(request.payload)
+          update(request.driver_model.not_nil!)
         when "stop"
           terminate
         else

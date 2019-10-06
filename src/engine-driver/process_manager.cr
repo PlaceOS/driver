@@ -24,11 +24,11 @@ class EngineDriver::ProcessManager
   @logger : ::Logger
   getter :logger, :loaded, terminated
 
-  def start(request : Protocol::Request)
+  def start(request : Protocol::Request, driver_model = nil)
     module_id = request.id
     return if @loaded[module_id]?
 
-    model = EngineDriver::DriverModel.from_json(request.payload.not_nil!)
+    model = driver_model || EngineDriver::DriverModel.from_json(request.payload.not_nil!)
     driver = DriverManager.new module_id, model, @logger_io, @subscriptions
     @loaded[module_id] = driver
 
@@ -52,8 +52,25 @@ class EngineDriver::ProcessManager
   end
 
   def update(request : Protocol::Request) : Nil
-    driver = @loaded[request.id]?
-    if driver
+    module_id = request.id
+    driver = @loaded[module_id]?
+    return unless driver
+    existing = driver.model
+    updated = EngineDriver::DriverModel.from_json(request.payload.not_nil!)
+
+    # Check if there are changes that require module restart
+    if (
+      updated.ip != existing.ip || updated.udp != existing.udp ||
+      updated.tls != existing.tls || updated.port != existing.port ||
+      updated.makebreak != existing.makebreak || updated.uri != existing.uri ||
+      updated.role != existing.role
+    )
+      # Change required
+      stop request
+      start request, updated
+    else
+      # No change required
+      request.driver_model = updated
       promise = Promise.new(Nil)
       driver.requests.send({promise, request})
       promise.get
