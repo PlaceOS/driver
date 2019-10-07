@@ -1,4 +1,5 @@
 require "ipaddress"
+require "promise"
 
 class EngineDriver::DriverManager
   def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT, subscriptions = nil)

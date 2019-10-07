@@ -4,6 +4,8 @@ abstract class EngineDriver; end
 
 class EngineDriver::Protocol; end
 
+require "../driver_model"
+
 class EngineDriver::Protocol::Request
   include JSON::Serializable
 
