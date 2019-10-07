@@ -22,6 +22,8 @@ dependencies:
   ssh2:
     github: spider-gazelle/ssh2.cr
     branch: master
+  connect-proxy:
+    github: spider-gazelle/connect-proxy
 
 development_dependencies:
   ameba:

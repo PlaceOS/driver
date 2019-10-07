@@ -64,7 +64,7 @@ abstract class EngineDriver::Transport
 
     {% if @type.name.stringify != "EngineDriver::TransportLogic" %}
       protected def new_http_client(uri, context)
-        client = HTTPClient.new(uri, context)
+        client = ConnectProxy::HTTPClient.new(uri, context)
 
         # Ensure client socket has not been closed
         client.before_request { client.check_socket_valid }
@@ -76,7 +76,7 @@ abstract class EngineDriver::Transport
 
         # Apply proxy settings
         if proxy_config = @settings.get { setting?(NamedTuple(host: String, port: Int32, auth: NamedTuple(username: String, password: String)?), :proxy) }
-          proxy = HTTPProxy.new(**proxy_config)
+          proxy = ConnectProxy.new(**proxy_config)
           client.before_request { client.set_proxy(proxy) }
         end
 
