@@ -44,6 +44,10 @@ abstract class EngineDriver
     end
   {% end %}
 
+  def config
+    @__driver_model__
+  end
+
   # Status helpers #}
   def []=(key, value)
     key = key.to_s
