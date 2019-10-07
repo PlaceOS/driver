@@ -97,7 +97,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
 
   def send(message) : EngineDriver::TransportUDP
     socket = @socket
-    return 0 if socket.nil? || socket.closed?
+    return self if socket.nil? || socket.closed?
     if message.responds_to? :to_io
       socket.write_bytes(message)
     elsif message.responds_to? :to_slice
