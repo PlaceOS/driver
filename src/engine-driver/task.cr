@@ -68,6 +68,10 @@ class EngineDriver::Task
     self
   end
 
+  def complete?
+    @channel.closed?
+  end
+
   def get(response_required = false)
     response_required! if response_required
     @channel.receive?

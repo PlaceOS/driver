@@ -108,8 +108,13 @@ abstract class EngineDriver::Transport
   end
 
   private def process_message(data)
+    # We want to ignore completed tasks as they could not have been the cause of the data
+    # The next task has not executed so this data is not associated with a task
+    task = @queue.current
+    task = nil if task.try &.complete?
+
     # Check if the task provided a response processing block
-    if task = @queue.current
+    if task
       if processing = task.processing
         processing.call(data, task)
         return
@@ -117,7 +122,7 @@ abstract class EngineDriver::Transport
     end
 
     # See spec for how this callback is expected to be used
-    @received.call(data, @queue.current)
+    @received.call(data, task)
   rescue error
     @logger.error "error processing received data\n#{error.inspect_with_backtrace}"
   end
