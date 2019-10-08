@@ -1,4 +1,5 @@
 require "socket"
+require "promise"
 require "tokenizer"
 require "./mock_http"
 require "./responder"
@@ -31,26 +32,35 @@ class EngineSpec
     wait_driver_close = Channel(Nil).new
     exited = false
     exit_code = -1
+    pid = -1
 
     begin
+      fetch_pid = Promise.new(Int32)
+
       # Load the driver (inherit STDOUT for logging)
       # -p is for protocol / process mode - expecting engine core
       spawn(same_thread: true) do
         begin
           puts "Launching driver: #{driver_exec}"
-          exit_code = Process.run(
+          Process.run(
             driver_exec,
             {"-p"},
             input: stdin_reader,
             output: STDOUT,
             error: stderr_writer
-          ).exit_status
+          ) do |process|
+            fetch_pid.resolve process.pid
+          end
+
+          exit_code = $?.exit_status
           puts "Driver terminated with: #{exit_code}"
         ensure
           exited = true
           wait_driver_close.send(nil)
         end
       end
+
+      pid = fetch_pid.get
 
       # Wait for the driver to be ready
       io.read_string(1)
@@ -155,9 +165,10 @@ class EngineSpec
         spawn(same_thread: true) do
           sleep 1.seconds
           puts "level=ERROR : driver process failed to terminate gracefully"
+          Process.run("kill", {"-9", pid.to_s})
           wait_driver_close.close
         end
-        wait_driver_close.receive
+        wait_driver_close.receive?
       end
     end
   end
