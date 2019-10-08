@@ -2,7 +2,7 @@ class EngineSpec; end
 
 class EngineSpec::Responder
   def initialize
-    @channel = Channel(EngineDriver::Protocol::Request).new(1)
+    @channel = Channel(ACAEngine::Driver::Protocol::Request).new(1)
   end
 
   getter channel

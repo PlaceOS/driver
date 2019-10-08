@@ -1,16 +1,16 @@
 require "./helper"
 
-describe EngineDriver::DriverManager do
+describe ACAEngine::Driver::DriverManager do
   it "should initialize a driver" do
     driver = Helper.new_driver(Helper::TestDriver, "mod-987", Helper.protocol[0])
-    driver.is_a?(EngineDriver).should eq(true)
+    driver.is_a?(ACAEngine::Driver).should eq(true)
   end
 
   it "should initialize a concrete driver and execute on it" do
-    driver = Helper.new_driver({{EngineDriver::CONCRETE_DRIVERS.keys.first}}, "mod-999", Helper.protocol[0])
-    driver.is_a?(EngineDriver).should eq(true)
+    driver = Helper.new_driver({{ACAEngine::Driver::CONCRETE_DRIVERS.keys.first}}, "mod-999", Helper.protocol[0])
+    driver.is_a?(ACAEngine::Driver).should eq(true)
 
-    executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
+    executor = {{ACAEngine::Driver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
         {
           "__exec__": "add",
           "add": {
@@ -22,7 +22,7 @@ describe EngineDriver::DriverManager do
     executor.execute(driver).should eq("3")
 
     # Check that argument arrays can be accepted too
-    executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
+    executor = {{ACAEngine::Driver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
         {
           "__exec__": "add",
           "add": [2, 3]
@@ -30,7 +30,7 @@ describe EngineDriver::DriverManager do
     ))
     executor.execute(driver).should eq("5")
 
-    executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
+    executor = {{ACAEngine::Driver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
         {
           "__exec__": "splat_add",
           "splat_add": {}
@@ -39,7 +39,7 @@ describe EngineDriver::DriverManager do
     executor.execute(driver).should eq("0")
 
     # Test an enum heavy function
-    executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
+    executor = {{ACAEngine::Driver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
         {
           "__exec__": "switch_input",
           "switch_input": {"input": "DisplayPort"}
@@ -47,7 +47,7 @@ describe EngineDriver::DriverManager do
     ))
     executor.execute(driver).should eq(%("DisplayPort"))
 
-    {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.functions.should eq(%({
+    {{ACAEngine::Driver::CONCRETE_DRIVERS.values.first[1]}}.functions.should eq(%({
       "switch_input":{
         "input":["String"]
       },
@@ -74,8 +74,8 @@ describe EngineDriver::DriverManager do
   end
 
   it "should initialize an instance of driver manager" do
-    EngineDriver::Protocol.new_instance(Helper.protocol[0]) unless EngineDriver::Protocol.instance?
-    model = EngineDriver::DriverModel.from_json(%({
+    ACAEngine::Driver::Protocol.new_instance(Helper.protocol[0]) unless ACAEngine::Driver::Protocol.instance?
+    model = ACAEngine::Driver::DriverModel.from_json(%({
       "ip": "localhost",
       "port": 23,
       "udp": false,
@@ -84,6 +84,6 @@ describe EngineDriver::DriverManager do
       "role": 1,
       "settings": {"test": {"number": 123}}
     }))
-    EngineDriver::DriverManager.new "mod-driverman", model
+    ACAEngine::Driver::DriverManager.new "mod-driverman", model
   end
 end

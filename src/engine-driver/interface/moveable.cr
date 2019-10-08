@@ -1,6 +1,6 @@
-module EngineDriver::Interface; end
+module ACAEngine::Driver::Interface; end
 
-module EngineDriver::Interface::Moveable
+module ACAEngine::Driver::Interface::Moveable
   enum MoveablePosition
     Open
     Close

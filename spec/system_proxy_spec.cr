@@ -1,8 +1,8 @@
 require "./helper"
 
-describe EngineDriver::Proxy::System do
+describe ACAEngine::Driver::Proxy::System do
   Spec.before_each do
-    storage = EngineDriver::Storage.new("sys-1234", "system")
+    storage = ACAEngine::Driver::Storage.new("sys-1234", "system")
     storage.delete "Display\x021"
     storage.delete "Display\x022"
     storage.delete "Display\x023"
@@ -10,7 +10,7 @@ describe EngineDriver::Proxy::System do
   end
 
   Spec.after_each do
-    storage = EngineDriver::Storage.new("sys-1234", "system")
+    storage = ACAEngine::Driver::Storage.new("sys-1234", "system")
     storage.delete "Display\x021"
     storage.delete "Display\x022"
     storage.delete "Display\x023"
@@ -18,7 +18,7 @@ describe EngineDriver::Proxy::System do
   end
 
   it "indicate if a module / driver exists in a system" do
-    cs = EngineDriver::DriverModel::ControlSystem.from_json(%(
+    cs = ACAEngine::Driver::DriverModel::ControlSystem.from_json(%(
         {
           "id": "sys-1234",
           "name": "Tesing System",
@@ -29,7 +29,7 @@ describe EngineDriver::Proxy::System do
         }
     ))
 
-    system = EngineDriver::Proxy::System.new cs, "reply_id"
+    system = ACAEngine::Driver::Proxy::System.new cs, "reply_id"
 
     system.id.should eq("sys-1234")
     system.name.should eq("Tesing System")
@@ -41,7 +41,7 @@ describe EngineDriver::Proxy::System do
     system.exists?(:Display_1).should eq(false)
 
     # Create some virtual systems
-    storage = EngineDriver::Storage.new(cs.id, "system")
+    storage = ACAEngine::Driver::Storage.new(cs.id, "system")
     storage["Display\x021"] = "mod-1234"
     storage["Display\x022"] = "mod-5678"
     storage["Display\x023"] = "mod-9000"
@@ -58,7 +58,7 @@ describe EngineDriver::Proxy::System do
   end
 
   it "should subscribe to module status" do
-    cs = EngineDriver::DriverModel::ControlSystem.from_json(%(
+    cs = ACAEngine::Driver::DriverModel::ControlSystem.from_json(%(
         {
           "id": "sys-1234",
           "name": "Tesing System",
@@ -69,10 +69,10 @@ describe EngineDriver::Proxy::System do
         }
     ))
 
-    subs = EngineDriver::Proxy::Subscriptions.new
-    system = EngineDriver::Proxy::System.new cs, "reply_id"
+    subs = ACAEngine::Driver::Proxy::Subscriptions.new
+    system = ACAEngine::Driver::Proxy::System.new cs, "reply_id"
     # Create some virtual systems
-    storage = EngineDriver::Storage.new(cs.id, "system")
+    storage = ACAEngine::Driver::Storage.new(cs.id, "system")
     storage["Display\x021"] = "mod-1234"
     storage["Display\x022"] = "mod-5678"
     storage["Display\x023"] = "mod-9000"
@@ -83,7 +83,7 @@ describe EngineDriver::Proxy::System do
     message_passed = nil
     channel = Channel(Nil).new
 
-    mod_store = EngineDriver::Storage.new("mod-5678")
+    mod_store = ACAEngine::Driver::Storage.new("mod-5678")
     mod_store.delete("power")
 
     subscription = system.subscribe(:Display_2, :power) do |sub, value|

@@ -2,17 +2,17 @@ require "json"
 
 require "./driver"
 
-class EngineDriver::Proxy::Drivers
-  include Enumerable(EngineDriver::Proxy::Driver)
+class ACAEngine::Driver::Proxy::Drivers
+  include Enumerable(ACAEngine::Driver::Proxy::Driver)
 
-  def initialize(@drivers : Array(EngineDriver::Proxy::Driver))
+  def initialize(@drivers : Array(ACAEngine::Driver::Proxy::Driver))
   end
 
-  def [](index : Int32) : EngineDriver::Proxy::Driver
+  def [](index : Int32) : ACAEngine::Driver::Proxy::Driver
     @drivers[index]
   end
 
-  def []?(index : Int32) : EngineDriver::Proxy::Driver?
+  def []?(index : Int32) : ACAEngine::Driver::Proxy::Driver?
     @drivers[index]?
   end
 
@@ -47,7 +47,7 @@ class EngineDriver::Proxy::Drivers
   end
 
   # This deliberately prevents compilation if called from driver code
-  def subscribe(status, &callback : (EngineDriver::Subscriptions::IndirectSubscription, String) -> Nil) : EngineDriver::Subscriptions::IndirectSubscription
+  def subscribe(status, &callback : (ACAEngine::Driver::Subscriptions::IndirectSubscription, String) -> Nil) : ACAEngine::Driver::Subscriptions::IndirectSubscription
     {{ "Can't subscribe to state on a collection of drivers".id }}
   end
 

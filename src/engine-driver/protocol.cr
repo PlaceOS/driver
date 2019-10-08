@@ -11,7 +11,7 @@ STDERR.sync = true
 STDOUT.blocking = false
 STDOUT.sync = true
 
-class EngineDriver::Protocol
+class ACAEngine::Driver::Protocol
   # NOTE:: potentially move to using https://github.com/jeromegn/protobuf.cr
   # 10_000 decodes
   # Proto decoding   0.020000   0.040000   0.060000 (  0.020322)
@@ -67,20 +67,20 @@ class EngineDriver::Protocol
   end
 
   # For process manager
-  def self.new_instance(input = STDIN, output = STDERR) : EngineDriver::Protocol
-    @@instance = ::EngineDriver::Protocol.new(input, output)
+  def self.new_instance(input = STDIN, output = STDERR) : ACAEngine::Driver::Protocol
+    @@instance = ::ACAEngine::Driver::Protocol.new(input, output)
   end
 
-  def self.new_instance(instance : EngineDriver::Protocol) : EngineDriver::Protocol
+  def self.new_instance(instance : ACAEngine::Driver::Protocol) : ACAEngine::Driver::Protocol
     @@instance = instance
   end
 
   # For other classes
-  def self.instance : EngineDriver::Protocol
+  def self.instance : ACAEngine::Driver::Protocol
     @@instance.not_nil!
   end
 
-  def self.instance? : EngineDriver::Protocol?
+  def self.instance? : ACAEngine::Driver::Protocol?
     @@instance
   end
 

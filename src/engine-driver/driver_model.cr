@@ -1,6 +1,6 @@
 require "json"
 
-class EngineDriver::DriverModel
+class ACAEngine::Driver::DriverModel
   include JSON::Serializable
 
   class ControlSystem

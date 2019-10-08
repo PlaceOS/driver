@@ -2,7 +2,7 @@
 require "retriable/core_ext/kernel"
 require "option_parser"
 
-abstract class EngineDriver
+abstract class ACAEngine::Driver
   module Proxy
   end
 
@@ -22,7 +22,7 @@ abstract class EngineDriver
     @__setting__ : Settings,
     @__queue__ : Queue,
     @__transport__ : Transport,
-    @__logger__ : EngineDriver::Logger,
+    @__logger__ : ACAEngine::Driver::Logger,
     @__schedule__ = Proxy::Scheduler.new,
     @__subscriptions__ = Proxy::Subscriptions.new,
     @__driver_model__ = DriverModel.from_json(%({"udp":false,"tls":false,"makebreak":false,"settings":{},"role":1}))
@@ -30,7 +30,7 @@ abstract class EngineDriver
     @__status__ = Status.new
     @__storage__ = Storage.new(@__module_id__)
     @__storage__.clear
-    @__storage__.redis.set("interface\x02#{@__module_id__}", {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.metadata)
+    @__storage__.redis.set("interface\x02#{@__module_id__}", {{ACAEngine::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata)
   end
 
   @__system__ : Proxy::System?
@@ -104,7 +104,7 @@ abstract class EngineDriver
   end
 
   def define_setting(name, value)
-    EngineDriver::Protocol.instance.request(@__module_id__, "setting", {name, value})
+    ACAEngine::Driver::Protocol.instance.request(@__module_id__, "setting", {name, value})
   end
 
   # Queuing
@@ -120,7 +120,7 @@ abstract class EngineDriver
     end
   end
 
-  def send(message, **opts, &block : (Bytes, EngineDriver::Task) -> Nil)
+  def send(message, **opts, &block : (Bytes, ACAEngine::Driver::Task) -> Nil)
     queue(**opts) do |task|
       task.request_payload = message if task.responds_to?(:request_payload)
       transport.send(message, task, &block)
@@ -143,7 +143,7 @@ abstract class EngineDriver
 
   # utilities
   def wake_device(mac_address, subnet = "255.255.255.255", port = 9)
-    EngineDriver::Utilities::WakeOnLAN.wake_device(mac_address, subnet, port)
+    ACAEngine::Driver::Utilities::WakeOnLAN.wake_device(mac_address, subnet, port)
   end
 
   def set_connected_state(online, status_only = true)
@@ -173,7 +173,7 @@ abstract class EngineDriver
     end
   end
 
-  IGNORE_KLASSES   = ["EngineDriver", "Reference", "Object", "Spec::ObjectExtensions", "Colorize::ObjectExtensions"]
+  IGNORE_KLASSES   = ["ACAEngine::Driver", "Reference", "Object", "Spec::ObjectExtensions", "Colorize::ObjectExtensions"]
   RESERVED_METHODS = {} of Nil => Nil
   {% RESERVED_METHODS["received"] = true %}
   {% RESERVED_METHODS["connected"] = true %}
@@ -343,7 +343,7 @@ abstract class EngineDriver
 
         {% for method in methods %}
           {% if method.annotation(Security) %}
-            level = {{method.annotation(Security)[0]}}.as(::EngineDriver::Level).to_s.downcase
+            level = {{method.annotation(Security)[0]}}.as(::ACAEngine::Driver::Level).to_s.downcase
             array = sec[level]? || [] of String
             array << {{method.name.stringify}}
             sec[level] = array
@@ -387,12 +387,12 @@ macro finished
     parser.banner = "Usage: #{PROGRAM_NAME} [arguments]"
 
     parser.on("-m", "--metadata", "output driver metadata") do
-      puts {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.metadata
+      puts {{ACAEngine::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
       exit 0
     end
 
     parser.on("-d", "--defaults", "output driver defaults") do
-      puts EngineDriver::Utilities::Discovery.defaults
+      puts ACAEngine::Driver::Utilities::Discovery.defaults
       exit 0
     end
 
@@ -408,7 +408,7 @@ macro finished
 
   # Launch the process manager by default, this can be overriten for testing
   if exec_process_manager
-    process = EngineDriver::ProcessManager.new
+    process = ACAEngine::Driver::ProcessManager.new
 
     # Detect ctr-c to shutdown gracefully
     Signal::INT.trap do |signal|

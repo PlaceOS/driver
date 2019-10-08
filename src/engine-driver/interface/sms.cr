@@ -1,7 +1,7 @@
 # Common SMS Gateway Interface
-module EngineDriver::Interface; end
+module ACAEngine::Driver::Interface; end
 
-module EngineDriver::Interface::SMS
+module ACAEngine::Driver::Interface::SMS
   abstract def send_sms(
     phone_numbers : String | Array(String),
     message : String,

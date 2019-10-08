@@ -1,13 +1,13 @@
-module EngineDriver::Interface; end
+module ACAEngine::Driver::Interface; end
 
-module EngineDriver::Interface::InputSelection(Input)
+module ACAEngine::Driver::Interface::InputSelection(Input)
   # Switches all outputs to the requested input
   # Special case `switch_to 0` should mute all the outputs, if supported
   abstract def switch_to(input : Input)
 end
 
-module EngineDriver::Interface::Switchable(Input, Output)
-  include EngineDriver::Interface::InputSelection(Input)
+module ACAEngine::Driver::Interface::Switchable(Input, Output)
+  include ACAEngine::Driver::Interface::InputSelection(Input)
 
   enum SwitchLayer
     Audio

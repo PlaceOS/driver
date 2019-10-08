@@ -1,4 +1,4 @@
-module EngineDriver::Interface; end
+module ACAEngine::Driver::Interface; end
 
 # Splitting up the interfaces allows logic modules to check if the device
 # supports the required level of muting. Allowing to it to fallback to an
@@ -7,7 +7,7 @@ module EngineDriver::Interface; end
 # a logic module can check if the output supports video muting and fall back
 # to the mute function of the switcher
 
-module EngineDriver::Interface::AudioMuteable
+module ACAEngine::Driver::Interface::AudioMuteable
   abstract def mute_audio(state : Bool = true, index : Int32 | String = 0)
 
   def unmute_audio(index : Int32 | String = 0)
@@ -15,7 +15,7 @@ module EngineDriver::Interface::AudioMuteable
   end
 end
 
-module EngineDriver::Interface::VideoMuteable
+module ACAEngine::Driver::Interface::VideoMuteable
   abstract def mute_video(state : Bool = true, index : Int32 | String = 0)
 
   def unmute_video(index : Int32 | String = 0)
@@ -23,9 +23,9 @@ module EngineDriver::Interface::VideoMuteable
   end
 end
 
-module EngineDriver::Interface::Muteable
-  include EngineDriver::Interface::AudioMuteable
-  include EngineDriver::Interface::VideoMuteable
+module ACAEngine::Driver::Interface::Muteable
+  include ACAEngine::Driver::Interface::AudioMuteable
+  include ACAEngine::Driver::Interface::VideoMuteable
 
   enum MuteLayer
     Audio

@@ -1,4 +1,4 @@
-class EngineDriver::Status < Hash(String, String)
+class ACAEngine::Driver::Status < Hash(String, String)
   def set_json(key, value)
     key = key.to_s
     current_value = self[key]?

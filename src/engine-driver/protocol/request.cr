@@ -1,12 +1,12 @@
 require "../exception"
 
-abstract class EngineDriver; end
+abstract class ACAEngine::Driver; end
 
-class EngineDriver::Protocol; end
+class ACAEngine::Driver::Protocol; end
 
 require "../driver_model"
 
-class EngineDriver::Protocol::Request
+class ACAEngine::Driver::Protocol::Request
   include JSON::Serializable
 
   def initialize(@id, @cmd, @payload = nil, @error = nil, @backtrace = nil, @seq = nil, @reply = nil)
@@ -33,10 +33,10 @@ class EngineDriver::Protocol::Request
   end
 
   def build_error
-    EngineDriver::RemoteException.new(self.payload, self.error, self.backtrace || [] of String)
+    ACAEngine::Driver::RemoteException.new(self.payload, self.error, self.backtrace || [] of String)
   end
 
   # Not part of the JSON payload, so we don't need to re-parse a request
   @[JSON::Field(ignore: true)]
-  property driver_model : ::EngineDriver::DriverModel? = nil
+  property driver_model : ::ACAEngine::Driver::DriverModel? = nil
 end

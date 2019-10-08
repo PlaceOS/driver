@@ -1,12 +1,12 @@
 require "socket"
 require "openssl"
 
-class EngineDriver::TransportUDP < EngineDriver::Transport
+class ACAEngine::Driver::TransportUDP < ACAEngine::Driver::Transport
   MULTICASTRANGEV4 = IPAddress.new("224.0.0.0/4")
   MULTICASTRANGEV6 = IPAddress.new("ff00::/8")
 
   # timeouts in seconds
-  def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, @settings : ::EngineDriver::Settings, @start_tls = false, @uri = nil, &@received : (Bytes, EngineDriver::Task?) -> Nil)
+  def initialize(@queue : ACAEngine::Driver::Queue, @ip : String, @port : Int32, @settings : ::ACAEngine::Driver::Settings, @start_tls = false, @uri = nil, &@received : (Bytes, ACAEngine::Driver::Task?) -> Nil)
     @terminated = false
     @tls_started = false
     @logger = @queue.logger
@@ -16,7 +16,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
   @logger : ::Logger
   @socket : IO?
   @tls : OpenSSL::SSL::Context::Client?
-  @settings : ::EngineDriver::Settings
+  @settings : ::ACAEngine::Driver::Settings
 
   property :received
   getter :logger
@@ -95,7 +95,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
     @socket.try &.close
   end
 
-  def send(message) : EngineDriver::TransportUDP
+  def send(message) : ACAEngine::Driver::TransportUDP
     socket = @socket
     return self if socket.nil? || socket.closed?
     if message.responds_to? :to_io
@@ -110,7 +110,7 @@ class EngineDriver::TransportUDP < EngineDriver::Transport
     self
   end
 
-  def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil) : EngineDriver::TransportUDP
+  def send(message, task : ACAEngine::Driver::Task, &block : (Bytes, ACAEngine::Driver::Task) -> Nil) : ACAEngine::Driver::TransportUDP
     task.processing = block
     send(message)
   end

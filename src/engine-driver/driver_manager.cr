@@ -1,13 +1,13 @@
 require "ipaddress"
 require "promise"
 
-class EngineDriver::DriverManager
+class ACAEngine::Driver::DriverManager
   def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT, subscriptions = nil)
     subscriptions ||= Subscriptions.new(module_id: @module_id)
     @settings = Settings.new @model.settings
-    @logger = EngineDriver::Logger.new(@module_id, logger_io)
+    @logger = ACAEngine::Driver::Logger.new(@module_id, logger_io)
     @queue = Queue.new(@logger) { |state| connection(state) }
-    @schedule = EngineDriver::Proxy::Scheduler.new(@logger)
+    @schedule = ACAEngine::Driver::Proxy::Scheduler.new(@logger)
     @subscriptions = Proxy::Subscriptions.new(subscriptions)
 
     # Ensures execution all occurs on a single thread
@@ -17,7 +17,7 @@ class EngineDriver::DriverManager
                  when DriverModel::Role::SSH
                    ip = @model.ip.not_nil!
                    port = @model.port.not_nil!
-                   EngineDriver::TransportSSH.new(@queue, ip, port, @settings, @model.uri) do |data, task|
+                   ACAEngine::Driver::TransportSSH.new(@queue, ip, port, @settings, @model.uri) do |data, task|
                      received(data, task)
                    end
                  when DriverModel::Role::RAW
@@ -28,43 +28,43 @@ class EngineDriver::DriverManager
                    makebreak = @model.makebreak
 
                    if udp
-                     EngineDriver::TransportUDP.new(@queue, ip, port, @settings, tls, @model.uri) do |data, task|
+                     ACAEngine::Driver::TransportUDP.new(@queue, ip, port, @settings, tls, @model.uri) do |data, task|
                        received(data, task)
                      end
                    else
-                     EngineDriver::TransportTCP.new(@queue, ip, port, @settings, tls, @model.uri, makebreak) do |data, task|
+                     ACAEngine::Driver::TransportTCP.new(@queue, ip, port, @settings, tls, @model.uri, makebreak) do |data, task|
                        received(data, task)
                      end
                    end
                  when DriverModel::Role::HTTP
-                   EngineDriver::TransportHTTP.new(@queue, @model.uri.not_nil!, @settings)
+                   ACAEngine::Driver::TransportHTTP.new(@queue, @model.uri.not_nil!, @settings)
                  when DriverModel::Role::LOGIC
                    # nothing required to be done here
-                   EngineDriver::TransportLogic.new(@queue)
+                   ACAEngine::Driver::TransportLogic.new(@queue)
                  else
                    raise "unknown role for driver #{@module_id}"
                  end
     @driver = new_driver
   end
 
-  getter model : ::EngineDriver::DriverModel
+  getter model : ::ACAEngine::Driver::DriverModel
 
   # This hack is required to "dynamically" load the user defined class
   # The compiler is somewhat fragile when it comes to initializers
   macro finished
     macro define_new_driver
       macro new_driver
-        {{EngineDriver::CONCRETE_DRIVERS.keys.first}}.new(@module_id, @settings, @queue, @transport, @logger, @schedule, @subscriptions, @model)
+        {{ACAEngine::Driver::CONCRETE_DRIVERS.keys.first}}.new(@module_id, @settings, @queue, @transport, @logger, @schedule, @subscriptions, @model)
       end
 
-      @driver : {{EngineDriver::CONCRETE_DRIVERS.keys.first}}
+      @driver : {{ACAEngine::Driver::CONCRETE_DRIVERS.keys.first}}
 
       def self.driver_class
-        {{EngineDriver::CONCRETE_DRIVERS.keys.first}}
+        {{ACAEngine::Driver::CONCRETE_DRIVERS.keys.first}}
       end
 
       def self.driver_executor
-        {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}
+        {{ACAEngine::Driver::CONCRETE_DRIVERS.values.first[1]}}
       end
     end
 
@@ -120,7 +120,7 @@ class EngineDriver::DriverManager
   end
 
   def execute(json)
-    executor = {{EngineDriver::CONCRETE_DRIVERS.values.first[1]}}.new(json)
+    executor = {{ACAEngine::Driver::CONCRETE_DRIVERS.values.first[1]}}.new(json)
     executor.execute(@driver)
   end
 

@@ -1,10 +1,10 @@
-module EngineDriver::Interface; end
+module ACAEngine::Driver::Interface; end
 
 # Compatible drivers will expose a status variable:
 # self[:power] = true / false
 # The power state function allows one to sepecify a preferred level of off if
 # supported by the device
-module EngineDriver::Interface::Powerable
+module ACAEngine::Driver::Interface::Powerable
   abstract def power(state : Bool)
 
   enum PowerState

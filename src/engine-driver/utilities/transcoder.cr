@@ -1,4 +1,4 @@
-module EngineDriver::Utilities::Transcoder
+module ACAEngine::Driver::Utilities::Transcoder
   # Converts a hex encoded string into bytes
   def hex_to_bytes(string)
     string = string.gsub(/(0x|[^0-9A-Fa-f])*/, "")

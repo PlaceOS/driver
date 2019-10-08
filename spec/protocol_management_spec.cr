@@ -1,13 +1,13 @@
 require "./helper"
 require "../src/engine-driver/protocol/management"
 
-describe EngineDriver::Protocol::Management do
+describe ACAEngine::Driver::Protocol::Management do
   it "should launch and manage an engine driver process" do
     # build a driver
     `crystal build ./spec/test_build.cr`
 
     # manage that driver
-    manager = EngineDriver::Protocol::Management.new("./test_build")
+    manager = ACAEngine::Driver::Protocol::Management.new("./test_build")
     manager.running?.should eq(false)
 
     # Launch an instance of the driver

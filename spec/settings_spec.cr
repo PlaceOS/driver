@@ -1,6 +1,6 @@
 require "./helper"
 
-describe EngineDriver::Settings do
+describe ACAEngine::Driver::Settings do
   it "should provide simplified access to settings" do
     settings = Helper.settings
 

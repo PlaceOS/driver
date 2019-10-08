@@ -3,7 +3,7 @@ require "redis"
 require "retriable/core_ext/kernel"
 
 # TODO:: we need to be scheduling these onto the correct thread
-class EngineDriver::Subscriptions
+class ACAEngine::Driver::Subscriptions
   SYSTEM_ORDER_UPDATE = "lookup-change"
 
   def initialize(logger_io = STDOUT, module_id = "")
@@ -26,10 +26,10 @@ class EngineDriver::Subscriptions
     @mutex = Mutex.new
 
     # Channel name to subscriptions
-    @subscriptions = {} of String => Array(EngineDriver::Subscriptions::Subscription)
+    @subscriptions = {} of String => Array(ACAEngine::Driver::Subscriptions::Subscription)
 
     # System ID to subscriptions
-    @redirections = {} of String => Array(EngineDriver::Subscriptions::IndirectSubscription)
+    @redirections = {} of String => Array(ACAEngine::Driver::Subscriptions::IndirectSubscription)
 
     # Subscriptions need their own seperate client
     @redis_subscribe = new_redis_client
@@ -59,19 +59,19 @@ class EngineDriver::Subscriptions
   end
 
   # Self reference subscription
-  def subscribe(module_id, status, &callback : (EngineDriver::Subscriptions::DirectSubscription, String) ->) : EngineDriver::Subscriptions::DirectSubscription
-    sub = EngineDriver::Subscriptions::DirectSubscription.new(module_id.to_s, status.to_s, &callback)
+  def subscribe(module_id, status, &callback : (ACAEngine::Driver::Subscriptions::DirectSubscription, String) ->) : ACAEngine::Driver::Subscriptions::DirectSubscription
+    sub = ACAEngine::Driver::Subscriptions::DirectSubscription.new(module_id.to_s, status.to_s, &callback)
     perform_subscribe(sub)
     sub
   end
 
   # Abstract subscription
-  def subscribe(system_id, module_name, index, status, &callback : (EngineDriver::Subscriptions::IndirectSubscription, String) ->) : EngineDriver::Subscriptions::IndirectSubscription
-    sub = EngineDriver::Subscriptions::IndirectSubscription.new(system_id.to_s, module_name.to_s, index.to_i, status.to_s, &callback)
+  def subscribe(system_id, module_name, index, status, &callback : (ACAEngine::Driver::Subscriptions::IndirectSubscription, String) ->) : ACAEngine::Driver::Subscriptions::IndirectSubscription
+    sub = ACAEngine::Driver::Subscriptions::IndirectSubscription.new(system_id.to_s, module_name.to_s, index.to_i, status.to_s, &callback)
 
     @mutex.synchronize {
       # Track indirect subscriptions
-      subscriptions = @redirections[system_id] ||= [] of EngineDriver::Subscriptions::IndirectSubscription
+      subscriptions = @redirections[system_id] ||= [] of ACAEngine::Driver::Subscriptions::IndirectSubscription
       subscriptions << sub
       perform_subscribe(sub)
     }
@@ -80,14 +80,14 @@ class EngineDriver::Subscriptions
   end
 
   # Provide generic channels for modules to communicate over
-  def channel(name, &callback : (EngineDriver::Subscriptions::ChannelSubscription, String) -> Nil) : EngineDriver::Subscriptions::ChannelSubscription
-    sub = EngineDriver::Subscriptions::ChannelSubscription.new(name.to_s, &callback)
+  def channel(name, &callback : (ACAEngine::Driver::Subscriptions::ChannelSubscription, String) -> Nil) : ACAEngine::Driver::Subscriptions::ChannelSubscription
+    sub = ACAEngine::Driver::Subscriptions::ChannelSubscription.new(name.to_s, &callback)
     if channel = sub.subscribe_to
       # update the subscription cache
       if subscriptions = @subscriptions[channel]?
         subscriptions << sub
       else
-        subscriptions = @subscriptions[channel] = [] of EngineDriver::Subscriptions::Subscription
+        subscriptions = @subscriptions[channel] = [] of ACAEngine::Driver::Subscriptions::Subscription
         subscriptions << sub
         @redis_subscribe.subscribe channel
       end
@@ -95,7 +95,7 @@ class EngineDriver::Subscriptions
     sub
   end
 
-  def unsubscribe(subscription : EngineDriver::Subscriptions::Subscription) : Nil
+  def unsubscribe(subscription : ACAEngine::Driver::Subscriptions::Subscription) : Nil
     @mutex.synchronize {
       # clean up indirect subscription (if this is one)
       if redirect = @redirections[subscription.system_id]?
@@ -207,7 +207,7 @@ class EngineDriver::Subscriptions
       if subscriptions = @subscriptions[channel]?
         subscriptions << subscription
       else
-        subscriptions = @subscriptions[channel] = [] of EngineDriver::Subscriptions::Subscription
+        subscriptions = @subscriptions[channel] = [] of ACAEngine::Driver::Subscriptions::Subscription
         subscriptions << subscription
         @redis_subscribe.subscribe channel
       end
@@ -219,7 +219,7 @@ class EngineDriver::Subscriptions
     end
   end
 
-  private def perform_unsubscribe(subscription : EngineDriver::Subscriptions::Subscription, channel : String)
+  private def perform_unsubscribe(subscription : ACAEngine::Driver::Subscriptions::Subscription, channel : String)
     if subscriptions = @subscriptions[channel]?
       sub = subscriptions.delete(subscription)
       if sub == subscription && subscriptions.empty?

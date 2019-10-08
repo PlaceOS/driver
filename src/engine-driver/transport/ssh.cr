@@ -2,14 +2,14 @@ require "socket"
 require "tasker"
 require "ssh2"
 
-class EngineDriver
+class ACAEngine::Driver
   protected def exec(message)
     transport.exec(message)
   end
 
   class TransportSSH < Transport
     # timeouts in seconds
-    def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, @settings : ::EngineDriver::Settings, @uri = nil, &@received : (Bytes, EngineDriver::Task?) -> Nil)
+    def initialize(@queue : ACAEngine::Driver::Queue, @ip : String, @port : Int32, @settings : ::ACAEngine::Driver::Settings, @uri = nil, &@received : (Bytes, ACAEngine::Driver::Task?) -> Nil)
       @terminated = false
       @logger = @queue.logger
     end
@@ -174,7 +174,7 @@ class EngineDriver
       self
     end
 
-    def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil) : TransportSSH
+    def send(message, task : ACAEngine::Driver::Task, &block : (Bytes, ACAEngine::Driver::Task) -> Nil) : TransportSSH
       task.processing = block
       send(message)
     end

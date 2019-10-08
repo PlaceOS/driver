@@ -2,7 +2,7 @@ require "priority-queue"
 require "tasker"
 require "json"
 
-class EngineDriver::Queue
+class ACAEngine::Driver::Queue
   def initialize(@logger : ::Logger, &@connected_callback : Bool -> Nil)
     @queue = Priority::Queue(Task).new
 

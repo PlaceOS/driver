@@ -2,12 +2,12 @@ require "priority-queue"
 require "tasker"
 require "json"
 
-class EngineDriver::Task
+class ACAEngine::Driver::Task
   DEFAULT_RESULT = "null"
   DEFAULT_BACKTR = [] of String
 
   def initialize(
-    @queue : EngineDriver::Queue,
+    @queue : ACAEngine::Driver::Queue,
     @callback : Proc(Task, Nil),
     @priority : Int32,
     @timeout : Time::Span,

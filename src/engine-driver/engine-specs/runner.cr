@@ -185,7 +185,7 @@ class EngineSpec
 
     # Request Response tracking
     @request_sequence = 0_u64
-    @requests = {} of UInt64 => Channel(EngineDriver::Protocol::Request)
+    @requests = {} of UInt64 => Channel(ACAEngine::Driver::Protocol::Request)
 
     # Transmit tracking
     @transmissions = [] of Bytes
@@ -224,7 +224,7 @@ class EngineSpec
         string = nil
         begin
           string = String.new(message[4, message.bytesize - 4])
-          request = EngineDriver::Protocol::Request.from_json(string)
+          request = ACAEngine::Driver::Protocol::Request.from_json(string)
           spawn(same_thread: true) do
             case request.cmd
             when "result"

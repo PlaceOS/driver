@@ -1,9 +1,9 @@
 require "json"
 
-class EngineDriver::ProcessManager
+class ACAEngine::Driver::ProcessManager
   def initialize(@logger_io = STDOUT, @input = STDIN, output = STDERR)
     @subscriptions = Subscriptions.new(@logger_io)
-    @protocol = EngineDriver::Protocol.new_instance(@input, output)
+    @protocol = ACAEngine::Driver::Protocol.new_instance(@input, output)
     @logger = @subscriptions.logger
 
     @loaded = {} of String => DriverManager
@@ -28,7 +28,7 @@ class EngineDriver::ProcessManager
     module_id = request.id
     return if @loaded[module_id]?
 
-    model = driver_model || EngineDriver::DriverModel.from_json(request.payload.not_nil!)
+    model = driver_model || ACAEngine::Driver::DriverModel.from_json(request.payload.not_nil!)
     driver = DriverManager.new module_id, model, @logger_io, @subscriptions
     @loaded[module_id] = driver
 
@@ -56,7 +56,7 @@ class EngineDriver::ProcessManager
     driver = @loaded[module_id]?
     return unless driver
     existing = driver.model
-    updated = EngineDriver::DriverModel.from_json(request.payload.not_nil!)
+    updated = ACAEngine::Driver::DriverModel.from_json(request.payload.not_nil!)
 
     # Check if there are changes that require module restart
     if (

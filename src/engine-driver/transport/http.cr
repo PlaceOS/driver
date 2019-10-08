@@ -1,7 +1,7 @@
 require "http"
 require "./http_proxy"
 
-class EngineDriver
+class ACAEngine::Driver
   # Implement the HTTP helpers
   protected def http(method, path, body : ::HTTP::Client::BodyType = nil,
                      params : Hash(String, String?) = {} of String => String?,
@@ -48,7 +48,7 @@ class EngineDriver
   # Implement transport
   class TransportHTTP < Transport
     # timeouts in seconds
-    def initialize(@queue : EngineDriver::Queue, uri_base : String, @settings : ::EngineDriver::Settings)
+    def initialize(@queue : ACAEngine::Driver::Queue, uri_base : String, @settings : ::ACAEngine::Driver::Settings)
       @terminated = false
       @logger = @queue.logger
       @tls = new_tls_context
@@ -202,7 +202,7 @@ class EngineDriver
       raise "not available to HTTP drivers"
     end
 
-    def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil) : TransportHTTP
+    def send(message, task : ACAEngine::Driver::Task, &block : (Bytes, ACAEngine::Driver::Task) -> Nil) : TransportHTTP
       raise "not available to HTTP drivers"
     end
   end

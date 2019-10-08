@@ -1,8 +1,8 @@
 require "./helper"
 
-describe EngineDriver::Storage do
+describe ACAEngine::Driver::Storage do
   it "should perform basic storage operations" do
-    store = EngineDriver::Storage.new("test-123")
+    store = ACAEngine::Driver::Storage.new("test-123")
     store.size.should eq(0)
     store[:test] = "null"
     store.size.should eq(1)
@@ -20,7 +20,7 @@ describe EngineDriver::Storage do
   end
 
   it "should return keys and values" do
-    store = EngineDriver::Storage.new("test-123")
+    store = ACAEngine::Driver::Storage.new("test-123")
     store[:test] = "null"
     store[:other] = "1234"
     store.size.should eq(2)
@@ -46,7 +46,7 @@ describe EngineDriver::Storage do
   end
 
   it "should generate a crystal hash" do
-    store = EngineDriver::Storage.new("test-123")
+    store = ACAEngine::Driver::Storage.new("test-123")
     store[:test] = "null"
     store[:other] = "1234"
     store.size.should eq(2)

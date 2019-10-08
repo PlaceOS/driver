@@ -12,7 +12,7 @@ Messages are written as message length (binary unsigned 32bit number) followed b
 
 ## Processing Commands
 
-* Commands are defined by the `EngineDriver::Protocol::Request` class.
+* Commands are defined by the `ACAEngine::Driver::Protocol::Request` class.
 * Incoming requests are buffered and tokenised `def consume_io`
 * Commands are then asynchronously dispatched `def process(message)`
 

@@ -1,15 +1,15 @@
 require "json"
 
-class EngineDriver::Proxy::Driver
+class ACAEngine::Driver::Proxy::Driver
   def initialize(
     @reply_id : String,
     @module_name : String,
     @index : Int32,
     @module_id : String,
-    @system : EngineDriver::Proxy::System,
-    @metadata : EngineDriver::DriverModel::Metadata
+    @system : ACAEngine::Driver::Proxy::System,
+    @metadata : ACAEngine::Driver::DriverModel::Metadata
   )
-    @status = EngineDriver::Storage.new(@module_id)
+    @status = ACAEngine::Driver::Storage.new(@module_id)
   end
 
   getter :module_name, :index
@@ -45,7 +45,7 @@ class EngineDriver::Proxy::Driver
   # All subscriptions to external drivers should be indirect as the driver might
   # be swapped into a completely different system - whilst we've looked up the id
   # of this instance of a driver, it's expected that this object is short lived
-  def subscribe(status, &callback : (EngineDriver::Subscriptions::IndirectSubscription, String) -> Nil) : EngineDriver::Subscriptions::IndirectSubscription
+  def subscribe(status, &callback : (ACAEngine::Driver::Subscriptions::IndirectSubscription, String) -> Nil) : ACAEngine::Driver::Subscriptions::IndirectSubscription
     @system.subscribe(@module_name, @index, status, &callback)
   end
 
@@ -119,7 +119,7 @@ class EngineDriver::Proxy::Driver
       end
 
       # parse the execute response
-      channel = EngineDriver::Protocol.instance.expect_response(@module_id, @reply_id, "exec", request, raw: true)
+      channel = ACAEngine::Driver::Protocol.instance.expect_response(@module_id, @reply_id, "exec", request, raw: true)
 
       # Grab the result if required
       lazy do
@@ -127,7 +127,7 @@ class EngineDriver::Proxy::Driver
 
         if error = result.error
           backtrace = result.backtrace || [] of String
-          exception = EngineDriver::RemoteException.new(result.payload, error, backtrace)
+          exception = ACAEngine::Driver::RemoteException.new(result.payload, error, backtrace)
           @system.logger.warn "#{exception.message}\n#{exception.backtrace?.try &.join("\n")}"
           raise exception
         else

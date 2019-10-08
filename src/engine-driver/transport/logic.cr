@@ -1,7 +1,7 @@
 require "socket"
 
-class EngineDriver::TransportLogic < EngineDriver::Transport
-  def initialize(@queue : EngineDriver::Queue)
+class ACAEngine::Driver::TransportLogic < ACAEngine::Driver::Transport
+  def initialize(@queue : ACAEngine::Driver::Queue)
   end
 
   def start_tls(verify_mode, context) : Nil
@@ -18,11 +18,11 @@ class EngineDriver::TransportLogic < EngineDriver::Transport
   def disconnect : Nil
   end
 
-  def send(message) : EngineDriver::TransportLogic
+  def send(message) : ACAEngine::Driver::TransportLogic
     self
   end
 
-  def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil) : EngineDriver::TransportLogic
+  def send(message, task : ACAEngine::Driver::Task, &block : (Bytes, ACAEngine::Driver::Task) -> Nil) : ACAEngine::Driver::TransportLogic
     self
   end
 end

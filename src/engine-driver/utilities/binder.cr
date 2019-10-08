@@ -1,4 +1,4 @@
-abstract class EngineDriver
+abstract class ACAEngine::Driver
   BINDINGS = {} of Nil => Nil
 
   macro __build_apply_bindings__

@@ -6,7 +6,7 @@ require "./request"
 
 # Launch driver when first instance is requested
 # Shutdown driver when no more instances required
-class EngineDriver::Protocol::Management
+class ACAEngine::Driver::Protocol::Management
   def initialize(@driver_path : String, @logger = ::Logger.new(STDOUT))
     @request_lock = Mutex.new
     @requests = {} of UInt64 => Promise::DeferredPromise(String?)
@@ -89,11 +89,11 @@ class EngineDriver::Protocol::Management
     promise = Promise.new(String)
 
     sequence = @request_lock.synchronize do
-                  seq = @sequence
-                  @sequence += 1
-                  @requests[seq] = promise
-                  seq
-                end
+      seq = @sequence
+      @sequence += 1
+      @requests[seq] = promise
+      seq
+    end
 
     @events.send(Request.new(module_id, "exec", payload, seq: sequence))
     promise.get.as(String)
@@ -101,10 +101,10 @@ class EngineDriver::Protocol::Management
 
   def debug(module_id : String, &callback : (String) -> Nil) : Nil
     count = @debug_lock.synchronize do
-                  array = @debugging[module_id]
-                  array << callback
-                  array.size
-                end
+      array = @debugging[module_id]
+      array << callback
+      array.size
+    end
 
     return unless count == 1
 
@@ -113,17 +113,17 @@ class EngineDriver::Protocol::Management
 
   def ignore(module_id : String, &callback : (String) -> Nil) : Nil
     signal = @debug_lock.synchronize do
-              array = @debugging[module_id]
-              initial_size = array.size
-              array.delete callback
+      array = @debugging[module_id]
+      initial_size = array.size
+      array.delete callback
 
-              if array.size == 0
-                @debugging.delete(module_id)
-                initial_size > 0
-              else
-                false
-              end
-            end
+      if array.size == 0
+        @debugging.delete(module_id)
+        initial_size > 0
+      else
+        false
+      end
+    end
 
     return unless signal
 

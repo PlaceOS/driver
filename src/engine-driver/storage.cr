@@ -1,8 +1,8 @@
 require "redis"
 
-abstract class EngineDriver; end
+abstract class ACAEngine::Driver; end
 
-class EngineDriver::Storage < Hash(String, String)
+class ACAEngine::Driver::Storage < Hash(String, String)
   @@instance : Redis::PooledClient?
 
   REDIS_URL  = ENV["REDIS_URL"]?

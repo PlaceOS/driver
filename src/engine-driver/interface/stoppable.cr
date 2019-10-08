@@ -1,5 +1,5 @@
-module EngineDriver::Interface; end
+module ACAEngine::Driver::Interface; end
 
-module EngineDriver::Interface::Stoppable
+module ACAEngine::Driver::Interface::Stoppable
   abstract def stop(index : Int32 | String = 0, emergency : Bool = false)
 end

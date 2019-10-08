@@ -1,6 +1,6 @@
 require "json"
 
-class EngineDriver::Settings
+class ACAEngine::Driver::Settings
   def initialize(settings : String)
     @json = JSON.parse(settings).as_h
   end
@@ -77,7 +77,7 @@ class EngineDriver::Settings
   macro extract(klass, json)
     {% ks = klass.id.stringify %}
     {% found = false %}
-    {% for key, value in EngineDriver::Settings::JSON_TYPES %}
+    {% for key, value in ACAEngine::Driver::Settings::JSON_TYPES %}
       {% if ks == key %}
         {% found = true %}
         {{json}}.as_{{value.id}}

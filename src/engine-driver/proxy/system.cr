@@ -2,7 +2,7 @@ require "json"
 
 require "../driver_model"
 
-class EngineDriver::Proxy::System
+class ACAEngine::Driver::Proxy::System
   def initialize(
     @model : DriverModel::ControlSystem,
     @reply_id : String,
@@ -10,8 +10,8 @@ class EngineDriver::Proxy::System
     @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new
   )
     @system_id = @model.id
-    @system = EngineDriver::Storage.new(@system_id, "system")
-    @redis = EngineDriver::Storage.redis_pool
+    @system = ACAEngine::Driver::Storage.new(@system_id, "system")
+    @redis = ACAEngine::Driver::Storage.redis_pool
   end
 
   @system_id : String
@@ -32,12 +32,12 @@ class EngineDriver::Proxy::System
   # Retrieve module metadata from redis
   #
   def self.module_id?(system_id, module_name, index) : String?
-    EngineDriver::Storage.new(system_id, "system")["#{module_name}\x02#{index}"]?
+    ACAEngine::Driver::Storage.new(system_id, "system")["#{module_name}\x02#{index}"]?
   end
 
   # Retrieve module metadata from redis
   #
-  def self.driver_metadata?(system_id, module_name, index) : EngineDriver::DriverModel::Metadata?
+  def self.driver_metadata?(system_id, module_name, index) : ACAEngine::Driver::DriverModel::Metadata?
     # Pull module_id from System redis
     module_id = self.module_id?(system_id, module_name, index)
 
@@ -46,13 +46,13 @@ class EngineDriver::Proxy::System
 
   # Retrieve module metadata from redis, bypassing module_id lookup
   #
-  def self.driver_metadata?(module_id) : EngineDriver::DriverModel::Metadata?
-    EngineDriver::Storage
+  def self.driver_metadata?(module_id) : ACAEngine::Driver::DriverModel::Metadata?
+    ACAEngine::Driver::Storage
       .get("interface\x02#{module_id}")
       .try(&->DriverModel::Metadata.from_json(String))
   end
 
-  private def get_driver(module_name, index) : EngineDriver::Proxy::Driver
+  private def get_driver(module_name, index) : ACAEngine::Driver::Proxy::Driver
     module_name = module_name.to_s
     index = index.to_i
 
@@ -71,7 +71,7 @@ class EngineDriver::Proxy::System
     Proxy::Driver.new(@reply_id, module_name, index, module_id, self, metadata)
   end
 
-  def all(module_name) : EngineDriver::Proxy::Drivers
+  def all(module_name) : ACAEngine::Driver::Proxy::Drivers
     module_name = module_name.to_s
     drivers = [] of Proxy::Driver
 
@@ -94,11 +94,11 @@ class EngineDriver::Proxy::System
       end
     end
 
-    EngineDriver::Proxy::Drivers.new(drivers)
+    ACAEngine::Driver::Proxy::Drivers.new(drivers)
   end
 
   # grabs all modules implementing(Powerable) for example
-  def implementing(interface) : EngineDriver::Proxy::Drivers
+  def implementing(interface) : ACAEngine::Driver::Proxy::Drivers
     interface = interface.to_s
     drivers = [] of Proxy::Driver
 
@@ -116,11 +116,11 @@ class EngineDriver::Proxy::System
       end
     end
 
-    EngineDriver::Proxy::Drivers.new(drivers)
+    ACAEngine::Driver::Proxy::Drivers.new(drivers)
   end
 
   # coordination to occur on engine core
-  def load_complete(&callback : (EngineDriver::Subscriptions::ChannelSubscription, String) -> Nil)
+  def load_complete(&callback : (ACAEngine::Driver::Subscriptions::ChannelSubscription, String) -> Nil)
     subscription = @subscriptions.channel("engine_load_complete", &callback)
 
     spawn do
@@ -138,7 +138,7 @@ class EngineDriver::Proxy::System
   end
 
   # Manages subscribing to all the non-local subscriptions
-  def subscribe(module_name, index, status = nil, &callback : (EngineDriver::Subscriptions::IndirectSubscription, String) -> Nil) : EngineDriver::Subscriptions::IndirectSubscription
+  def subscribe(module_name, index, status = nil, &callback : (ACAEngine::Driver::Subscriptions::IndirectSubscription, String) -> Nil) : ACAEngine::Driver::Subscriptions::IndirectSubscription
     if status.nil?
       status = index
       module_name, index = get_parts(module_name)

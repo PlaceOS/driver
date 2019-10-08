@@ -1,8 +1,8 @@
 require "./helper"
 
-describe EngineDriver::Proxy::Driver do
+describe ACAEngine::Driver::Proxy::Driver do
   it "should execute functions on remote drivers" do
-    cs = EngineDriver::DriverModel::ControlSystem.from_json(%(
+    cs = ACAEngine::Driver::DriverModel::ControlSystem.from_json(%(
         {
           "id": "sys-1236",
           "name": "Tesing System",
@@ -13,20 +13,20 @@ describe EngineDriver::Proxy::Driver do
         }
     ))
 
-    system = EngineDriver::Proxy::System.new cs, "reply_id"
+    system = ACAEngine::Driver::Proxy::System.new cs, "reply_id"
     system.id.should eq("sys-1236")
 
     # Create a virtual systems
-    storage = EngineDriver::Storage.new(cs.id, "system")
+    storage = ACAEngine::Driver::Storage.new(cs.id, "system")
     storage["Display\x021"] = "mod-1234"
     system.exists?(:Display_1).should eq(true)
 
     # Create the driver metadata
-    mod_store = EngineDriver::Storage.new("mod-1234")
+    mod_store = ACAEngine::Driver::Storage.new("mod-1234")
     mod_store["power"] = false
 
-    redis = EngineDriver::Storage.redis_pool
-    meta = EngineDriver::DriverModel::Metadata.new({
+    redis = ACAEngine::Driver::Storage.redis_pool
+    meta = ACAEngine::Driver::DriverModel::Metadata.new({
       "function1" => {} of String => Array(String),
       "function2" => {"arg1" => ["Int32"]},
       "function3" => {"arg1" => ["Int32", "200"], "arg2" => ["Int32"]},
@@ -41,7 +41,7 @@ describe EngineDriver::Proxy::Driver do
 
     # Grab the protocol output
     proto, input, output = Helper.protocol
-    EngineDriver::Protocol.new_instance proto
+    ACAEngine::Driver::Protocol.new_instance proto
 
     # Execute a remote function
     result = system[:Display_1].function1
@@ -50,7 +50,7 @@ describe EngineDriver::Proxy::Driver do
     # Check the exec request
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.payload.should eq(%({"__exec__":"function1","function1":{}}))
     req_out.reply.should eq("reply_id")
     req_out.id.should eq("mod-1234")
@@ -87,7 +87,7 @@ describe EngineDriver::Proxy::Driver do
     # Check the exec request
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.payload.should eq(%({"__exec__":"function2","function2":{"arg1":12345}}))
 
     # Execute a remote function with named arguments
@@ -97,7 +97,7 @@ describe EngineDriver::Proxy::Driver do
     # Check the exec request
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.payload.should eq(%({"__exec__":"function3","function3":{"arg1":null,"arg2":12345}}))
 
     # Ensure timeouts work!!
@@ -107,7 +107,7 @@ describe EngineDriver::Proxy::Driver do
     # Check the exec request
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.payload.should eq(%({"__exec__":"function1","function1":{}}))
     req_out.reply.should eq("reply_id")
     req_out.id.should eq("mod-1234")
@@ -121,7 +121,7 @@ describe EngineDriver::Proxy::Driver do
     input.write_bytes json_resp.bytesize
     input.write json_resp.to_slice
 
-    expect_raises(EngineDriver::RemoteException) do
+    expect_raises(ACAEngine::Driver::RemoteException) do
       result.get
     end
 
@@ -132,7 +132,7 @@ describe EngineDriver::Proxy::Driver do
   end
 
   it "should subscribe to status updates" do
-    cs = EngineDriver::DriverModel::ControlSystem.from_json(%(
+    cs = ACAEngine::Driver::DriverModel::ControlSystem.from_json(%(
         {
           "id": "sys-1234",
           "name": "Tesing System",
@@ -143,10 +143,10 @@ describe EngineDriver::Proxy::Driver do
         }
     ))
 
-    subs = EngineDriver::Proxy::Subscriptions.new
-    system = EngineDriver::Proxy::System.new cs, "reply_id"
+    subs = ACAEngine::Driver::Proxy::Subscriptions.new
+    system = ACAEngine::Driver::Proxy::System.new cs, "reply_id"
     # Create some virtual systems
-    storage = EngineDriver::Storage.new(cs.id, "system")
+    storage = ACAEngine::Driver::Storage.new(cs.id, "system")
     storage["Display\x021"] = "mod-1234"
 
     in_callback = false
@@ -154,7 +154,7 @@ describe EngineDriver::Proxy::Driver do
     message_passed = nil
     channel = Channel(Nil).new
 
-    mod_store = EngineDriver::Storage.new("mod-1234")
+    mod_store = ACAEngine::Driver::Storage.new("mod-1234")
     mod_store.delete("power")
 
     subscription = system[:Display_1].subscribe(:power) do |sub, value|

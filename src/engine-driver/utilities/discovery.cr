@@ -1,4 +1,4 @@
-abstract class EngineDriver
+abstract class ACAEngine::Driver
   module Utilities
     class Discovery
       @@settings = {} of Symbol => String | Int32 | Bool

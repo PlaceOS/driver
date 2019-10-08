@@ -1,6 +1,6 @@
 require "logger"
 
-class EngineDriver::Logger < Logger
+class ACAEngine::Driver::Logger < Logger
   def initialize(module_id : String, logger_io = STDOUT, @protocol = Protocol.instance)
     super(logger_io)
     @debugging = false

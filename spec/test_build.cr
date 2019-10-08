@@ -2,7 +2,7 @@ require "../src/engine-driver"
 require "promise"
 
 class Helper
-  abstract class HelperBase < EngineDriver
+  abstract class HelperBase < ACAEngine::Driver
     def implemented_in_base_class
       self[:test] = ["bob"]
       logger.info "testing info message"

@@ -1,8 +1,8 @@
 require "socket"
 
-class EngineDriver::TransportTCP < EngineDriver::Transport
+class ACAEngine::Driver::TransportTCP < ACAEngine::Driver::Transport
   # timeouts in seconds
-  def initialize(@queue : EngineDriver::Queue, @ip : String, @port : Int32, @settings : ::EngineDriver::Settings, @start_tls = false, @uri = nil, @makebreak = false, &@received : (Bytes, EngineDriver::Task?) -> Nil)
+  def initialize(@queue : ACAEngine::Driver::Queue, @ip : String, @port : Int32, @settings : ::ACAEngine::Driver::Settings, @start_tls = false, @uri = nil, @makebreak = false, &@received : (Bytes, ACAEngine::Driver::Task?) -> Nil)
     # TODO:: makebreak needs a little more consideration around setting connected / disconnected status
     @terminated = false
     @tls_started = false
@@ -82,7 +82,7 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     @socket.try &.close
   end
 
-  def send(message) : EngineDriver::TransportTCP
+  def send(message) : ACAEngine::Driver::TransportTCP
     connect if @makebreak
 
     socket = @socket
@@ -99,7 +99,7 @@ class EngineDriver::TransportTCP < EngineDriver::Transport
     self
   end
 
-  def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil) : EngineDriver::TransportTCP
+  def send(message, task : ACAEngine::Driver::Task, &block : (Bytes, ACAEngine::Driver::Task) -> Nil) : ACAEngine::Driver::TransportTCP
     task.processing = block
     send(message)
   end

@@ -1,20 +1,20 @@
 require "./helper"
 
-describe EngineDriver::Proxy::Subscriptions do
+describe ACAEngine::Driver::Proxy::Subscriptions do
   it "should subscribe to a channel" do
     in_callback = false
     sub_passed = nil
     message_passed = nil
     channel = Channel(Nil).new
 
-    subs = EngineDriver::Proxy::Subscriptions.new
+    subs = ACAEngine::Driver::Proxy::Subscriptions.new
     subscription = subs.channel "test" do |sub, message|
       sub_passed = sub
       message_passed = message
       in_callback = true
       channel.close
     end
-    EngineDriver::Storage.redis_pool.publish("engine\x02test", "whatwhat")
+    ACAEngine::Driver::Storage.redis_pool.publish("engine\x02test", "whatwhat")
     channel.receive?
 
     in_callback.should eq(true)
@@ -30,14 +30,14 @@ describe EngineDriver::Proxy::Subscriptions do
     message_passed = nil
     channel = Channel(Nil).new
 
-    subs = EngineDriver::Proxy::Subscriptions.new
+    subs = ACAEngine::Driver::Proxy::Subscriptions.new
     subscription = subs.subscribe "mod-123", :power do |sub, message|
       sub_passed = sub
       message_passed = message
       in_callback = true
       channel.close
     end
-    storage = EngineDriver::Storage.new("mod-123")
+    storage = ACAEngine::Driver::Storage.new("mod-123")
     storage["power"] = true
     channel.receive?
 
@@ -54,16 +54,16 @@ describe EngineDriver::Proxy::Subscriptions do
     sub_passed = nil
     message_passed = nil
     channel = Channel(Nil).new
-    redis = EngineDriver::Storage.redis_pool
+    redis = ACAEngine::Driver::Storage.redis_pool
 
     # Ensure keys don't already exist
-    sys_lookup = EngineDriver::Storage.new("sys-123", "system")
+    sys_lookup = ACAEngine::Driver::Storage.new("sys-123", "system")
     lookup_key = "Display\x021"
     sys_lookup.delete lookup_key
-    storage = EngineDriver::Storage.new("mod-1234")
+    storage = ACAEngine::Driver::Storage.new("mod-1234")
     storage.delete("power")
 
-    subs = EngineDriver::Proxy::Subscriptions.new
+    subs = ACAEngine::Driver::Proxy::Subscriptions.new
     subscription = subs.subscribe "sys-123", "Display", 1, :power do |sub, message|
       sub_passed = sub
       message_passed = message

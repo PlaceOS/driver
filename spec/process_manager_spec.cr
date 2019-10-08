@@ -1,6 +1,6 @@
 require "./helper"
 
-describe EngineDriver::ProcessManager do
+describe ACAEngine::Driver::ProcessManager do
   # * Start
   # * Execute (simple) + response
   # * Enable debugging
@@ -32,7 +32,7 @@ describe EngineDriver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq("3")
@@ -54,7 +54,7 @@ describe EngineDriver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq("\"DisplayPort\"")
@@ -175,7 +175,7 @@ describe EngineDriver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq("you fool!")
@@ -204,7 +204,7 @@ describe EngineDriver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq("null")
@@ -248,7 +248,7 @@ describe EngineDriver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq(%("hello steve"))
@@ -274,7 +274,7 @@ describe EngineDriver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq(%(11))
@@ -299,7 +299,7 @@ describe EngineDriver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq(%(205))
@@ -322,7 +322,7 @@ describe EngineDriver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq("oops")
@@ -347,7 +347,7 @@ describe EngineDriver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = EngineDriver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq("nooooo")

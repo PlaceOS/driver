@@ -2,7 +2,6 @@
 
 A simple overview of how the system coordinates actions and where data is stored
 
-
 ## API
 
 ### Look up a driver ID (i.e. system_id => Display 3)
@@ -16,7 +15,7 @@ So HSET "system\x02system_id", "Display\x023" => driver_id
 * Use the existing helper at `require "engine-driver/storage"`
 
 ```crystal
-status = EngineDriver::Storage.new(system_id, prefix: "system")
+status = ACAEngine::Driver::Storage.new(system_id, prefix: "system")
 module_name = "Display"
 index = 1
 system["#{module_name}\x02#{index}"]? => "module_id" / nil
@@ -35,7 +34,7 @@ So HSET "status\x02module_id", "power" => true / false
 * Use the existing helper at `require "engine-driver/storage"`
 
 ```crystal
-status = EngineDriver::Storage.new(module_id)
+status = ACAEngine::Driver::Storage.new(module_id)
 status["power"]? => true / false / nil
 status["power"] => true / false / raise KeyError.new("not found")
 ```
@@ -51,10 +50,10 @@ The proxy class simplifies management of each websockets subscriptions
 
 ```crystal
 # Should only be a single instance of this class per-process
-@@subscriptions = EngineDriver::Subscriptions.new
+@@subscriptions = ACAEngine::Driver::Subscriptions.new
 
 # One instance of the subscription proxy per-websocket
-subscriber = EngineDriver::Proxy::Subscriptions.new(@@subscriptions)
+subscriber = ACAEngine::Driver::Proxy::Subscriptions.new(@@subscriptions)
 subscription_reference = subscriber.subscribe(system_id, module_name, index, status_name) do |sub_reference, message|
   # message is always a JSON string (can be passed directly to the front-end)
 end
@@ -130,4 +129,4 @@ Should perform the following operations:
 6. Mark self as ready
 7. Once all Engine Core instances are ready, engine core leader to signal system ready
    * Use a channel called `system`
-   * `EngineDriver::Storage.redis_pool.publish("engine\x02system", "ready")`
+   * `ACAEngine::Driver::Storage.redis_pool.publish("engine\x02system", "ready")`

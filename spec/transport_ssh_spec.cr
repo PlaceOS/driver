@@ -1,10 +1,10 @@
 require "./helper"
 
-describe EngineDriver::TransportSSH do
+describe ACAEngine::Driver::TransportSSH do
   it "should work with a received function" do
     queue = Helper.queue
     count = 0
-    transport = EngineDriver::TransportSSH.new(queue, "localhost", 2222, ::EngineDriver::Settings.new(%({
+    transport = ACAEngine::Driver::TransportSSH.new(queue, "localhost", 2222, ::ACAEngine::Driver::Settings.new(%({
       "ssh": {
         "username": "root",
         "password": "somepassword"

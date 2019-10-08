@@ -1,6 +1,6 @@
 require "./subscription"
 
-class EngineDriver::Subscriptions::IndirectSubscription < EngineDriver::Subscriptions::Subscription
+class ACAEngine::Driver::Subscriptions::IndirectSubscription < ACAEngine::Driver::Subscriptions::Subscription
   def initialize(@system_id : String, @module_name : String, @index : Int32, @status : String, &@callback : (IndirectSubscription, String) ->)
   end
 
@@ -12,7 +12,7 @@ class EngineDriver::Subscriptions::IndirectSubscription < EngineDriver::Subscrip
     logger.error "error in subscription callback\n#{e.message}\n#{e.backtrace?.try &.join("\n")}"
   end
 
-  @storage : EngineDriver::Storage?
+  @storage : ACAEngine::Driver::Storage?
   @module_id : String?
 
   getter :system_id, :module_name, :index, :module_id, :status
@@ -38,12 +38,12 @@ class EngineDriver::Subscriptions::IndirectSubscription < EngineDriver::Subscrip
     module_id = @module_id
     return module_id if module_id
 
-    lookup = EngineDriver::Storage.new(@system_id, "system")
+    lookup = ACAEngine::Driver::Storage.new(@system_id, "system")
     module_id = lookup["#{@module_name}\x02#{@index}"]?
 
     if module_id
       @module_id = module_id
-      @storage = EngineDriver::Storage.new(module_id)
+      @storage = ACAEngine::Driver::Storage.new(module_id)
     end
   end
 end

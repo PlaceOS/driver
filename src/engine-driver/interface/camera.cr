@@ -1,6 +1,6 @@
-module EngineDriver::Interface; end
+module ACAEngine::Driver::Interface; end
 
-module EngineDriver::Interface::Camera
+module ACAEngine::Driver::Interface::Camera
   # All cameras should expose limits:
   # ================================
   # pan_left, pan_right, pan_stop,
@@ -100,7 +100,7 @@ module EngineDriver::Interface::Camera
     Stop
   end
 
-  @zoom_timer : EngineDriver::Proxy::Scheduler::TaskWrapper? = nil
+  @zoom_timer : ACAEngine::Driver::Proxy::Scheduler::TaskWrapper? = nil
 
   # As zoom is typically discreet we manually implement the analogue version
   # Simple enough to overwrite this as required

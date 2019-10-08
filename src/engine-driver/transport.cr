@@ -1,9 +1,9 @@
 require "tokenizer"
 require "./transport/http_proxy"
 
-abstract class EngineDriver::Transport
-  abstract def send(message) : EngineDriver::Transport
-  abstract def send(message, task : EngineDriver::Task, &block : (Bytes, EngineDriver::Task) -> Nil) : EngineDriver::Transport
+abstract class ACAEngine::Driver::Transport
+  abstract def send(message) : ACAEngine::Driver::Transport
+  abstract def send(message, task : ACAEngine::Driver::Task, &block : (Bytes, ACAEngine::Driver::Task) -> Nil) : ACAEngine::Driver::Transport
   abstract def terminate : Nil
   abstract def disconnect : Nil
   abstract def start_tls(verify_mode : OpenSSL::SSL::VerifyMode, context : OpenSSL::SSL::Context) : Nil
@@ -23,7 +23,7 @@ abstract class EngineDriver::Transport
       headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
       secure = false, concurrent = true
     ) : ::HTTP::Client::Response
-      {% if @type.name.stringify == "EngineDriver::TransportLogic" %}
+      {% if @type.name.stringify == "ACAEngine::Driver::TransportLogic" %}
         raise "HTTP requests are not available in logic drivers"
       {% else %}
         uri_config = @uri.try(&.strip)
@@ -62,7 +62,7 @@ abstract class EngineDriver::Transport
       {% end %}
     end
 
-    {% if @type.name.stringify != "EngineDriver::TransportLogic" %}
+    {% if @type.name.stringify != "ACAEngine::Driver::TransportLogic" %}
       protected def new_http_client(uri, context)
         client = ConnectProxy::HTTPClient.new(uri, context)
 
@@ -85,7 +85,7 @@ abstract class EngineDriver::Transport
     {% end %}
 
     def enable_multicast_loop(state = true)
-      {% if @type.name.stringify == "EngineDriver::TransportUDP" %}
+      {% if @type.name.stringify == "ACAEngine::Driver::TransportUDP" %}
         @socket.try &.multicast_loopback = state
       {% end %}
       state
