@@ -88,63 +88,66 @@ class ACAEngine::Driver::Protocol
     @callbacks[type] << block
   end
 
-  def process
+  private def process!
     loop do
       message = @processor.receive?
       break unless message
 
-      begin
-        callbacks = case message.cmd
-                    when "start"
-                      # New instance of id == mod_id
-                      # payload == module details
-                      @callbacks[:start]
-                    when "stop"
-                      # Stop instance of id
-                      @callbacks[:stop]
-                    when "update"
-                      # New settings for id
-                      @callbacks[:update]
-                    when "terminate"
-                      # Stop all the modules and exit the process
-                      @callbacks[:terminate]
-                    when "exec"
-                      # Run payload on id
-                      @callbacks[:exec]
-                    when "debug"
-                      # enable debugging on id
-                      @callbacks[:debug]
-                    when "ignore"
-                      # stop debugging on id
-                      @callbacks[:ignore]
-                    when "result"
-                      # result of an executed request
-                      # seq == request id
-                      # payload or error response
-                      seq = message.seq
-                      @current_requests.delete(seq)
-                      @next_requests.delete(seq)
-                      channel = @tracking.delete(seq)
-                      channel.try &.send(message)
-                      next
-                    else
-                      raise "unknown request cmd type"
-                    end
+      # Requests should run in async so they don't block the processing loop
+      spawn(same_thread: true) { process(message.not_nil!) }
+    end
+  end
 
-        callbacks.each do |callback|
-          response = callback.call(message)
-          if response
-            @producer.send({response, nil})
-            break
-          end
-        end
-      rescue error
-        message.payload = nil
-        message.error = error.message
-        message.backtrace = error.backtrace?
-        @producer.send({message, nil})
+  def process(message : Request)
+    callbacks = case message.cmd
+                when "start"
+                  # New instance of id == mod_id
+                  # payload == module details
+                  @callbacks[:start]
+                when "stop"
+                  # Stop instance of id
+                  @callbacks[:stop]
+                when "update"
+                  # New settings for id
+                  @callbacks[:update]
+                when "terminate"
+                  # Stop all the modules and exit the process
+                  @callbacks[:terminate]
+                when "exec"
+                  # Run payload on id
+                  @callbacks[:exec]
+                when "debug"
+                  # enable debugging on id
+                  @callbacks[:debug]
+                when "ignore"
+                  # stop debugging on id
+                  @callbacks[:ignore]
+                when "result"
+                  # result of an executed request
+                  # seq == request id
+                  # payload or error response
+                  seq = message.seq
+                  @current_requests.delete(seq)
+                  @next_requests.delete(seq)
+                  channel = @tracking.delete(seq)
+                  channel.try &.send(message)
+                  return
+                else
+                  raise "unknown request cmd type"
+                end
+
+    callbacks.each do |callback|
+      response = callback.call(message)
+      if response
+        @producer.send({response, nil})
+        break
       end
     end
+  rescue error
+    message.payload = nil
+    message.error = error.message
+    message.backtrace = error.backtrace?
+    @producer.send({message, nil})
   end
 
   def request(id, command, payload = nil, raw = false)
@@ -169,7 +172,7 @@ class ACAEngine::Driver::Protocol
   @@seq = 0_u64
 
   private def produce_io(timeout_period)
-    spawn(same_thread: true) { self.process }
+    spawn(same_thread: true) { self.process! }
 
     # Ensures all outgoing event processing is done on the same thread
     spawn(same_thread: true) do

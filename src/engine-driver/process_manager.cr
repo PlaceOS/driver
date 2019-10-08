@@ -60,11 +60,11 @@ class ACAEngine::Driver::ProcessManager
 
     # Check if there are changes that require module restart
     if (
-      updated.ip != existing.ip || updated.udp != existing.udp ||
-      updated.tls != existing.tls || updated.port != existing.port ||
-      updated.makebreak != existing.makebreak || updated.uri != existing.uri ||
-      updated.role != existing.role
-    )
+         updated.ip != existing.ip || updated.udp != existing.udp ||
+         updated.tls != existing.tls || updated.port != existing.port ||
+         updated.makebreak != existing.makebreak || updated.uri != existing.uri ||
+         updated.role != existing.role
+       )
       # Change required
       stop request
       start request, updated
