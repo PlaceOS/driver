@@ -90,7 +90,7 @@ class ACAEngine::Driver::DriverManager
     end
 
     # Ensures all requests are running on this thread
-    spawn(same_thread: true) { process_requests }
+    spawn(same_thread: true) { process_requests! }
   end
 
   def terminate : Nil
@@ -124,61 +124,63 @@ class ACAEngine::Driver::DriverManager
     executor.execute(@driver)
   end
 
-  private def process_requests
+  private def process_requests!
     loop do
       req_data = @requests.receive?
       break unless req_data
 
       promise, request = req_data
+      spawn(same_thread: true) do
+        process request
+        promise.resolve(nil)
+      end
+    end
+  end
+
+  private def process(request)
+    case request.cmd
+    when "exec"
+      exec_request = request.payload.not_nil!
 
       begin
-        case request.cmd
-        when "exec"
-          exec_request = request.payload.not_nil!
+        result = execute exec_request
 
-          begin
-            result = execute exec_request
+        case result
+        when Task
+          outcome = result.get(:response_required)
+          request.payload = outcome.payload
 
-            case result
-            when Task
-              outcome = result.get(:response_required)
-              request.payload = outcome.payload
-
-              case outcome.state
-              when :success
-              when :abort
-                request.error = "Abort"
-              when :exception
-                request.payload = outcome.payload
-                request.error = outcome.error_class
-                request.backtrace = outcome.backtrace
-              when :unknown
-                @logger.fatal "unexpected result: #{outcome.state} - #{outcome.payload}, #{outcome.error_class}, #{outcome.backtrace.join("\n")}"
-              else
-                @logger.fatal "unexpected result: #{outcome.state}"
-              end
-            else
-              request.payload = result
-            end
-          rescue error
-            msg = "executing #{exec_request} on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}"
-            @logger.error(msg)
-            request.set_error(error)
+          case outcome.state
+          when :success
+          when :abort
+            request.error = "Abort"
+          when :exception
+            request.payload = outcome.payload
+            request.error = outcome.error_class
+            request.backtrace = outcome.backtrace
+          when :unknown
+            @logger.fatal "unexpected result: #{outcome.state} - #{outcome.payload}, #{outcome.error_class}, #{outcome.backtrace.join("\n")}"
+          else
+            @logger.fatal "unexpected result: #{outcome.state}"
           end
-        when "update"
-          update(request.driver_model.not_nil!)
-        when "stop"
-          terminate
         else
-          raise "unexpected request"
+          request.payload = result
         end
       rescue error
-        @logger.fatal("issue processing requests on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}")
+        msg = "executing #{exec_request} on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}"
+        @logger.error(msg)
         request.set_error(error)
       end
-
-      promise.resolve(nil)
+    when "update"
+      update(request.driver_model.not_nil!)
+    when "stop"
+      terminate
+    else
+      raise "unexpected request"
     end
+  rescue error
+    @logger.fatal("issue processing requests on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}")
+    request.set_error(error)
   end
 
   private def connection(state : Bool) : Nil
