@@ -54,22 +54,32 @@ class ACAEngine::Driver::Task
 
     @callback.call(self)
     @last_executed = Time.utc.to_unix_ms
-    @wait ? start_timers : @channel.close
+    if @wait
+      start_timers
+    else
+      @channel.close unless @channel.closed?
+      if !@complete.closed?
+        @complete.send true
+        @complete.close
+      end
+    end
     self
-  rescue e
-    @logger.error "error executing task #{@name}\n#{e.message}\n#{e.backtrace?.try &.join("\n")}"
+  rescue error
+    @logger.error "error executing task #{@name}\n#{error.inspect_with_backtrace}"
     @state = :exception
-    @payload = e.message || "error executing task"
-    @backtrace = e.backtrace? || DEFAULT_BACKTR
-    @error_class = e.class.to_s
-    @channel.close
-    @complete.send true
-    @complete.close
+    @payload = error.message || "error executing task"
+    @backtrace = error.backtrace? || DEFAULT_BACKTR
+    @error_class = error.class.to_s
+    @channel.close unless @channel.closed?
+    if !@complete.closed?
+      @complete.send true
+      @complete.close
+    end
     self
   end
 
   def complete?
-    @channel.closed?
+    @complete.closed?
   end
 
   def get(response_required = false)
