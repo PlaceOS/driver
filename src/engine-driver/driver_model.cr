@@ -1,20 +1,20 @@
 require "json"
 
-class ACAEngine::Driver::DriverModel
+struct ACAEngine::Driver::DriverModel
   include JSON::Serializable
 
-  class ControlSystem
+  struct ControlSystem
     include JSON::Serializable
 
     property id : String
     property name : String
-    property email : String
+    property email : String?
     property capacity : Int32
-    property features : String
+    property features : String?
     property bookable : Bool
   end
 
-  class Metadata
+  struct Metadata
     include JSON::Serializable
 
     def initialize(
