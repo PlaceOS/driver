@@ -413,7 +413,7 @@ macro finished
     # Detect ctr-c to shutdown gracefully
     Signal::INT.trap do |signal|
       puts " > terminating gracefully"
-      spawn { process.terminate }
+      spawn(same_thread: true) { process.terminate }
       signal.ignore
     end
 

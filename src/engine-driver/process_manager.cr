@@ -33,7 +33,7 @@ class ACAEngine::Driver::ProcessManager
     @loaded[module_id] = driver
 
     # Drivers can all run on a different thread
-    spawn { driver.start }
+    spawn(same_thread: true) { driver.start }
     request.payload = nil
     request
   rescue error

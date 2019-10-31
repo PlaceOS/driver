@@ -34,7 +34,7 @@ class ACAEngine::Driver::Protocol::Management
     @modules = {} of String => String
     @terminated = false
     @events = Channel(Request).new
-    spawn { process_events }
+    spawn(same_thread: true) { process_events }
   end
 
   # Core should update this callback to route requests
@@ -275,12 +275,12 @@ class ACAEngine::Driver::Protocol::Management
     @launch_time = Time.utc.to_unix
 
     fetch_pid = Promise.new(Int32)
-    spawn { launch_driver(fetch_pid, stdin_reader, stderr_writer) }
+    spawn(same_thread: true) { launch_driver(fetch_pid, stdin_reader, stderr_writer) }
     @pid = fetch_pid.get.as(Int32)
 
     # Start processing the output of the driver
     loaded = Promise.new(Nil)
-    spawn { process_comms(io, loaded) }
+    spawn(same_thread: true) { process_comms(io, loaded) }
     loaded.get
 
     # start the desired instances
@@ -337,7 +337,7 @@ class ACAEngine::Driver::Protocol::Management
           string = String.new(message[4, message.bytesize - 4])
           # puts "recieved #{string}"
           request = Request.from_json(string)
-          spawn { process(request) }
+          spawn(same_thread: true) { process(request) }
         rescue error
           @logger.warn "error parsing request #{string.inspect}\n#{error.inspect_with_backtrace}"
         end

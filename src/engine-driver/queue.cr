@@ -38,7 +38,7 @@ class ACAEngine::Driver::Queue
     @online = state
     @connected_callback.call(state) if state_changed
     if @online && @waiting && @queue.size > 0
-      spawn { @channel.send nil }
+      spawn(same_thread: true) { @channel.send nil }
     end
   end
 
@@ -136,7 +136,7 @@ class ACAEngine::Driver::Queue
     if @online
       @queue.push priority, task
       # Spawn so the channel send occurs next tick
-      spawn { @channel.send nil } if @waiting
+      spawn(same_thread: true) { @channel.send nil } if @waiting
     elsif task.name
       @queue.push priority, task
     else

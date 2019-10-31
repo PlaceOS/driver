@@ -123,7 +123,7 @@ class ACAEngine::Driver::Proxy::System
   def load_complete(&callback : (ACAEngine::Driver::Subscriptions::ChannelSubscription, String) -> Nil)
     subscription = @subscriptions.channel("engine_load_complete", &callback)
 
-    spawn do
+    spawn(same_thread: do) do
       ready = @redis.get("engine_cluster_state") == "ready"
       if ready
         begin

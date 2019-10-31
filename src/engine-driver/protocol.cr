@@ -54,8 +54,8 @@ class ACAEngine::Driver::Protocol
     @current_requests = {} of UInt64 => Request
     @next_requests = {} of UInt64 => Request
 
-    spawn { self.produce_io(timeout) }
-    spawn { self.consume_io }
+    spawn(same_thread: true) { self.produce_io(timeout) }
+    spawn(same_thread: true) { self.consume_io }
   end
 
   @timeouts : Tasker::Task? = nil
