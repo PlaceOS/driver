@@ -2,8 +2,9 @@ require "redis"
 
 abstract class ACAEngine::Driver; end
 
+# Abstraction of a redis hset
 class ACAEngine::Driver::Storage < Hash(String, String)
-  @@instance : Redis::PooledClient?
+  @@redis_pool : Redis::PooledClient?
 
   REDIS_URL  = ENV["REDIS_URL"]?
   REDIS_HOST = ENV["REDIS_HOST"]? || "localhost"
@@ -11,9 +12,9 @@ class ACAEngine::Driver::Storage < Hash(String, String)
 
   def self.redis_pool : Redis::PooledClient
     if REDIS_URL
-      @@instance ||= Redis::PooledClient.new(url: REDIS_URL)
+      @@redis_pool ||= Redis::PooledClient.new(url: REDIS_URL)
     else
-      @@instance ||= Redis::PooledClient.new(host: REDIS_HOST, port: REDIS_PORT)
+      @@redis_pool ||= Redis::PooledClient.new(host: REDIS_HOST, port: REDIS_PORT)
     end
   end
 
@@ -21,16 +22,26 @@ class ACAEngine::Driver::Storage < Hash(String, String)
     redis_pool.get(key.to_s)
   end
 
+  # TODO use enum to restrain prefixes
+  # enum Prefix
+  #   Status # => "status"
+  #   System # => "system"
+  #
+  #   def to_s
+  #     super.downcase
+  #   end
+  # end
+
   DEFAULT_PREFIX = "status"
 
-  def initialize(@module_id : String, prefix = DEFAULT_PREFIX)
+  def initialize(@id : String, prefix = DEFAULT_PREFIX)
     super()
     @redis = self.class.redis_pool
-    @hash_key = "#{prefix}\x02#{@module_id}"
+    @hash_key = "#{prefix}\x02#{@id}"
   end
 
   @redis : Redis::PooledClient
-  getter :hash_key, :redis
+  getter hash_key, redis, prefix, id
 
   def []=(status_name, json_value)
     if json_value.nil?

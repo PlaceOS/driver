@@ -3,7 +3,7 @@
 There are three types of subscriptions.
 
 * channel - these are user defined events
-* direct - these subscribe directly to a driver (driver id + status name)
+* direct - these subscribe directly to a module (module id + status name)
 * indirect - these subscribe to the system indirection (system id + module name + module index + status)
 
 The main complexity is then tracking indirect subscriptions.
