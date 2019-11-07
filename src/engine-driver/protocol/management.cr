@@ -170,10 +170,11 @@ class ACAEngine::Driver::Protocol::Management
   private def start(request : Request) : Nil
     module_id = request.id
     if @modules[module_id]?
-      return update(request)
-      if starting = @request_lock.synchronize { @starting.delete(module_id) }
-        starting.resolve(nil)
-      end
+      update(request)
+      starting = @request_lock.synchronize { @starting.delete(module_id) }
+      starting.resolve(nil) if starting
+
+      return
     end
 
     payload = request.payload.not_nil!
