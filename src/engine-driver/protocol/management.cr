@@ -211,7 +211,7 @@ class ACAEngine::Driver::Protocol::Management
     return unless io && instance
     return shutdown(false) if @modules.empty?
 
-    json = %({"id":#{module_id},"cmd":"stop"})
+    json = %({"id":"#{module_id}","cmd":"stop"})
     io.write_bytes json.bytesize
     io.write json.to_slice
     io.flush
