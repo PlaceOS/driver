@@ -41,6 +41,10 @@ class ACAEngine::Driver::DriverManager
                  when DriverModel::Role::LOGIC
                    # nothing required to be done here
                    ACAEngine::Driver::TransportLogic.new(@queue)
+                 when DriverModel::Role::WEBSOCKET
+                   ACAEngine::Driver::TransportWebsocket.new(@queue, @model.uri.not_nil!, @settings) do |data, task|
+                     received(data, task)
+                   end
                  else
                    raise "unknown role for driver #{@module_id}"
                  end

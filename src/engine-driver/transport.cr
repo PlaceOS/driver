@@ -92,6 +92,43 @@ abstract class ACAEngine::Driver::Transport
     end
   end
 
+  protected def new_tls_context(verify_mode : OpenSSL::SSL::VerifyMode? = nil) : OpenSSL::SSL::Context::Client
+    tls = OpenSSL::SSL::Context::Client.new
+    if verify_mode
+      tls.verify_mode = verify_mode
+    else
+      begin
+        if mode = @settings.get { setting?(String | Int32, :https_verify) }
+          # NOTE:: why we use case here crystal-lang/crystal#7382
+          if mode.is_a?(String)
+            tls.verify_mode = case mode.camelcase.downcase
+                              when "none"
+                                OpenSSL::SSL::VerifyMode::NONE
+                              when "peer"
+                                OpenSSL::SSL::VerifyMode::PEER
+                              when "failifnopeercert"
+                                OpenSSL::SSL::VerifyMode::FAIL_IF_NO_PEER_CERT
+                              when "clientonce"
+                                OpenSSL::SSL::VerifyMode::CLIENT_ONCE
+                              when "all"
+                                OpenSSL::SSL::VerifyMode::All
+                              else
+                                OpenSSL::SSL::VerifyMode::NONE
+                              end
+          else
+            tls.verify_mode = OpenSSL::SSL::VerifyMode.from_value(mode)
+          end
+        else
+          tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
+        end
+      rescue error
+        @logger.warn "issue configuring verify mode\n#{error.inspect_with_backtrace}"
+        tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
+      end
+    end
+    tls
+  end
+
   private def process(data : Bytes) : Nil
     if tokenize = @tokenizer
       messages = tokenize.extract(data)

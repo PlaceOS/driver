@@ -40,6 +40,7 @@ struct ACAEngine::Driver::DriverModel
     RAW
     HTTP
     LOGIC
+    WEBSOCKET
   end
 
   property control_system : ControlSystem?
