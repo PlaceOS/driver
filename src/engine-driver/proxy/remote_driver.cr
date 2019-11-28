@@ -157,18 +157,18 @@ class ACAEngine::Driver::Proxy::RemoteDriver
     response = HTTP::Client.post(core_uri, body: {
       "__exec__" => function,
       function => args || named_args
-    })
+    }.to_json)
 
     case response.status_code
     when 200
       # exec was successful, json string returned
-      request.body.gets_to_end
+      response.body
     when 203
       # exec sent to module and it raised an error
       info = NamedTuple(
         message: String,
         backtrace: Array(String)?
-      ).from_json(request.body.gets_to_end)
+      ).from_json(response.body)
 
       raise Error.new(ErrorCode::RequestFailed, "module raised: #{info[:message]}", *@error_details, info[:backtrace])
     else
