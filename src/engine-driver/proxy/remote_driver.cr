@@ -17,14 +17,21 @@ class ACAEngine::Driver::Proxy::RemoteDriver
 
   @[Flags]
   enum ErrorCode
+    # JSON parsing error
     ParseError     # 0
+    # Pre-requisite does not exist (i.e no function)
     BadRequest     # 1
+    # The current user does not have permissions
     AccessDenied   # 2
+    # The request was sent and error occured in core / the module
     RequestFailed  # 3
+    # Not one of bind, unbind, exec, debug, ignore
     UnknownCommand # 4
-
+    # System ID was not found in the database
     SystemNotFound    # 5
+    # Module does not exist in this system
     ModuleNotFound    # 6
+    # Some other transient failure like database unavailable
     UnexpectedFailure # 7
 
     def to_s
@@ -33,9 +40,17 @@ class ACAEngine::Driver::Proxy::RemoteDriver
   end
 
   class Error < ::Exception
-    getter error_code
+    getter error_code, system_id, module_name, index
+    property remote_backtrace : Array(String)?
 
-    def initialize(@error_code : ErrorCode, message = "")
+    def initialize(
+      @error_code : ErrorCode,
+      message : String = "",
+      @system_id : String = "",
+      @module_name : String = "",
+      @index : Int32 = 1,
+      @remote_backtrace : Array(String)? = nil
+    )
       super(message)
     end
   end
@@ -44,12 +59,26 @@ class ACAEngine::Driver::Proxy::RemoteDriver
     @sys_id : String,
     @module_name : String,
     @index : Int32,
-    @security : Clearance = Clearance::Admin
+    @security : Clearance = Clearance::Admin,
+    @subscriptions : Proxy::Subscriptions? = nil
   )
+    @error_details = {@sys_id, @module_name, @index}
   end
 
   getter metadata : ACAEngine::Driver::DriverModel::Metadata? = nil
   getter module_id : String? = nil
+  getter :module_name, :index
+
+  @status : ACAEngine::Driver::Storage? = nil
+
+  def status : ACAEngine::Driver::Storage
+    redis_store = @status
+    return redis_store if redis_store
+
+    module_id = module_id?
+    raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
+    @status = ACAEngine::Driver::Storage.new(module_id)
+  end
 
   def module_id? : String?
     return @module_id if @module_id
@@ -99,19 +128,77 @@ class ACAEngine::Driver::Proxy::RemoteDriver
   # TODO:: noop, requires etcd lookup
   def which_core? : URI?
     module_id = module_id?
-    raise Error.new(ErrorCode::ModuleNotFound, "could not find module id") unless module_id
+    raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
 
     URI.parse("https://core_1")
   end
 
-  def exec(function, args : Array(JSON::Any)? = nil, named_args : Hash(String, JSON::Any)? = nil)
+  def which_core?(hash_id : String) : URI?
+    URI.parse("https://core_1")
+  end
+
+  # Executes a request against the appropriate core and returns the JSON result
+  #
+  def exec(function : String, args : Array(JSON::Any)? = nil, named_args : Hash(String, JSON::Any)? = nil) : String
     metadata = metadata?
-    raise Error.new(ErrorCode::ModuleNotFound, "could not find module") unless metadata
-    raise Error.new(ErrorCode::BadRequest, "could not find function #{function}") unless function_present?(function)
-    raise Error.new(ErrorCode::AccessDenied, "attempted to access privileged function #{function}") unless function_visible?(function)
+    raise Error.new(ErrorCode::ModuleNotFound, "could not find module", *@error_details) unless metadata
+    raise Error.new(ErrorCode::BadRequest, "could not find function #{function}", *@error_details) unless function_present?(function)
+    raise Error.new(ErrorCode::AccessDenied, "attempted to access privileged function #{function}", *@error_details) unless function_visible?(function)
 
-    core_uri = which_core?
+    module_id = module_id?
+    raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
 
-    # TODO:: build request
+    core_uri = which_core?(module_id)
+
+    # build request
+    core_uri.path = "/api/core/v1/command/#{module_id}/execute"
+    response = HTTP::Client.post(core_uri, body: {
+      "__exec__" => function,
+      function => args || named_args
+    })
+
+    case response.status_code
+    when 200
+      # exec was successful, json string returned
+      request.body.gets_to_end
+    when 203
+      # exec sent to module and it raised an error
+      info = NamedTuple(
+        message: String,
+        backtrace: Array(String)?
+      ).from_json(request.body.gets_to_end)
+
+      raise Error.new(ErrorCode::RequestFailed, "module raised: #{info[:message]}", *@error_details, info[:backtrace])
+    else
+      # some other failure 3
+      raise Error.new(ErrorCode::UnexpectedFailure, "unexpected response code #{response.status_code}", *@error_details)
+    end
+  end
+
+  def [](status)
+    value = status[status]
+    JSON.parse(value)
+  end
+
+  def []?(status)
+    value = status[status]?
+    JSON.parse(value) if value
+  end
+
+  def status(klass, key)
+    klass.from_json(status[key.to_s])
+  end
+
+  def status?(klass, key)
+    value = status[key.to_s]?
+    klass.from_json(value) if value
+  end
+
+  # All subscriptions to external drivers should be indirect as the driver might
+  # be swapped into a completely different system - whilst we've looked up the id
+  # of this instance of a driver, it's expected that this object is short lived
+  def subscribe(status, &callback : (ACAEngine::Driver::Subscriptions::IndirectSubscription, String) -> Nil) : ACAEngine::Driver::Subscriptions::IndirectSubscription
+    subscriptions = @subscriptions.not_nil!
+    subscriptions.subscribe(@sys_id, @module_name, @index, status, &callback)
   end
 end
