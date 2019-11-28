@@ -1,4 +1,6 @@
 require "json"
+require "../subscriptions"
+require "./subscriptions"
 require "./system"
 
 # This is a helper class for integrating internal components that communicate
