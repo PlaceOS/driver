@@ -143,7 +143,7 @@ class ACAEngine::Driver::Proxy::RemoteDriver
     metadata = metadata?
     raise Error.new(ErrorCode::ModuleNotFound, "could not find module", *@error_details) unless metadata
     raise Error.new(ErrorCode::BadRequest, "could not find function #{function}", *@error_details) unless function_present?(function)
-    raise Error.new(ErrorCode::AccessDenied, "attempted to access privileged function #{function}", *@error_details) unless function_visible?(function)
+    raise Error.new(ErrorCode::AccessDenied, "attempted to access privileged function #{function}", *@error_details) unless function_visible?(security, function)
 
     module_id = module_id?
     raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
