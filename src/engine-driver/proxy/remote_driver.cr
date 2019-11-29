@@ -60,9 +60,7 @@ class ACAEngine::Driver::Proxy::RemoteDriver
   def initialize(
     @sys_id : String,
     @module_name : String,
-    @index : Int32,
-    @security : Clearance = Clearance::Admin,
-    @subscriptions : Proxy::Subscriptions? = nil
+    @index : Int32
   )
     @error_details = {@sys_id, @module_name, @index}
   end
@@ -102,7 +100,7 @@ class ACAEngine::Driver::Proxy::RemoteDriver
     end
   end
 
-  def function_visible?(function : String)
+  def function_visible?(security : Clearance, function : String)
     metadata = metadata?
     return false unless metadata
 
@@ -119,9 +117,9 @@ class ACAEngine::Driver::Proxy::RemoteDriver
     # Check user's privilege against the function's privilege.
     case level
     when "support"
-      {Clearance::Support, Clearance::Admin}.includes?(@security)
+      {Clearance::Support, Clearance::Admin}.includes?(security)
     when "administrator"
-      @security == Clearance::Admin
+      security == Clearance::Admin
     else
       false
     end
@@ -141,7 +139,7 @@ class ACAEngine::Driver::Proxy::RemoteDriver
 
   # Executes a request against the appropriate core and returns the JSON result
   #
-  def exec(function : String, args : Array(JSON::Any)? = nil, named_args : Hash(String, JSON::Any)? = nil) : String
+  def exec(security : Clearance, function : String, args : Array(JSON::Any)? = nil, named_args : Hash(String, JSON::Any)? = nil) : String
     metadata = metadata?
     raise Error.new(ErrorCode::ModuleNotFound, "could not find module", *@error_details) unless metadata
     raise Error.new(ErrorCode::BadRequest, "could not find function #{function}", *@error_details) unless function_present?(function)
@@ -199,8 +197,7 @@ class ACAEngine::Driver::Proxy::RemoteDriver
   # All subscriptions to external drivers should be indirect as the driver might
   # be swapped into a completely different system - whilst we've looked up the id
   # of this instance of a driver, it's expected that this object is short lived
-  def subscribe(status, &callback : (ACAEngine::Driver::Subscriptions::IndirectSubscription, String) -> Nil) : ACAEngine::Driver::Subscriptions::IndirectSubscription
-    subscriptions = @subscriptions.not_nil!
+  def subscribe(subscriptions : Proxy::Subscriptions, status, &callback : (ACAEngine::Driver::Subscriptions::IndirectSubscription, String) -> Nil) : ACAEngine::Driver::Subscriptions::IndirectSubscription
     subscriptions.subscribe(@sys_id, @module_name, @index, status, &callback)
   end
 end
