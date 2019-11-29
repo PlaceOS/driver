@@ -12,6 +12,8 @@ require "./system"
 # time delta that is considered reasonable in the face of change.
 # i.e eventual consistency
 class ACAEngine::Driver::Proxy::RemoteDriver
+  CORE_NAMESPACE = "core"
+
   enum Clearance
     User
     Support
@@ -21,19 +23,19 @@ class ACAEngine::Driver::Proxy::RemoteDriver
   @[Flags]
   enum ErrorCode
     # JSON parsing error
-    ParseError     # 0
+    ParseError # 0
     # Pre-requisite does not exist (i.e no function)
-    BadRequest     # 1
+    BadRequest # 1
     # The current user does not have permissions
-    AccessDenied   # 2
+    AccessDenied # 2
     # The request was sent and error occured in core / the module
-    RequestFailed  # 3
+    RequestFailed # 3
     # Not one of bind, unbind, exec, debug, ignore
     UnknownCommand # 4
     # System ID was not found in the database
-    SystemNotFound    # 5
+    SystemNotFound # 5
     # Module does not exist in this system
-    ModuleNotFound    # 6
+    ModuleNotFound # 6
     # Some other transient failure like database unavailable
     UnexpectedFailure # 7
 
@@ -61,7 +63,8 @@ class ACAEngine::Driver::Proxy::RemoteDriver
   def initialize(
     @sys_id : String,
     @module_name : String,
-    @index : Int32
+    @index : Int32,
+    @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE)
   )
     @error_details = {@sys_id, @module_name, @index}
   end
@@ -126,16 +129,21 @@ class ACAEngine::Driver::Proxy::RemoteDriver
     end
   end
 
-  # TODO:: noop, requires etcd lookup
+  # Use consistent hashing to determine the location of the module
+  #
   def which_core? : URI?
     module_id = module_id?
     raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
 
-    URI.parse("https://core_1")
+    node = @discovery.find!(module_id)
+    URI.parse(host: node[:ip], port: node[:port])
   end
 
+  # Use consistent hashing to determine location of a resource
+  #
   def which_core?(hash_id : String) : URI?
-    URI.parse("https://core_1")
+    node = @discovery.find!(hash_id)
+    URI.new(host: node[:ip], port: node[:port])
   end
 
   # Executes a request against the appropriate core and returns the JSON result
@@ -145,7 +153,7 @@ class ACAEngine::Driver::Proxy::RemoteDriver
     function : String,
     args : Array(JSON::Any)? = nil,
     named_args : Hash(String, JSON::Any)? = nil,
-    request_id : String? = nil,
+    request_id : String? = nil
   ) : String
     metadata = metadata?
     raise Error.new(ErrorCode::ModuleNotFound, "could not find module", *@error_details) unless metadata
@@ -164,7 +172,7 @@ class ACAEngine::Driver::Proxy::RemoteDriver
       headers: HTTP::Headers{"X-Request-ID" => request_id || UUID.random.to_s},
       body: {
         "__exec__" => function,
-        function => args || named_args
+        function   => args || named_args,
       }.to_json
     )
 
@@ -176,8 +184,7 @@ class ACAEngine::Driver::Proxy::RemoteDriver
       # exec sent to module and it raised an error
       info = NamedTuple(
         message: String,
-        backtrace: Array(String)?
-      ).from_json(response.body)
+        backtrace: Array(String)?).from_json(response.body)
 
       raise Error.new(ErrorCode::RequestFailed, "module raised: #{info[:message]}", *@error_details, info[:backtrace])
     else
