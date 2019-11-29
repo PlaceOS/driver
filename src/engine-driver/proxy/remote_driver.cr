@@ -1,4 +1,5 @@
 require "json"
+require "uuid"
 require "../subscriptions"
 require "./subscriptions"
 require "./system"
@@ -139,7 +140,13 @@ class ACAEngine::Driver::Proxy::RemoteDriver
 
   # Executes a request against the appropriate core and returns the JSON result
   #
-  def exec(security : Clearance, function : String, args : Array(JSON::Any)? = nil, named_args : Hash(String, JSON::Any)? = nil) : String
+  def exec(
+    security : Clearance,
+    function : String,
+    args : Array(JSON::Any)? = nil,
+    named_args : Hash(String, JSON::Any)? = nil,
+    request_id : String? = nil,
+  ) : String
     metadata = metadata?
     raise Error.new(ErrorCode::ModuleNotFound, "could not find module", *@error_details) unless metadata
     raise Error.new(ErrorCode::BadRequest, "could not find function #{function}", *@error_details) unless function_present?(function)
@@ -152,10 +159,14 @@ class ACAEngine::Driver::Proxy::RemoteDriver
 
     # build request
     core_uri.path = "/api/core/v1/command/#{module_id}/execute"
-    response = HTTP::Client.post(core_uri, body: {
-      "__exec__" => function,
-      function => args || named_args
-    }.to_json)
+    response = HTTP::Client.post(
+      core_uri,
+      headers: HTTP::Headers{"X-Request-ID" => request_id || UUID.random.to_s},
+      body: {
+        "__exec__" => function,
+        function => args || named_args
+      }.to_json
+    )
 
     case response.status_code
     when 200
