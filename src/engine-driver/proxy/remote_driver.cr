@@ -212,6 +212,21 @@ class ACAEngine::Driver::Proxy::RemoteDriver
     klass.from_json(value) if value
   end
 
+  # Returns a websocket that sends debugging logging to the remote
+  # Each message consists of an array `[0, "message"]`
+  # Easiest way to parse is: `Tuple(Logger::Severity, String).from_json(%([0, "test"]))``
+  #
+  def debug
+    module_id = module_id?
+    raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
+
+    core_uri = which_core?(module_id)
+
+    # build request
+    core_uri.path = "/api/core/v1/command/#{module_id}/debugger"
+    HTTP::WebSocket.new(core_uri)
+  end
+
   # All subscriptions to external drivers should be indirect as the driver might
   # be swapped into a completely different system - whilst we've looked up the id
   # of this instance of a driver, it's expected that this object is short lived
