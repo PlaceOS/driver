@@ -237,7 +237,7 @@ class ACAEngine::Driver::Proxy::RemoteDriver
   # Extract module name and module id from string
   # e.g. "Display_3" => {"Display", 3}
   #
-  def self.get_parts(module_id)
+  def self.get_parts(module_id : String)
     mod_name, match, index = module_id.rpartition('_')
     if match.empty?
       {module_id, 1}
