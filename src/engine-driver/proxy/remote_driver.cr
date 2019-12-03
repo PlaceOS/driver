@@ -214,7 +214,7 @@ class ACAEngine::Driver::Proxy::RemoteDriver
 
   # Returns a websocket that sends debugging logging to the remote
   # Each message consists of an array `[0, "message"]`
-  # Easiest way to parse is: `Tuple(Logger::Severity, String).from_json(%([0, "test"]))``
+  # Easiest way to parse is: `Tuple(Logger::Severity, String).from_json(%([0, "test"]))`
   #
   def debug
     module_id = module_id?
@@ -232,5 +232,17 @@ class ACAEngine::Driver::Proxy::RemoteDriver
   # of this instance of a driver, it's expected that this object is short lived
   def subscribe(subscriptions : Proxy::Subscriptions, status, &callback : (ACAEngine::Driver::Subscriptions::IndirectSubscription, String) -> Nil) : ACAEngine::Driver::Subscriptions::IndirectSubscription
     subscriptions.subscribe(@sys_id, @module_name, @index, status, &callback)
+  end
+
+  # Extract module name and module id from string
+  # e.g. "Display_3" => {"Display", 3}
+  #
+  def self.get_parts(module_id)
+    mod_name, match, index = module_id.rpartition('_')
+    if match.empty?
+      {module_id, 1}
+    else
+      {mod_name, index.to_i}
+    end
   end
 end
