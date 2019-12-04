@@ -89,6 +89,19 @@ describe ACAEngine::Driver::Subscriptions do
     message_passed.should eq("true")
     sub_passed.should eq(subscription)
 
+    # reset
+    in_callback = false
+    message_passed = nil
+    sub_passed = nil
+    channel = Channel(Nil).new
+
+    # test signal_status
+    storage.signal_status("power")
+    channel.receive?
+    in_callback.should eq(true)
+    message_passed.should eq("true")
+    sub_passed.should eq(subscription)
+
     storage.delete("power")
     sys_lookup.delete lookup_key
     subs.terminate

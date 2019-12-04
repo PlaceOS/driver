@@ -61,9 +61,9 @@ class ACAEngine::Driver::Storage < Hash(String, String)
     status_name = status_name.to_s
     json_value = self[status_name]?
     if json_value
-      pipeline.publish("#{hash_key}\x02#{status_name}", json_value)
+      @redis.publish("#{hash_key}\x02#{status_name}", json_value)
     else
-      pipeline.publish("#{hash_key}\x02#{status_name}", "null")
+      @redis.publish("#{hash_key}\x02#{status_name}", "null")
     end
     json_value
   end
