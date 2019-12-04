@@ -85,7 +85,7 @@ module ACAEngine::Driver::Proxy
 
     getter metadata : DriverModel::Metadata? = nil
     getter module_id : String? = nil
-    getter :module_name, :index
+    getter :module_name, :index, :sys_id
 
     @status : Storage? = nil
 
