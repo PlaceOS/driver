@@ -6,7 +6,7 @@ dependencies:
     github: spider-gazelle/priority-queue
   redis:
     github: stefanwille/crystal-redis
-    version: "2.2.1"
+    version: ~> 2.5
   tokenizer:
     github: spider-gazelle/tokenizer
   promise:

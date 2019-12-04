@@ -49,13 +49,13 @@ class ACAEngine::Driver::Subscriptions
   @redis_subscribe : Redis
   getter :running, :logger
 
-  def terminate(terminate = true)
+  def terminate(terminate = true) : Nil
     @terminated = terminate
     @running = false
 
     # Unsubscribe with no arguments unsubscribes from all, this will terminate
     # the subscription loop, allowing monitor_changes to return
-    @redis_subscribe.unsubscribe
+    @redis_subscribe.unsubscribe([] of String)
   end
 
   # Self reference subscription
@@ -89,7 +89,7 @@ class ACAEngine::Driver::Subscriptions
       else
         subscriptions = @subscriptions[channel] = [] of ACAEngine::Driver::Subscriptions::Subscription
         subscriptions << sub
-        @redis_subscribe.subscribe channel
+        @redis_subscribe.subscribe [channel]
       end
     end
     sub
@@ -138,9 +138,8 @@ class ACAEngine::Driver::Subscriptions
           wait.receive?
           @mutex.synchronize {
             # re-subscribe to existing subscriptions here
-            @subscriptions.each_key do |channel|
-              @redis_subscribe.subscribe channel
-            end
+            # NOTE:: sending an empty array errors
+            @redis_subscribe.subscribe(@subscriptions.keys) if @subscriptions.size > 0
 
             # re-check indirect subscriptions
             @redirections.each_key do |system_id|
@@ -158,6 +157,7 @@ class ACAEngine::Driver::Subscriptions
         # NOTE:: The crystal redis subscription API could use a little work.
         # The reason for all the sync and spawns is that the first subscribe
         # requires a block and subsequent ones throw an error with a block.
+        # NOTE:: this version of subscribe only supports splat arguments
         @redis_subscribe.subscribe(SYSTEM_ORDER_UPDATE) do |on|
           on.message { |c, m| on_message(c, m) }
           spawn(same_thread: true) { wait.close }
@@ -209,7 +209,7 @@ class ACAEngine::Driver::Subscriptions
       else
         subscriptions = @subscriptions[channel] = [] of ACAEngine::Driver::Subscriptions::Subscription
         subscriptions << subscription
-        @redis_subscribe.subscribe channel
+        @redis_subscribe.subscribe [channel]
       end
 
       # notify of current value
@@ -224,7 +224,7 @@ class ACAEngine::Driver::Subscriptions
       sub = subscriptions.delete(subscription)
       if sub == subscription && subscriptions.empty?
         @subscriptions.delete(channel)
-        @redis_subscribe.unsubscribe channel
+        @redis_subscribe.unsubscribe [channel]
       end
     end
   end
