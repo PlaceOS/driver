@@ -45,6 +45,18 @@ describe ACAEngine::Driver::Protocol::Management do
       "add": [1, 2]
     })).should eq("3")
 
+    logged = nil
+    manager.debug("mod-management-test") do |debug_json|
+      logged = debug_json
+    end
+
+    manager.execute("mod-management-test", %({
+      "__exec__": "implemented_in_base_class",
+      "implemented_in_base_class": {}
+    }))
+
+    logged.should eq(%([1,"testing info message"]))
+
     manager.stop("mod-management-test")
     sleep 0.2
     manager.running?.should eq(false)
