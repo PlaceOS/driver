@@ -9,7 +9,7 @@ require "./request"
 class ACAEngine::Driver::Protocol::Management
   def initialize(@driver_path : String, @logger = ::Logger.new(STDOUT))
     @request_lock = Mutex.new
-    @requests = {} of UInt64 => Promise::DeferredPromise(String?)
+    @requests = {} of UInt64 => Promise::DeferredPromise(String)
     @starting = {} of String => Promise::DeferredPromise(Nil)
 
     @debug_lock = Mutex.new

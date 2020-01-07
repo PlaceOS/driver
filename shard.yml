@@ -21,7 +21,6 @@ dependencies:
     github: Sija/retriable.cr
   ssh2:
     github: spider-gazelle/ssh2.cr
-    branch: master
   connect-proxy:
     github: spider-gazelle/connect-proxy
 
