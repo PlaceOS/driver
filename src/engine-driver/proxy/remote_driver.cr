@@ -150,7 +150,7 @@ module ACAEngine::Driver::Proxy
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
 
       node = @discovery.find!(module_id)
-      URI.parse(host: node[:ip], port: node[:port])
+      URI.new(host: node[:ip], port: node[:port])
     end
 
     # Use consistent hashing to determine location of a resource
