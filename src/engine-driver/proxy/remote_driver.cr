@@ -193,7 +193,7 @@ module ACAEngine::Driver::Proxy
       case response.status_code
       when 200
         # exec was successful, json string returned
-        response.body
+        response.body.try(&.gets_to_end) || ""
       when 203
         # exec sent to module and it raised an error
         info = NamedTuple(
