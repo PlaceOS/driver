@@ -193,13 +193,10 @@ module ACAEngine::Driver::Proxy
       case response.status_code
       when 200
         # exec was successful, json string returned
-        response.body.try(&.gets_to_end) || ""
+        response.body
       when 203
         # exec sent to module and it raised an error
-        info = NamedTuple(
-          message: String,
-          backtrace: Array(String)?).from_json(response.body)
-
+        info = NamedTuple(message: String, backtrace: Array(String)?).from_json(response.body)
         raise Error.new(ErrorCode::RequestFailed, "module raised: #{info[:message]}", *@error_details, info[:backtrace])
       else
         # some other failure 3
