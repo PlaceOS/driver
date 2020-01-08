@@ -39,8 +39,8 @@ struct ACAEngine::Driver::DriverModel
     SSH
     RAW
     HTTP
-    LOGIC
     WEBSOCKET
+    LOGIC = 99
   end
 
   property control_system : ControlSystem?
