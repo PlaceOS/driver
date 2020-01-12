@@ -17,7 +17,7 @@ describe ACAEngine::Driver::Protocol::Management do
       "udp": false,
       "tls": false,
       "makebreak": false,
-      "role": 3,
+      "role": 99,
       "settings": {"test": {"number": 123}},
       "control_system": {
         "id": "sys-1234",
