@@ -20,6 +20,24 @@ This includes things like:
 * description
 * default ports
 
+Looks like:
+
+```yaml
+
+{
+  "descriptive_name": "Screen Technics Control",
+  "generic_name": "Screen",
+  "tcp_port": 3001,
+  "default_settings": "{\"json\": \"formatted hash\"}",
+
+  # All the possible keys
+  "description": "to be considered markdown format",
+  "udp_port": 3001,
+  "uri_base": "https://twitter.com",
+  "makebreak": true
+}
+
+```
 
 ## Metadata
 

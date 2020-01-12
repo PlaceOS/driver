@@ -32,7 +32,7 @@ abstract class ACAEngine::Driver
   end
 
   def self.tcp_port(port)
-    Utilities::Discovery.settings[:generic_name] = port.to_i
+    Utilities::Discovery.settings[:tcp_port] = port.to_i
   end
 
   def self.udp_port(port)
