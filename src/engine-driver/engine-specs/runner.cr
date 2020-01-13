@@ -1,3 +1,4 @@
+require "debug"
 require "socket"
 require "promise"
 require "tokenizer"
@@ -12,6 +13,9 @@ require "../protocol/request"
 # TODO:: Add verbose mode that outputs way too much information about the comms
 STDOUT.sync = true
 STDERR.sync = true
+
+# Enable explicit debugging
+Debug.enabled = true
 
 # An engine driver has 4 typical points of IO contact
 # 1. Engine driver protocol (engine-core's point of contact)
@@ -45,6 +49,7 @@ class EngineSpec
           Process.run(
             driver_exec,
             {"-p"},
+            {"DEBUG" => "1"},
             input: stdin_reader,
             output: STDOUT,
             error: stderr_writer
