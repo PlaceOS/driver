@@ -83,7 +83,7 @@ class ACAEngine::Driver::TransportWebsocket < ACAEngine::Driver::Transport
     disconnect
   end
 
-  def send(message) : ACAEngine::Driver::TransportTCP
+  def send(message) : ACAEngine::Driver::TransportWebsocket
     websocket = @websocket
     return self if websocket.nil? || websocket.closed?
 
@@ -107,7 +107,7 @@ class ACAEngine::Driver::TransportWebsocket < ACAEngine::Driver::Transport
     self
   end
 
-  def send(message, task : ACAEngine::Driver::Task, &block : (Bytes, ACAEngine::Driver::Task) -> Nil) : ACAEngine::Driver::TransportTCP
+  def send(message, task : ACAEngine::Driver::Task, &block : (Bytes, ACAEngine::Driver::Task) -> Nil) : ACAEngine::Driver::TransportWebsocket
     task.processing = block
     send(message)
   end
