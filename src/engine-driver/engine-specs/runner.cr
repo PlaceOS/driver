@@ -1,6 +1,7 @@
 require "debug"
 require "socket"
 require "promise"
+require "colorize"
 require "tokenizer"
 require "./mock_http"
 require "./responder"
@@ -45,7 +46,7 @@ class EngineSpec
       # -p is for protocol / process mode - expecting engine core
       spawn(same_thread: true) do
         begin
-          puts "Launching driver: #{driver_exec}"
+          puts "Launching driver: #{driver_exec.colorize(:green)}"
           Process.run(
             driver_exec,
             {"-p"},
@@ -87,7 +88,7 @@ class EngineSpec
       )
       defaults = JSON.parse(defaults_io.to_s.strip)
       default_settings = JSON.parse(defaults["default_settings"].as_s)
-      puts "... got default settings: #{default_settings.inspect}"
+      puts "... got default settings: #{default_settings.inspect.colorize(:green)}"
 
       # Check for makebreak
       makebreak = !!(defaults["makebreak"]?.try &.as_bool)
@@ -146,15 +147,16 @@ class EngineSpec
       puts "... starting spec"
       begin
         with spec yield
+        puts "... spec passed".colorize(:green)
       rescue e
-        puts "level=ERROR : unhandled exception in spec"
+        puts "level=ERROR : unhandled exception in spec".colorize(:red)
         e.inspect_with_backtrace(STDOUT)
+        puts "... spec failed".colorize(:red)
       end
-      puts "... spec complete"
     ensure
       # Shutdown the driver
       if exited
-        puts "level=ERROR : driver process exited with: #{exit_code}"
+        puts "level=ERROR : driver process exited with: #{exit_code}".colorize(:red)
         puts "... please ensure `redis-server` is running locally" if exit_code == 256
       else
         puts "... terminating driver gracefully"
@@ -169,7 +171,7 @@ class EngineSpec
 
         spawn(same_thread: true) do
           sleep 1.seconds
-          puts "level=ERROR : driver process failed to terminate gracefully"
+          puts "level=ERROR : driver process failed to terminate gracefully".colorize(:red)
           Process.run("kill", {"-9", pid.to_s})
           wait_driver_close.close
         end
@@ -334,7 +336,7 @@ class EngineSpec
     # We want to clear any previous transmissions
     @transmissions.clear
 
-    puts "-> spec calling: #{function} #{args}"
+    puts "-> spec calling: #{function.colorize(:green)} #{args.to_s.colorize(:green)}"
 
     # Build the request
     json = {
@@ -375,7 +377,7 @@ class EngineSpec
         sleep timeout
         if sent.empty?
           channel.close
-          puts "level=ERROR : timeout waiting for expected data\n-> expecting: #{tdata.inspect}"
+          puts "level=ERROR : timeout waiting for expected data\n-> expecting: #{tdata.inspect}".colorize(:red)
         end
       end
 
@@ -415,7 +417,7 @@ class EngineSpec
     rescue e : Spec::AssertionFailed
       # Print out some human friendly results
       begin
-        puts "level=ERROR : expected vs received"
+        puts "level=ERROR : expected vs received".colorize(:red)
         puts "... #{String.new(raw_data)}"
         puts "... #{String.new(sent)}"
       rescue
@@ -432,12 +434,12 @@ class EngineSpec
     comms = @comms
     if comms && !comms.closed?
     else
-      puts "level=WARN : Attempting to transmit: #{data.inspect}"
+      puts "level=WARN : Attempting to transmit: #{data.inspect}".colorize(:orange)
       raise "module is currently disconnected, cannot transmit data"
     end
     return unless comms
 
-    puts "-> transmitting: #{data.inspect}"
+    puts "-> transmitting: #{data.inspect.colorize(:green)}"
 
     data = if data.responds_to? :to_io
              io = IO::Memory.new
@@ -466,7 +468,7 @@ class EngineSpec
                   spawn(same_thread: true) do
                     sleep timeout
                     if temp_http.nil?
-                      puts "level=ERROR : timeout waiting for expected HTTP request"
+                      puts "level=ERROR : timeout waiting for expected HTTP request".colorize(:red)
                       channel.close
                     end
                   end
