@@ -39,7 +39,7 @@ class ACAEngine::Driver::Protocol::Management
 
   # Core should update this callback to route requests
   property on_exec : Proc(Request, Proc(Request, Nil), Nil) = ->(request : Request, callback : Proc(Request, Nil)) {}
-  property on_setting : Proc(String, String, JSON::Any, Nil) = ->(module_id : String, setting_name : String, setting_value : JSON::Any) {}
+  property on_setting : Proc(String, String, YAML::Any, Nil) = ->(module_id : String, setting_name : String, setting_value : YAML::Any) {}
 
   getter :terminated, :logger, pid
   getter :last_exit_code, :launch_count, :launch_time
@@ -97,7 +97,7 @@ class ACAEngine::Driver::Protocol::Management
     end
 
     @events.send(Request.new(module_id, "exec", payload, seq: sequence))
-    promise.get.as(String)
+    promise.get
   end
 
   def debug(module_id : String, &callback : (String) -> Nil) : Nil
@@ -383,7 +383,7 @@ class ACAEngine::Driver::Protocol::Management
       })
     when "setting"
       mod_id = request.id
-      setting_name, setting_value = Tuple(String, JSON::Any).from_json(request.payload.not_nil!)
+      setting_name, setting_value = Tuple(String, YAML::Any).from_yaml(request.payload.not_nil!)
       @on_setting.call(mod_id, setting_name, setting_value)
     else
       @logger.warn("received unknown request #{request.cmd} - #{request.inspect}")
