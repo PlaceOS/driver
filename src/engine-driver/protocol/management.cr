@@ -389,5 +389,7 @@ class ACAEngine::Driver::Protocol::Management
     else
       @logger.warn("received unknown request #{request.cmd} - #{request.inspect}")
     end
+  rescue error
+    @logger.warn "error processing driver request #{request.inspect}\n#{error.inspect_with_backtrace}"
   end
 end
