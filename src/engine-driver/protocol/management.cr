@@ -1,4 +1,5 @@
 require "set"
+require "yaml"
 require "socket"
 require "promise"
 require "tokenizer"
