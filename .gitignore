@@ -1,7 +1,6 @@
 doc
 lib
 bin
-drivers
 .crystal
 .shards
 app
