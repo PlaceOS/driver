@@ -248,17 +248,17 @@ module ACAEngine::Driver::Proxy
         subscriptions.subscribe(@sys_id, @module_name, @index, status, &callback)
       end
     end
-  end
 
-  # Extract module name and module id from string
-  # e.g. "Display_3" => {"Display", 3}
-  #
-  def self.get_parts(module_id : String)
-    mod_name, match, index = module_id.rpartition('_')
-    if match.empty?
-      {module_id, 1}
-    else
-      {mod_name, index.to_i}
+    # Extract module name and module id from string
+    # e.g. "Display_3" => {"Display", 3}
+    #
+    def self.get_parts(module_id : String)
+      mod_name, match, index = module_id.rpartition('_')
+      if match.empty?
+        {module_id, 1}
+      else
+        {mod_name, index.to_i}
+      end
     end
   end
 end
