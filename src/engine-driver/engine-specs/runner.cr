@@ -365,6 +365,26 @@ class EngineSpec
     response
   end
 
+  def expect_send(timeout = 500.milliseconds) : Bytes
+    if @transmissions.empty?
+      channel = Channel(Bytes).new(1)
+      @expected_transmissions << channel
+      begin
+        select
+        when received = channel.receive
+          return received
+        when timeout(timeout)
+          puts "level=ERROR : timeout waiting for data".colorize(:red)
+          raise "timeout waiting for data"
+        end
+      ensure
+        @expected_transmissions.delete(channel)
+      end
+    else
+      return @transmissions.shift
+    end
+  end
+
   def should_send(data, timeout = 500.milliseconds)
     sent = Bytes.new(0)
 
