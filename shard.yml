@@ -1,31 +1,35 @@
 name: engine-driver
 version: 1.0.0
+license: MIT
 
 dependencies:
+  connect-proxy:
+    github: spider-gazelle/connect-proxy
+  debug:
+    github: Sija/debug.cr
+  hound-dog:
+    github: aca-labs/hound-dog
+    version: ~> 2.0.0
+  ipaddress:
+    github: Sija/ipaddress.cr
   priority-queue:
     github: spider-gazelle/priority-queue
+  promise:
+    github: spider-gazelle/promise
+  protobuf:
+    github: jeromegn/protobuf.cr
   redis:
     github: stefanwille/crystal-redis
     version: ~> 2.5
-  tokenizer:
-    github: spider-gazelle/tokenizer
-  promise:
-    github: spider-gazelle/promise
-  tasker:
-    github: spider-gazelle/tasker
-  protobuf:
-    github: jeromegn/protobuf.cr
-  ipaddress:
-    github: Sija/ipaddress.cr
   retriable:
     github: Sija/retriable.cr
-  debug:
-    github: Sija/debug.cr
   ssh2:
     github: spider-gazelle/ssh2.cr
-  connect-proxy:
-    github: spider-gazelle/connect-proxy
+  tasker:
+    github: spider-gazelle/tasker
+  tokenizer:
+    github: spider-gazelle/tokenizer
 
 development_dependencies:
   ameba:
-    github: veelenga/ameba
+    github: crystal-ameba/ameba

@@ -1,3 +1,4 @@
+require "hound-dog"
 require "json"
 require "uuid"
 
@@ -149,15 +150,13 @@ module ACAEngine::Driver::Proxy
       module_id = module_id?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
 
-      node = @discovery.find(module_id)
-      URI.new(host: node[:ip], port: node[:port])
+      @discovery[module_id]?
     end
 
     # Use consistent hashing to determine location of a resource
     #
     def which_core?(hash_id : String) : URI?
-      node = @discovery.find(hash_id)
-      URI.new(host: node[:ip], port: node[:port])
+      @discovery[hash_id]?
     end
 
     # Executes a request against the appropriate core and returns the JSON result
