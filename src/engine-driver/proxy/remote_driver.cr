@@ -146,17 +146,19 @@ module ACAEngine::Driver::Proxy
 
     # Use consistent hashing to determine the location of the module
     #
-    def which_core? : URI?
+    def which_core : URI
       module_id = module_id?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
 
-      @discovery[module_id]?
+      which_core(module_id)
     end
 
     # Use consistent hashing to determine location of a resource
     #
-    def which_core?(hash_id : String) : URI?
-      @discovery[hash_id]?
+    def which_core(hash_id : String) : URI
+      node = @discovery[hash_id]?
+      raise Error.new(ErrorCode::UnexpectedFailure, "No registered core instances", *@error_details) unless node
+      node[:uri]
     end
 
     # Executes a request against the appropriate core and returns the JSON result
@@ -176,7 +178,7 @@ module ACAEngine::Driver::Proxy
       module_id = module_id?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
 
-      core_uri = which_core?(module_id)
+      core_uri = which_core(module_id)
 
       # build request
       core_uri.path = "/api/core/v1/command/#{module_id}/execute"
@@ -230,7 +232,7 @@ module ACAEngine::Driver::Proxy
       module_id = module_id?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
 
-      core_uri = which_core?(module_id)
+      core_uri = which_core(module_id)
 
       # build request
       core_uri.path = "/api/core/v1/command/#{module_id}/debugger"
