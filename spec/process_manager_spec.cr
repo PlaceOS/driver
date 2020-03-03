@@ -125,6 +125,21 @@ describe ACAEngine::Driver::ProcessManager do
     sleep 0.01
     process.loaded[driver_id].settings.json["test"]["number"].as_i.should eq(12345)
 
+    # Check what's running on this node:
+    json = {
+      id:      "",
+      cmd:     "info",
+    }.to_json
+    input.write_bytes json.bytesize
+    input.write json.to_slice
+
+    Fiber.yield
+    raw_data = Bytes.new(4096)
+    bytes_read = output.read(raw_data)
+    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    loaded = Array(String).from_json(req_out.id)
+    loaded.should eq(["mod_1234"])
+
     # Stop a driver
     json = {
       id:  driver_id,

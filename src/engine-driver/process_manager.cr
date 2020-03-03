@@ -14,6 +14,7 @@ class ACAEngine::Driver::ProcessManager
     @protocol.register :exec { |request| exec(request) }
     @protocol.register :debug { |request| debug(request) }
     @protocol.register :ignore { |request| ignore(request) }
+    @protocol.register :info { |request| info(request) }
     @protocol.register :terminate { terminate }
 
     @terminated = Channel(Nil).new
@@ -103,6 +104,11 @@ class ACAEngine::Driver::ProcessManager
   def ignore(request : Protocol::Request) : Nil
     driver = @loaded[request.id]?
     driver.try &.logger.debugging = false
+  end
+
+  def info(request : Protocol::Request) : Protocol::Request
+    request.id = @loaded.keys.to_json
+    request
   end
 
   def terminate : Nil

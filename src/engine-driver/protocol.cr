@@ -38,6 +38,7 @@ class ACAEngine::Driver::Protocol
       exec:      [] of Request -> Request?,
       debug:     [] of Request -> Request?,
       ignore:    [] of Request -> Request?,
+      info:      [] of Request -> Request?,
     }
 
     # Tracks request IDs that expect responses
@@ -122,6 +123,9 @@ class ACAEngine::Driver::Protocol
                 when "ignore"
                   # stop debugging on id
                   @callbacks[:ignore]
+                when "info"
+                  # return the number of running instances (for debugging purposes)
+                  @callbacks[:info]
                 when "result"
                   # result of an executed request
                   # seq == request id
