@@ -107,7 +107,8 @@ class ACAEngine::Driver::ProcessManager
   end
 
   def info(request : Protocol::Request) : Protocol::Request
-    request.id = @loaded.keys.to_json
+    request.payload = @loaded.keys.to_json
+    request.cmd = "result"
     request
   end
 

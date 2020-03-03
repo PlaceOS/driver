@@ -87,6 +87,20 @@ class ACAEngine::Driver::Protocol::Management
     @events.send(Request.new(module_id, "stop"))
   end
 
+  def info
+    promise = Promise.new(String)
+
+    sequence = @request_lock.synchronize do
+      seq = @sequence
+      @sequence += 1
+      @requests[seq] = promise
+      seq
+    end
+
+    @events.send(Request.new("", "info", seq: sequence))
+    Array(String).from_json promise.get
+  end
+
   def execute(module_id : String, payload : String?) : String
     promise = Promise.new(String)
 
@@ -156,6 +170,8 @@ class ACAEngine::Driver::Protocol::Management
           debug(request.id)
         when "ignore"
           ignore(request.id)
+        when "info"
+          running_modules(request.seq.not_nil!)
         when "update"
           update(request)
         when "exited"
@@ -258,6 +274,16 @@ class ACAEngine::Driver::Protocol::Management
     return unless io && @modules[module_id]?
 
     json = %({"id":"#{module_id}","cmd":"ignore"})
+    io.write_bytes json.bytesize
+    io.write json.to_slice
+    io.flush
+  end
+
+  private def running_modules(seq : UInt64)
+    io = @io
+    return unless io
+
+    json = %({"id":"","cmd":"info","seq":#{seq}})
     io.write_bytes json.bytesize
     io.write json.to_slice
     io.flush

@@ -57,6 +57,8 @@ describe ACAEngine::Driver::Protocol::Management do
 
     logged.should eq(%([1,"testing info message"]))
 
+    manager.info.should eq(["mod-management-test"])
+
     manager.stop("mod-management-test")
     sleep 0.2
     manager.running?.should eq(false)

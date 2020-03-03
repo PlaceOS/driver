@@ -137,7 +137,7 @@ describe ACAEngine::Driver::ProcessManager do
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
     req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
-    loaded = Array(String).from_json(req_out.id)
+    loaded = Array(String).from_json(req_out.payload.not_nil!)
     loaded.should eq(["mod_1234"])
 
     # Stop a driver
