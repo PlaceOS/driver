@@ -15,7 +15,7 @@ class ACAEngine::Driver::Subscriptions::ChannelSubscription < ACAEngine::Driver:
   getter :channel
 
   def subscribe_to : String?
-    "engine\x02#{@channel}"
+    "engine/#{@channel}"
   end
 
   def current_value : String?

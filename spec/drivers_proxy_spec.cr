@@ -19,9 +19,9 @@ describe ACAEngine::Driver::Proxy::Drivers do
     # Create a virtual systems
     storage = ACAEngine::Driver::Storage.new(cs.id, "system")
     storage.clear
-    storage["Display\x021"] = "mod-999"
-    storage["Display\x022"] = "mod-888"
-    storage["Switcher\x021"] = "mod-444"
+    storage["Display/1"] = "mod-999"
+    storage["Display/2"] = "mod-888"
+    storage["Switcher/1"] = "mod-444"
     storage.size.should eq(3)
     storage.empty?.should eq(false)
     system.exists?(:Display_1).should eq(true)
@@ -34,13 +34,13 @@ describe ACAEngine::Driver::Proxy::Drivers do
       "function2" => {"arg1" => ["Int32"]},
       "function3" => {"arg1" => ["Int32", "200"], "arg2" => ["Int32"]},
     }, ["Functoids"])
-    redis.set("interface\x02mod-999", meta.to_json)
-    redis.set("interface\x02mod-888", meta.to_json)
+    redis.set("interface/mod-999", meta.to_json)
+    redis.set("interface/mod-888", meta.to_json)
 
     meta = ACAEngine::Driver::DriverModel::Metadata.new({
       "function1" => {} of String => Array(String),
     })
-    redis.set("interface\x02mod-444", meta.to_json)
+    redis.set("interface/mod-444", meta.to_json)
 
     # Check if implements check works
     system.modules.should eq(["Display", "Switcher"])

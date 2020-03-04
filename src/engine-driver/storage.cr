@@ -37,7 +37,7 @@ class ACAEngine::Driver::Storage < Hash(String, String)
   def initialize(@id : String, prefix = DEFAULT_PREFIX)
     super()
     @redis = self.class.redis_pool
-    @hash_key = "#{prefix}\x02#{@id}"
+    @hash_key = "#{prefix}/#{@id}"
   end
 
   @redis : Redis::PooledClient
@@ -51,7 +51,7 @@ class ACAEngine::Driver::Storage < Hash(String, String)
       key = hash_key
       @redis.pipelined do |pipeline|
         pipeline.hset(key, status_name, json_value)
-        pipeline.publish("#{key}\x02#{status_name}", json_value)
+        pipeline.publish("#{key}/#{status_name}", json_value)
       end
     end
     json_value
@@ -61,9 +61,9 @@ class ACAEngine::Driver::Storage < Hash(String, String)
     status_name = status_name.to_s
     json_value = self[status_name]?
     if json_value
-      @redis.publish("#{hash_key}\x02#{status_name}", json_value)
+      @redis.publish("#{hash_key}/#{status_name}", json_value)
     else
-      @redis.publish("#{hash_key}\x02#{status_name}", "null")
+      @redis.publish("#{hash_key}/#{status_name}", "null")
     end
     json_value
   end
@@ -81,7 +81,7 @@ class ACAEngine::Driver::Storage < Hash(String, String)
       hkey = hash_key
       @redis.pipelined do |pipeline|
         pipeline.hdel(hkey, key)
-        pipeline.publish("#{hkey}\x02#{key}", "null")
+        pipeline.publish("#{hkey}/#{key}", "null")
       end
       return value.to_s
     end
@@ -118,7 +118,7 @@ class ACAEngine::Driver::Storage < Hash(String, String)
     @redis.pipelined do |pipeline|
       keys.each do |key|
         pipeline.hdel(hkey, key)
-        pipeline.publish("#{hkey}\x02#{key}", "null")
+        pipeline.publish("#{hkey}/#{key}", "null")
       end
     end
     self

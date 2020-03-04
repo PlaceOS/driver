@@ -18,7 +18,7 @@ describe ACAEngine::Driver::Proxy::Driver do
 
     # Create a virtual systems
     storage = ACAEngine::Driver::Storage.new(cs.id, "system")
-    storage["Display\x021"] = "mod-1234"
+    storage["Display/1"] = "mod-1234"
     system.exists?(:Display_1).should eq(true)
 
     # Create the driver metadata
@@ -31,7 +31,7 @@ describe ACAEngine::Driver::Proxy::Driver do
       "function2" => {"arg1" => ["Int32"]},
       "function3" => {"arg1" => ["Int32", "200"], "arg2" => ["Int32"]},
     }, ["Functoids"])
-    redis.set("interface\x02mod-1234", meta.to_json)
+    redis.set("interface/mod-1234", meta.to_json)
 
     # Check if implements check works
     system[:Display_1].implements?(:function0).should eq(false)
@@ -126,7 +126,7 @@ describe ACAEngine::Driver::Proxy::Driver do
     end
 
     # CLEAN UP
-    redis.del("interface\x02mod-1234")
+    redis.del("interface/mod-1234")
     mod_store.clear
     storage.clear
   end
@@ -147,7 +147,7 @@ describe ACAEngine::Driver::Proxy::Driver do
     system = ACAEngine::Driver::Proxy::System.new cs, "reply_id"
     # Create some virtual systems
     storage = ACAEngine::Driver::Storage.new(cs.id, "system")
-    storage["Display\x021"] = "mod-1234"
+    storage["Display/1"] = "mod-1234"
 
     in_callback = false
     sub_passed = nil

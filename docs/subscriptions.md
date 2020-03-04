@@ -13,7 +13,7 @@ The main complexity is then tracking indirect subscriptions.
 
 Every time a change of state occurs in redis, an event is fired:
 
-* event path: `status\x02module_id\x02status_name` this is fired in `./src/storage.cr`
+* event path: `status/module_id/status_name` this is fired in `./src/storage.cr`
 
 Subscriptions are made to redis and monitored in the `./src/subscriptions.cr`
 

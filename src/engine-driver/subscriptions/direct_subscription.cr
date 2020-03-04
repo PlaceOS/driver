@@ -16,7 +16,7 @@ class ACAEngine::Driver::Subscriptions::DirectSubscription < ACAEngine::Driver::
   getter :module_id, :status
 
   def subscribe_to : String?
-    "#{@storage.hash_key}\x02#{@status}"
+    "#{@storage.hash_key}/#{@status}"
   end
 
   def current_value : String?

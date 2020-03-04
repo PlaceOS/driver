@@ -3,18 +3,18 @@ require "./helper"
 describe ACAEngine::Driver::Proxy::System do
   Spec.before_each do
     storage = ACAEngine::Driver::Storage.new("sys-1234", "system")
-    storage.delete "Display\x021"
-    storage.delete "Display\x022"
-    storage.delete "Display\x023"
-    storage.delete "Switcher\x021"
+    storage.delete "Display/1"
+    storage.delete "Display/2"
+    storage.delete "Display/3"
+    storage.delete "Switcher/1"
   end
 
   Spec.after_each do
     storage = ACAEngine::Driver::Storage.new("sys-1234", "system")
-    storage.delete "Display\x021"
-    storage.delete "Display\x022"
-    storage.delete "Display\x023"
-    storage.delete "Switcher\x021"
+    storage.delete "Display/1"
+    storage.delete "Display/2"
+    storage.delete "Display/3"
+    storage.delete "Switcher/1"
   end
 
   it "indicate if a module / driver exists in a system" do
@@ -42,10 +42,10 @@ describe ACAEngine::Driver::Proxy::System do
 
     # Create some virtual systems
     storage = ACAEngine::Driver::Storage.new(cs.id, "system")
-    storage["Display\x021"] = "mod-1234"
-    storage["Display\x022"] = "mod-5678"
-    storage["Display\x023"] = "mod-9000"
-    storage["Switcher\x021"] = "mod-9999"
+    storage["Display/1"] = "mod-1234"
+    storage["Display/2"] = "mod-5678"
+    storage["Display/3"] = "mod-9000"
+    storage["Switcher/1"] = "mod-9999"
 
     system.exists?(:Display_1).should eq(true)
     system.exists?("Display_2").should eq(true)
@@ -73,10 +73,10 @@ describe ACAEngine::Driver::Proxy::System do
     system = ACAEngine::Driver::Proxy::System.new cs, "reply_id"
     # Create some virtual systems
     storage = ACAEngine::Driver::Storage.new(cs.id, "system")
-    storage["Display\x021"] = "mod-1234"
-    storage["Display\x022"] = "mod-5678"
-    storage["Display\x023"] = "mod-9000"
-    storage["Switcher\x021"] = "mod-9999"
+    storage["Display/1"] = "mod-1234"
+    storage["Display/2"] = "mod-5678"
+    storage["Display/3"] = "mod-9000"
+    storage["Switcher/1"] = "mod-9999"
 
     in_callback = false
     sub_passed = nil

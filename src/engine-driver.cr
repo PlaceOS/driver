@@ -30,7 +30,7 @@ abstract class ACAEngine::Driver
     @__status__ = Status.new
     @__storage__ = Storage.new(@__module_id__)
     @__storage__.clear
-    @__storage__.redis.set("interface\x02#{@__module_id__}", {{ACAEngine::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata)
+    @__storage__.redis.set("interface/#{@__module_id__}", {{ACAEngine::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata)
   end
 
   @__system__ : Proxy::System?
@@ -133,7 +133,7 @@ abstract class ACAEngine::Driver
   end
 
   def publish(channel, message)
-    @__storage__.redis.publish("engine\x02#{channel}", message.to_s)
+    @__storage__.redis.publish("engine/#{channel}", message.to_s)
     message
   end
 

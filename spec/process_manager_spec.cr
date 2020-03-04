@@ -127,8 +127,8 @@ describe ACAEngine::Driver::ProcessManager do
 
     # Check what's running on this node:
     json = {
-      id:      "",
-      cmd:     "info",
+      id:  "",
+      cmd: "info",
     }.to_json
     input.write_bytes json.bytesize
     input.write json.to_slice

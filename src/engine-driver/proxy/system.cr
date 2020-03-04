@@ -32,7 +32,7 @@ class ACAEngine::Driver::Proxy::System
   # Retrieve module metadata from redis
   #
   def self.module_id?(system_id, module_name, index) : String?
-    ACAEngine::Driver::Storage.new(system_id, "system")["#{module_name}\x02#{index}"]?
+    ACAEngine::Driver::Storage.new(system_id, "system")["#{module_name}/#{index}"]?
   end
 
   # Retrieve module metadata from redis
@@ -48,7 +48,7 @@ class ACAEngine::Driver::Proxy::System
   #
   def self.driver_metadata?(module_id) : ACAEngine::Driver::DriverModel::Metadata?
     ACAEngine::Driver::Storage
-      .get("interface\x02#{module_id}")
+      .get("interface/#{module_id}")
       .try(&->DriverModel::Metadata.from_json(String))
   end
 
@@ -56,8 +56,8 @@ class ACAEngine::Driver::Proxy::System
     module_name = module_name.to_s
     index = index.to_i
 
-    module_id = @system["#{module_name}\x02#{index}"]?
-    metadata = @redis.get("interface\x02#{module_id}") if module_id
+    module_id = @system["#{module_name}/#{index}"]?
+    metadata = @redis.get("interface/#{module_id}") if module_id
     metadata = if module_id && metadata
                  DriverModel::Metadata.from_json metadata
                else
@@ -76,13 +76,13 @@ class ACAEngine::Driver::Proxy::System
     drivers = [] of Proxy::Driver
 
     @system.keys.each do |key|
-      parts = key.split("\x02")
+      parts = key.split("/")
       mod_name = parts[0]
       index = parts[1]
 
       if mod_name == module_name
         module_id = @system[key]
-        metadata = @redis.get("interface\x02#{module_id}")
+        metadata = @redis.get("interface/#{module_id}")
         metadata = if module_id && metadata
                      DriverModel::Metadata.from_json metadata
                    else
@@ -103,12 +103,12 @@ class ACAEngine::Driver::Proxy::System
     drivers = [] of Proxy::Driver
 
     @system.keys.each do |key|
-      parts = key.split("\x02")
+      parts = key.split("/")
       mod_name = parts[0]
       index = parts[1]
 
       module_id = @system[key]
-      metadata = @redis.get("interface\x02#{module_id}")
+      metadata = @redis.get("interface/#{module_id}")
       if module_id && metadata
         data = DriverModel::Metadata.from_json metadata
         next unless data.implements.includes?(interface) || data.functions[interface]?
@@ -153,18 +153,18 @@ class ACAEngine::Driver::Proxy::System
   # Checks for the existence of a particular module
   def exists?(module_name, index = nil) : Bool
     module_name, index = get_parts(module_name) unless index
-    !@system["#{module_name}\x02#{index}"]?.nil?
+    !@system["#{module_name}/#{index}"]?.nil?
   end
 
   # Returns a list of all the module names in the system
   def modules
-    @system.keys.map { |key| key.split("\x02")[0] }.uniq
+    @system.keys.map { |key| key.split("/")[0] }.uniq
   end
 
   # Grabs the number of a particular device type
   def count(module_name)
     module_name = module_name.to_s
-    @system.keys.map { |key| key.split("\x02")[0] }.count { |key| key == module_name }
+    @system.keys.map { |key| key.split("/")[0] }.count { |key| key == module_name }
   end
 
   def name

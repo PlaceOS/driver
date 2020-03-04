@@ -19,7 +19,7 @@ class ACAEngine::Driver::Subscriptions::IndirectSubscription < ACAEngine::Driver
 
   def subscribe_to : String?
     if get_module_id
-      "#{@storage.not_nil!.hash_key}\x02#{@status}"
+      "#{@storage.not_nil!.hash_key}/#{@status}"
     end
   end
 
@@ -39,7 +39,7 @@ class ACAEngine::Driver::Subscriptions::IndirectSubscription < ACAEngine::Driver
     return module_id if module_id
 
     lookup = ACAEngine::Driver::Storage.new(@system_id, "system")
-    module_id = lookup["#{@module_name}\x02#{@index}"]?
+    module_id = lookup["#{@module_name}/#{@index}"]?
 
     if module_id
       @module_id = module_id

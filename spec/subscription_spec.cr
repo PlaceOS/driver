@@ -14,7 +14,7 @@ describe ACAEngine::Driver::Subscriptions do
       in_callback = true
       channel.close
     end
-    ACAEngine::Driver::Storage.redis_pool.publish("engine\x02test", "whatwhat")
+    ACAEngine::Driver::Storage.redis_pool.publish("engine/test", "whatwhat")
     channel.receive?
 
     in_callback.should eq(true)
@@ -58,7 +58,7 @@ describe ACAEngine::Driver::Subscriptions do
 
     # Ensure keys don't already exist
     sys_lookup = ACAEngine::Driver::Storage.new("sys-123", "system")
-    lookup_key = "Display\x021"
+    lookup_key = "Display/1"
     sys_lookup.delete lookup_key
     storage = ACAEngine::Driver::Storage.new("mod-1234")
     storage.delete("power")
@@ -116,7 +116,7 @@ describe ACAEngine::Driver::Subscriptions do
 
     # Ensure keys don't already exist
     sys_lookup = ACAEngine::Driver::Storage.new("sys-1234", "system")
-    lookup_key = "Display\x021"
+    lookup_key = "Display/1"
     sys_lookup.delete lookup_key
     storage = ACAEngine::Driver::Storage.new("mod-12345")
     storage.delete("power")

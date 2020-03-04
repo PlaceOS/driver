@@ -32,7 +32,7 @@ Spec in
 
 Status is stored in a [redis hash](https://redis.io/commands/hset) structure
 
-* The hash is stored at: "status\x02module_id" (where module ID is the ID of the driver)
+* The hash is stored at: "status/module_id" (where module ID is the ID of the driver)
 * The hash keys are the status variable names.
 * The hash values are JSON encoded values
 
@@ -45,8 +45,8 @@ This is how we look up status related to system indexes.
 i.e. System id -> Display_1 -> power status
 
 * System indexes are also stored using a [redis hash](https://redis.io/commands/hset) structure
-* The hash is stored at: "system\x02system_id"
-* The hash keys are the driver indexes: "module_name\x02index" i.e. "Display\x021"
+* The hash is stored at: "system/system_id"
+* The hash keys are the driver indexes: "module_name/index" i.e. "Display/1"
 * The hash values are the driver id
 
 You can see this implemented in `./src/engine-driver/proxy/system.cr` function `def get_driver`
