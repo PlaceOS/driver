@@ -8,13 +8,18 @@ describe ACAEngine::Driver::Subscriptions do
     channel = Channel(Nil).new
 
     subs = ACAEngine::Driver::Subscriptions.new
+
     subscription = subs.channel "test" do |sub, message|
       sub_passed = sub
       message_passed = message
       in_callback = true
       channel.close
     end
+
+    sleep 0.005
+
     ACAEngine::Driver::Storage.redis_pool.publish("engine/test", "whatwhat")
+
     channel.receive?
 
     in_callback.should eq(true)
@@ -37,6 +42,7 @@ describe ACAEngine::Driver::Subscriptions do
       in_callback = true
       channel.close
     end
+
     storage = ACAEngine::Driver::Storage.new("mod-123")
     storage["power"] = true
     channel.receive?
@@ -134,9 +140,12 @@ describe ACAEngine::Driver::Subscriptions do
 
     # Create the lookup and signal the change
     sys_lookup[lookup_key] = "mod-12345"
+
+    sleep 0.005
+
     redis.publish "lookup-change", "sys-12345"
 
-    sleep 0.05
+    sleep 0.005
 
     # Update the status
     storage["power"] = true

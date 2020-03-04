@@ -14,7 +14,11 @@ describe ACAEngine::Driver::Proxy::Subscriptions do
       in_callback = true
       channel.close
     end
+
+    sleep 0.005
+
     ACAEngine::Driver::Storage.redis_pool.publish("engine/test", "whatwhat")
+
     channel.receive?
 
     in_callback.should eq(true)
