@@ -7,3 +7,4 @@ app
 *.dwarf
 .DS_Store
 *.lock
+test_build
