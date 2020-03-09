@@ -1,8 +1,8 @@
-# Crystal Lang Engine Driver
+# PlaceOS Driver
 
 [![Build Status](https://travis-ci.org/placeos/driver.svg?branch=master)](https://travis-ci.org/placeos/driver)
 
-The framework for running drivers on Crystal-Engine.
+The framework for running drivers on PlaceOS.
 
 ## Requirements
 
