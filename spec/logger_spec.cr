@@ -1,12 +1,12 @@
 require "./helper"
 
-describe ACAEngine::Driver::Logger do
+describe PlaceOS::Driver::Logger do
   it "should send outgoing requests" do
     proto, _, output = Helper.protocol
     std_out = IO::Memory.new
 
     # By default debug messages are ignored
-    logger = ACAEngine::Driver::Logger.new("mod-123", std_out, proto)
+    logger = PlaceOS::Driver::Logger.new("mod-123", std_out, proto)
     logger.debug "this should do nothing"
 
     (std_out.size > 0).should eq(false)
@@ -17,7 +17,7 @@ describe ACAEngine::Driver::Logger do
 
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq("mod-123")
     req_out.payload.should eq(%{[0,"whatwhat"]})
 
@@ -28,7 +28,7 @@ describe ACAEngine::Driver::Logger do
     logger.warn "hello-logs"
 
     bytes_read = output.read(raw_data)
-    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq("mod-123")
     req_out.payload.should eq(%{[2,"hello-logs"]})
 
@@ -40,7 +40,7 @@ describe ACAEngine::Driver::Logger do
     std_out = IO::Memory.new
 
     # By default debug messages are ignored
-    logger = ACAEngine::Driver::Logger.new("mod-123", std_out, proto)
+    logger = PlaceOS::Driver::Logger.new("mod-123", std_out, proto)
     in_block = false
     logger.debug {
       in_block = true
@@ -59,7 +59,7 @@ describe ACAEngine::Driver::Logger do
 
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq("mod-123")
     req_out.payload.should eq(%{[0,"whatwhat"]})
 
@@ -71,7 +71,7 @@ describe ACAEngine::Driver::Logger do
     logger.warn { "hello-logs" }
 
     bytes_read = output.read(raw_data)
-    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq("mod-123")
     req_out.payload.should eq(%{[2,"hello-logs"]})
 

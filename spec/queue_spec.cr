@@ -1,6 +1,6 @@
 require "./helper"
 
-describe ACAEngine::Driver::Queue do
+describe PlaceOS::Driver::Queue do
   it "should process task with response" do
     queue = Helper.queue
     queue.online = true
@@ -157,7 +157,7 @@ describe ACAEngine::Driver::Queue do
     std_out = IO::Memory.new
     logger = ::Logger.new(std_out)
     connected = false
-    queue = ACAEngine::Driver::Queue.new(logger) { |state| connected = state }
+    queue = PlaceOS::Driver::Queue.new(logger) { |state| connected = state }
 
     connected.should eq(false)
     queue.online = true

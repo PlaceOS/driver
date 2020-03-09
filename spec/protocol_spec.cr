@@ -1,6 +1,6 @@
 require "./helper"
 
-describe ACAEngine::Driver::Protocol do
+describe PlaceOS::Driver::Protocol do
   it "should parse an incomming request" do
     proto, input, _ = Helper.protocol
 
@@ -28,7 +28,7 @@ describe ACAEngine::Driver::Protocol do
 
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq(req.id)
   end
 

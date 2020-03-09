@@ -3,9 +3,9 @@
 You can access the transport at any time without interacting with the queue.
 However the queue exists to provide structure to async events, i.e. preventing a send while waiting for a response.
 
-* Queue is defined here: `./src/engine-driver/queue.cr`
-  * Queued Tasks are here: `./src/engine-driver/task.cr`
-* Transport files: `./src/engine-driver/transport*`
+* Queue is defined here: `./src/driver/queue.cr`
+  * Queued Tasks are here: `./src/driver/task.cr`
+* Transport files: `./src/driver/transport*`
 
 
 ## The Queue
@@ -26,7 +26,7 @@ Spec in `./spec/queue_spec.cr`
 
 ### Usage
 
-There is `def queue` helper method in `./src/engine-driver.cr` which adds a Task to the instances transport.
+There is `def queue` helper method in `./src/driver.cr` which adds a Task to the instances transport.
 
 ```crystal
 queue name: :power, delay: 30.milliseconds, priority: 99 do |task|
@@ -53,7 +53,7 @@ Timers are also not started if the task is resolved in the block.
 Transports are queue aware, in that they check if there is a currently processing item in the queue and this can effect behaviour.
 
 * Typically, data coming in from a transport will be sent to the `def received` function. (along with any active task)
-  * This occurs in `./src/engine-driver/transport.cr` base class method `def process`
+  * This occurs in `./src/driver/transport.cr` base class method `def process`
 * However a task may define a custom received block and in that case the data will be sent there.
 
 ```crystal

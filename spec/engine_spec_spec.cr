@@ -1,5 +1,5 @@
 require "./helper"
-require "../src/engine-driver/engine-specs/runner"
+require "../src/driver/engine-specs/runner"
 
 describe EngineSpec do
   it "should be able to load a compiled driver for mocking" do

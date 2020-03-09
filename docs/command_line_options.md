@@ -2,8 +2,8 @@
 
 Handled by
 
-* Command line parser: `./src/engine-driver.cr`
-* Discovery and Metadata: `./src/engine-driver/utilities/discovery.cr`
+* Command line parser: `./src/driver.cr`
+* Discovery and Metadata: `./src/driver/utilities/discovery.cr`
 
 
 ## Discovery and Defaults

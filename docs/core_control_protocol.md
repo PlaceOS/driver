@@ -1,6 +1,6 @@
 # Core Control Protocol
 
-* Handled by `./src/engine-driver/protocol.cr`
+* Handled by `./src/driver/protocol.cr`
 * Engine Core communicates with Engine Drivers over STDIN / STDERR.
 * Drivers inherit the STDOUT used by Engine Core for logging.
 
@@ -12,7 +12,7 @@ Messages are written as message length (binary unsigned 32bit number) followed b
 
 ## Processing Commands
 
-* Commands are defined by the `ACAEngine::Driver::Protocol::Request` class.
+* Commands are defined by the `PlaceOS::Driver::Protocol::Request` class.
 * Incoming requests are buffered and tokenised `def consume_io`
 * Commands are then asynchronously dispatched `def process(message)`
 
@@ -34,7 +34,7 @@ Spec in `./spec/driver_proxy_spec.cr`
 * Starts an instance of the current driver
 * Expects payload to contain:
   * id: of the instance being started (will ignore if already running)
-  * payload: is expected to be JSON `DriverModel` conforming to: `./src/engine-driver/driver_model.cr`
+  * payload: is expected to be JSON `DriverModel` conforming to: `./src/driver/driver_model.cr`
 * Response is expected to be either an error (driver was not loaded) or success (an instance is running)
 * Success response is the original request with no payload
 
@@ -77,7 +77,7 @@ Executes a function on a running instance.
 
 * Expects payload to contain:
   * id: of the instance to be called
-  * payload: the function and functions arguments (see: `./src/engine-driver.cr` => `KlassExecutor`, example below)
+  * payload: the function and functions arguments (see: `./src/driver.cr` => `KlassExecutor`, example below)
   * reply: the ID of the driver or process that initiated the request (for routing reply back)
   * seq: senders sequence number, so the request can be tracked by the requestor
 * A reply is required
@@ -157,7 +157,7 @@ Spec in `./spec/logger_spec.cr`
 
 ## Save Setting (Driver -> Core)
 
-defined in `./src/engine-driver.cr`
+defined in `./src/driver.cr`
 
 * Requests core saves a setting on behalf of the driver
 * Expects payload to contain:

@@ -1,8 +1,8 @@
 require "./helper"
 
-describe ACAEngine::Driver::Proxy::System do
+describe PlaceOS::Driver::Proxy::System do
   Spec.before_each do
-    storage = ACAEngine::Driver::Storage.new("sys-1234", "system")
+    storage = PlaceOS::Driver::Storage.new("sys-1234", "system")
     storage.delete "Display/1"
     storage.delete "Display/2"
     storage.delete "Display/3"
@@ -10,7 +10,7 @@ describe ACAEngine::Driver::Proxy::System do
   end
 
   Spec.after_each do
-    storage = ACAEngine::Driver::Storage.new("sys-1234", "system")
+    storage = PlaceOS::Driver::Storage.new("sys-1234", "system")
     storage.delete "Display/1"
     storage.delete "Display/2"
     storage.delete "Display/3"
@@ -18,7 +18,7 @@ describe ACAEngine::Driver::Proxy::System do
   end
 
   it "indicate if a module / driver exists in a system" do
-    cs = ACAEngine::Driver::DriverModel::ControlSystem.from_json(%(
+    cs = PlaceOS::Driver::DriverModel::ControlSystem.from_json(%(
         {
           "id": "sys-1234",
           "name": "Tesing System",
@@ -29,7 +29,7 @@ describe ACAEngine::Driver::Proxy::System do
         }
     ))
 
-    system = ACAEngine::Driver::Proxy::System.new cs, "reply_id"
+    system = PlaceOS::Driver::Proxy::System.new cs, "reply_id"
 
     system.id.should eq("sys-1234")
     system.name.should eq("Tesing System")
@@ -41,7 +41,7 @@ describe ACAEngine::Driver::Proxy::System do
     system.exists?(:Display_1).should eq(false)
 
     # Create some virtual systems
-    storage = ACAEngine::Driver::Storage.new(cs.id, "system")
+    storage = PlaceOS::Driver::Storage.new(cs.id, "system")
     storage["Display/1"] = "mod-1234"
     storage["Display/2"] = "mod-5678"
     storage["Display/3"] = "mod-9000"
@@ -58,7 +58,7 @@ describe ACAEngine::Driver::Proxy::System do
   end
 
   it "should subscribe to module status" do
-    cs = ACAEngine::Driver::DriverModel::ControlSystem.from_json(%(
+    cs = PlaceOS::Driver::DriverModel::ControlSystem.from_json(%(
         {
           "id": "sys-1234",
           "name": "Tesing System",
@@ -69,10 +69,10 @@ describe ACAEngine::Driver::Proxy::System do
         }
     ))
 
-    subs = ACAEngine::Driver::Proxy::Subscriptions.new
-    system = ACAEngine::Driver::Proxy::System.new cs, "reply_id"
+    subs = PlaceOS::Driver::Proxy::Subscriptions.new
+    system = PlaceOS::Driver::Proxy::System.new cs, "reply_id"
     # Create some virtual systems
-    storage = ACAEngine::Driver::Storage.new(cs.id, "system")
+    storage = PlaceOS::Driver::Storage.new(cs.id, "system")
     storage["Display/1"] = "mod-1234"
     storage["Display/2"] = "mod-5678"
     storage["Display/3"] = "mod-9000"
@@ -83,7 +83,7 @@ describe ACAEngine::Driver::Proxy::System do
     message_passed = nil
     channel = Channel(Nil).new
 
-    mod_store = ACAEngine::Driver::Storage.new("mod-5678")
+    mod_store = PlaceOS::Driver::Storage.new("mod-5678")
     mod_store.delete("power")
 
     subscription = system.subscribe(:Display_2, :power) do |sub, value|

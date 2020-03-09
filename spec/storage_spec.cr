@@ -1,8 +1,8 @@
 require "./helper"
 
-describe ACAEngine::Driver::Storage do
+describe PlaceOS::Driver::Storage do
   it "should perform basic storage operations" do
-    store = ACAEngine::Driver::Storage.new("test-123")
+    store = PlaceOS::Driver::Storage.new("test-123")
     store.size.should eq(0)
     store[:test] = "null"
     store.size.should eq(1)
@@ -20,7 +20,7 @@ describe ACAEngine::Driver::Storage do
   end
 
   it "should return keys and values" do
-    store = ACAEngine::Driver::Storage.new("test-123")
+    store = PlaceOS::Driver::Storage.new("test-123")
     store[:test] = "null"
     store[:other] = "1234"
     store.size.should eq(2)
@@ -46,7 +46,7 @@ describe ACAEngine::Driver::Storage do
   end
 
   it "should generate a crystal hash" do
-    store = ACAEngine::Driver::Storage.new("test-123")
+    store = PlaceOS::Driver::Storage.new("test-123")
     store[:test] = "null"
     store[:other] = "1234"
     store.size.should eq(2)

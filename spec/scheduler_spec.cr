@@ -1,8 +1,8 @@
 require "./helper"
 
-describe ACAEngine::Driver::Proxy::Scheduler do
+describe PlaceOS::Driver::Proxy::Scheduler do
   it "should wrap Tasker objects so we can effectively track them" do
-    sched = ACAEngine::Driver::Proxy::Scheduler.new
+    sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = false
     sched.at(2.milliseconds.from_now) { ran = true }
 
@@ -16,7 +16,7 @@ describe ACAEngine::Driver::Proxy::Scheduler do
   end
 
   it "should cancel Tasker objects" do
-    sched = ACAEngine::Driver::Proxy::Scheduler.new
+    sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = false
     sched.at(2.milliseconds.from_now) { ran = true }
 
@@ -33,7 +33,7 @@ describe ACAEngine::Driver::Proxy::Scheduler do
   end
 
   it "should be possible to obtain the return value of the task" do
-    sched = ACAEngine::Driver::Proxy::Scheduler.new
+    sched = PlaceOS::Driver::Proxy::Scheduler.new
 
     # Test execution
     task = sched.at(2.milliseconds.from_now) { true }
@@ -60,7 +60,7 @@ describe ACAEngine::Driver::Proxy::Scheduler do
   end
 
   it "should schedule a repeating task" do
-    sched = ACAEngine::Driver::Proxy::Scheduler.new
+    sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
     task = sched.every(2.milliseconds) { ran += 1 }
 
@@ -84,7 +84,7 @@ describe ACAEngine::Driver::Proxy::Scheduler do
   end
 
   it "should pause and resume a repeating task" do
-    sched = ACAEngine::Driver::Proxy::Scheduler.new
+    sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
     task = sched.every(2.milliseconds) { ran += 1; ran }
 
@@ -114,7 +114,7 @@ describe ACAEngine::Driver::Proxy::Scheduler do
   end
 
   it "should be possible to obtain the next value of a repeating" do
-    sched = ACAEngine::Driver::Proxy::Scheduler.new
+    sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
     task = sched.every(2.milliseconds) do
       ran += 1

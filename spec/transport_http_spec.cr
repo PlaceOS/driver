@@ -1,9 +1,9 @@
 require "./helper"
 
-describe ACAEngine::Driver::TransportHTTP do
+describe PlaceOS::Driver::TransportHTTP do
   it "should perform a secure request" do
     queue = Helper.queue
-    transport = ACAEngine::Driver::TransportHTTP.new(queue, "https://www.google.com.au/", ::ACAEngine::Driver::Settings.new("{}"))
+    transport = PlaceOS::Driver::TransportHTTP.new(queue, "https://www.google.com.au/", ::PlaceOS::Driver::Settings.new("{}"))
     transport.connect
     queue.online.should eq(true)
 
@@ -19,7 +19,7 @@ describe ACAEngine::Driver::TransportHTTP do
     queue = Helper.queue
 
     # Selected from: https://whynohttps.com/
-    transport = ACAEngine::Driver::TransportHTTP.new(queue, "http://blog.jp/", ::ACAEngine::Driver::Settings.new("{}"))
+    transport = PlaceOS::Driver::TransportHTTP.new(queue, "http://blog.jp/", ::PlaceOS::Driver::Settings.new("{}"))
     transport.connect
     queue.online.should eq(true)
 

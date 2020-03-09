@@ -12,10 +12,10 @@ A simple overview of how the system coordinates actions and where data is stored
 
 So HSET "system/system_id", "Display/3" => driver_id
 
-* Use the existing helper at `require "engine-driver/storage"`
+* Use the existing helper at `require "driver/storage"`
 
 ```crystal
-status = ACAEngine::Driver::Storage.new(system_id, prefix: "system")
+status = PlaceOS::Driver::Storage.new(system_id, prefix: "system")
 module_name = "Display"
 index = 1
 system["#{module_name}/#{index}"]? => "module_id" / nil
@@ -31,10 +31,10 @@ system["#{module_name}/#{index}"] => "module_id" / raise KeyError.new("not found
 
 So HSET "status/module_id", "power" => true / false
 
-* Use the existing helper at `require "engine-driver/storage"`
+* Use the existing helper at `require "driver/storage"`
 
 ```crystal
-status = ACAEngine::Driver::Storage.new(module_id)
+status = PlaceOS::Driver::Storage.new(module_id)
 status["power"]? => true / false / nil
 status["power"] => true / false / raise KeyError.new("not found")
 ```
@@ -42,7 +42,7 @@ status["power"] => true / false / raise KeyError.new("not found")
 
 ### Monitor the status of a driver
 
-* Use `require "engine-driver/proxy/subscriptions"` to monitor subscriptions for each websocket connection
+* Use `require "driver/proxy/subscriptions"` to monitor subscriptions for each websocket connection
 * Always use system ID, module name (i.e. Display_1) and status name to subscribe
 
 This is an indirect subscription, allowing seamless module re-ordering without re-subscription.
@@ -50,10 +50,10 @@ The proxy class simplifies management of each websockets subscriptions
 
 ```crystal
 # Should only be a single instance of this class per-process
-@@subscriptions = ACAEngine::Driver::Subscriptions.new
+@@subscriptions = PlaceOS::Driver::Subscriptions.new
 
 # One instance of the subscription proxy per-websocket
-subscriber = ACAEngine::Driver::Proxy::Subscriptions.new(@@subscriptions)
+subscriber = PlaceOS::Driver::Proxy::Subscriptions.new(@@subscriptions)
 subscription_reference = subscriber.subscribe(system_id, module_name, index, status_name) do |sub_reference, message|
   # message is always a JSON string (can be passed directly to the front-end)
 end
@@ -125,8 +125,8 @@ Should perform the following operations:
 5. Build system hashes in redis (consistent hash of system id == instance in charge of building that data structure)
 5. Start modules on those drivers (once all drivers are running)
    * See `core_control_protocol.md`
-   * Also `engine-driver/engine-specs/runner.cr`
+   * Also `driver/engine-specs/runner.cr`
 6. Mark self as ready
 7. Once all Engine Core instances are ready, engine core leader to signal system ready
    * Use a channel called `system`
-   * `ACAEngine::Driver::Storage.redis_pool.publish("engine/system", "ready")`
+   * `PlaceOS::Driver::Storage.redis_pool.publish("engine/system", "ready")`

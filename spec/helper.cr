@@ -7,7 +7,7 @@ class Helper
   def self.protocol
     input = IO::Stapled.new(*IO.pipe, true)
     output = IO::Stapled.new(*IO.pipe, true)
-    proto = ACAEngine::Driver::Protocol.new(input, output, 10.milliseconds)
+    proto = PlaceOS::Driver::Protocol.new(input, output, 10.milliseconds)
     output.read_string(1)
     {proto, input, output}
   end
@@ -16,7 +16,7 @@ class Helper
     input = IO::Stapled.new(*IO.pipe, true)
     output = IO::Stapled.new(*IO.pipe, true)
     logs = IO::Stapled.new(*IO.pipe, true)
-    process = ACAEngine::Driver::ProcessManager.new(logs, input, output)
+    process = PlaceOS::Driver::ProcessManager.new(logs, input, output)
     process.loaded.size.should eq 0
 
     # Wait for ready signal
@@ -47,7 +47,7 @@ class Helper
     bytes_read = output.read(raw_data)
 
     # Check start responded
-    req_out = ACAEngine::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("start")
 
@@ -73,19 +73,19 @@ class Helper
   def self.queue
     std_out = IO::Memory.new
     logger = ::Logger.new(std_out)
-    ACAEngine::Driver::Queue.new(logger) { }
+    PlaceOS::Driver::Queue.new(logger) { }
   end
 
   macro new_driver(klass, module_id, protocol = nil)
     %settings = Helper.settings
     %queue = Helper.queue
     {% if protocol %}
-      %logger = ACAEngine::Driver::Logger.new({{module_id}}, protocol: {{protocol}})
+      %logger = PlaceOS::Driver::Logger.new({{module_id}}, protocol: {{protocol}})
     {% else %}
-      %logger = ACAEngine::Driver::Logger.new({{module_id}})
+      %logger = PlaceOS::Driver::Logger.new({{module_id}})
     {% end %}
     %driver = nil
-    %transport = ACAEngine::Driver::TransportTCP.new(%queue, "localhost", 1234, ::ACAEngine::Driver::Settings.new("{}")) do |data, task|
+    %transport = PlaceOS::Driver::TransportTCP.new(%queue, "localhost", 1234, ::PlaceOS::Driver::Settings.new("{}")) do |data, task|
       d = %driver.not_nil!
       if d.responds_to?(:received)
         d.received(data, task)
@@ -99,7 +99,7 @@ class Helper
   macro settings
     std_out = IO::Memory.new
     logger = ::Logger.new(std_out)
-    settings = ACAEngine::Driver::Settings.new %({
+    settings = PlaceOS::Driver::Settings.new %({
       "integer": 1234,
       "string": "hello",
       "array": [12, 34, 54],

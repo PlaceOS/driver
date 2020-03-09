@@ -1,11 +1,11 @@
 require "./helper"
 
-describe ACAEngine::Driver::TransportTCP do
+describe PlaceOS::Driver::TransportTCP do
   it "should work with a received function" do
     Helper.tcp_server
 
     queue = Helper.queue
-    transport = ACAEngine::Driver::TransportTCP.new(queue, "localhost", 1234, ::ACAEngine::Driver::Settings.new("{}")) do |data, task|
+    transport = PlaceOS::Driver::TransportTCP.new(queue, "localhost", 1234, ::PlaceOS::Driver::Settings.new("{}")) do |data, task|
       # This would usually call: driver.received(data, task)
       response = IO::Memory.new(data).to_s
       task.try &.success(response)
@@ -28,7 +28,7 @@ describe ACAEngine::Driver::TransportTCP do
     Helper.tcp_server
 
     queue = Helper.queue
-    transport = ACAEngine::Driver::TransportTCP.new(queue, "localhost", 1234, ::ACAEngine::Driver::Settings.new("{}")) do |data, task|
+    transport = PlaceOS::Driver::TransportTCP.new(queue, "localhost", 1234, ::PlaceOS::Driver::Settings.new("{}")) do |data, task|
       # This would usually call: driver.received(data, task)
       response = IO::Memory.new(data).to_s
       task.try &.success(response)

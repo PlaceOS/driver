@@ -1,13 +1,13 @@
 require "./helper"
 
-describe ACAEngine::Driver::Subscriptions do
+describe PlaceOS::Driver::Subscriptions do
   it "should subscribe to a channel" do
     in_callback = false
     sub_passed = nil
     message_passed = nil
     channel = Channel(Nil).new
 
-    subs = ACAEngine::Driver::Subscriptions.new
+    subs = PlaceOS::Driver::Subscriptions.new
 
     subscription = subs.channel "test" do |sub, message|
       sub_passed = sub
@@ -18,7 +18,7 @@ describe ACAEngine::Driver::Subscriptions do
 
     sleep 0.005
 
-    ACAEngine::Driver::Storage.redis_pool.publish("engine/test", "whatwhat")
+    PlaceOS::Driver::Storage.redis_pool.publish("engine/test", "whatwhat")
 
     channel.receive?
 
@@ -35,7 +35,7 @@ describe ACAEngine::Driver::Subscriptions do
     message_passed = nil
     channel = Channel(Nil).new
 
-    subs = ACAEngine::Driver::Subscriptions.new
+    subs = PlaceOS::Driver::Subscriptions.new
     subscription = subs.subscribe "mod-123", :power do |sub, message|
       sub_passed = sub
       message_passed = message
@@ -43,7 +43,7 @@ describe ACAEngine::Driver::Subscriptions do
       channel.close
     end
 
-    storage = ACAEngine::Driver::Storage.new("mod-123")
+    storage = PlaceOS::Driver::Storage.new("mod-123")
     storage["power"] = true
     channel.receive?
 
@@ -60,16 +60,16 @@ describe ACAEngine::Driver::Subscriptions do
     sub_passed = nil
     message_passed = nil
     channel = Channel(Nil).new
-    redis = ACAEngine::Driver::Storage.redis_pool
+    redis = PlaceOS::Driver::Storage.redis_pool
 
     # Ensure keys don't already exist
-    sys_lookup = ACAEngine::Driver::Storage.new("sys-123", "system")
+    sys_lookup = PlaceOS::Driver::Storage.new("sys-123", "system")
     lookup_key = "Display/1"
     sys_lookup.delete lookup_key
-    storage = ACAEngine::Driver::Storage.new("mod-1234")
+    storage = PlaceOS::Driver::Storage.new("mod-1234")
     storage.delete("power")
 
-    subs = ACAEngine::Driver::Subscriptions.new
+    subs = PlaceOS::Driver::Subscriptions.new
     subscription = subs.subscribe "sys-123", "Display", 1, :power do |sub, message|
       sub_passed = sub
       message_passed = message
@@ -118,16 +118,16 @@ describe ACAEngine::Driver::Subscriptions do
     sub_passed = nil
     message_passed = nil
     channel = Channel(Nil).new
-    redis = ACAEngine::Driver::Storage.redis_pool
+    redis = PlaceOS::Driver::Storage.redis_pool
 
     # Ensure keys don't already exist
-    sys_lookup = ACAEngine::Driver::Storage.new("sys-1234", "system")
+    sys_lookup = PlaceOS::Driver::Storage.new("sys-1234", "system")
     lookup_key = "Display/1"
     sys_lookup.delete lookup_key
-    storage = ACAEngine::Driver::Storage.new("mod-12345")
+    storage = PlaceOS::Driver::Storage.new("mod-12345")
     storage.delete("power")
 
-    subs = ACAEngine::Driver::Subscriptions.new
+    subs = PlaceOS::Driver::Subscriptions.new
     subscription = subs.subscribe "sys-1234", "Display", 1, :power do |sub, message|
       sub_passed = sub
       message_passed = message

@@ -16,8 +16,8 @@ end
 ```
 
 Files implementing this:
-* Redis storage: `./src/engine-driver/storage.cr`
-* Memory status: `./src/engine-driver/status.cr`
+* Redis storage: `./src/driver/storage.cr`
+* Memory status: `./src/driver/status.cr`
 
 
 ## Redis structures
@@ -49,15 +49,15 @@ i.e. System id -> Display_1 -> power status
 * The hash keys are the driver indexes: "module_name/index" i.e. "Display/1"
 * The hash values are the driver id
 
-You can see this implemented in `./src/engine-driver/proxy/system.cr` function `def get_driver`
+You can see this implemented in `./src/driver/proxy/system.cr` function `def get_driver`
 
 
 ### Driver Metadata
 
 Each driver stores metadata in Redis so other drivers interacting with it can validate function calls before requesting them.
 
-* Metadata model is defined here: `./src/engine-driver/driver_model.cr`
-* Drivers set the redis metadata on initialize `./src/engine-driver.cr`
+* Metadata model is defined here: `./src/driver/driver_model.cr`
+* Drivers set the redis metadata on initialize `./src/driver.cr`
 * System proxy loads the metadata in `def get_driver`
 * Driver proxy uses the metadata
 
