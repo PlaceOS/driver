@@ -130,7 +130,7 @@ abstract class PlaceOS::Driver
       {% if collection %}
         system.all({{ntype}})
       {% else %}
-        system[{{ntype.stringify}}]
+        system[{{ntype}}]
       {% end %}
     end
   end
