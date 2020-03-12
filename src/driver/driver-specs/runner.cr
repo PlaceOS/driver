@@ -19,12 +19,12 @@ STDERR.sync = true
 # Enable explicit debugging
 Debug.enabled = true
 
-# An engine driver has 4 typical points of IO contact
-# 1. Engine driver protocol (engine-core's point of contact)
+# A place driver has 4 typical points of IO contact
+# 1. Place driver protocol (placeos-core's point of contact)
 # 2. The modules transport layer (module to device comms)
 # 3. An optional HTTP client
 # 4. Redis for state storage and subscriptions
-class EngineSpec
+class DriverSpecs
   SPEC_PORT = 0x45ae
   HTTP_PORT = SPEC_PORT + 1
   DRIVER_ID = "spec_runner"
@@ -48,7 +48,7 @@ class EngineSpec
       fetch_pid = Promise.new(Int32)
 
       # Load the driver (inherit STDOUT for logging)
-      # -p is for protocol / process mode - expecting engine core
+      # -p is for protocol / process mode - expecting placeos core
       spawn(same_thread: true) do
         begin
           puts "Launching driver: #{driver_exec.colorize(:green)}"
@@ -78,7 +78,7 @@ class EngineSpec
 
       # Start comms
       puts "... starting driver IO services"
-      spec = EngineSpec.new(driver_name, io)
+      spec = DriverSpecs.new(driver_name, io)
       spawn(same_thread: true) { spec.__start_server__ }
       spawn(same_thread: true) { spec.__start_http_server__ }
       spawn(same_thread: true) { spec.__process_responses__ }
@@ -535,76 +535,76 @@ class EngineSpec
     self
   end
 
-    # =============
-    # Logic Helpers
-    # =============
+  # =============
+  # Logic Helpers
+  # =============
 
-    # expects {ModuleName: [{key: "value"}]}
-    def system(details)
-      storage = PlaceOS::Driver::Storage.new(SYSTEM_ID, "system")
-      storage.clear
+  # expects {ModuleName: [{key: "value"}]}
+  def system(details)
+    storage = PlaceOS::Driver::Storage.new(SYSTEM_ID, "system")
+    storage.clear
 
-      redis = PlaceOS::Driver::Storage.redis_pool
+    redis = PlaceOS::Driver::Storage.redis_pool
 
-      details.each do |key, entries|
-        index = 1
-        functions = Hash(String, Hash(String, Array(String))).new
+    details.each do |key, entries|
+      index = 1
+      functions = Hash(String, Hash(String, Array(String))).new
 
-        entries.each do |mod_state|
-          system_key = "#{key}/#{index}"
-          driver_id = "mod-#{system_key}"
+      entries.each do |mod_state|
+        system_key = "#{key}/#{index}"
+        driver_id = "mod-#{system_key}"
 
-          # Index the driver
-          storage[system_key] = driver_id
-          index += 1
+        # Index the driver
+        storage[system_key] = driver_id
+        index += 1
 
-          # Update the state
-          mod_store = PlaceOS::Driver::Storage.new(driver_id)
-          mod_store.clear
-          mod_state.each do |key, value|
-            key = key.to_s
-            if key.starts_with?("$")
-              if value.responds_to?(:each)
-                args = Hash(String, Array(String)).new
-                value.each do |arg, type_info|
-                  if type_info.size == 1
-                    args[arg.to_s] = [type_info[0].to_s]
-                  else
-                    args[arg.to_s] = [type_info[0].to_s, type_info[1]?.to_json]
-                  end
+        # Update the state
+        mod_store = PlaceOS::Driver::Storage.new(driver_id)
+        mod_store.clear
+        mod_state.each do |key, value|
+          key = key.to_s
+          if key.starts_with?("$")
+            if value.responds_to?(:each)
+              args = Hash(String, Array(String)).new
+              value.each do |arg, type_info|
+                if type_info.size == 1
+                  args[arg.to_s] = [type_info[0].to_s]
+                else
+                  args[arg.to_s] = [type_info[0].to_s, type_info[1]?.to_json]
                 end
-                functions[key[1..-1]] = args
               end
-            else
-              mod_store[key] = value.to_json
+              functions[key[1..-1]] = args
             end
+          else
+            mod_store[key] = value.to_json
           end
-
-          # Configure this drivers metadata
-          metadata = {
-            functions: functions,
-            implements: [] of String,
-            requirements: {} of String => Array(String),
-            security: {} of String => Array(String),
-          }
-          redis.set("interface/#{driver_id}", metadata.to_json)
         end
+
+        # Configure this drivers metadata
+        metadata = {
+          functions:    functions,
+          implements:   [] of String,
+          requirements: {} of String => Array(String),
+          security:     {} of String => Array(String),
+        }
+        redis.set("interface/#{driver_id}", metadata.to_json)
       end
-
-      # Signal that the system has changed for any subscriptions
-      redis.publish "lookup-change", SYSTEM_ID
-      sleep 5.milliseconds
-      self
     end
 
-    # Grab the storage for "Module_2"
-    def system(module_id : String | Symbol)
-      mod_name, match, index = module_id.to_s.rpartition('_')
-      mod_name, index = if match.empty?
-                          {module_id, 1}
-                        else
-                          {mod_name, index.to_i}
-                        end
-      PlaceOS::Driver::Storage.new("mod-#{mod_name}/#{index}")
-    end
+    # Signal that the system has changed for any subscriptions
+    redis.publish "lookup-change", SYSTEM_ID
+    sleep 5.milliseconds
+    self
+  end
+
+  # Grab the storage for "Module_2"
+  def system(module_id : String | Symbol)
+    mod_name, match, index = module_id.to_s.rpartition('_')
+    mod_name, index = if match.empty?
+                        {module_id, 1}
+                      else
+                        {mod_name, index.to_i}
+                      end
+    PlaceOS::Driver::Storage.new("mod-#{mod_name}/#{index}")
+  end
 end

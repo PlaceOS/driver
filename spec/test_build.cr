@@ -16,7 +16,7 @@ class Helper
     end
   end
 
-  # A basic engine driver for testing
+  # A basic placeos driver for testing
   class TestDriver < HelperBase
     generic_name :Driver
     descriptive_name "Driver model Test"

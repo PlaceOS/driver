@@ -1,8 +1,8 @@
 require "http/server"
 
-class EngineSpec; end
+class DriverSpecs; end
 
-class EngineSpec::MockHTTP
+class DriverSpecs::MockHTTP
   def initialize(@context : HTTP::Server::Context)
     @channel = Channel(Nil).new
   end

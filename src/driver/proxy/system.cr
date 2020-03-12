@@ -119,18 +119,17 @@ class PlaceOS::Driver::Proxy::System
     PlaceOS::Driver::Proxy::Drivers.new(drivers)
   end
 
-  # coordination to occur on engine core
+  # coordination to occur on placeos core
   def load_complete(&callback : (PlaceOS::Driver::Subscriptions::ChannelSubscription, String) -> Nil)
-    subscription = @subscriptions.channel("engine_load_complete", &callback)
+    subscription = @subscriptions.channel("cluster/cluster_version", &callback)
 
+    # NOTE:: we assume the cluster is ready on load.
+    # All drivers should handle this cleanly
     spawn(same_thread: do) do
-      ready = @redis.get("engine_cluster_state") == "ready"
-      if ready
-        begin
-          callback.call(subscription, "ready")
-        rescue error
-          @logger.error "error in subscription callback\n#{error.inspect_with_backtrace}"
-        end
+      begin
+        callback.call(subscription, "ready")
+      rescue error
+        @logger.error "error in subscription callback\n#{error.inspect_with_backtrace}"
       end
     end
 

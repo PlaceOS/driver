@@ -1,6 +1,6 @@
-class EngineSpec; end
+class DriverSpecs; end
 
-class EngineSpec::Responder
+class DriverSpecs::Responder
   def initialize
     @channel = Channel(PlaceOS::Driver::Protocol::Request).new(1)
   end

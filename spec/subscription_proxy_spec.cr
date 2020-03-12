@@ -17,7 +17,7 @@ describe PlaceOS::Driver::Proxy::Subscriptions do
 
     sleep 0.005
 
-    PlaceOS::Driver::Storage.redis_pool.publish("engine/test", "whatwhat")
+    PlaceOS::Driver::Storage.redis_pool.publish("placeos/test", "whatwhat")
 
     channel.receive?
 

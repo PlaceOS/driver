@@ -133,7 +133,7 @@ abstract class PlaceOS::Driver
   end
 
   def publish(channel, message)
-    @__storage__.redis.publish("engine/#{channel}", message.to_s)
+    @__storage__.redis.publish("placeos/#{channel}", message.to_s)
     message
   end
 
@@ -396,7 +396,7 @@ macro finished
       exit 0
     end
 
-    parser.on("-p", "--process", "starts the process manager (expects to have been launched by engine core)") do
+    parser.on("-p", "--process", "starts the process manager (expects to have been launched by PlaceOS core)") do
       exec_process_manager = true
     end
 

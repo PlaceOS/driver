@@ -15,7 +15,7 @@ class PlaceOS::Driver::Subscriptions::ChannelSubscription < PlaceOS::Driver::Sub
   getter :channel
 
   def subscribe_to : String?
-    "engine/#{@channel}"
+    "placeos/#{@channel}"
   end
 
   def current_value : String?

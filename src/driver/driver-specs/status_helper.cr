@@ -4,9 +4,9 @@ require "spec/dsl"
 require "spec/methods"
 require "spec/expectations"
 
-class EngineSpec; end
+class DriverSpecs; end
 
-class EngineSpec::StatusHelper
+class DriverSpecs::StatusHelper
   def initialize(module_id : String)
     @storage = PlaceOS::Driver::Storage.new(module_id)
   end

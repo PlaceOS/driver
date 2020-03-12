@@ -2,7 +2,7 @@ require "./helper"
 require "../src/driver/protocol/management"
 
 describe PlaceOS::Driver::Protocol::Management do
-  it "should launch and manage an engine driver process" do
+  it "should launch and manage an placeos driver process" do
     # build a driver
     `crystal build ./spec/test_build.cr`
 

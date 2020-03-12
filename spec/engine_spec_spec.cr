@@ -1,13 +1,13 @@
 require "./helper"
-require "../src/driver/engine-specs/runner"
+require "../src/driver/driver-specs/runner"
 
-describe EngineSpec do
+describe DriverSpecs do
   it "should be able to load a compiled driver for mocking" do
     # Compile the driver
     `crystal build ./spec/test_build.cr`
 
     # Test spec'ing a driver
-    EngineSpec.mock_driver("Helper::TestDriver", "./test_build") do
+    DriverSpecs.mock_driver("Helper::TestDriver", "./test_build") do
       transmit "testing\n"
       response = exec(:implemented_in_base_class)
 

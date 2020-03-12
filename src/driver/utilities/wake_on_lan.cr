@@ -9,7 +9,7 @@ module PlaceOS::Driver::Utilities::WakeOnLAN
     udp.broadcast = true
 
     # allow for a custom port to be defined
-    udp.bind "0.0.0.0", ENV["ENGINE_WOL_PORT"]?.try(&.to_i) || 0
+    udp.bind "0.0.0.0", ENV["PLACEOS_WOL_PORT"]?.try(&.to_i) || 0
     udp
   end
 
@@ -21,7 +21,7 @@ module PlaceOS::Driver::Utilities::WakeOnLAN
     # https://msdn.microsoft.com/en-us/library/ff361877.aspx
 
     # allow for a custom port to be defined
-    udp.bind "::", ENV["ENGINE_WOL_PORT"]?.try(&.to_i) || 0
+    udp.bind "::", ENV["PLACEOS_WOL_PORT"]?.try(&.to_i) || 0
     udp
   end
 
