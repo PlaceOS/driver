@@ -77,13 +77,6 @@ class DriverSpecs
       # Wait for the driver to be ready
       io.read_string(1)
 
-      # Start comms
-      puts "... starting driver IO services"
-      spec = DriverSpecs.new(driver_name, io)
-      spawn(same_thread: true) { spec.__start_server__ }
-      spawn(same_thread: true) { spec.__start_http_server__ }
-      spawn(same_thread: true) { spec.__process_responses__ }
-
       puts "... requesting default settings"
       defaults_io = IO::Memory.new
       Process.run(
@@ -98,6 +91,14 @@ class DriverSpecs
 
       # Check for makebreak
       makebreak = !!(defaults["makebreak"]?.try &.as_bool)
+
+      # Start comms
+      puts "... starting driver IO services"
+      spec = DriverSpecs.new(driver_name, io, makebreak)
+      spawn(same_thread: true) { spec.__start_server__ }
+      spawn(same_thread: true) { spec.__start_http_server__ }
+      spawn(same_thread: true) { spec.__process_responses__ }
+      Fiber.yield
 
       # request a module instance be created by the driver
       puts "... starting module"
@@ -186,7 +187,7 @@ class DriverSpecs
     end
   end
 
-  def initialize(@driver_name : String, @io : IO::Stapled)
+  def initialize(@driver_name : String, @io : IO::Stapled, @makebreak : Bool)
     # setup structures for handling HTTP request emulation
     @mock_drivers = {} of String => MockDriver
     @write_mutex = Mutex.new
@@ -597,5 +598,39 @@ class DriverSpecs
                         {mod_name, index.to_i}
                       end
     PlaceOS::Driver::Storage.new("mod-#{mod_name}/#{index}")
+  end
+
+  def settings(new_settings)
+    json = {
+      id:      DRIVER_ID,
+      cmd:     "update",
+      payload: {
+        control_system: {
+          id:       SYSTEM_ID,
+          name:     "Spec Runner",
+          email:    "spec@acaprojects.com",
+          capacity: 4,
+          features: "many modules",
+          bookable: true,
+        },
+        ip:        "127.0.0.1",
+        uri:       "http://127.0.0.1:#{HTTP_PORT}",
+        udp:       false,
+        tls:       false,
+        port:      SPEC_PORT,
+        makebreak: @makebreak,
+        role:      1,
+        # use defaults as defined in the driver
+        settings: new_settings,
+      }.to_json,
+    }.to_json
+
+    @write_mutex.synchronize do
+      @io.write_bytes json.bytesize
+      @io.write json.to_slice
+      @io.flush
+    end
+
+    self
   end
 end
