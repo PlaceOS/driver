@@ -5,6 +5,7 @@ require "colorize"
 require "tokenizer"
 require "./mock_http"
 require "./responder"
+require "./mock_driver"
 require "./status_helper"
 require "spec/dsl"
 require "spec/methods"
@@ -187,6 +188,9 @@ class DriverSpecs
 
   def initialize(@driver_name : String, @io : IO::Stapled)
     # setup structures for handling HTTP request emulation
+    @mock_drivers = {} of String => MockDriver
+    @write_mutex = Mutex.new
+
     @received_http = [] of MockHTTP
     @expected_http = [] of Channel(MockHTTP)
     @http_server = HTTP::Server.new do |context|
@@ -264,7 +268,21 @@ class DriverSpecs
                 puts "level=#{level} message=#{text}"
               end
             when "exec"
-              puts "EXEC request received! #{request.inspect}"
+              module_id = request.id
+              exec_payload = request.payload.not_nil!
+              mod = @mock_drivers[module_id]
+              result = mod.__executor(exec_payload).execute(mod)
+
+              # return the result
+              request.payload = result
+              request.cmd = "result"
+              json = request.to_json
+              # Send the result
+              @write_mutex.synchronize do
+                @io.write_bytes json.bytesize
+                @io.write json.to_slice
+                @io.flush
+              end
             end
           end
         rescue error
@@ -317,13 +335,13 @@ class DriverSpecs
 
   def exec(function, *args)
     resp = __exec__(function, args)
-    sleep 1.milliseconds
+    sleep 2.milliseconds
     resp
   end
 
   def exec(function, **args)
     resp = __exec__(function, args)
-    sleep 1.milliseconds
+    sleep 2.milliseconds
     resp
   end
 
@@ -365,9 +383,11 @@ class DriverSpecs
     @request_sequence += 1_u64
 
     # Send the request
-    @io.write_bytes json.bytesize
-    @io.write json.to_slice
-    @io.flush
+    @write_mutex.synchronize do
+      @io.write_bytes json.bytesize
+      @io.write json.to_slice
+      @io.flush
+    end
 
     response
   end
@@ -539,60 +559,31 @@ class DriverSpecs
   # Logic Helpers
   # =============
 
-  # expects {ModuleName: [{key: "value"}]}
+  # expects {ModuleName: {Klass, Klass}}
   def system(details)
-    storage = PlaceOS::Driver::Storage.new(SYSTEM_ID, "system")
-    storage.clear
+    system_index = PlaceOS::Driver::Storage.new(SYSTEM_ID, "system")
+    system_index.clear
 
-    redis = PlaceOS::Driver::Storage.redis_pool
+    @mock_drivers.clear
 
     details.each do |key, entries|
       index = 1
-      functions = Hash(String, Hash(String, Array(String))).new
 
-      entries.each do |mod_state|
+      entries.each do |driver|
         system_key = "#{key}/#{index}"
-        driver_id = "mod-#{system_key}"
+        module_id = "mod-#{system_key}"
+
+        # Create the mock driver
+        @mock_drivers[module_id] = driver.new(module_id)
 
         # Index the driver
-        storage[system_key] = driver_id
+        system_index[system_key] = module_id
         index += 1
-
-        # Update the state
-        mod_store = PlaceOS::Driver::Storage.new(driver_id)
-        mod_store.clear
-        mod_state.each do |key, value|
-          key = key.to_s
-          if key.starts_with?("$")
-            if value.responds_to?(:each)
-              args = Hash(String, Array(String)).new
-              value.each do |arg, type_info|
-                if type_info.size == 1
-                  args[arg.to_s] = [type_info[0].to_s]
-                else
-                  args[arg.to_s] = [type_info[0].to_s, type_info[1]?.to_json]
-                end
-              end
-              functions[key[1..-1]] = args
-            end
-          else
-            mod_store[key] = value.to_json
-          end
-        end
-
-        # Configure this drivers metadata
-        metadata = {
-          functions:    functions,
-          implements:   [] of String,
-          requirements: {} of String => Array(String),
-          security:     {} of String => Array(String),
-        }
-        redis.set("interface/#{driver_id}", metadata.to_json)
       end
     end
 
     # Signal that the system has changed for any subscriptions
-    redis.publish "lookup-change", SYSTEM_ID
+    PlaceOS::Driver::Storage.redis_pool.publish "lookup-change", SYSTEM_ID
     sleep 5.milliseconds
     self
   end

@@ -183,6 +183,7 @@ abstract class PlaceOS::Driver
   {% RESERVED_METHODS["on_unload"] = true %}
   {% RESERVED_METHODS["[]?"] = true %}
   {% RESERVED_METHODS["[]"] = true %}
+  {% RESERVED_METHODS["[]="] = true %}
   {% RESERVED_METHODS["send"] = true %}
   {% for name in HELPERS %}
     {% RESERVED_METHODS[name.id.stringify] = true %}
