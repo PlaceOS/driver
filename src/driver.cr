@@ -175,6 +175,7 @@ abstract class PlaceOS::Driver
 
   IGNORE_KLASSES   = ["PlaceOS::Driver", "Reference", "Object", "Spec::ObjectExtensions", "Colorize::ObjectExtensions"]
   RESERVED_METHODS = {} of Nil => Nil
+  {% RESERVED_METHODS["initialize"] = true %}
   {% RESERVED_METHODS["received"] = true %}
   {% RESERVED_METHODS["connected"] = true %}
   {% RESERVED_METHODS["disconnected"] = true %}
