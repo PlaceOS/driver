@@ -18,7 +18,7 @@ struct PlaceOS::Driver::DriverModel
     include JSON::Serializable
 
     def initialize(
-      @functions = {} of String => Hash(String, Array(String)),
+      @functions = {} of String => Hash(String, Array(JSON::Any)),
       @implements = [] of String,
       @requirements = {} of String => Array(String),
       @security = {} of String => Array(String)
@@ -26,7 +26,7 @@ struct PlaceOS::Driver::DriverModel
     end
 
     # Functions available on module, map of function name to args
-    property functions : Hash(String, Hash(String, Array(String)))
+    property functions : Hash(String, Hash(String, Array(JSON::Any)))
     # Interfaces implemented by module
     property implements : Array(String)
     # Module requirements, map of module name to required interfaces
