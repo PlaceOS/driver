@@ -11,8 +11,14 @@ class DriverSpecs::StatusHelper
     @storage = PlaceOS::Driver::Storage.new(module_id)
   end
 
-  def []=(key, json_value)
-    @storage[key] = json_value.to_json
+  def []=(key, value)
+    key = key.to_s
+    if value.nil?
+      delete(key)
+    else
+      @storage[key] = value.to_json
+    end
+    value
   end
 
   def [](key)
@@ -25,7 +31,5 @@ class DriverSpecs::StatusHelper
     value ? JSON.parse(value) : nil
   end
 
-  def delete(key)
-    @storage.delete key
-  end
+  forward_missing_to @storage
 end

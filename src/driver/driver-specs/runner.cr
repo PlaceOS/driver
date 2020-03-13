@@ -597,7 +597,7 @@ class DriverSpecs
                       else
                         {mod_name, index.to_i}
                       end
-    PlaceOS::Driver::Storage.new("mod-#{mod_name}/#{index}")
+    DriverSpecs::StatusHelper.new("mod-#{mod_name}/#{index}")
   end
 
   def settings(new_settings)

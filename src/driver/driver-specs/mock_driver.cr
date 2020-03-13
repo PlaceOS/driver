@@ -1,6 +1,7 @@
 require "../core_ext"
 require "../storage"
 require "../status"
+require "../status_helper"
 
 class DriverSpecs; end
 
@@ -33,14 +34,14 @@ abstract class DriverSpecs::MockDriver
   def on_load; end
 
   # Grab the storage for "Module_2"
-  def system(module_id : String | Symbol) : PlaceOS::Driver::Storage
+  def system(module_id : String | Symbol) : DriverSpecs::StatusHelper
     mod_name, match, index = module_id.to_s.rpartition('_')
     mod_name, index = if match.empty?
                         {module_id, 1}
                       else
                         {mod_name, index.to_i}
                       end
-    PlaceOS::Driver::Storage.new("mod-#{mod_name}/#{index}")
+    DriverSpecs::StatusHelper.new("mod-#{mod_name}/#{index}")
   end
 
   def logger
