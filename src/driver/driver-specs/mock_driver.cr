@@ -1,7 +1,7 @@
 require "../core_ext"
 require "../storage"
 require "../status"
-require "../status_helper"
+require "./status_helper"
 
 class DriverSpecs; end
 
