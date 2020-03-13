@@ -27,9 +27,9 @@ describe PlaceOS::Driver::Proxy::Driver do
 
     redis = PlaceOS::Driver::Storage.redis_pool
     meta = PlaceOS::Driver::DriverModel::Metadata.new({
-      "function1" => {} of String => Array(String),
-      "function2" => {"arg1" => ["Int32"]},
-      "function3" => {"arg1" => ["Int32", "200"], "arg2" => ["Int32"]},
+      "function1" => {} of String => Array(JSON::Any),
+      "function2" => {"arg1" => [JSON::Any.new "Int32"]},
+      "function3" => {"arg1" => [JSON::Any.new "Int32"], "arg2" => [JSON::Any.new("Int32"), JSON::Any.new(200_i64)]},
     }, ["Functoids"])
     redis.set("interface/mod-1234", meta.to_json)
 
