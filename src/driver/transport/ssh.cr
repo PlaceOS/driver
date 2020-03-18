@@ -117,6 +117,7 @@ class PlaceOS::Driver
             supported_methods = ", supported authentication methods: #{supported_methods}" if supported_methods
             "connecting to device#{supported_methods}\n#{error.inspect_with_backtrace}"
           }
+          @queue.online = false
           raise error
         end
       end
@@ -195,6 +196,7 @@ class PlaceOS::Driver
       @logger.error "error consuming IO\n#{error.inspect_with_backtrace}"
     ensure
       disconnect
+      @queue.online = false
       connect
     end
 

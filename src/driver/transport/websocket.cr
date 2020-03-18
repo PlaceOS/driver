@@ -62,6 +62,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     spawn(same_thread: true) { consume_io }
   rescue error
     @logger.info { "connecting to device\n#{error.inspect_with_backtrace}" }
+    @queue.online = false
     raise error
   end
 
@@ -130,6 +131,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
   rescue error
     @logger.error "error consuming IO\n#{error.inspect_with_backtrace}"
   ensure
+    @queue.online = false
     connect
   end
 end
