@@ -131,9 +131,9 @@ class PlaceOS::Driver::Task
     if @retries >= 0
       @logger.info do
         if @name
-          "retrying command #{@name.inspect} #{reason}"
+          "retrying task #{@name.inspect} #{reason}"
         else
-          "retrying command #{reason}"
+          "retrying task #{reason}"
         end
       end
 
@@ -153,6 +153,13 @@ class PlaceOS::Driver::Task
     @channel.close
     @complete.send true
     @complete.close
+    @logger.warn do
+      if @name
+        "aborting task, #{@name.inspect}, #{reason}"
+      else
+        "aborting task, #{reason}"
+      end
+    end
     self
   end
 
