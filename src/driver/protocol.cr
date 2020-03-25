@@ -196,25 +196,31 @@ class PlaceOS::Driver::Protocol
 
     # Process outgoing requests
     loop do
-      req_data = @producer.receive?
-      break unless req_data
+      begin
+        req_data = @producer.receive?
+        break unless req_data
 
-      request, channel = req_data
+        request, channel = req_data
 
-      # Expects a response
-      if channel
-        seq = @@seq
-        @@seq += 1
-        request.seq = seq
+        # Expects a response
+        if channel
+          seq = @@seq
+          @@seq += 1
+          request.seq = seq
 
-        @tracking[seq] = channel
-        @next_requests[seq] = request
+          @tracking[seq] = channel
+          @next_requests[seq] = request
+        end
+
+        json = request.to_json
+        @io.write_bytes json.bytesize
+        @io.write json.to_slice
+        @io.flush
+      rescue e
+        STDOUT.puts "#{PROGRAM_NAME}: Fatal error #{e.inspect_with_backtrace}"
+        STDOUT.flush
+        exit(2)
       end
-
-      json = request.to_json
-      @io.write_bytes json.bytesize
-      @io.write json.to_slice
-      @io.flush
     end
   end
 
@@ -240,9 +246,17 @@ class PlaceOS::Driver::Protocol
         end
       end
     end
-  rescue IO::Error
-  rescue Errno
+  rescue IO::Error | Errno
     # Input stream closed. This should only occur on termination
+    STDOUT.puts "#{PROGRAM_NAME}: IO terminated, exiting cleanly"
+    STDOUT.flush
+  rescue e
+    begin
+      STDOUT.puts "#{PROGRAM_NAME}: Fatal error #{e.inspect_with_backtrace}"
+      STDOUT.flush
+    rescue
+    end
+    exit(1)
   ensure
     @producer.close
     @processor.close
