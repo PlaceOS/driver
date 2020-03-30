@@ -28,7 +28,7 @@ class PlaceOS::Driver::Proxy::Drivers
 
   # This deliberately prevents compilation if called from driver code
   def []=(status, value)
-    {{ "Remote drivers are read only. Please use the public interface to modify state".id }}
+    {{ raise "Remote drivers are read only. Please use the public interface to modify state" }}
   end
 
   def implements?(interface) : Bool
@@ -48,7 +48,7 @@ class PlaceOS::Driver::Proxy::Drivers
 
   # This deliberately prevents compilation if called from driver code
   def subscribe(status, &callback : (PlaceOS::Driver::Subscriptions::IndirectSubscription, String) -> Nil) : PlaceOS::Driver::Subscriptions::IndirectSubscription
-    {{ "Can't subscribe to state on a collection of drivers".id }}
+    {{ raise "Can't subscribe to state on a collection of drivers" }}
   end
 
   class Responses

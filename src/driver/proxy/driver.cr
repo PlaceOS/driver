@@ -35,7 +35,7 @@ class PlaceOS::Driver::Proxy::Driver
 
   # This deliberately prevents compilation if called from driver code
   def []=(status, value)
-    {{ "Remote drivers are read only. Please use the public interface to modify state".id }}
+    {{ raise "Remote drivers are read only. Please use the public interface to modify state" }}
   end
 
   def implements?(interface) : Bool

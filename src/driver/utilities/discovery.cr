@@ -65,7 +65,7 @@ abstract class PlaceOS::Driver
       {% if name.type.types[1].stringify == "::Nil" || name.type.types[1].stringify == "Nil" %}
         {% optional = true %}
       {% else %}
-        {{ "Can only specify a single driver class when aliasing".id }}
+        {{ raise "Can only specify a single driver class when aliasing" }}
       {% end %}
     {% end %}
 
@@ -79,7 +79,7 @@ abstract class PlaceOS::Driver
         # puts "{{name.var}} - {{ntype.name}} - {{ntype.type_vars[0]}} - {{optional}}"
         {% ntype = ntype.type_vars[0].stringify %}
       {% else %}
-        {{ "Only generic type supported is Array".id }}
+        {{ raise "Only generic type supported is Array" }}
       {% end %}
     {% end %}
 
