@@ -337,7 +337,7 @@ class PlaceOS::Driver::Protocol::Management
     end
 
     status = $?
-    last_exit_code = status.exit_status.to_s
+    last_exit_code = status.exit_code.to_s
     @logger.warn("driver process exited with #{last_exit_code}", @driver_path) unless status.success?
     @events.send(Request.new(last_exit_code, "exited"))
   end

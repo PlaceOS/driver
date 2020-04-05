@@ -31,6 +31,7 @@ abstract class DriverSpecs::MockDriver
 
   abstract def __init__ : Nil
   abstract def __executor(json : String) : BaseExecutor
+
   def on_load; end
 
   # Grab the storage for "Module_2"

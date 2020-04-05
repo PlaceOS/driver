@@ -64,7 +64,7 @@ class DriverSpecs
             fetch_pid.resolve process.pid
           end
 
-          exit_code = $?.exit_status
+          exit_code = $?.exit_code
           puts "Driver terminated with: #{exit_code}"
         ensure
           exited = true
