@@ -102,7 +102,7 @@ class PlaceOS::Driver::Protocol
   end
 
   def process(message : Request)
-    LOGGER.debug { "protocol processing: #{message}" }
+    LOGGER.debug { "protocol processing: #{message.inspect}" }
     callbacks = case message.cmd
                 when "start"
                   # New instance of id == mod_id
@@ -146,7 +146,7 @@ class PlaceOS::Driver::Protocol
     callbacks.each do |callback|
       response = callback.call(message)
       if response
-        LOGGER.debug { "protocol queuing response: #{response}" }
+        LOGGER.debug { "protocol queuing response: #{response.inspect}" }
         @producer.send({response, nil})
         break
       end
@@ -155,7 +155,7 @@ class PlaceOS::Driver::Protocol
     message.payload = nil
     message.error = error.message
     message.backtrace = error.backtrace?
-    LOGGER.debug { "protocol queuing error response: #{message}" }
+    LOGGER.debug { "protocol queuing error response: #{message.inspect}" }
     @producer.send({message, nil})
   end
 
@@ -164,7 +164,7 @@ class PlaceOS::Driver::Protocol
     if payload
       req.payload = raw ? payload.to_s : payload.to_json
     end
-    LOGGER.debug { "protocol queuing request: #{req}" }
+    LOGGER.debug { "protocol queuing request: #{req.inspect}" }
     @producer.send({req, nil})
     req
   end
@@ -176,7 +176,7 @@ class PlaceOS::Driver::Protocol
     end
     channel = Channel(Request).new(1)
 
-    LOGGER.debug { "protocol queuing request: #{req}" }
+    LOGGER.debug { "protocol queuing request: #{req.inspect}" }
     @producer.send({req, channel})
     channel
   end
@@ -209,7 +209,7 @@ class PlaceOS::Driver::Protocol
         break unless req_data
 
         request, channel = req_data
-        LOGGER.debug { "protocol sending reqest (expects response #{!!channel}): #{request}" }
+        LOGGER.debug { "protocol sending (expects reply #{!!channel}): #{request.inspect}" }
 
         # Expects a response
         if channel
