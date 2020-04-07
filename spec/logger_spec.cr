@@ -17,7 +17,7 @@ describe PlaceOS::Driver::Logger do
 
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq("mod-123")
     req_out.payload.should eq(%{[0,"whatwhat"]})
 
@@ -28,7 +28,7 @@ describe PlaceOS::Driver::Logger do
     logger.warn "hello-logs"
 
     bytes_read = output.read(raw_data)
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq("mod-123")
     req_out.payload.should eq(%{[2,"hello-logs"]})
 
@@ -59,7 +59,7 @@ describe PlaceOS::Driver::Logger do
 
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq("mod-123")
     req_out.payload.should eq(%{[0,"whatwhat"]})
 
@@ -71,7 +71,7 @@ describe PlaceOS::Driver::Logger do
     logger.warn { "hello-logs" }
 
     bytes_read = output.read(raw_data)
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq("mod-123")
     req_out.payload.should eq(%{[2,"hello-logs"]})
 

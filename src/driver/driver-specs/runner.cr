@@ -236,13 +236,7 @@ class DriverSpecs
 
   def __process_responses__
     raw_data = Bytes.new(4096)
-    tokenizer = ::Tokenizer.new do |io|
-      begin
-        io.read_bytes(Int32) + 4
-      rescue
-        0
-      end
-    end
+    tokenizer = Tokenizer.new(Bytes[0x00, 0x03])
 
     while !@io.closed?
       bytes_read = @io.read(raw_data)
@@ -251,7 +245,8 @@ class DriverSpecs
       tokenizer.extract(raw_data[0, bytes_read]).each do |message|
         string = nil
         begin
-          string = String.new(message[4, message.bytesize - 4])
+          string = String.new(message[0..-3])
+          _, _, string = string.rpartition("\x00\x02")
           request = PlaceOS::Driver::Protocol::Request.from_json(string)
           spawn(same_thread: true) do
             case request.cmd

@@ -50,7 +50,7 @@ describe PlaceOS::Driver::Proxy::Driver do
     # Check the exec request
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.payload.should eq(%({"__exec__":"function1","function1":{}}))
     req_out.reply.should eq("reply_id")
     req_out.id.should eq("mod-1234")
@@ -87,7 +87,7 @@ describe PlaceOS::Driver::Proxy::Driver do
     # Check the exec request
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.payload.should eq(%({"__exec__":"function2","function2":{"arg1":12345}}))
 
     # Execute a remote function with named arguments
@@ -97,7 +97,7 @@ describe PlaceOS::Driver::Proxy::Driver do
     # Check the exec request
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.payload.should eq(%({"__exec__":"function3","function3":{"arg1":null,"arg2":12345}}))
 
     # Ensure timeouts work!!
@@ -107,7 +107,7 @@ describe PlaceOS::Driver::Proxy::Driver do
     # Check the exec request
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.payload.should eq(%({"__exec__":"function1","function1":{}}))
     req_out.reply.should eq("reply_id")
     req_out.id.should eq("mod-1234")
