@@ -360,11 +360,13 @@ class PlaceOS::Driver::Protocol::Management
       bytes_read = io.read(raw_data)
       break if bytes_read == 0 # IO was closed
 
+      @logger.debug { "manager #{@driver_path} received #{bytes_read}" }
+
       @tokenizer.extract(raw_data[0, bytes_read]).each do |message|
         string = nil
         begin
           string = String.new(message[4, message.bytesize - 4])
-          # puts "recieved #{string}"
+          @logger.debug { "manager #{@driver_path} processing #{string}" }
           request = Request.from_json(string)
           spawn(same_thread: true) { process(request) }
         rescue error
@@ -372,9 +374,11 @@ class PlaceOS::Driver::Protocol::Management
         end
       end
     end
-  rescue IO::Error
-  rescue Errno
+  rescue error : IO::Error | Errno
     # Input stream closed. This should only occur on termination
+    @logger.debug { "comms closed for #{@driver_path}\n#{error.inspect_with_backtrace}" }
+  ensure
+    @logger.info "comms closed for #{@driver_path}"
   end
 
   private def process(request)

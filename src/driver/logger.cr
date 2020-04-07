@@ -7,7 +7,9 @@ class PlaceOS::Driver
     io << String.build do |str|
       str << "level=" << label << " time="
       datetime.to_rfc3339(str)
-      str << " progname=" << (progname || PROGRAM_NAME) << " message=" << message
+      progname ||= PROGRAM_NAME
+      progname = PROGRAM_NAME if progname.empty?
+      str << " progname=" << progname << " message=" << message
     end
   end
 
