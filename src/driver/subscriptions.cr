@@ -1,6 +1,6 @@
+require "simple_retry"
 require "logger"
 require "redis"
-require "retriable/core_ext/kernel"
 
 # TODO:: we need to be scheduling these onto the correct thread
 class PlaceOS::Driver::Subscriptions
@@ -127,7 +127,11 @@ class PlaceOS::Driver::Subscriptions
   private def monitor_changes(wait)
     wait.close
 
-    retry max_interval: 5.seconds do
+    SimpleRetry.try_to(
+      base_interval: 1.second,
+      max_interval: 5.seconds,
+      randomise: 500.milliseconds
+    ) do
       begin
         wait = Channel(Nil).new
 

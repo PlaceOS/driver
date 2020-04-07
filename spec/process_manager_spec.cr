@@ -32,7 +32,7 @@ describe PlaceOS::Driver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq("3")
@@ -54,7 +54,7 @@ describe PlaceOS::Driver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq("\"DisplayPort\"")
@@ -136,7 +136,7 @@ describe PlaceOS::Driver::ProcessManager do
     Fiber.yield
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     loaded = Array(String).from_json(req_out.payload.not_nil!)
     loaded.should eq(["mod_1234"])
 
@@ -190,7 +190,7 @@ describe PlaceOS::Driver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq("you fool!")
@@ -219,7 +219,7 @@ describe PlaceOS::Driver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq("null")
@@ -263,7 +263,7 @@ describe PlaceOS::Driver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq(%("hello steve"))
@@ -289,7 +289,7 @@ describe PlaceOS::Driver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq(%(11))
@@ -314,7 +314,7 @@ describe PlaceOS::Driver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq(%(205))
@@ -337,7 +337,7 @@ describe PlaceOS::Driver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq("oops")
@@ -362,7 +362,7 @@ describe PlaceOS::Driver::ProcessManager do
     bytes_read = output.read(raw_data)
 
     # Check response was returned
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("result")
     req_out.payload.should eq("nooooo")

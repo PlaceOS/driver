@@ -1,3 +1,4 @@
+require "simple_retry"
 require "socket"
 
 class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
@@ -29,7 +30,11 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
     if @makebreak
       start_socket(connect_timeout)
     else
-      retry max_interval: 10.seconds do
+      SimpleRetry.try_to(
+        base_interval: 1.second,
+        max_interval: 10.seconds,
+        randomise: 500.milliseconds
+      ) do
         start_socket(connect_timeout)
       end
     end

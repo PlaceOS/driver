@@ -1,3 +1,4 @@
+require "simple_retry"
 require "socket"
 require "openssl"
 
@@ -27,7 +28,11 @@ class PlaceOS::Driver::TransportUDP < PlaceOS::Driver::Transport
       return unless socket.closed?
     end
 
-    retry max_interval: 10.seconds do
+    SimpleRetry.try_to(
+      base_interval: 1.second,
+      max_interval: 10.seconds,
+      randomise: 500.milliseconds
+    ) do
       begin
         @socket = socket = UDPSocket.new
         socket.connect(@ip, @port)
