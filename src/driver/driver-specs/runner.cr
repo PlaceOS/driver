@@ -404,7 +404,7 @@ class DriverSpecs
         @expected_transmissions.delete(channel)
       end
     else
-      return @transmissions.shift
+      @transmissions.shift
     end
   end
 
