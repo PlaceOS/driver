@@ -8,7 +8,7 @@ require "./logger"
 STDIN.blocking = false
 STDIN.sync = false
 STDERR.blocking = false
-STDERR.sync = false
+STDERR.sync = true
 STDOUT.blocking = false
 STDOUT.sync = true
 
@@ -182,6 +182,8 @@ class PlaceOS::Driver::Protocol
   end
 
   @@seq = 0_u64
+  INDICATOR = "\x00\x02"
+  DELIMITER = "\x00\x03"
 
   private def produce_io(timeout_period)
     spawn(same_thread: true) { self.process! }
@@ -221,9 +223,13 @@ class PlaceOS::Driver::Protocol
           @next_requests[seq] = request
         end
 
-        json = request.to_json.to_slice
-        @io.write_bytes json.size, IO::ByteFormat::LittleEndian
-        @io.write json
+        # Single call to write ensure there is no interlacing
+        # in-case a 3rd party library writes something to STDERR
+        @io.print(String.build { |msg|
+          msg << INDICATOR
+          request.to_json(msg)
+          msg << DELIMITER
+        })
         @io.flush
       rescue e
         LOGGER.fatal "Fatal error #{e.inspect_with_backtrace}"
