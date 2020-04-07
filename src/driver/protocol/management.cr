@@ -20,7 +20,7 @@ class PlaceOS::Driver::Protocol::Management
 
     @tokenizer = ::Tokenizer.new do |io|
       begin
-        io.read_bytes(Int32) + 4
+        io.read_bytes(Int32, IO::ByteFormat::LittleEndian) + 4
       rescue
         0
       end
@@ -330,7 +330,7 @@ class PlaceOS::Driver::Protocol::Management
       @driver_path,
       {"-p"},
       input: stdin_reader,
-      output: STDOUT,
+      output: Redirect::Inherit,
       error: stderr_writer
     ) do |process|
       fetch_pid.resolve process.pid
@@ -365,7 +365,7 @@ class PlaceOS::Driver::Protocol::Management
       @tokenizer.extract(raw_data[0, bytes_read]).each do |message|
         string = nil
         begin
-          string = String.new(message[4, message.bytesize - 4])
+          string = String.new(message[4, message.size - 4])
           @logger.debug { "manager #{@driver_path} processing #{string}" }
           request = Request.from_json(string)
           spawn(same_thread: true) { process(request) }

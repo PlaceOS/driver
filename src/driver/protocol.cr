@@ -6,9 +6,9 @@ require "./protocol/request"
 require "./logger"
 
 STDIN.blocking = false
-STDIN.sync = true
+STDIN.sync = false
 STDERR.blocking = false
-STDERR.sync = true
+STDERR.sync = false
 STDOUT.blocking = false
 STDOUT.sync = true
 
@@ -221,9 +221,9 @@ class PlaceOS::Driver::Protocol
           @next_requests[seq] = request
         end
 
-        json = request.to_json
-        @io.write_bytes json.bytesize
-        @io.write json.to_slice
+        json = request.to_json.to_slice
+        @io.write_bytes json.size, IO::ByteFormat::LittleEndian
+        @io.write json
         @io.flush
       rescue e
         LOGGER.fatal "Fatal error #{e.inspect_with_backtrace}"
