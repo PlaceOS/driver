@@ -4,10 +4,10 @@ class PlaceOS::Driver
   LOGGER = ::Logger.new(STDOUT, level: ::Logger::INFO)
   LOGGER.formatter = Logger::Formatter.new do |severity, datetime, progname, message, io|
     label = severity.unknown? ? "ANY" : severity.to_s
+    progname = Process.pid.to_s if progname.empty?
     io << String.build do |str|
       str << "level=" << label << " time="
       datetime.to_rfc3339(str)
-      progname ||= Process.pid
       str << " progname=" << progname << " message=" << message
     end
   end
