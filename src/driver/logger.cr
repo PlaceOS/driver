@@ -7,8 +7,7 @@ class PlaceOS::Driver
     io << String.build do |str|
       str << "level=" << label << " time="
       datetime.to_rfc3339(str)
-      progname ||= PROGRAM_NAME
-      progname = PROGRAM_NAME if progname.empty?
+      progname ||= Process.pid
       str << " progname=" << progname << " message=" << message
     end
   end
@@ -16,7 +15,7 @@ class PlaceOS::Driver
   # Allow signals to change the log level at run-time
   logging = Proc(Signal, Nil).new do |signal|
     level = signal.usr1? ? ::Logger::DEBUG : ::Logger::INFO
-    LOGGER.info " > Log level changed to #{level}"
+    LOGGER.info "> Log level changed to #{level}"
     LOGGER.level = level
     signal.ignore
   end
