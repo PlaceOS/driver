@@ -210,8 +210,8 @@ class PlaceOS::Driver
       else
         # Only a single request can occur at a time
         # crystal does not provide any queuing mechanism so this mutex does the trick
-        with_shared_client do |client|
-          client.exec(method.to_s.upcase, uri.full_path, headers, body)
+        with_shared_client do |shared_client|
+          shared_client.exec(method.to_s.upcase, uri.full_path, headers, body)
         end
       end
     end

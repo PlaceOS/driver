@@ -1,5 +1,3 @@
-# https://github.com/Sija/retriable.cr#kernel-extension
-require "retriable/core_ext/kernel"
 require "option_parser"
 
 abstract class PlaceOS::Driver

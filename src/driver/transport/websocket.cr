@@ -1,3 +1,4 @@
+require "simple_retry"
 require "socket"
 
 class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
@@ -34,7 +35,11 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     tokenizer = @tokenizer
     tokenizer.clear if tokenizer
 
-    retry max_interval: 10.seconds do
+    SimpleRetry.try_to(
+      base_interval: 1.second,
+      max_interval: 10.seconds,
+      randomise: 500.milliseconds
+    ) do
       start_socket(connect_timeout)
     end
   end

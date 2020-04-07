@@ -28,7 +28,7 @@ describe PlaceOS::Driver::Protocol do
 
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(req.id)
   end
 

@@ -47,7 +47,7 @@ class Helper
     bytes_read = output.read(raw_data)
 
     # Check start responded
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[4, bytes_read - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
     req_out.cmd.should eq("start")
 

@@ -75,23 +75,17 @@ describe PlaceOS::Driver::Proxy::Drivers do
     # Check the exec request
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
-    tokenizer = ::Tokenizer.new do |io|
-      begin
-        io.read_bytes(Int32) + 4
-      rescue
-        0
-      end
-    end
+    tokenizer = Tokenizer.new(Bytes[0x00, 0x03])
     messages = tokenizer.extract(raw_data[0, bytes_read])
 
     message = messages[0]
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(message[4, message.bytesize - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(message[2, message.bytesize - 4]))
     req_out.payload.should eq(%({"__exec__":"function1","function1":{}}))
     req_out.id.should eq("mod-999")
     req_out.reply.should eq("reply_id")
 
     message = messages[1]
-    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(message[4, message.bytesize - 4]))
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(message[2, message.bytesize - 4]))
     req_out.payload.should eq(%({"__exec__":"function1","function1":{}}))
     req_out.id.should eq("mod-888")
     req_out.reply.should eq("reply_id")

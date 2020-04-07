@@ -1,6 +1,5 @@
 name: driver
 version: 1.0.0
-license: MIT
 
 dependencies:
   connect-proxy:
@@ -21,8 +20,8 @@ dependencies:
   redis:
     github: stefanwille/crystal-redis
     version: ~> 2.5
-  retriable:
-    github: Sija/retriable.cr
+  simple_retry:
+    github: spider-gazelle/simple_retry
   ssh2:
     github: spider-gazelle/ssh2.cr
   tasker:

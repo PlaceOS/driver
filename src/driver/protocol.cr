@@ -3,9 +3,10 @@ require "json"
 require "tasker"
 require "tokenizer"
 require "./protocol/request"
+require "./logger"
 
 STDIN.blocking = false
-STDIN.sync = true
+STDIN.sync = false
 STDERR.blocking = false
 STDERR.sync = true
 STDOUT.blocking = false
@@ -97,9 +98,11 @@ class PlaceOS::Driver::Protocol
       # Requests should run in async so they don't block the processing loop
       spawn(same_thread: true) { process(message.not_nil!) }
     end
+    LOGGER.debug { "protocol processor terminated" }
   end
 
   def process(message : Request)
+    LOGGER.debug { "protocol processing: #{message.inspect}" }
     callbacks = case message.cmd
                 when "start"
                   # New instance of id == mod_id
@@ -143,6 +146,7 @@ class PlaceOS::Driver::Protocol
     callbacks.each do |callback|
       response = callback.call(message)
       if response
+        LOGGER.debug { "protocol queuing response: #{response.inspect}" }
         @producer.send({response, nil})
         break
       end
@@ -151,6 +155,7 @@ class PlaceOS::Driver::Protocol
     message.payload = nil
     message.error = error.message
     message.backtrace = error.backtrace?
+    LOGGER.debug { "protocol queuing error response: #{message.inspect}" }
     @producer.send({message, nil})
   end
 
@@ -159,6 +164,7 @@ class PlaceOS::Driver::Protocol
     if payload
       req.payload = raw ? payload.to_s : payload.to_json
     end
+    LOGGER.debug { "protocol queuing request: #{req.inspect}" }
     @producer.send({req, nil})
     req
   end
@@ -169,11 +175,15 @@ class PlaceOS::Driver::Protocol
       req.payload = raw ? payload.to_s : payload.to_json
     end
     channel = Channel(Request).new(1)
+
+    LOGGER.debug { "protocol queuing request: #{req.inspect}" }
     @producer.send({req, channel})
     channel
   end
 
   @@seq = 0_u64
+  INDICATOR = "\x00\x02"
+  DELIMITER = "\x00\x03"
 
   private def produce_io(timeout_period)
     spawn(same_thread: true) { self.process! }
@@ -201,6 +211,7 @@ class PlaceOS::Driver::Protocol
         break unless req_data
 
         request, channel = req_data
+        LOGGER.debug { "protocol sending (expects reply #{!!channel}): #{request.inspect}" }
 
         # Expects a response
         if channel
@@ -212,13 +223,16 @@ class PlaceOS::Driver::Protocol
           @next_requests[seq] = request
         end
 
-        json = request.to_json
-        @io.write_bytes json.bytesize
-        @io.write json.to_slice
+        # Single call to write ensure there is no interlacing
+        # in-case a 3rd party library writes something to STDERR
+        @io.print(String.build { |msg|
+          msg << INDICATOR
+          request.to_json(msg)
+          msg << DELIMITER
+        })
         @io.flush
       rescue e
-        STDOUT.puts "#{PROGRAM_NAME}: Fatal error #{e.inspect_with_backtrace}"
-        STDOUT.flush
+        LOGGER.fatal "Fatal error #{e.inspect_with_backtrace}"
         exit(2)
       end
     end
@@ -236,24 +250,25 @@ class PlaceOS::Driver::Protocol
       bytes_read = @io.read(raw_data)
       break if bytes_read == 0 # IO was closed
 
+      LOGGER.debug { "protocol received #{bytes_read}" }
+
       @tokenizer.extract(raw_data[0, bytes_read]).each do |message|
         string = nil
         begin
           string = String.new(message[4, message.bytesize - 4])
+          LOGGER.debug { "protocol queuing #{string}" }
           @processor.send Request.from_json(string)
         rescue error
-          puts "error parsing request #{string.inspect}\n#{error.inspect_with_backtrace}"
+          LOGGER.warn "error parsing request #{string.inspect}\n#{error.inspect_with_backtrace}"
         end
       end
     end
   rescue IO::Error | Errno
     # Input stream closed. This should only occur on termination
-    STDOUT.puts "#{PROGRAM_NAME}: IO terminated, exiting cleanly"
-    STDOUT.flush
+    LOGGER.info "IO terminated, exiting cleanly"
   rescue e
     begin
-      STDOUT.puts "#{PROGRAM_NAME}: Fatal error #{e.inspect_with_backtrace}"
-      STDOUT.flush
+      LOGGER.fatal e.inspect_with_backtrace
     rescue
     end
     exit(1)
