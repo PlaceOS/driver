@@ -211,7 +211,6 @@ class PlaceOS::Driver::Protocol
         break unless req_data
 
         request, channel = req_data
-        LOGGER.debug { "protocol sending (expects reply #{!!channel}): #{request.inspect}" }
 
         # Expects a response
         if channel
@@ -222,6 +221,8 @@ class PlaceOS::Driver::Protocol
           @tracking[seq] = channel
           @next_requests[seq] = request
         end
+
+        LOGGER.debug { "protocol sending (expects reply #{!!channel}): #{request.inspect}" }
 
         # Single call to write ensure there is no interlacing
         # in-case a 3rd party library writes something to STDERR

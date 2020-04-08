@@ -384,6 +384,7 @@ class PlaceOS::Driver::Protocol::Management
     @logger.info "comms closed for #{@driver_path}"
   end
 
+  # This function is used to process comms coming from the driver
   private def process(request)
     case request.cmd
     when "start"
@@ -412,6 +413,8 @@ class PlaceOS::Driver::Protocol::Management
     when "exec"
       # need to route this internally to the correct module
       @on_exec.call(request, ->(response : Request) {
+        # The event queue is for sending data to the driver
+        response.cmd = "result"
         @events.send(response)
         nil
       })
