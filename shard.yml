@@ -7,8 +7,8 @@ dependencies:
   debug:
     github: Sija/debug.cr
   hound-dog:
-    github: place-labs/hound-dog
-    version: ~> 2.1
+    github: aca-labs/hound-dog
+    version: ~> 2.0.0
   ipaddress:
     github: Sija/ipaddress.cr
   priority-queue:
