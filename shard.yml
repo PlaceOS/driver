@@ -1,5 +1,5 @@
 name: driver
-version: 1.0.0
+version: 1.1.0
 
 dependencies:
   connect-proxy:
@@ -32,3 +32,4 @@ dependencies:
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba
+    version: ~> 0.12
