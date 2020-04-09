@@ -384,7 +384,7 @@ class PlaceOS::Driver::Protocol::Management
         end
       end
     end
-  rescue error : IO::Error | Errno
+  rescue error : IO::Error
     # Input stream closed. This should only occur on termination
     @logger.debug { "comms closed for #{@driver_path}\n#{error.inspect_with_backtrace}" }
   ensure

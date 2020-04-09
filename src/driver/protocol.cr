@@ -196,7 +196,7 @@ class PlaceOS::Driver::Protocol
         @next_requests = {} of UInt64 => Request
 
         if !current_requests.empty?
-          error = IO::Timeout.new("request timed out")
+          error = IO::TimeoutError.new("request timed out")
           current_requests.each do |request|
             timeout(error, request)
           end
@@ -264,7 +264,7 @@ class PlaceOS::Driver::Protocol
         end
       end
     end
-  rescue IO::Error | Errno
+  rescue IO::Error
     # Input stream closed. This should only occur on termination
     LOGGER.info "IO terminated, exiting cleanly"
   rescue e

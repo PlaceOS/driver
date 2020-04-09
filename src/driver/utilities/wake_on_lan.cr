@@ -43,7 +43,7 @@ module PlaceOS::Driver::Utilities::WakeOnLAN
     # https://crystal-lang.org/api/0.27.0/UDPSocket.html
     begin
       udp.send(magicpacket.hexbytes, address)
-    rescue ex : Errno
+    rescue ex : Socket::ConnectError
     end
   end
 end

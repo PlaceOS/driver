@@ -132,7 +132,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
       websocket.on_message { |string| spawn(same_thread: true) { process string.to_slice } }
       websocket.run
     end
-  rescue IO::Error | Errno
+  rescue IO::Error
   rescue error
     @logger.error "error consuming IO\n#{error.inspect_with_backtrace}"
   ensure

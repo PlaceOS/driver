@@ -121,7 +121,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
         spawn(same_thread: true) { process data }
       end
     end
-  rescue IO::Error | Errno
+  rescue IO::Error
   rescue error
     @logger.error "error consuming IO\n#{error.inspect_with_backtrace}"
   ensure
