@@ -196,7 +196,7 @@ class PlaceOS::Driver
           spawn(same_thread: true) { process data }
         end
       end
-    rescue IO::Error | Errno | SSH2::SessionError
+    rescue IO::Error | SSH2::SessionError
     rescue error
       @logger.error "error consuming IO\n#{error.inspect_with_backtrace}"
     ensure

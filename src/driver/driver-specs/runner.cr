@@ -287,7 +287,6 @@ class DriverSpecs
       end
     end
   rescue IO::Error
-  rescue Errno
     # Input stream closed. This should only occur on termination
   end
 
@@ -307,7 +306,6 @@ class DriverSpecs
       end
     end
   rescue IO::Error
-  rescue Errno
     # Input stream closed. This should only occur on termination
   end
 

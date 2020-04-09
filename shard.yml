@@ -7,8 +7,8 @@ dependencies:
   debug:
     github: Sija/debug.cr
   hound-dog:
-    github: aca-labs/hound-dog
-    version: ~> 2.0.0
+    github: place-labs/hound-dog
+    version: ~> 2.1
   ipaddress:
     github: Sija/ipaddress.cr
   priority-queue:
@@ -19,7 +19,7 @@ dependencies:
     github: jeromegn/protobuf.cr
   redis:
     github: stefanwille/crystal-redis
-    version: 2.5.3
+    version: ~> 2.6
   simple_retry:
     github: spider-gazelle/simple_retry
   ssh2:
