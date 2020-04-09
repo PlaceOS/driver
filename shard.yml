@@ -19,7 +19,7 @@ dependencies:
     github: jeromegn/protobuf.cr
   redis:
     github: stefanwille/crystal-redis
-    version: ~> 2.5
+    version: 2.5.3
   simple_retry:
     github: spider-gazelle/simple_retry
   ssh2:

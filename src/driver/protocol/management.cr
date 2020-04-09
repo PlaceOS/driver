@@ -82,11 +82,12 @@ class PlaceOS::Driver::Protocol::Management
   end
 
   def info
+    return [] of String if @terminated
     promise = Promise.new(String)
 
     sequence = @request_lock.synchronize do
       seq = @sequence
-      @sequence += 1
+      @sequence = seq &+ 1
       @requests[seq] = promise
       seq
     end
@@ -96,11 +97,12 @@ class PlaceOS::Driver::Protocol::Management
   end
 
   def execute(module_id : String, payload : String?) : String
+    raise "module #{module_id} not running, terminated" if @terminated
     promise = Promise.new(String)
 
     sequence = @request_lock.synchronize do
       seq = @sequence
-      @sequence += 1
+      @sequence = seq &+ 1
       @requests[seq] = promise
       seq
     end
@@ -246,11 +248,14 @@ class PlaceOS::Driver::Protocol::Management
 
   private def exec(module_id : String, payload : String, seq : UInt64) : Nil
     io = @io
-    return unless io && @modules[module_id]?
-    json = %({"id":"#{module_id}","cmd":"exec","seq":#{seq},"payload":#{payload.to_json}})
-    io.write_bytes json.bytesize
-    io.write json.to_slice
-    io.flush
+    if io && @modules[module_id]?
+      json = %({"id":"#{module_id}","cmd":"exec","seq":#{seq},"payload":#{payload.to_json}})
+      io.write_bytes json.bytesize
+      io.write json.to_slice
+      io.flush
+    elsif promise = @request_lock.synchronize { @requests.delete(seq) }
+      promise.reject Exception.new("module #{module_id} not running on this host")
+    end
   end
 
   private def debug(module_id : String) : Nil
@@ -275,12 +280,14 @@ class PlaceOS::Driver::Protocol::Management
 
   private def running_modules(seq : UInt64)
     io = @io
-    return unless io
-
-    json = %({"id":"","cmd":"info","seq":#{seq}})
-    io.write_bytes json.bytesize
-    io.write json.to_slice
-    io.flush
+    if io
+      json = %({"id":"","cmd":"info","seq":#{seq}})
+      io.write_bytes json.bytesize
+      io.write json.to_slice
+      io.flush
+    elsif promise = @request_lock.synchronize { @requests.delete(seq) }
+      promise.resolve "[]"
+    end
   end
 
   # This function
@@ -381,6 +388,13 @@ class PlaceOS::Driver::Protocol::Management
     # Input stream closed. This should only occur on termination
     @logger.debug { "comms closed for #{@driver_path}\n#{error.inspect_with_backtrace}" }
   ensure
+    # Reject any pending request
+    temp_reqs = @request_lock.synchronize do
+      reqs = @requests
+      @requests = {} of UInt64 => Promise::DeferredPromise(String)
+      reqs
+    end
+    temp_reqs.each { |request| request.reject(Exception.new("process terminated")) }
     @logger.info "comms closed for #{@driver_path}"
   end
 
