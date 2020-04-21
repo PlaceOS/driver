@@ -9,9 +9,13 @@ struct PlaceOS::Driver::DriverModel
     property id : String
     property name : String
     property email : String?
-    property capacity : Int32
     property features : String?
     property bookable : Bool
+    property display_name : String?
+    property code : String?
+    property type : String?
+    property capacity : Int32
+    property map_id : String?
   end
 
   struct Metadata
