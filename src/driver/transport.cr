@@ -16,6 +16,7 @@ abstract class PlaceOS::Driver::Transport
     raise ::IO::EOFError.new("exec is only available to SSH transports")
   end
 
+  # Use `logger` of `Driver::Queue`
   delegate logger, to: @queue
 
   # Many devices have a HTTP service. Might as well make it easy to access.

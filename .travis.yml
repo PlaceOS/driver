@@ -25,6 +25,6 @@ install:
   - sleep 5
 
 script:
-  - crystal spec
+  - crystal spec -v --error-trace
 
 language: crystal
