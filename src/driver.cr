@@ -408,6 +408,11 @@ macro finished
     end
   end
 
+  # Set up logging
+  backend = ::Log::IOBackend.new(STDOUT)
+  backend.formatter = PlaceOS::Driver::LOG_FORMATTER
+  ::Log.builder.bind("*", ::Log::Severity::Info, backend)
+
   # Launch the process manager by default, this can be overriten for testing
   if exec_process_manager
     process = PlaceOS::Driver::ProcessManager.new
