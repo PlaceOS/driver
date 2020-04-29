@@ -21,6 +21,7 @@ class PlaceOS::Driver
   Signal::USR1.trap &log_level_change
   Signal::USR2.trap &log_level_change
 
+  # Custom backend that writes to a `PlaceOS::Driver::Protocol`
   class ProtocolBackend < ::Log::Backend
     getter protocol : Protocol
     getter formatter = PlaceOS::Driver::LOG_FORMATTER
@@ -44,6 +45,7 @@ class PlaceOS::Driver
     end
   end
 
+  # Custom Log that broadcasts to a `Log::IOBackend` and `PlaceOS::Driver::ProtocolBackend`
   class Log < ::Log
     getter broadcast_backend : ::Log::BroadcastBackend
     getter io_backend : ::Log::IOBackend
