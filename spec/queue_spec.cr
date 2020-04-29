@@ -154,10 +154,8 @@ describe PlaceOS::Driver::Queue do
   end
 
   it "should allow for connected state to be updated" do
-    std_out = IO::Memory.new
-    logger = ::Logger.new(std_out)
     connected = false
-    queue = PlaceOS::Driver::Queue.new(logger) { |state| connected = state }
+    queue = PlaceOS::Driver::Queue.new { |state| connected = state }
 
     connected.should eq(false)
     queue.online = true

@@ -1,14 +1,18 @@
-require "set"
-require "yaml"
-require "socket"
+require "log_helper"
 require "promise"
+require "set"
+require "socket"
 require "tokenizer"
+require "yaml"
+
 require "./request"
 
 # Launch driver when first instance is requested
 # Shutdown driver when no more instances required
 class PlaceOS::Driver::Protocol::Management
-  def initialize(@driver_path : String, @logger = ::Logger.new(STDOUT))
+  Log = ::Log.for("driver.protocol.management")
+
+  def initialize(@driver_path : String)
     @request_lock = Mutex.new
     @requests = {} of UInt64 => Promise::DeferredPromise(String)
     @starting = {} of String => Promise::DeferredPromise(Nil)
@@ -36,7 +40,7 @@ class PlaceOS::Driver::Protocol::Management
   property on_exec : Proc(Request, Proc(Request, Nil), Nil) = ->(request : Request, callback : Proc(Request, Nil)) {}
   property on_setting : Proc(String, String, YAML::Any, Nil) = ->(module_id : String, setting_name : String, setting_value : YAML::Any) {}
 
-  getter :terminated, :logger, pid
+  getter :terminated, pid
   getter :last_exit_code, :launch_count, :launch_time
   @io : IO::Stapled? = nil
 
@@ -142,6 +146,7 @@ class PlaceOS::Driver::Protocol::Management
     @events.send(Request.new(module_id, "ignore"))
   end
 
+  # ameba:disable Metrics/CyclomaticComplexity
   private def process_events
     loop do
       return if @terminated
@@ -174,9 +179,11 @@ class PlaceOS::Driver::Protocol::Management
           relaunch(request.id)
         when "terminate"
           shutdown
+        else
+          raise "unexpected command: #{request.cmd}"
         end
       rescue error
-        @logger.error error.inspect_with_backtrace, @driver_path
+        Log.error { {error: error.inspect_with_backtrace, driver_path: @driver_path} }
       end
     end
   end
@@ -339,7 +346,7 @@ class PlaceOS::Driver::Protocol::Management
 
     status = $?
     last_exit_code = status.exit_code.to_s
-    @logger.warn("driver process exited with #{last_exit_code}", @driver_path) unless status.success?
+    Log.warn { {message: "driver process exited with #{last_exit_code}", driver_path: @driver_path} } unless status.success?
     @events.send(Request.new(last_exit_code, "exited"))
   end
 
@@ -363,14 +370,14 @@ class PlaceOS::Driver::Protocol::Management
       bytes_read = io.read(raw_data)
       break if bytes_read == 0 # IO was closed
 
-      @logger.debug { "manager #{@driver_path} received #{bytes_read}" }
+      Log.debug { "manager #{@driver_path} received #{bytes_read}" }
 
       @tokenizer.extract(raw_data[0, bytes_read]).each do |message|
         string = nil
         begin
           string = String.new(message[0..-3])
           junk, _, string = string.rpartition(MESSAGE_INDICATOR)
-          @logger.debug do
+          Log.debug do
             if junk.empty?
               "manager #{@driver_path} processing #{string}"
             else
@@ -380,13 +387,13 @@ class PlaceOS::Driver::Protocol::Management
           request = Request.from_json(string)
           spawn(same_thread: true) { process(request) }
         rescue error
-          @logger.warn "error parsing request #{string.inspect}\n#{error.inspect_with_backtrace}"
+          Log.warn { "error parsing request #{string.inspect}\n#{error.inspect_with_backtrace}" }
         end
       end
     end
   rescue error : IO::Error
     # Input stream closed. This should only occur on termination
-    @logger.debug { "comms closed for #{@driver_path}\n#{error.inspect_with_backtrace}" }
+    Log.debug { "comms closed for #{@driver_path}\n#{error.inspect_with_backtrace}" }
   ensure
     # Reject any pending request
     temp_reqs = @request_lock.synchronize do
@@ -395,7 +402,7 @@ class PlaceOS::Driver::Protocol::Management
       reqs
     end
     temp_reqs.each { |request| request.reject(Exception.new("process terminated")) }
-    @logger.info "comms closed for #{@driver_path}"
+    Log.info { "comms closed for #{@driver_path}" }
   end
 
   # This function is used to process comms coming from the driver
@@ -417,7 +424,7 @@ class PlaceOS::Driver::Protocol::Management
           promise.resolve "null"
         end
       else
-        @logger.warn "sequence number #{request.seq} not found for result from #{request.id}"
+        Log.warn { "sequence number #{request.seq} not found for result from #{request.id}" }
       end
     when "debug"
       # pass the unparsed message down the pipe
@@ -437,9 +444,9 @@ class PlaceOS::Driver::Protocol::Management
       setting_name, setting_value = Tuple(String, YAML::Any).from_yaml(request.payload.not_nil!)
       @on_setting.call(mod_id, setting_name, setting_value)
     else
-      @logger.warn("received unknown request #{request.cmd} - #{request.inspect}")
+      Log.warn { "received unknown request #{request.cmd} - #{request.inspect}" }
     end
   rescue error
-    @logger.warn "error processing driver request #{request.inspect}\n#{error.inspect_with_backtrace}"
+    Log.warn { "error processing driver request #{request.inspect}\n#{error.inspect_with_backtrace}" }
   end
 end

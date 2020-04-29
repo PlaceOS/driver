@@ -28,7 +28,9 @@ class PlaceOS::Driver::Proxy::Scheduler
     end
   end
 
-  def initialize(@logger = ::Logger.new(STDOUT))
+  getter logger : ::Log
+
+  def initialize(@logger = ::Log.for("driver.scheduler"))
     @scheduler = Tasker.instance
     @schedules = [] of TaskWrapper
     @terminated = false
@@ -98,7 +100,7 @@ class PlaceOS::Driver::Proxy::Scheduler
   private def run_now(block)
     block.call
   rescue error
-    @logger.error "in scheduled task on #{DriverManager.driver_class}\n#{error.inspect_with_backtrace}"
+    logger.error { "in scheduled task on #{DriverManager.driver_class}\n#{error.inspect_with_backtrace}" }
     raise error
   end
 end

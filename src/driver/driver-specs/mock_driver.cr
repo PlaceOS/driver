@@ -21,10 +21,7 @@ abstract class DriverSpecs::MockDriver
   def initialize(@module_id : String)
     @__storage__ = PlaceOS::Driver::Storage.new(module_id)
     @__status__ = PlaceOS::Driver::Status.new
-    @__logger__ = Logger.new(STDOUT, Logger::Severity::DEBUG, Logger::Formatter.new { |severity, _, _, message, io|
-      label = severity.unknown? ? "ANY" : severity.to_s
-      io << label.rjust(5) << " -- " << module_id << ": " << message
-    })
+    @__logger__ = PlaceOS::Driver::Log.new(@module_id, STDOUT, ::Log::Severity::Debug)
 
     __init__
   end

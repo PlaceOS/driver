@@ -23,21 +23,21 @@ class PlaceOS::Driver::Task
     # Was the process retried?
     @complete = Channel(Bool).new(1)
 
-    @logger = @queue.logger
-
     @state = @wait ? :unknown : :success
     @payload = DEFAULT_RESULT
     @backtrace = DEFAULT_BACKTR
     @error_class = nil
   end
 
-  @logger : ::Logger
   @timer : Tasker::Task?
   @processing : Proc(Bytes, Task, Nil)?
   @error_class : String?
-  getter last_executed, state, payload, backtrace, error_class, logger
+  getter last_executed, state, payload, backtrace, error_class
   getter name, delay, wait
   property processing, retries, priority, clear_queue
+
+  # Use the Queue's custom logger
+  delegate logger, to: @queue
 
   # Drivers can monkey patch task if the request is required to process the response
   # @request_payload : Bytes?
@@ -65,7 +65,7 @@ class PlaceOS::Driver::Task
     end
     self
   rescue error
-    @logger.error "error executing task #{@name}\n#{error.inspect_with_backtrace}"
+    logger.error { "error executing task #{@name}\n#{error.inspect_with_backtrace}" }
     @state = :exception
     @payload = error.message || "error executing task"
     @backtrace = error.backtrace? || DEFAULT_BACKTR
@@ -107,7 +107,7 @@ class PlaceOS::Driver::Task
       begin
         @payload = result.try_to_json("null")
       rescue e
-        @logger.warn "unable to convert result to JSON\n#{e.message}\n#{e.backtrace?.try &.join("\n")}"
+        logger.warn { "unable to convert result to JSON\n#{e.message}\n#{e.backtrace?.try &.join("\n")}" }
       end
     end
 
@@ -129,7 +129,7 @@ class PlaceOS::Driver::Task
 
     @retries -= 1
     if @retries >= 0
-      @logger.info do
+      logger.info do
         if @name
           "retrying task #{@name.inspect} #{reason}"
         else
@@ -153,7 +153,7 @@ class PlaceOS::Driver::Task
     @channel.close
     @complete.send true
     @complete.close
-    @logger.warn do
+    logger.warn do
       if @name
         "aborting task, #{@name.inspect}, #{reason}"
       else

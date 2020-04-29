@@ -5,7 +5,7 @@ class Helper
   abstract class HelperBase < PlaceOS::Driver
     def implemented_in_base_class
       self[:test] = ["bob"]
-      logger.info "testing info message"
+      logger.info { "testing info message" }
       puts "woot!"
     end
   end

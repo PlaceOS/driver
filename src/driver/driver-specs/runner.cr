@@ -279,6 +279,8 @@ class DriverSpecs
                 @io.write json.to_slice
                 @io.flush
               end
+            else
+              puts "unexpected command in driver-runner server"
             end
           end
         rescue error

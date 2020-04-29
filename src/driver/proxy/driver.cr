@@ -128,7 +128,7 @@ class PlaceOS::Driver::Proxy::Driver
         if error = result.error
           backtrace = result.backtrace || [] of String
           exception = PlaceOS::Driver::RemoteException.new(result.payload, error, backtrace)
-          @system.logger.warn "#{exception.message}\n#{exception.backtrace?.try &.join("\n")}"
+          @system.logger.warn { "#{exception.message}\n#{exception.backtrace?.try &.join("\n")}" }
           raise exception
         else
           JSON.parse(result.payload.not_nil!)
@@ -138,7 +138,7 @@ class PlaceOS::Driver::Proxy::Driver
       raise "undefined method '#{function_name}' for #{@module_name}_#{@index} (#{@module_id})"
     end
   rescue error
-    @system.logger.warn error.inspect_with_backtrace
+    @system.logger.warn { error.inspect_with_backtrace }
     lazy { raise error; JSON.parse("") }
   end
 end

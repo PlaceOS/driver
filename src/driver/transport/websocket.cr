@@ -1,11 +1,12 @@
 require "simple_retry"
 require "socket"
 
+require "../transport"
+
 class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
   # timeouts in seconds
   def initialize(@queue : PlaceOS::Driver::Queue, @uri : String, @settings : ::PlaceOS::Driver::Settings, &@received : (Bytes, PlaceOS::Driver::Task?) -> Nil)
     @terminated = false
-    @logger = @queue.logger
 
     parts = URI.parse(@uri)
     @ip = parts.host.not_nil!
@@ -19,11 +20,9 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
   @path : String
   @port : Int32?
   @use_tls : Bool
-  @logger : ::Logger
   @websocket : HTTP::WebSocket?
   @tls : OpenSSL::SSL::Context::Client?
   property :received
-  getter :logger
 
   def connect(connect_timeout : Int32 = 10) : Nil
     return if @terminated
@@ -66,7 +65,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     # Start consuming data from the socket
     spawn(same_thread: true) { consume_io }
   rescue error
-    @logger.info { "connecting to device\n#{error.inspect_with_backtrace}" }
+    logger.info { "connecting to device\n#{error.inspect_with_backtrace}" }
     @queue.online = false
     raise error
   end
@@ -134,7 +133,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     end
   rescue IO::Error
   rescue error
-    @logger.error "error consuming IO\n#{error.inspect_with_backtrace}"
+    logger.error { "error consuming IO\n#{error.inspect_with_backtrace}" }
   ensure
     @queue.online = false
     connect

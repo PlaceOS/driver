@@ -16,6 +16,8 @@ abstract class PlaceOS::Driver::Transport
     raise ::IO::EOFError.new("exec is only available to SSH transports")
   end
 
+  delegate logger, to: @queue
+
   # Many devices have a HTTP service. Might as well make it easy to access.
   macro inherited
     def http(method, path, body : ::HTTP::Client::BodyType = nil,
@@ -122,7 +124,7 @@ abstract class PlaceOS::Driver::Transport
           tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
         end
       rescue error
-        @logger.warn "issue configuring verify mode\n#{error.inspect_with_backtrace}"
+        Log.warn { "issue configuring verify mode\n#{error.inspect_with_backtrace}" }
         tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
       end
     end
@@ -141,7 +143,7 @@ abstract class PlaceOS::Driver::Transport
       process_message(data)
     end
   rescue error
-    @logger.error "error processing data\n#{error.inspect_with_backtrace}"
+    Log.error { "error processing data\n#{error.inspect_with_backtrace}" }
   end
 
   private def process_message(data)
@@ -161,6 +163,6 @@ abstract class PlaceOS::Driver::Transport
     # See spec for how this callback is expected to be used
     @received.call(data, task)
   rescue error
-    @logger.error "error processing received data\n#{error.inspect_with_backtrace}"
+    Log.error { "error processing received data\n#{error.inspect_with_backtrace}" }
   end
 end

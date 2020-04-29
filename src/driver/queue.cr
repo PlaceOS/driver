@@ -1,37 +1,32 @@
+require "json"
+require "log"
 require "priority-queue"
 require "tasker"
-require "json"
 
 class PlaceOS::Driver::Queue
-  def initialize(@logger : ::Logger, &@connected_callback : Bool -> Nil)
+  def initialize(@logger : ::Log = ::Log.for("driver.queue"), &@connected_callback : Bool -> Nil)
     @queue = Priority::Queue(Task).new
-
-    # Task defaults
-    @priority = 50
-    @timeout = 5.seconds
-    @retries = 3
-    @wait = true
-    @delay = nil
 
     # Queue controls
     @channel = Channel(Nil).new
     @terminated = false
     @waiting = false
-    @online = false
-    @retry_bonus = 20
 
     spawn(same_thread: true) { process! }
   end
 
-  @current : Task?
-  @previous : Task?
-  @timeout : Time::Span
-  @delay : Time::Span?
-  getter :current, :waiting
-  getter :online, :logger
+  getter logger : ::Log
+  getter current : Task? = nil
+  getter previous : Task? = nil
+  getter online : Bool = false
 
   # for modifying defaults
-  property :priority, :timeout, :retries, :wait, :delay, :retry_bonus
+  property priority : Int32 = 50
+  property timeout : Time::Span = 5.seconds
+  property retries : Int32 = 3
+  property wait : Bool = true
+  property delay : Time::Span? = nil
+  property retry_bonus : Int32 = 20
 
   def online=(state : Bool)
     state_changed = state != @online

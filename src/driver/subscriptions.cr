@@ -1,24 +1,18 @@
 require "simple_retry"
-require "logger"
 require "redis"
+
+require "./logger"
 
 # TODO:: we need to be scheduling these onto the correct thread
 class PlaceOS::Driver::Subscriptions
   SYSTEM_ORDER_UPDATE = "lookup-change"
+  Log                 = ::Log.for("driver.subscriptions")
 
-  def initialize(logger_io = STDOUT, module_id = "")
+  def initialize(logger_io : IO = ::PlaceOS::Driver.logger_io, module_id : String = "")
     @terminated = false
-    @logger = ::Logger.new(logger_io)
-    @logger.progname = module_id
-    @logger.formatter = Logger::Formatter.new do |severity, datetime, progname, message, io|
-      label = severity.unknown? ? "ANY" : severity.to_s
-      io << String.build do |str|
-        str << "level=" << label << " time="
-        datetime.to_rfc3339(str)
-        str << " progname=" << progname if progname && !progname.empty?
-        str << " message=" << message
-      end
-    end
+    backend = ::Log::IOBackend.new(logger_io)
+    backend.formatter = PlaceOS::Driver::LOG_FORMATTER
+    ::Log.builder.bind("driver.subscriptions", ::Log::Severity::Info, backend)
 
     # Mutex for indirect subscriptions as it involves two hashes, a redis lookup
     # and the possibility of an index change. The redis lookup pauses the
@@ -47,7 +41,7 @@ class PlaceOS::Driver::Subscriptions
   end
 
   @redis_subscribe : Redis
-  getter :running, :logger
+  getter :running
 
   def terminate(terminate = true) : Nil
     @terminated = terminate
@@ -116,11 +110,11 @@ class PlaceOS::Driver::Subscriptions
       @mutex.synchronize { remap_indirect(message) }
     elsif subscriptions = @subscriptions[channel]?
       subscriptions.each do |subscription|
-        subscription.callback @logger, message
+        subscription.callback Log, message
       end
     else
       # subscribed to channel but no subscriptions
-      @logger.warn "received message for channel with no subscription!\nChannel: #{channel}\nMessage: #{message}"
+      Log.warn { "received message for channel with no subscription!\nChannel: #{channel}\nMessage: #{message}" }
     end
   end
 
@@ -169,7 +163,7 @@ class PlaceOS::Driver::Subscriptions
 
         raise "no subscriptions, restarting loop" unless @terminated
       rescue e
-        @logger.warn "redis subscription loop exited\n#{e.message}\n#{e.backtrace?.try &.join("\n")}"
+        Log.warn { "redis subscription loop exited\n#{e.message}\n#{e.backtrace?.try &.join("\n")}" }
         raise e
       ensure
         wait.close
@@ -218,7 +212,7 @@ class PlaceOS::Driver::Subscriptions
 
       # notify of current value
       if current_value = subscription.current_value
-        spawn(same_thread: true) { subscription.callback(@logger, current_value.not_nil!) }
+        spawn(same_thread: true) { subscription.callback(Log, current_value.not_nil!) }
       end
     end
   end

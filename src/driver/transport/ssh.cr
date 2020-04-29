@@ -1,7 +1,9 @@
 require "simple_retry"
 require "socket"
-require "tasker"
 require "ssh2"
+require "tasker"
+
+require "../transport"
 
 class PlaceOS::Driver
   protected def exec(message)
@@ -12,18 +14,15 @@ class PlaceOS::Driver
     # timeouts in seconds
     def initialize(@queue : PlaceOS::Driver::Queue, @ip : String, @port : Int32, @settings : ::PlaceOS::Driver::Settings, @uri = nil, &@received : (Bytes, PlaceOS::Driver::Task?) -> Nil)
       @terminated = false
-      @logger = @queue.logger
     end
 
     @uri : String?
-    @logger : ::Logger
     @socket : TCPSocket?
     @session : SSH2::Session?
     @shell : SSH2::Channel?
     @keepalive : Tasker::Task?
 
     property :received
-    getter :logger
 
     class Settings
       include JSON::Serializable
@@ -48,6 +47,7 @@ class PlaceOS::Driver
       channel
     end
 
+    # ameba:disable Metrics/CyclomaticComplexity
     def connect(connect_timeout : Int32 = 10) : Nil
       return if @terminated
 
@@ -109,7 +109,7 @@ class PlaceOS::Driver
               shell.close
               @shell = nil
             end
-            @logger.warn "unable to negotiage a shell on SSH connection\n#{error.inspect_with_backtrace}"
+            logger.warn { "unable to negotiage a shell on SSH connection\n#{error.inspect_with_backtrace}" }
           end
 
           # This will track the socket state when there is no shell
@@ -118,7 +118,7 @@ class PlaceOS::Driver
           # Enable queuing
           @queue.online = true
         rescue error
-          @logger.info {
+          logger.info {
             supported_methods = ", supported authentication methods: #{supported_methods}" if supported_methods
             "connecting to device#{supported_methods}\n#{error.inspect_with_backtrace}"
           }
@@ -198,7 +198,7 @@ class PlaceOS::Driver
       end
     rescue IO::Error | SSH2::SessionError
     rescue error
-      @logger.error "error consuming IO\n#{error.inspect_with_backtrace}"
+      logger.error { "error consuming IO\n#{error.inspect_with_backtrace}" }
     ensure
       disconnect
       @queue.online = false

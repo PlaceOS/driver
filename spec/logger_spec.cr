@@ -1,19 +1,19 @@
 require "./helper"
 
-describe PlaceOS::Driver::Logger do
+describe PlaceOS::Driver::Log do
   it "should send outgoing requests" do
     proto, _, output = Helper.protocol
     std_out = IO::Memory.new
 
     # By default debug messages are ignored
-    logger = PlaceOS::Driver::Logger.new("mod-123", std_out, proto)
-    logger.debug "this should do nothing"
+    logger = PlaceOS::Driver::Log.new("mod-123", std_out, protocol: proto)
+    logger.debug { "this should do nothing" }
 
     (std_out.size > 0).should eq(false)
 
     # However when debugging we want these to be routed to the developer
     logger.debugging = true
-    logger.debug "whatwhat"
+    logger.debug { "whatwhat" }
 
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
@@ -25,7 +25,7 @@ describe PlaceOS::Driver::Logger do
     (std_out.size > 0).should eq(false)
 
     # Warning and above logs should go to both
-    logger.warn "hello-logs"
+    logger.warn { "hello-logs" }
 
     bytes_read = output.read(raw_data)
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
@@ -40,7 +40,7 @@ describe PlaceOS::Driver::Logger do
     std_out = IO::Memory.new
 
     # By default debug messages are ignored
-    logger = PlaceOS::Driver::Logger.new("mod-123", std_out, proto)
+    logger = PlaceOS::Driver::Log.new("mod-123", std_out, proto)
     in_block = false
     logger.debug {
       in_block = true

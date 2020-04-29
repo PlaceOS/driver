@@ -1,5 +1,7 @@
 require "option_parser"
 
+require "./driver/logger"
+
 abstract class PlaceOS::Driver
   module Proxy
   end
@@ -20,7 +22,7 @@ abstract class PlaceOS::Driver
     @__setting__ : Settings,
     @__queue__ : Queue,
     @__transport__ : Transport,
-    @__logger__ : PlaceOS::Driver::Logger,
+    @__logger__ : PlaceOS::Driver::Log,
     @__schedule__ = Proxy::Scheduler.new,
     @__subscriptions__ = Proxy::Subscriptions.new,
     @__driver_model__ = DriverModel.from_json(%({"udp":false,"tls":false,"makebreak":false,"settings":{},"role":1}))
