@@ -10,17 +10,14 @@ class PlaceOS::Driver::TransportUDP < PlaceOS::Driver::Transport
   def initialize(@queue : PlaceOS::Driver::Queue, @ip : String, @port : Int32, @settings : ::PlaceOS::Driver::Settings, @start_tls = false, @uri = nil, &@received : (Bytes, PlaceOS::Driver::Task?) -> Nil)
     @terminated = false
     @tls_started = false
-    @logger = @queue.logger
   end
 
   @uri : String?
-  @logger : ::Logger
   @socket : IO?
   @tls : OpenSSL::SSL::Context::Client?
   @settings : ::PlaceOS::Driver::Settings
 
   property :received
-  getter :logger
 
   def connect(connect_timeout : Int32 = 10) : Nil
     return if @terminated
@@ -66,7 +63,7 @@ class PlaceOS::Driver::TransportUDP < PlaceOS::Driver::Transport
         # Start consuming data from the socket
         spawn(same_thread: true) { consume_io }
       rescue error
-        @logger.info { "connecting to device\n#{error.inspect_with_backtrace}" }
+        logger.info { "connecting to device\n#{error.inspect_with_backtrace}" }
         raise error
       end
     end
@@ -133,7 +130,7 @@ class PlaceOS::Driver::TransportUDP < PlaceOS::Driver::Transport
     end
   rescue IO::Error
   rescue error
-    @logger.error "error consuming IO\n#{error.inspect_with_backtrace}"
+    logger.error { "error consuming IO\n#{error.inspect_with_backtrace}" }
   ensure
     connect
   end

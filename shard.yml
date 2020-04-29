@@ -2,6 +2,8 @@ name: driver
 version: 1.2.0
 
 dependencies:
+  action-controller:
+    github: spider-gazelle/action-controller
   connect-proxy:
     github: spider-gazelle/connect-proxy
   debug:

@@ -1,21 +1,20 @@
 require "simple_retry"
 require "socket"
 
+require "../transport"
+
 class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
   # timeouts in seconds
   def initialize(@queue : PlaceOS::Driver::Queue, @ip : String, @port : Int32, @settings : ::PlaceOS::Driver::Settings, @start_tls = false, @uri = nil, @makebreak = false, &@received : (Bytes, PlaceOS::Driver::Task?) -> Nil)
     # TODO:: makebreak needs a little more consideration around setting connected / disconnected status
     @terminated = false
     @tls_started = false
-    @logger = @queue.logger
   end
 
   @uri : String?
-  @logger : ::Logger
   @socket : IO?
   @tls : OpenSSL::SSL::Context::Client?
   property :received
-  getter :logger
 
   def connect(connect_timeout : Int32 = 10) : Nil
     return if @terminated
@@ -59,7 +58,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
     # Start consuming data from the socket
     spawn(same_thread: true) { consume_io }
   rescue error
-    @logger.info { "connecting to device\n#{error.inspect_with_backtrace}" }
+    logger.info { "connecting to device\n#{error.inspect_with_backtrace}" }
     @queue.online = false
     raise error
   end
@@ -123,7 +122,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
     end
   rescue IO::Error
   rescue error
-    @logger.error "error consuming IO\n#{error.inspect_with_backtrace}"
+    logger.error { "error consuming IO\n#{error.inspect_with_backtrace}" }
   ensure
     if !@makebreak
       @queue.online = false

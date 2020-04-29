@@ -6,7 +6,7 @@ class PlaceOS::Driver::Proxy::System
   def initialize(
     @model : DriverModel::ControlSystem,
     @reply_id : String,
-    @logger : ::Logger = ::Logger.new(STDOUT),
+    @logger : ::Log = ::Log.for("driver.proxy.system"),
     @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new
   )
     @system_id = @model.id
@@ -15,7 +15,8 @@ class PlaceOS::Driver::Proxy::System
   end
 
   @system_id : String
-  getter :logger
+
+  getter logger : ::Log
 
   def [](module_name)
     get_driver(*get_parts(module_name))
@@ -129,7 +130,7 @@ class PlaceOS::Driver::Proxy::System
       begin
         callback.call(subscription, "ready")
       rescue error
-        @logger.error "error in subscription callback\n#{error.inspect_with_backtrace}"
+        logger.error { "error in subscription callback\n#{error.inspect_with_backtrace}" }
       end
     end
 

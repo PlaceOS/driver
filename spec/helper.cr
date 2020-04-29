@@ -72,17 +72,18 @@ class Helper
   # Returns a running queue
   def self.queue
     std_out = IO::Memory.new
-    logger = ::Logger.new(std_out)
-    PlaceOS::Driver::Queue.new(logger) { }
+    backend = ::Log::IOBackend.new(std_out)
+    ::Log.builder.bind("driver.queue", level: ::Log::Severity::Debug, backend: backend)
+    PlaceOS::Driver::Queue.new { }
   end
 
   macro new_driver(klass, module_id, protocol = nil)
     %settings = Helper.settings
     %queue = Helper.queue
     {% if protocol %}
-      %logger = PlaceOS::Driver::Logger.new({{module_id}}, protocol: {{protocol}})
+      %logger = PlaceOS::Driver::Log.new({{module_id}}, protocol: {{protocol}})
     {% else %}
-      %logger = PlaceOS::Driver::Logger.new({{module_id}})
+      %logger = PlaceOS::Driver::Log.new({{module_id}})
     {% end %}
     %driver = nil
     %transport = PlaceOS::Driver::TransportTCP.new(%queue, "localhost", 1234, ::PlaceOS::Driver::Settings.new("{}")) do |data, task|
@@ -90,7 +91,7 @@ class Helper
       if d.responds_to?(:received)
         d.received(data, task)
       else
-        d.logger.warn "no received function provided for #{d.class}"
+        d.logger.warn { "no received function provided for #{d.class}" }
       end
     end
     %driver = {{klass}}.new {{module_id}}.to_s, %settings, %queue, %transport, %logger
@@ -98,7 +99,8 @@ class Helper
 
   macro settings
     std_out = IO::Memory.new
-    logger = ::Logger.new(std_out)
+    backend = ::Log::IOBackend.new(std_out)
+    logger = ::Log.new("driver.settings", backend, ::Log::Severity::Debug)
     settings = PlaceOS::Driver::Settings.new %({
       "integer": 1234,
       "string": "hello",

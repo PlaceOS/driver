@@ -1,63 +1,81 @@
-require "logger"
+require "action-controller/logger"
+require "log_helper"
 
 class PlaceOS::Driver
-  LOGGER = ::Logger.new(STDOUT, level: ::Logger::INFO)
-  LOGGER.formatter = Logger::Formatter.new do |severity, datetime, progname, message, io|
-    label = severity.unknown? ? "ANY" : severity.to_s
-    progname = Process.pid.to_s if progname.empty?
-    io << String.build do |str|
-      str << "level=" << label << " time="
-      datetime.to_rfc3339(str)
-      str << " progname=" << progname << " message=" << message
-    end
-  end
+  class_property logger_io : IO = STDOUT
+  LOG_FORMATTER = ActionController.default_formatter
 
   # Allow signals to change the log level at run-time
-  logging = Proc(Signal, Nil).new do |signal|
-    level = signal.usr1? ? ::Logger::DEBUG : ::Logger::INFO
-    LOGGER.info "> Log level changed to #{level}"
-    LOGGER.level = level
+  log_level_change = Proc(Signal, Nil).new do |signal|
+    level = signal.usr1? ? ::Log::Severity::Debug : ::Log::Severity::Info
+    Log.info { "> Log level changed to #{level}" }
+
+    backend = ::Log::IOBackend.new(PlaceOS::Driver.logger_io)
+    backend.formatter = PlaceOS::Driver::LOG_FORMATTER
+    Log.builder.bind "*", level, backend
     signal.ignore
   end
 
   # Turn on DEBUG level logging `kill -s USR1 %PID`
   # Default production log levels (INFO and above) `kill -s USR2 %PID`
-  Signal::USR1.trap &logging
-  Signal::USR2.trap &logging
+  Signal::USR1.trap &log_level_change
+  Signal::USR2.trap &log_level_change
 
-  class Logger < Logger
-    def initialize(module_id : String, logger_io = STDOUT, @protocol = Protocol.instance)
-      super(logger_io)
-      @debugging = false
-      @progname = module_id
-      self.level = Logger::WARN
-      self.formatter = Logger::Formatter.new do |severity, datetime, progname, message, io|
-        # method=DELETE path=/build/drivers%2Faca%2Fspec_helper.cr/ status=200 duration=32.65ms request_id=8a14cef3-15ea-4d2d-ad55-cff5799d4add
+  class ProtocolBackend < ::Log::Backend
+    getter protocol : Protocol
+    getter formatter = PlaceOS::Driver::LOG_FORMATTER
 
-        label = severity.unknown? ? "ANY" : severity.to_s
-        io << String.build do |str|
-          str << "level=" << label << " time="
-          datetime.to_rfc3339(str)
-          str << " progname=" << progname << " message=" << message
-        end
+    property debugging : Bool
+
+    def initialize(@debugging : Bool = false, @protocol = Protocol.instance)
+    end
+
+    def write(entry : ::Log::Entry)
+      if debugging
+        message = format(entry)
+        protocol.request entry.source, "debug", [entry.severity, message]
       end
     end
 
-    @protocol : Protocol
-    property :debugging
+    protected def format(entry : ::Log::Entry) : String
+      output = IO::Memory.new
+      formatter.call(entry, output)
+      output.to_s
+    end
+  end
 
-    def log(severity, message, progname = nil)
-      if @debugging
-        message = message.to_s
-        @protocol.request @progname, "debug", [severity, message]
-      end
-      return if severity < level || !@io
-      write(severity, Time.local, progname || @progname, message)
+  class Log < ::Log
+    getter broadcast_backend : ::Log::BroadcastBackend
+    getter io_backend : ::Log::IOBackend
+    getter protocol_backend : ProtocolBackend
+
+    delegate :debugging=, :debugging, to: protocol_backend
+
+    def initialize(
+      module_id : String,
+      logger_io : IO = ::PlaceOS::Driver.logger_io,
+      @protocol : Protocol = Protocol.instance,
+      severity : ::Log::Severity = ::Log::Severity::Info
+    )
+      # Create a Driver protocol log backend
+      @protocol_backend = ProtocolBackend.new(debugging: false, protocol: @protocol)
+
+      # Create a IO based log backend
+      @io_backend = ::Log::IOBackend.new(logger_io)
+      io_backend.formatter = PlaceOS::Driver::LOG_FORMATTER
+
+      # Combine backends
+      @broadcast_backend = ::Log::BroadcastBackend.new
+      broadcast_backend.append(io_backend, severity)
+      broadcast_backend.append(protocol_backend, severity)
+      super(module_id, broadcast_backend, severity)
     end
 
-    def log(severity, progname = nil)
-      return if !@debugging && (severity < level || !@io)
-      log(severity, yield, progname)
+    def level=(severity : ::Log::Severity)
+      protocol_backend.level = severity
+      io_backend.level = severity
+      broadcast_backend.level = severity
+      super(severity)
     end
   end
 end

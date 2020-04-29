@@ -40,7 +40,7 @@ class PlaceOS::Driver::Settings
       begin
         extract {{klass}}, %json
       rescue ex : TypeCastError
-        logger.error "setting[#{%keys.join("->")}] expected to be type of {{klass}}"
+        logger.error { "setting[#{%keys.join("->")}] expected to be type of {{klass}}" }
         raise ex
       end
     else
@@ -56,7 +56,7 @@ class PlaceOS::Driver::Settings
       begin
         extract {{klass}}, %json
       rescue ex : TypeCastError
-        logger.error "setting[#{%keys.join("->")}] expected to be type of {{klass}}"
+        logger.error { "setting[#{%keys.join("->")}] expected to be type of {{klass}}" }
         raise ex
       end
     else

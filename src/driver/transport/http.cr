@@ -1,6 +1,8 @@
 require "http"
 require "./http_proxy"
 
+require "../transport"
+
 class PlaceOS::Driver
   {% for method in %w(get post put head delete patch options) %}
     # Executes a {{method.id.upcase}} request on the client connection.
@@ -112,7 +114,6 @@ class PlaceOS::Driver
     # timeouts in seconds
     def initialize(@queue : PlaceOS::Driver::Queue, uri_base : String, @settings : ::PlaceOS::Driver::Settings)
       @terminated = false
-      @logger = @queue.logger
       @tls = new_tls_context
       @uri_base = URI.parse(uri_base)
       @http_client_mutex = Mutex.new
@@ -129,12 +130,10 @@ class PlaceOS::Driver
     end
 
     @params_base : Hash(String, String?)
-    @logger : ::Logger
     @tls : OpenSSL::SSL::Context::Client
     @client : HTTP::Client
 
     property :received
-    getter :logger
 
     def connect(connect_timeout : Int32 = 10) : Nil
       return if @terminated
@@ -161,6 +160,7 @@ class PlaceOS::Driver
       end
     end
 
+    # ameba:disable Metrics/CyclomaticComplexity
     def http(method, path, body : ::HTTP::Client::BodyType = nil,
              params : Hash(String, String?) = {} of String => String?,
              headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,

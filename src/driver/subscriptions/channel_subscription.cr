@@ -4,12 +4,12 @@ class PlaceOS::Driver::Subscriptions::ChannelSubscription < PlaceOS::Driver::Sub
   def initialize(@channel : String, &@callback : (ChannelSubscription, String) ->)
   end
 
-  def callback(logger : ::Logger, message : String) : Nil
+  def callback(logger : ::Log, message : String) : Nil
     # Error handling is the responsibility of the callback
     # This is fine as this should only be used internally
     @callback.call(self, message)
   rescue e
-    logger.error "error in subscription callback\n#{e.message}\n#{e.backtrace?.try &.join("\n")}"
+    logger.error { "error in subscription callback\n#{e.message}\n#{e.backtrace?.try &.join("\n")}" }
   end
 
   getter :channel

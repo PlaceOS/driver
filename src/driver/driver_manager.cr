@@ -5,7 +5,7 @@ class PlaceOS::Driver::DriverManager
   def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT, subscriptions = nil)
     subscriptions ||= Subscriptions.new(module_id: @module_id)
     @settings = Settings.new @model.settings
-    @logger = PlaceOS::Driver::Logger.new(@module_id, logger_io)
+    @logger = PlaceOS::Driver::Log.new(@module_id, logger_io)
     @queue = Queue.new(@logger) { |state| connection(state) }
     @schedule = PlaceOS::Driver::Proxy::Scheduler.new(@logger)
     @subscriptions = Proxy::Subscriptions.new(subscriptions)
@@ -84,7 +84,7 @@ class PlaceOS::Driver::DriverManager
       driver.on_load if driver.responds_to?(:on_load)
       driver.__apply_bindings__
     rescue error
-      @logger.error "in the on_load function of #{driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}"
+      logger.error { "in the on_load function of #{driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}" }
     end
 
     if @model.makebreak
@@ -104,7 +104,7 @@ class PlaceOS::Driver::DriverManager
       begin
         driver.on_unload
       rescue error
-        @logger.error "in the on_unload function of #{driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}"
+        logger.error { "in the on_unload function of #{driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}" }
       end
     end
     @requests.close
@@ -120,7 +120,7 @@ class PlaceOS::Driver::DriverManager
     driver = @driver
     driver.on_update if driver.responds_to?(:on_update)
   rescue error
-    @logger.error "during settings update of #{@driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}"
+    logger.error { "during settings update of #{@driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}" }
   end
 
   def execute(json)
@@ -163,16 +163,16 @@ class PlaceOS::Driver::DriverManager
             request.error = outcome.error_class
             request.backtrace = outcome.backtrace
           when :unknown
-            @logger.fatal "unexpected result: #{outcome.state} - #{outcome.payload}, #{outcome.error_class}, #{outcome.backtrace.join("\n")}"
+            logger.fatal { "unexpected result: #{outcome.state} - #{outcome.payload}, #{outcome.error_class}, #{outcome.backtrace.join("\n")}" }
           else
-            @logger.fatal "unexpected result: #{outcome.state}"
+            logger.fatal { "unexpected result: #{outcome.state}" }
           end
         else
           request.payload = result
         end
       rescue error
         msg = "executing #{exec_request} on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}"
-        @logger.error(msg)
+        logger.error { msg }
         request.set_error(error)
       end
     when "update"
@@ -183,7 +183,7 @@ class PlaceOS::Driver::DriverManager
       raise "unexpected request"
     end
   rescue error
-    @logger.fatal("issue processing requests on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}")
+    logger.fatal { "issue processing requests on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}" }
     request.set_error(error)
   end
 
@@ -198,7 +198,7 @@ class PlaceOS::Driver::DriverManager
         driver.disconnected if driver.responds_to?(:disconnected)
       end
     rescue error
-      @logger.warn "error changing connected state #{driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}"
+      logger.warn { "error changing connected state #{driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}" }
     end
   end
 
@@ -207,7 +207,7 @@ class PlaceOS::Driver::DriverManager
     if driver.responds_to? :received
       driver.received(data, task)
     else
-      @logger.warn "no received function provided for #{driver.class} (#{@module_id})"
+      logger.warn { "no received function provided for #{driver.class} (#{@module_id})" }
       task.try &.abort("no received function provided")
     end
   end

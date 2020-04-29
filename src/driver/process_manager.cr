@@ -1,10 +1,16 @@
 require "json"
+require "./logger"
 
 class PlaceOS::Driver::ProcessManager
-  def initialize(@logger_io = STDOUT, @input = STDIN, output = STDERR)
+  Log = ::Log.for("driver.process_manager")
+
+  def initialize(@logger_io = ::PlaceOS::Driver.logger_io, @input = STDIN, output = STDERR)
     @subscriptions = Subscriptions.new(@logger_io)
     @protocol = PlaceOS::Driver::Protocol.new_instance(@input, output)
-    @logger = @subscriptions.logger
+
+    backend = ::Log::IOBackend.new(@logger_io)
+    backend.formatter = PlaceOS::Driver::LOG_FORMATTER
+    ::Log.builder.bind("driver.process_manager", ::Log::Severity::Info, backend)
 
     @loaded = {} of String => DriverManager
 
@@ -22,8 +28,7 @@ class PlaceOS::Driver::ProcessManager
 
   @input : IO
   @logger_io : IO
-  @logger : ::Logger
-  getter :logger, :loaded, terminated
+  getter :loaded, terminated
 
   def start(request : Protocol::Request, driver_model = nil)
     module_id = request.id
@@ -39,7 +44,7 @@ class PlaceOS::Driver::ProcessManager
     request
   rescue error
     # Driver was unable to be loaded.
-    @logger.error "starting driver #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}"
+    Log.error { "starting driver #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}" }
     request.set_error(error)
   end
 
@@ -88,7 +93,7 @@ class PlaceOS::Driver::ProcessManager
       driver.requests.send({promise, request})
       promise.get
     rescue error
-      @logger.error("executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}")
+      Log.error { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}" }
       request.set_error(error)
     end
 
