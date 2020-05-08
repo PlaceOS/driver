@@ -24,17 +24,12 @@ class PlaceOS::Driver
   # Custom backend that writes to a `PlaceOS::Driver::Protocol`
   class ProtocolBackend < ::Log::Backend
     getter protocol : Protocol
-    getter formatter = PlaceOS::Driver::LOG_FORMATTER
 
-    property debugging : Bool
-
-    def initialize(@debugging : Bool = false, @protocol = Protocol.instance)
+    def initialize(@protocol = Protocol.instance)
     end
 
     def write(entry : ::Log::Entry)
-      if debugging
-        protocol.request entry.source, "debug", [entry.severity, entry.message]
-      end
+      protocol.request entry.source, "debug", [entry.severity, entry.message]
     end
   end
 
@@ -43,11 +38,10 @@ class PlaceOS::Driver
     getter broadcast_backend : ::Log::BroadcastBackend
     getter io_backend : ::Log::IOBackend
     getter protocol_backend : ProtocolBackend
-
-    delegate :debugging, to: protocol_backend
+    getter debugging : Bool
 
     def debugging=(value : Bool)
-      @protocol_backend.debugging = value
+      @debugging = value
 
       # Don't worry it's not really an append, it's updating a hash with the
       # backend as the key, so this is a clean update
@@ -61,8 +55,10 @@ class PlaceOS::Driver
       @protocol : Protocol = Protocol.instance,
       severity : ::Log::Severity = ::Log::Severity::Info
     )
+      @debugging = false
+
       # Create a Driver protocol log backend
-      @protocol_backend = ProtocolBackend.new(debugging: false, protocol: @protocol)
+      @protocol_backend = ProtocolBackend.new(protocol: @protocol)
 
       # Create a IO based log backend
       @io_backend = ::Log::IOBackend.new(logger_io)
