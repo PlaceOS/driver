@@ -52,7 +52,7 @@ class PlaceOS::Driver::Proxy::Drivers
   end
 
   class Responses
-    def initialize(@results : Array(Concurrent::Future(JSON::Any)))
+    def initialize(@results : Array(::Future::Compute(JSON::Any)))
     end
 
     @computed : Array(JSON::Any)?
