@@ -55,7 +55,7 @@ describe PlaceOS::Driver::Protocol::Management do
       "implemented_in_base_class": {}
     }))
 
-    logged.should eq(%([1,"testing info message"]))
+    logged.should eq(%([2,"testing info message"]))
 
     manager.info.should eq(["mod-management-test"])
 

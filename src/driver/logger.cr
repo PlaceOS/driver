@@ -33,15 +33,8 @@ class PlaceOS::Driver
 
     def write(entry : ::Log::Entry)
       if debugging
-        message = format(entry)
-        protocol.request entry.source, "debug", [entry.severity, message]
+        protocol.request entry.source, "debug", [entry.severity, entry.message]
       end
-    end
-
-    protected def format(entry : ::Log::Entry) : String
-      output = IO::Memory.new
-      formatter.call(entry, output)
-      output.to_s
     end
   end
 
@@ -51,7 +44,16 @@ class PlaceOS::Driver
     getter io_backend : ::Log::IOBackend
     getter protocol_backend : ProtocolBackend
 
-    delegate :debugging=, :debugging, to: protocol_backend
+    delegate :debugging, to: protocol_backend
+
+    def debugging=(value : Bool)
+      @protocol_backend.debugging = value
+
+      # Don't worry it's not really an append, it's updating a hash with the
+      # backend as the key, so this is a clean update
+      @broadcast_backend.append(@protocol_backend, value ? ::Log::Severity::Debug : ::Log::Severity::None)
+      self.level = value ? ::Log::Severity::Debug : ::Log::Severity::Info
+    end
 
     def initialize(
       module_id : String,
@@ -64,20 +66,23 @@ class PlaceOS::Driver
 
       # Create a IO based log backend
       @io_backend = ::Log::IOBackend.new(logger_io)
-      io_backend.formatter = PlaceOS::Driver::LOG_FORMATTER
+      @io_backend.formatter = PlaceOS::Driver::LOG_FORMATTER
 
       # Combine backends
       @broadcast_backend = ::Log::BroadcastBackend.new
       broadcast_backend.append(io_backend, severity)
-      broadcast_backend.append(protocol_backend, severity)
+      broadcast_backend.append(protocol_backend, ::Log::Severity::None)
       super(module_id, broadcast_backend, severity)
+
+      # NOTE:: if broadcast level is set then it overrides the backend severity levels
+      @broadcast_backend.level = nil
     end
 
     def level=(severity : ::Log::Severity)
-      protocol_backend.level = severity
-      io_backend.level = severity
-      broadcast_backend.level = severity
       super(severity)
+
+      # NOTE:: if broadcast level is set then it overrides the backend severity levels
+      @broadcast_backend.level = nil
     end
   end
 end
