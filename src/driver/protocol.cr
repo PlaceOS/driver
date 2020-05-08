@@ -168,7 +168,13 @@ class PlaceOS::Driver::Protocol
       req.payload = raw ? payload.to_s : payload.to_json
     end
     Log.debug { "protocol queuing request: #{req.inspect}" }
-    @producer.send({req, nil})
+
+    begin
+      @producer.send({req, nil})
+    rescue ::Channel::ClosedError
+      # This occurs on shutdown and can be ignored
+    end
+
     req
   end
 

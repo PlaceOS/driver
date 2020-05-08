@@ -1,3 +1,4 @@
+require "log"
 require "debug"
 require "socket"
 require "promise"
@@ -40,6 +41,9 @@ class DriverSpecs
     exited = false
     exit_code = -1
     pid = -1
+
+    # Configure logging
+    ::Log.builder.bind "*", :debug, ::Log::IOBackend.new
 
     # Ensure the system lookup is not in place
     storage = PlaceOS::Driver::Storage.new(SYSTEM_ID, "system")

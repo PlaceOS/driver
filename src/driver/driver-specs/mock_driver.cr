@@ -1,3 +1,4 @@
+require "log"
 require "../core_ext"
 require "../storage"
 require "../status"
@@ -6,6 +7,8 @@ require "./status_helper"
 class DriverSpecs; end
 
 abstract class DriverSpecs::MockDriver
+  Log = ::Log.for("mock")
+
   abstract class BaseExecutor
     def initialize(json : String)
       @lookup = Hash(String, JSON::Any).from_json(json)
@@ -21,7 +24,6 @@ abstract class DriverSpecs::MockDriver
   def initialize(@module_id : String)
     @__storage__ = PlaceOS::Driver::Storage.new(module_id)
     @__status__ = PlaceOS::Driver::Status.new
-    @__logger__ = PlaceOS::Driver::Log.new(@module_id, STDOUT, ::Log::Severity::Debug)
 
     __init__
   end
@@ -43,7 +45,7 @@ abstract class DriverSpecs::MockDriver
   end
 
   def logger
-    @__logger__
+    ::DriverSpecs::MockDriver::Log
   end
 
   def []=(key, value)
@@ -54,11 +56,11 @@ abstract class DriverSpecs::MockDriver
       # ensures that setting a key and then reading it back as the next
       # operation will always result in the expected value
       @__storage__[key] = json_data
-      @__logger__.debug { "status updated: #{key} = #{value}" }
+      logger.debug { "status updated: #{key} = #{value}" }
     else
       # We still update the state in mocks as this could have been modified outside
       @__storage__[key] = json_data
-      @__logger__.debug { "no change for: #{key} = #{value}" }
+      logger.debug { "no change for: #{key} = #{value}" }
     end
     value
   end
