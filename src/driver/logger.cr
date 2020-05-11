@@ -1,10 +1,9 @@
-require "action-controller/logger"
 require "log_helper"
 
-class PlaceOS::Driver
-  class_property logger_io : IO = STDOUT
-  LOG_FORMATTER = ActionController.default_formatter
+require "./constants"
+require "./logger_io"
 
+class PlaceOS::Driver
   # Allow signals to change the log level at run-time
   log_level_change = Proc(Signal, Nil).new do |signal|
     level = signal.usr1? ? ::Log::Severity::Debug : ::Log::Severity::Info
