@@ -1,7 +1,9 @@
-require "action-controller/logger"
 require "log_helper"
 require "redis"
 require "simple_retry"
+
+require "./constants"
+require "./logger_io"
 
 # TODO:: we need to be scheduling these onto the correct thread
 class PlaceOS::Driver::Subscriptions
@@ -14,7 +16,7 @@ class PlaceOS::Driver::Subscriptions
 
     # Note: formatter set globally via PlaceOS::Driver::LOG_FORMATTER
     #       this change is to prevent the Driver::Log bleeding into other namespaces
-    backend.formatter = ActionController.default_formatter
+    backend.formatter = PlaceOS::Driver::LOG_FORMATTER
     ::Log.builder.bind("driver.subscriptions", ::Log::Severity::Info, backend)
 
     # Mutex for indirect subscriptions as it involves two hashes, a redis lookup
