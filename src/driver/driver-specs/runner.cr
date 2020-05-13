@@ -284,7 +284,7 @@ class DriverSpecs
                 @io.flush
               end
             else
-              puts "unexpected command in driver-runner server"
+              puts "ignoring command #{request.cmd} in driver-runner server"
             end
           end
         rescue error
