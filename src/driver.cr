@@ -271,6 +271,10 @@ abstract class PlaceOS::Driver
             {% end %}
 
             case ret_val
+            when Array(::Log::Entry)
+              ret_val.map(&.message).to_json
+            when ::Log::Entry
+              ret_val.message.to_json
             when Task
               ret_val
             when Enum
