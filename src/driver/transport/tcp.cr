@@ -58,7 +58,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
     # Start consuming data from the socket
     spawn(same_thread: true) { consume_io }
   rescue error
-    logger.info { "connecting to device\n#{error.inspect_with_backtrace}" }
+    logger.info(exception: error) { "connecting to device" }
     @queue.online = false
     raise error
   end
@@ -122,7 +122,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
     end
   rescue IO::Error
   rescue error
-    logger.error { "error consuming IO\n#{error.inspect_with_backtrace}" }
+    logger.error(exception: error) { "error consuming IO" }
   ensure
     if !@makebreak
       @queue.online = false

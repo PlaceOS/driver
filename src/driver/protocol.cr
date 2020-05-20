@@ -269,7 +269,7 @@ class PlaceOS::Driver::Protocol
           Log.debug { "protocol queuing #{string}" }
           @processor.send Request.from_json(string)
         rescue error
-          Log.warn { "error parsing request #{string.inspect}\n#{error.inspect_with_backtrace}" }
+          Log.warn(exception: error) { "error parsing request #{string.inspect}" }
         end
       end
     end

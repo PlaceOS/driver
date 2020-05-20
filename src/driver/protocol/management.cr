@@ -387,13 +387,13 @@ class PlaceOS::Driver::Protocol::Management
           request = Request.from_json(string)
           spawn(same_thread: true) { process(request) }
         rescue error
-          Log.warn { "error parsing request #{string.inspect}\n#{error.inspect_with_backtrace}" }
+          Log.warn(exception: error) { "error parsing request #{string.inspect}" }
         end
       end
     end
   rescue error : IO::Error
     # Input stream closed. This should only occur on termination
-    Log.debug { "comms closed for #{@driver_path}\n#{error.inspect_with_backtrace}" }
+    Log.debug(exception: error) { "comms closed for #{@driver_path}" }
   ensure
     # Reject any pending request
     temp_reqs = @request_lock.synchronize do
@@ -447,6 +447,6 @@ class PlaceOS::Driver::Protocol::Management
       Log.warn { "received unknown request #{request.cmd} - #{request.inspect}" }
     end
   rescue error
-    Log.warn { "error processing driver request #{request.inspect}\n#{error.inspect_with_backtrace}" }
+    Log.warn(exception: error) { "error processing driver request #{request.inspect}" }
   end
 end

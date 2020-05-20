@@ -125,7 +125,7 @@ abstract class PlaceOS::Driver::Transport
           tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
         end
       rescue error
-        Log.warn { "issue configuring verify mode\n#{error.inspect_with_backtrace}" }
+        Log.warn(exception: error) { "issue configuring verify mode" }
         tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
       end
     end
@@ -144,7 +144,7 @@ abstract class PlaceOS::Driver::Transport
       process_message(data)
     end
   rescue error
-    Log.error { "error processing data\n#{error.inspect_with_backtrace}" }
+    Log.error(exception: error) { "error processing data" }
   end
 
   private def process_message(data)
@@ -164,6 +164,6 @@ abstract class PlaceOS::Driver::Transport
     # See spec for how this callback is expected to be used
     @received.call(data, task)
   rescue error
-    Log.error { "error processing received data\n#{error.inspect_with_backtrace}" }
+    Log.error(exception: error) { "error processing received data" }
   end
 end

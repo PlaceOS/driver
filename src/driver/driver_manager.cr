@@ -84,7 +84,7 @@ class PlaceOS::Driver::DriverManager
       driver.on_load if driver.responds_to?(:on_load)
       driver.__apply_bindings__
     rescue error
-      logger.error { "in the on_load function of #{driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}" }
+      logger.error(exception: error) { "in the on_load function of #{driver.class} (#{@module_id})" }
     end
 
     if @model.makebreak
@@ -104,7 +104,7 @@ class PlaceOS::Driver::DriverManager
       begin
         driver.on_unload
       rescue error
-        logger.error { "in the on_unload function of #{driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}" }
+        logger.error(exception: error) { "in the on_unload function of #{driver.class} (#{@module_id})" }
       end
     end
     @requests.close
@@ -120,7 +120,7 @@ class PlaceOS::Driver::DriverManager
     driver = @driver
     driver.on_update if driver.responds_to?(:on_update)
   rescue error
-    logger.error { "during settings update of #{@driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}" }
+    logger.error(exception: error) { "during settings update of #{@driver.class} (#{@module_id})" }
   end
 
   def execute(json)
@@ -171,8 +171,7 @@ class PlaceOS::Driver::DriverManager
           request.payload = result
         end
       rescue error
-        msg = "executing #{exec_request} on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}"
-        logger.error { msg }
+        logger.error(exception: error) { "executing #{exec_request} on #{DriverManager.driver_class} (#{request.id})" }
         request.set_error(error)
       end
     when "update"
@@ -183,7 +182,7 @@ class PlaceOS::Driver::DriverManager
       raise "unexpected request"
     end
   rescue error
-    logger.fatal { "issue processing requests on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}" }
+    logger.fatal(exception: error) { "issue processing requests on #{DriverManager.driver_class} (#{request.id})" }
     request.set_error(error)
   end
 
@@ -198,7 +197,7 @@ class PlaceOS::Driver::DriverManager
         driver.disconnected if driver.responds_to?(:disconnected)
       end
     rescue error
-      logger.warn { "error changing connected state #{driver.class} (#{@module_id})\n#{error.inspect_with_backtrace}" }
+      logger.warn(exception: error) { "error changing connected state #{driver.class} (#{@module_id})" }
     end
   end
 

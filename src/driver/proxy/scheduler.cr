@@ -100,7 +100,7 @@ class PlaceOS::Driver::Proxy::Scheduler
   private def run_now(block)
     block.call
   rescue error
-    logger.error { "in scheduled task on #{DriverManager.driver_class}\n#{error.inspect_with_backtrace}" }
+    logger.error(exception: error) { "in scheduled task on #{DriverManager.driver_class}" }
     raise error
   end
 end

@@ -180,7 +180,7 @@ abstract class DriverSpecs::MockDriver
               begin
                 ret_val.try_to_json("null")
               rescue error
-                klass.logger.info { "unable to convert result to json executing #{{{method.name.stringify}}} on #{klass.class}\n#{error.inspect_with_backtrace}" }
+                klass.logger.info(exception: error) { "unable to convert result to json executing #{{{method.name.stringify}}} on #{klass.class}" }
                 "null"
               end
             end

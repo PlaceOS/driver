@@ -128,7 +128,7 @@ class PlaceOS::Driver::Proxy::Driver
         if error = result.error
           backtrace = result.backtrace || [] of String
           exception = PlaceOS::Driver::RemoteException.new(result.payload, error, backtrace)
-          @system.logger.warn { "#{exception.message}\n#{exception.backtrace?.try &.join("\n")}" }
+          @system.logger.warn(exception: exception) { exception.message }
           raise exception
         else
           JSON.parse(result.payload.not_nil!)
