@@ -168,7 +168,7 @@ class PlaceOS::Driver::Subscriptions
 
         raise "no subscriptions, restarting loop" unless @terminated
       rescue e
-        Log.warn { "redis subscription loop exited\n#{e.message}\n#{e.backtrace?.try &.join("\n")}" }
+        Log.warn(exception: e) { "redis subscription loop exited" }
         raise e
       ensure
         wait.close

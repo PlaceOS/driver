@@ -9,7 +9,7 @@ class PlaceOS::Driver::Subscriptions::ChannelSubscription < PlaceOS::Driver::Sub
     # This is fine as this should only be used internally
     @callback.call(self, message)
   rescue e
-    logger.error { "error in subscription callback\n#{e.message}\n#{e.backtrace?.try &.join("\n")}" }
+    logger.error(exception: e) { "error in subscription callback" }
   end
 
   getter :channel

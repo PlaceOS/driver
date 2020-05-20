@@ -65,7 +65,7 @@ class PlaceOS::Driver::Task
     end
     self
   rescue error
-    logger.error { "error executing task #{@name}\n#{error.inspect_with_backtrace}" }
+    logger.error(exception: error) { "error executing task #{@name}" }
     @state = :exception
     @payload = error.message || "error executing task"
     @backtrace = error.backtrace? || DEFAULT_BACKTR
@@ -107,7 +107,7 @@ class PlaceOS::Driver::Task
       begin
         @payload = result.try_to_json("null")
       rescue e
-        logger.warn { "unable to convert result to JSON\n#{e.message}\n#{e.backtrace?.try &.join("\n")}" }
+        logger.warn(exception: e) { "unable to convert result to JSON" }
       end
     end
 

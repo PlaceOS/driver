@@ -130,7 +130,7 @@ class PlaceOS::Driver::Proxy::System
       begin
         callback.call(subscription, "ready")
       rescue error
-        logger.error { "error in subscription callback\n#{error.inspect_with_backtrace}" }
+        logger.error(exception: error) { "error in subscription callback" }
       end
     end
 

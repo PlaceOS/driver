@@ -81,13 +81,39 @@ class PlaceOS::Driver
           # Attempt to authenticate
           supported_methods = session.login_with_noauth(settings.username)
           if supported_methods
-            if password = settings.password
-              session.login(settings.username, password)
-            end
+            if supported_methods.is_a?(Array(String))
+              logger.debug { "supported auhentication methods: #{supported_methods}" }
 
-            if prikey = settings.private_key
-              pubkey = settings.public_key.not_nil!
-              session.login_with_data(settings.username, prikey, pubkey, settings.passphrase.try &.to_slice.to_unsafe)
+              supported_methods.each do |auth_method|
+                case auth_method
+                when "publickey"
+                  if prikey = settings.private_key
+                    pubkey = settings.public_key.not_nil!
+                    session.login_with_data(settings.username, prikey, pubkey, settings.passphrase.try &.to_slice.to_unsafe)
+                  else
+                    logger.debug { "ignoring publickey authentication as no key provided" }
+                  end
+                when "password"
+                  if password = settings.password
+                    session.login(settings.username, password)
+                  else
+                    logger.debug { "ignoring password authentication as no password provided" }
+                  end
+                else
+                  logger.debug { "ignoring unsupported authentication method: #{auth_method}" }
+                end
+
+                break if session.authenticated?
+              end
+            else
+              if password = settings.password
+                session.login(settings.username, password)
+              end
+
+              if !session.authenticated? && (prikey = settings.private_key)
+                pubkey = settings.public_key.not_nil!
+                session.login_with_data(settings.username, prikey, pubkey, settings.passphrase.try &.to_slice.to_unsafe)
+              end
             end
           end
 
@@ -109,7 +135,7 @@ class PlaceOS::Driver
               shell.close
               @shell = nil
             end
-            logger.warn { "unable to negotiage a shell on SSH connection\n#{error.inspect_with_backtrace}" }
+            logger.warn(exception: error) { "unable to negotiage a shell on SSH connection" }
           end
 
           # This will track the socket state when there is no shell
@@ -118,9 +144,9 @@ class PlaceOS::Driver
           # Enable queuing
           @queue.online = true
         rescue error
-          logger.info {
+          logger.info(exception: error) {
             supported_methods = ", supported authentication methods: #{supported_methods}" if supported_methods
-            "connecting to device#{supported_methods}\n#{error.inspect_with_backtrace}"
+            "connecting to device#{supported_methods}"
           }
           @queue.online = false
           raise error
@@ -198,7 +224,7 @@ class PlaceOS::Driver
       end
     rescue IO::Error | SSH2::SessionError
     rescue error
-      logger.error { "error consuming IO\n#{error.inspect_with_backtrace}" }
+      logger.error(exception: error) { "error consuming IO" }
     ensure
       disconnect
       @queue.online = false

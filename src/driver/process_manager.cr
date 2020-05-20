@@ -44,7 +44,7 @@ class PlaceOS::Driver::ProcessManager
     request
   rescue error
     # Driver was unable to be loaded.
-    Log.error { "starting driver #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}" }
+    Log.error(exception: error) { "starting driver #{DriverManager.driver_class} (#{request.id})" }
     request.set_error(error)
   end
 
@@ -93,7 +93,7 @@ class PlaceOS::Driver::ProcessManager
       driver.requests.send({promise, request})
       promise.get
     rescue error
-      Log.error { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})\n#{error.inspect_with_backtrace}" }
+      Log.error(exception: error) { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})" }
       request.set_error(error)
     end
 

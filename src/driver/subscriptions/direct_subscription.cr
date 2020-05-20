@@ -10,7 +10,7 @@ class PlaceOS::Driver::Subscriptions::DirectSubscription < PlaceOS::Driver::Subs
     # This is fine as this should only be used internally
     @callback.call(self, message)
   rescue e
-    logger.error { "error in subscription callback\n#{e.message}\n#{e.backtrace?.try &.join("\n")}" }
+    logger.error(exception: e) { "error in subscription callback" }
   end
 
   getter :module_id, :status
