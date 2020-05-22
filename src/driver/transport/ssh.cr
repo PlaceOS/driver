@@ -88,16 +88,34 @@ class PlaceOS::Driver
                 case auth_method
                 when "publickey"
                   if prikey = settings.private_key
-                    pubkey = settings.public_key.not_nil!
-                    session.login_with_data(settings.username, prikey, pubkey, settings.passphrase.try &.to_slice.to_unsafe)
+                    begin
+                      pubkey = settings.public_key.not_nil!
+                      session.login_with_data(settings.username, prikey, pubkey, settings.passphrase.try &.to_slice.to_unsafe)
+                    rescue SSH2::SessionError
+                      logger.warn { "publickey auth failed, incorrect key" }
+                    end
                   else
                     logger.debug { "ignoring publickey authentication as no key provided" }
                   end
                 when "password"
                   if password = settings.password
-                    session.login(settings.username, password)
+                    begin
+                      session.login(settings.username, password)
+                    rescue SSH2::SessionError
+                      logger.warn { "password auth failed, incorrect password" }
+                    end
                   else
                     logger.debug { "ignoring password authentication as no password provided" }
+                  end
+                when "keyboard-interactive"
+                  if password = settings.password
+                    begin
+                      session.interactive_login(settings.username) { password.not_nil! }
+                    rescue SSH2::SessionError
+                      logger.warn { "password auth failed, incorrect password" }
+                    end
+                  else
+                    logger.debug { "ignoring keyboard-interactive authentication as no password provided" }
                   end
                 else
                   logger.debug { "ignoring unsupported authentication method: #{auth_method}" }
@@ -107,12 +125,24 @@ class PlaceOS::Driver
               end
             else
               if password = settings.password
-                session.login(settings.username, password)
+                begin
+                  session.login(settings.username, password)
+                rescue error : SSH2::SessionError
+                  begin
+                    session.interactive_login(settings.username) { password.not_nil! }
+                  rescue SSH2::SessionError
+                    logger.warn { "password auth failed, either not supported or incorrect password" }
+                  end
+                end
               end
 
               if !session.authenticated? && (prikey = settings.private_key)
-                pubkey = settings.public_key.not_nil!
-                session.login_with_data(settings.username, prikey, pubkey, settings.passphrase.try &.to_slice.to_unsafe)
+                begin
+                  pubkey = settings.public_key.not_nil!
+                  session.login_with_data(settings.username, prikey, pubkey, settings.passphrase.try &.to_slice.to_unsafe)
+                rescue SSH2::SessionError
+                  logger.warn { "publickey auth failed, either not supported or incorrect key" }
+                end
               end
             end
           end
