@@ -1,6 +1,6 @@
 require "option_parser"
 
-require "./driver/logger"
+require "./placeos-driver/logger"
 
 abstract class PlaceOS::Driver
   module Proxy
@@ -379,11 +379,11 @@ abstract class PlaceOS::Driver
   end
 end
 
-require "./driver/*"
-require "./driver/proxy/*"
-require "./driver/subscriptions/*"
-require "./driver/transport/*"
-require "./driver/utilities/*"
+require "./placeos-driver/*"
+require "./placeos-driver/proxy/*"
+require "./placeos-driver/subscriptions/*"
+require "./placeos-driver/transport/*"
+require "./placeos-driver/utilities/*"
 
 macro finished
   exec_process_manager = false

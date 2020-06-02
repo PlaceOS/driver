@@ -1,5 +1,5 @@
 require "./helper"
-require "../src/driver/driver-specs/runner"
+require "../src/placeos-driver/driver-specs/runner"
 
 describe DriverSpecs do
   it "should be able to load a compiled driver for mocking" do

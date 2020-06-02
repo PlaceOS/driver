@@ -1,5 +1,5 @@
 require "./helper"
-require "../src/driver/protocol/management"
+require "../src/placeos-driver/protocol/management"
 
 describe PlaceOS::Driver::Protocol::Management do
   it "should launch and manage an placeos driver process" do
