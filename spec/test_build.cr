@@ -1,4 +1,4 @@
-require "../src/driver"
+require "../src/placeos-driver"
 require "promise"
 
 class Helper
