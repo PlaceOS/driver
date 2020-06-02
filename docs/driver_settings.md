@@ -1,7 +1,7 @@
 # Driver Settings
 
 Driver settings are stored as JSON so values need to be extracted into typed variables.
-There are helpers in `./src/driver.cr` that simplify extracting types
+There are helpers in `./src/placeos-driver.cr` that simplify extracting types
 
 
 ## Extracting Settings

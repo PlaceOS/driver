@@ -2,8 +2,8 @@
 
 Handled by
 
-* Command line parser: `./src/driver.cr`
-* Discovery and Metadata: `./src/driver/utilities/discovery.cr`
+* Command line parser: `./src/placeos-driver.cr`
+* Discovery and Metadata: `./src/placeos-driver/utilities/discovery.cr`
 
 
 ## Discovery and Defaults

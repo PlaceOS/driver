@@ -12,7 +12,7 @@ A simple overview of how the system coordinates actions and where data is stored
 
 So HSET "system/system_id", "Display/3" => driver_id
 
-* Use the existing helper at `require "driver/storage"`
+* Use the existing helper at `require "placeos-driver/storage"`
 
 ```crystal
 status = PlaceOS::Driver::Storage.new(system_id, prefix: "system")
@@ -31,7 +31,7 @@ system["#{module_name}/#{index}"] => "module_id" / raise KeyError.new("not found
 
 So HSET "status/module_id", "power" => true / false
 
-* Use the existing helper at `require "driver/storage"`
+* Use the existing helper at `require "placeos-driver/storage"`
 
 ```crystal
 status = PlaceOS::Driver::Storage.new(module_id)
@@ -42,7 +42,7 @@ status["power"] => true / false / raise KeyError.new("not found")
 
 ### Monitor the status of a driver
 
-* Use `require "driver/proxy/subscriptions"` to monitor subscriptions for each websocket connection
+* Use `require "placeos-driver/proxy/subscriptions"` to monitor subscriptions for each websocket connection
 * Always use system ID, module name (i.e. Display_1) and status name to subscribe
 
 This is an indirect subscription, allowing seamless module re-ordering without re-subscription.
@@ -125,7 +125,7 @@ Should perform the following operations:
 5. Build system hashes in redis (consistent hash of system id == instance in charge of building that data structure)
 5. Start modules on those drivers (once all drivers are running)
    * See `core_control_protocol.md`
-   * Also `driver/engine-specs/runner.cr`
+   * Also `placeos-driver/engine-specs/runner.cr`
 6. Mark self as ready
 7. Once all Engine Core instances are ready, engine core leader to signal system ready
    * Use a channel called `system`

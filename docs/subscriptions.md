@@ -13,12 +13,12 @@ The main complexity is then tracking indirect subscriptions.
 
 Every time a change of state occurs in redis, an event is fired:
 
-* event path: `status/module_id/status_name` this is fired in `./src/storage.cr`
+* event path: `status/module_id/status_name` this is fired in `./src/placeos-driver/storage.cr`
 
-Subscriptions are made to redis and monitored in the `./src/subscriptions.cr`
+Subscriptions are made to redis and monitored in the `./src/placeos-driver/subscriptions.cr`
 
-* Each driver instance has it's own collection of subscriptions, tracked by `./src/proxy/subscriptions`
-* The keys that map to actual status variables are stored in `./src/subscriptions/*` along with the callbacks
+* Each driver instance has it's own collection of subscriptions, tracked by `./src/placeos-driver/proxy/subscriptions`
+* The keys that map to actual status variables are stored in `./src/placeos-driver/subscriptions/*` along with the callbacks
 
 
 ### Indirect Subscription
@@ -41,6 +41,6 @@ Every time a change in system state occurs:
 There is a special event that occurs when a system updated occurs.
 
 * Event name: `lookup-change` which passes a system id.
-* This triggers `def remap_indirect` in `./src/subscriptions.cr`
+* This triggers `def remap_indirect` in `./src/placeos-driver/subscriptions.cr`
 
 The `lookup-change` event is fired by the Triggers micro-service
