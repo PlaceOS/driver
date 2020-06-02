@@ -124,6 +124,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
   rescue error
     logger.error(exception: error) { "error consuming IO" }
   ensure
+    disconnect
     if !@makebreak
       @queue.online = false
       connect
