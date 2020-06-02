@@ -18,7 +18,7 @@ class PlaceOS::Driver::Queue
   getter logger : ::Log
   getter current : Task? = nil
   getter previous : Task? = nil
-  getter online : Bool = false
+  @online : Bool? = nil
 
   # for modifying defaults
   property priority : Int32 = 50
@@ -35,6 +35,10 @@ class PlaceOS::Driver::Queue
     if @online && @waiting && @queue.size > 0
       spawn(same_thread: true) { @channel.send nil }
     end
+  end
+
+  def online : Bool
+    @online == true
   end
 
   # removes all jobs currently in the queue
