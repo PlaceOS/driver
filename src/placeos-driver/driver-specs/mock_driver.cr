@@ -254,7 +254,7 @@ abstract class DriverSpecs::MockDriver
 
     def __init__ : Nil
       @__storage__.clear
-      PlaceOS::Driver::Storage.redis_pool.set("interface/#{@module_id}", KlassExecutor.metadata)
+      PlaceOS::Driver::Storage.redis.set("interface/#{@module_id}", KlassExecutor.metadata)
       on_load
     end
 

@@ -11,7 +11,7 @@ class PlaceOS::Driver::Proxy::System
   )
     @system_id = @model.id
     @system = PlaceOS::Driver::Storage.new(@system_id, "system")
-    @redis = PlaceOS::Driver::Storage.redis_pool
+    @redis = PlaceOS::Driver::Storage.new_redis_client
   end
 
   @system_id : String
