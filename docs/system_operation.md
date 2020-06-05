@@ -129,4 +129,4 @@ Should perform the following operations:
 6. Mark self as ready
 7. Once all Engine Core instances are ready, engine core leader to signal system ready
    * Use a channel called `system`
-   * `PlaceOS::Driver::Storage.redis_pool.publish("engine/system", "ready")`
+   * `PlaceOS::Driver::Storage.with_redis &.publish("engine/system", "ready")`
