@@ -165,6 +165,7 @@ module PlaceOS
         while !subs.running
           sleep 0.1
         end
+
         in_callback = false
         sub_passed = nil
         message_passed = nil
