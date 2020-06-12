@@ -89,6 +89,7 @@ class PlaceOS::Driver
           redis.subscribe [channel]
         end
       end
+
       sub
     end
 
@@ -122,15 +123,13 @@ class PlaceOS::Driver
     end
 
     private def monitor_changes(wait)
-      wait.close
-
       SimpleRetry.try_to(
         base_interval: 1.second,
         max_interval: 5.seconds,
         randomise: 500.milliseconds
       ) do
         begin
-          wait = Channel(Nil).new
+          wait = Channel(Nil).new if wait.closed?
 
           # This will run on redis reconnect
           # We can't have this run in the subscribe block as the subscribe block
@@ -155,7 +154,6 @@ class PlaceOS::Driver
             }
           }
 
-          # NOTE:: The crystal redis subscription API could use a little work.
           # The reason for all the sync and spawns is that the first subscribe
           # requires a block and subsequent ones throw an error with a block.
           # NOTE:: this version of subscribe only supports splat arguments
