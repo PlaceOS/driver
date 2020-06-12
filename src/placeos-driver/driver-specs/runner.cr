@@ -50,7 +50,7 @@ class DriverSpecs
     storage.clear
 
     begin
-      fetch_pid = Promise.new(Int32)
+      fetch_pid = Promise.new(Int64)
 
       # Load the driver (inherit STDOUT for logging)
       # -p is for protocol / process mode - expecting placeos core
