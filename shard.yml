@@ -4,13 +4,14 @@ version: 3.1.0
 dependencies:
   action-controller:
     github: spider-gazelle/action-controller
+    version: ~> 3.1
   connect-proxy:
     github: spider-gazelle/connect-proxy
   debug:
     github: Sija/debug.cr
   hound-dog:
     github: place-labs/hound-dog
-    version: ~> 2.2
+    version: ~> 2.5
   ipaddress:
     github: Sija/ipaddress.cr
   priority-queue:
@@ -21,6 +22,7 @@ dependencies:
     github: jeromegn/protobuf.cr
   redis-cluster:
     github: caspiano/redis-cluster.cr
+    version: ">= 0.8.4"
   simple_retry:
     github: spider-gazelle/simple_retry
   ssh2:
