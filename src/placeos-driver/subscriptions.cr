@@ -84,7 +84,7 @@ class PlaceOS::Driver
         else
           channel_subscriptions = subscriptions[channel] = [] of PlaceOS::Driver::Subscriptions::Subscription
           channel_subscriptions << sub
-          redis.subscribe [channel]
+          subscription_channel.send({true, channel})
         end
       end
 
