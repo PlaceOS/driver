@@ -19,7 +19,7 @@ describe PlaceOS::Driver::Log do
     bytes_read = output.read(raw_data)
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq("mod-123")
-    req_out.payload.should eq(%{[0,"whatwhat"]})
+    req_out.payload.should eq(%{[1,"whatwhat"]})
 
     # However we still don't want them being logged to our regular logs
     (std_out.size > 0).should eq(false)
@@ -30,7 +30,7 @@ describe PlaceOS::Driver::Log do
     bytes_read = output.read(raw_data)
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq("mod-123")
-    req_out.payload.should eq(%{[3,"hello-logs"]})
+    req_out.payload.should eq(%{[4,"hello-logs"]})
 
     (std_out.size > 10).should eq(true)
   end
@@ -61,7 +61,7 @@ describe PlaceOS::Driver::Log do
     bytes_read = output.read(raw_data)
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq("mod-123")
-    req_out.payload.should eq(%{[0,"whatwhat"]})
+    req_out.payload.should eq(%{[1,"whatwhat"]})
 
     # However we still don't want them being logged to our regular logs
     in_block.should eq(true)
@@ -73,7 +73,7 @@ describe PlaceOS::Driver::Log do
     bytes_read = output.read(raw_data)
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq("mod-123")
-    req_out.payload.should eq(%{[3,"hello-logs"]})
+    req_out.payload.should eq(%{[4,"hello-logs"]})
 
     (std_out.size > 10).should eq(true)
   end
