@@ -12,44 +12,45 @@ require "./request"
 class PlaceOS::Driver::Protocol::Management
   Log = ::Log.for("driver.protocol.management")
 
-  def initialize(@driver_path : String)
-    @request_lock = Mutex.new
-    @requests = {} of UInt64 => Promise::DeferredPromise(String)
-    @starting = {} of String => Promise::DeferredPromise(Nil)
-
-    @debug_lock = Mutex.new
-    @debugging = Hash(String, Array(Proc(String, Nil))).new do |hash, key|
-      hash[key] = [] of Proc(String, Nil)
-    end
-
-    @tokenizer = Tokenizer.new(Bytes[0x00, 0x03])
-
-    @last_exit_code = 0
-    @launch_count = 0
-    @launch_time = 0_i64
-    @pid = -1
-
-    @sequence = 1_u64
-    @modules = {} of String => String
-    @terminated = false
-    @events = Channel(Request).new
-    spawn(same_thread: true) { process_events }
-  end
-
   # Core should update this callback to route requests
   property on_exec : Proc(Request, Proc(Request, Nil), Nil) = ->(request : Request, callback : Proc(Request, Nil)) {}
   property on_setting : Proc(String, String, YAML::Any, Nil) = ->(module_id : String, setting_name : String, setting_value : YAML::Any) {}
 
-  getter :terminated, pid
-  getter :last_exit_code, :launch_count, :launch_time
+  getter? terminated = false
+  getter pid : Int64 = -1
+
+  getter last_exit_code : Int32 = 0
+  getter launch_count : Int32 = 0
+  getter launch_time : Int64 = 0
+
+  private getter tokenizer : Tokenizer = Tokenizer.new(Bytes[0x00, 0x03])
+
+  private getter debug_lock : Mutex = Mutex.new
+  private getter request_lock : Mutex = Mutex.new
+
+  private getter modules : Hash(String, String) = {} of String => String
+  private getter events : Channel(Request) = Channel(Request).new
+
   @io : IO::Stapled? = nil
+
+  def initialize(@driver_path : String)
+    @requests = {} of UInt64 => Promise::DeferredPromise(String)
+    @starting = {} of String => Promise::DeferredPromise(Nil)
+
+    @debugging = Hash(String, Array(Proc(String, Nil))).new do |hash, key|
+      hash[key] = [] of Proc(String, Nil)
+    end
+
+    @sequence = 1_u64
+    spawn(same_thread: true) { process_events }
+  end
 
   def running?
     !!@io
   end
 
   def module_instances
-    @modules.size
+    modules.size
   end
 
   def terminate : Nil
@@ -58,7 +59,7 @@ class PlaceOS::Driver::Protocol::Management
 
   def start(module_id : String, payload : String) : Nil
     update = false
-    promise = @request_lock.synchronize do
+    promise = request_lock.synchronize do
       prom = @starting[module_id]?
       # We want to ensure updates make it if they come in while loading
       if prom
@@ -86,10 +87,10 @@ class PlaceOS::Driver::Protocol::Management
   end
 
   def info
-    return [] of String if @terminated
+    return [] of String if terminated?
     promise = Promise.new(String)
 
-    sequence = @request_lock.synchronize do
+    sequence = request_lock.synchronize do
       seq = @sequence
       @sequence = seq &+ 1
       @requests[seq] = promise
@@ -101,10 +102,10 @@ class PlaceOS::Driver::Protocol::Management
   end
 
   def execute(module_id : String, payload : String?) : String
-    raise "module #{module_id} not running, terminated" if @terminated
+    raise "module #{module_id} not running, terminated" if terminated?
     promise = Promise.new(String)
 
-    sequence = @request_lock.synchronize do
+    sequence = request_lock.synchronize do
       seq = @sequence
       @sequence = seq &+ 1
       @requests[seq] = promise
@@ -116,7 +117,7 @@ class PlaceOS::Driver::Protocol::Management
   end
 
   def debug(module_id : String, &callback : (String) -> Nil) : Nil
-    count = @debug_lock.synchronize do
+    count = debug_lock.synchronize do
       array = @debugging[module_id]
       array << callback
       array.size
@@ -128,7 +129,7 @@ class PlaceOS::Driver::Protocol::Management
   end
 
   def ignore(module_id : String, &callback : (String) -> Nil) : Nil
-    signal = @debug_lock.synchronize do
+    signal = debug_lock.synchronize do
       array = @debugging[module_id]
       initial_size = array.size
       array.delete callback
@@ -149,7 +150,7 @@ class PlaceOS::Driver::Protocol::Management
   # ameba:disable Metrics/CyclomaticComplexity
   private def process_events
     loop do
-      return if @terminated
+      return if terminated?
       request = @events.receive
 
       begin
@@ -190,16 +191,16 @@ class PlaceOS::Driver::Protocol::Management
 
   private def start(request : Request) : Nil
     module_id = request.id
-    if @modules[module_id]?
+    if modules[module_id]?
       update(request)
-      starting = @request_lock.synchronize { @starting.delete(module_id) }
+      starting = request_lock.synchronize { @starting.delete(module_id) }
       starting.resolve(nil) if starting
 
       return
     end
 
     payload = request.payload.not_nil!
-    @modules[module_id] = payload
+    modules[module_id] = payload
 
     if io = @io
       json = %({"id":"#{module_id}","cmd":"start","payload":#{payload.to_json}})
@@ -213,10 +214,10 @@ class PlaceOS::Driver::Protocol::Management
 
   private def update(request : Request) : Nil
     module_id = request.id
-    return unless @modules[module_id]?
+    return unless modules[module_id]?
 
     payload = request.payload.not_nil!
-    @modules[module_id] = payload
+    modules[module_id] = payload
     io = @io
     return unless io
 
@@ -228,10 +229,10 @@ class PlaceOS::Driver::Protocol::Management
 
   private def stop(request : Request) : Nil
     module_id = request.id
-    instance = @modules.delete module_id
+    instance = modules.delete module_id
     io = @io
     return unless io && instance
-    return shutdown(false) if @modules.empty?
+    return shutdown(false) if modules.empty?
 
     json = %({"id":"#{module_id}","cmd":"stop"})
     io.write_bytes json.bytesize
@@ -244,7 +245,7 @@ class PlaceOS::Driver::Protocol::Management
     io = @io
     return unless io
 
-    @modules.clear
+    modules.clear
 
     # The driver will shutdown the modules gracefully
     json = %({"id":"t","cmd":"terminate"})
@@ -255,19 +256,19 @@ class PlaceOS::Driver::Protocol::Management
 
   private def exec(module_id : String, payload : String, seq : UInt64) : Nil
     io = @io
-    if io && @modules[module_id]?
+    if io && modules[module_id]?
       json = %({"id":"#{module_id}","cmd":"exec","seq":#{seq},"payload":#{payload.to_json}})
       io.write_bytes json.bytesize
       io.write json.to_slice
       io.flush
-    elsif promise = @request_lock.synchronize { @requests.delete(seq) }
+    elsif promise = request_lock.synchronize { @requests.delete(seq) }
       promise.reject Exception.new("module #{module_id} not running on this host")
     end
   end
 
   private def debug(module_id : String) : Nil
     io = @io
-    return unless io && @modules[module_id]?
+    return unless io && modules[module_id]?
 
     json = %({"id":"#{module_id}","cmd":"debug"})
     io.write_bytes json.bytesize
@@ -277,7 +278,7 @@ class PlaceOS::Driver::Protocol::Management
 
   private def ignore(module_id : String) : Nil
     io = @io
-    return unless io && @modules[module_id]?
+    return unless io && modules[module_id]?
 
     json = %({"id":"#{module_id}","cmd":"ignore"})
     io.write_bytes json.bytesize
@@ -292,14 +293,14 @@ class PlaceOS::Driver::Protocol::Management
       io.write_bytes json.bytesize
       io.write json.to_slice
       io.flush
-    elsif promise = @request_lock.synchronize { @requests.delete(seq) }
+    elsif promise = request_lock.synchronize { @requests.delete(seq) }
       promise.resolve "[]"
     end
   end
 
   # This function
   private def start_process : Nil
-    return if @io || @terminated
+    return if @io || terminated?
 
     stdin_reader, input = IO.pipe
     output, stderr_writer = IO.pipe
@@ -321,7 +322,7 @@ class PlaceOS::Driver::Protocol::Management
     loaded.get
 
     # start the desired instances
-    @modules.each do |module_id, payload|
+    modules.each do |module_id, payload|
       json = %({"id":"#{module_id}","cmd":"start","payload":#{payload.to_json}})
       io.write_bytes json.bytesize
       io.write json.to_slice
@@ -353,8 +354,8 @@ class PlaceOS::Driver::Protocol::Management
   private def relaunch(last_exit_code : String) : Nil
     @io = nil
     @last_exit_code = last_exit_code.to_i
-    return if @terminated
-    start_process unless @modules.empty?
+    return if terminated?
+    start_process unless modules.empty?
   end
 
   MESSAGE_INDICATOR = "\x00\x02"
@@ -372,7 +373,7 @@ class PlaceOS::Driver::Protocol::Management
 
       Log.debug { "manager #{@driver_path} received #{bytes_read}" }
 
-      @tokenizer.extract(raw_data[0, bytes_read]).each do |message|
+      tokenizer.extract(raw_data[0, bytes_read]).each do |message|
         string = nil
         begin
           string = String.new(message[0..-3])
@@ -396,7 +397,7 @@ class PlaceOS::Driver::Protocol::Management
     Log.debug(exception: error) { "comms closed for #{@driver_path}" }
   ensure
     # Reject any pending request
-    temp_reqs = @request_lock.synchronize do
+    temp_reqs = request_lock.synchronize do
       reqs = @requests
       @requests = {} of UInt64 => Promise::DeferredPromise(String)
       reqs
@@ -409,12 +410,12 @@ class PlaceOS::Driver::Protocol::Management
   private def process(request)
     case request.cmd
     when "start"
-      if starting = @request_lock.synchronize { @starting.delete(request.id) }
+      if starting = request_lock.synchronize { @starting.delete(request.id) }
         starting.resolve(nil)
       end
     when "result"
       seq = request.seq.not_nil!
-      if promise = @request_lock.synchronize { @requests.delete(seq) }
+      if promise = request_lock.synchronize { @requests.delete(seq) }
         # determine if the result was a success or an error
         if request.error
           promise.reject request.build_error
@@ -429,11 +430,11 @@ class PlaceOS::Driver::Protocol::Management
     when "debug"
       # pass the unparsed message down the pipe
       payload = request.payload.not_nil!
-      watchers = @debug_lock.synchronize { @debugging[request.id].dup }
+      watchers = debug_lock.synchronize { @debugging[request.id].dup }
       watchers.each { |callback| callback.call(payload) }
     when "exec"
       # need to route this internally to the correct module
-      @on_exec.call(request, ->(response : Request) {
+      on_exec.call(request, ->(response : Request) {
         # The event queue is for sending data to the driver
         response.cmd = "result"
         @events.send(response)
@@ -442,7 +443,7 @@ class PlaceOS::Driver::Protocol::Management
     when "setting"
       mod_id = request.id
       setting_name, setting_value = Tuple(String, YAML::Any).from_yaml(request.payload.not_nil!)
-      @on_setting.call(mod_id, setting_name, setting_value)
+      on_setting.call(mod_id, setting_name, setting_value)
     else
       Log.warn { "received unknown request #{request.cmd} - #{request.inspect}" }
     end

@@ -62,6 +62,6 @@ describe PlaceOS::Driver::Protocol::Management do
     manager.stop("mod-management-test")
     sleep 0.2
     manager.running?.should eq(false)
-    manager.terminated.should eq(false)
+    manager.terminated?.should eq(false)
   end
 end
