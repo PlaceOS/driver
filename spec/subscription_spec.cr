@@ -134,7 +134,7 @@ module PlaceOS
           sub_passed = sub
           message_passed = message
           in_callback = true
-          channel.close
+          channel.send(nil)
         end
 
         # Subscription should not exist yet - i.e. no lookup
@@ -151,7 +151,7 @@ module PlaceOS
 
         # Update the status
         storage["power"] = true
-        channel.receive?
+        channel.receive
 
         subscription.module_id.should eq("mod-12345")
         in_callback.should eq(true)

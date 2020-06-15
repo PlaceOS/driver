@@ -33,6 +33,8 @@ class PlaceOS::Driver
     # Is the subscription terminated
     private property? terminated = false
 
+    private property subscription_channel : Channel(Tuple(Bool, String)) = Channel(Tuple(Bool, String)).new
+
     def initialize(logger_io : IO = ::PlaceOS::Driver.logger_io, module_id : String = "")
       backend = ::Log::IOBackend.new(logger_io)
 
@@ -41,9 +43,7 @@ class PlaceOS::Driver
       backend.formatter = PlaceOS::Driver::LOG_FORMATTER
       ::Log.builder.bind("driver.subscriptions", ::Log::Severity::Info, backend)
 
-      channel = Channel(Nil).new
-      spawn(same_thread: true) { monitor_changes(channel) }
-      channel.receive?
+      spawn(same_thread: true) { monitor_changes }
     end
 
     def terminate(terminate = true) : Nil
@@ -66,12 +66,10 @@ class PlaceOS::Driver
     def subscribe(system_id, module_name, index, status, &callback : (PlaceOS::Driver::Subscriptions::IndirectSubscription, String) ->) : PlaceOS::Driver::Subscriptions::IndirectSubscription
       sub = PlaceOS::Driver::Subscriptions::IndirectSubscription.new(system_id.to_s, module_name.to_s, index.to_i, status.to_s, &callback)
 
-      mutex.synchronize {
-        # Track indirect subscriptions
-        subscriptions = redirections[system_id] ||= [] of PlaceOS::Driver::Subscriptions::IndirectSubscription
-        subscriptions << sub
-        perform_subscribe(sub)
-      }
+      # Track indirect subscriptions
+      subscriptions = redirections[system_id] ||= [] of PlaceOS::Driver::Subscriptions::IndirectSubscription
+      subscriptions << sub
+      perform_subscribe(sub)
 
       sub
     end
@@ -94,24 +92,22 @@ class PlaceOS::Driver
     end
 
     def unsubscribe(subscription : PlaceOS::Driver::Subscriptions::Subscription) : Nil
-      mutex.synchronize {
-        # clean up indirect subscription (if this is one)
-        if redirect = redirections[subscription.system_id]?
-          sub = redirect.delete(subscription)
-          if sub == subscription && redirect.empty?
-            redirections.delete(subscription.system_id)
-          end
+      # clean up indirect subscription (if this is one)
+      if redirect = redirections[subscription.system_id]?
+        sub = redirect.delete(subscription)
+        if sub == subscription && redirect.empty?
+          redirections.delete(subscription.system_id)
         end
+      end
 
-        # clean up subscription tracker
-        channel = subscription.subscribe_to
-        perform_unsubscribe(subscription, channel) if channel
-      }
+      # clean up subscription tracker
+      channel = subscription.subscribe_to
+      perform_unsubscribe(subscription, channel) if channel
     end
 
     private def on_message(channel, message)
       if channel == SYSTEM_ORDER_UPDATE
-        mutex.synchronize { remap_indirect(message) }
+        remap_indirect(message)
       elsif channel_subscriptions = subscriptions[channel]?
         channel_subscriptions.each do |subscription|
           subscription.callback Log, message
@@ -122,36 +118,48 @@ class PlaceOS::Driver
       end
     end
 
-    private def monitor_changes(wait)
+    private def monitor_changes
       SimpleRetry.try_to(
         base_interval: 1.second,
         max_interval: 5.seconds,
         randomise: 500.milliseconds
       ) do
+        wait = Channel(Nil).new
         begin
-          wait = Channel(Nil).new if wait.closed?
-
           # This will run on redis reconnect
           # We can't have this run in the subscribe block as the subscribe block
           # needs to return before we subscribe to further channels
           spawn(same_thread: true) {
             wait.receive?
-            mutex.synchronize {
-              # re-subscribe to existing subscriptions here
-              # NOTE:: sending an empty array errors
-              redis.subscribe(subscriptions.keys) if subscriptions.size > 0
+            # re-subscribe to existing subscriptions here
+            # NOTE:: sending an empty array errors
+            redis.subscribe(subscriptions.keys) if subscriptions.size > 0
 
+            spawn(same_thread: true) {
               # re-check indirect subscriptions
               redirections.each_key do |system_id|
                 remap_indirect(system_id)
               end
-
-              @running = true
-
-              # TODO:: check for any value changes
-              # disconnect might have been a network partition and an update may
-              # have occurred during this time gap
             }
+
+            @running = true
+
+            # TODO:: check for any value changes
+            # disconnect might have been a network partition and an update may
+            # have occurred during this time gap
+
+            loop do
+              if details = subscription_channel.receive?
+                break if details.nil?
+
+                sub, chan = details
+                if sub
+                  redis.subscribe [chan]
+                else
+                  redis.unsubscribe [chan]
+                end
+              end
+            end
           }
 
           # The reason for all the sync and spawns is that the first subscribe
@@ -168,6 +176,9 @@ class PlaceOS::Driver
           raise e
         ensure
           wait.close
+          subscription_channel.close
+          self.subscription_channel = Channel(Tuple(Bool, String)).new
+
           @running = false
 
           # We need to re-create the subscribe object for our sanity
@@ -208,7 +219,7 @@ class PlaceOS::Driver
         else
           channel_subscriptions = subscriptions[channel] = [] of PlaceOS::Driver::Subscriptions::Subscription
           channel_subscriptions << subscription
-          redis.subscribe [channel]
+          subscription_channel.send({true, channel})
         end
 
         # notify of current value
@@ -223,12 +234,12 @@ class PlaceOS::Driver
         sub = channel_subscriptions.delete(subscription)
         if sub == subscription && subscriptions.empty?
           channel_subscriptions.delete(channel)
-          redis.unsubscribe [channel]
+          subscription_channel.send({false, channel})
         end
       end
     end
 
-    @redis_cluster : (Redis | Redis::Cluster::Client)? = nil
+    @redis_cluster : Redis::Client? = nil
     @redis : Redis? = nil
 
     protected def self.new_clustered_redis
@@ -236,15 +247,16 @@ class PlaceOS::Driver
     end
 
     private def redis_cluster
-      @redis_cluster ||= Subscriptions.new_clustered_redis.connect!
+      @redis_cluster_client ||= Subscriptions.new_clustered_redis
     end
 
-    protected def self.new_redis(client : Redis | Redis::Cluster::Client = new_clustered_redis.connect!) : Redis
-      if client.is_a?(Redis::Cluster::Client)
+    protected def self.new_redis(cluster : Redis::Client = new_clustered_redis) : Redis
+      client = new_clustered_redis.connect!
+
+      if client.is_a?(::Redis::Cluster::Client)
         client.cluster_info.each_nodes do |node_info|
           begin
-            new_client = client.new_redis(node_info.addr.host, node_info.addr.port)
-            return new_client
+            return client.new_redis(node_info.addr.host, node_info.addr.port)
           rescue
             # Ignore nodes we cannot connect to
           end
@@ -253,7 +265,8 @@ class PlaceOS::Driver
         # Could not connect to any nodes in cluster
         raise Redis::ConnectionError.new
       else
-        client.as(Redis)
+        cluster.close!
+        cluster.connect!.as(Redis)
       end
     end
 
