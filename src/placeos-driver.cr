@@ -250,6 +250,8 @@ abstract class PlaceOS::Driver
                 {% for arg in args %}
                   {% arg_name = arg.name.stringify %}
 
+                  {% raise "#{@type}##{method.name} argument `#{arg.name}` is missing a type" if arg.restriction.is_a?(Nop) %}
+
                   {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}
                     {% if arg.default_value.is_a?(Nop) %}
                       {{arg.name}}: ({{arg.restriction}}).parse(json[{{arg_name}}].as_s),
