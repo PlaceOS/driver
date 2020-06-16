@@ -121,7 +121,7 @@ class PlaceOS::Driver::Storage < Hash(String, String)
     client = new_redis_client
     client.get(key.to_s)
   ensure
-    client.close
+    client.try &.close
   end
 
   def self.with_redis

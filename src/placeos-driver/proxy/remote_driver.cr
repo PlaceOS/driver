@@ -107,6 +107,7 @@ module PlaceOS::Driver::Proxy
     def metadata? : DriverModel::Metadata?
       return @metadata if @metadata
       if module_id = module_id?
+        # TODO: Pass storage's redis client
         @metadata = Proxy::System.driver_metadata?(module_id)
       end
     end
