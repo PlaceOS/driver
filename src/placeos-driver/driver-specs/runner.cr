@@ -583,7 +583,9 @@ class DriverSpecs
     end
 
     # Signal that the system has changed for any subscriptions
-    PlaceOS::Driver::Storage.redis.publish "lookup-change", SYSTEM_ID
+    PlaceOS::Driver::Storage.with_redis do |redis|
+      redis.publish "lookup-change", SYSTEM_ID
+    end
     sleep 5.milliseconds
     self
   end
