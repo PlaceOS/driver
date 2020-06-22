@@ -24,7 +24,7 @@ describe PlaceOS::Driver::Proxy::System do
           "name": "Tesing System",
           "email": "name@email.com",
           "capacity": 20,
-          "features": "in-house-pc projector",
+          "features": ["in-house-pc","projector"],
           "bookable": true
         }
     ))
@@ -35,7 +35,7 @@ describe PlaceOS::Driver::Proxy::System do
     system.name.should eq("Tesing System")
     system.email.should eq("name@email.com")
     system.capacity.should eq(20)
-    system.features.should eq("in-house-pc projector")
+    system.features.should eq(["in-house-pc", "projector"])
     system.bookable.should eq(true)
 
     system.exists?(:Display_1).should eq(false)
@@ -64,7 +64,7 @@ describe PlaceOS::Driver::Proxy::System do
           "name": "Tesing System",
           "email": "name@email.com",
           "capacity": 20,
-          "features": "in-house-pc projector",
+          "features": ["in-house-pc","projector"],
           "bookable": true
         }
     ))

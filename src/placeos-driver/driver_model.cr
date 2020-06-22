@@ -9,7 +9,7 @@ struct PlaceOS::Driver::DriverModel
     property id : String
     property name : String
     property email : String?
-    property features : String?
+    property features : Array(String)?
     property bookable : Bool
     property display_name : String?
     property code : String?
