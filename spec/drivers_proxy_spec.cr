@@ -9,7 +9,7 @@ module PlaceOS::Driver::Proxy
           "name": "Tesing System",
           "email": "name@email.com",
           "capacity": 20,
-          "features": "in-house-pc projector",
+          "features": ["in-house-pc","projector"],
           "bookable": true
         }
     ))
