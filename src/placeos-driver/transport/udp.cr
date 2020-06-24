@@ -95,6 +95,8 @@ class PlaceOS::Driver::TransportUDP < PlaceOS::Driver::Transport
 
   def disconnect : Nil
     @socket.try &.close
+  rescue error
+    logger.info(exception: error) { "calling disconnect" }
   end
 
   def send(message) : PlaceOS::Driver::TransportUDP
@@ -132,6 +134,7 @@ class PlaceOS::Driver::TransportUDP < PlaceOS::Driver::Transport
   rescue error
     logger.error(exception: error) { "error consuming IO" }
   ensure
+    disconnect
     connect
   end
 end

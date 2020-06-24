@@ -85,6 +85,8 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
 
   def disconnect : Nil
     @socket.try &.close
+  rescue error
+    logger.info(exception: error) { "calling disconnect" }
   end
 
   def send(message) : PlaceOS::Driver::TransportTCP

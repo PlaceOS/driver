@@ -220,6 +220,8 @@ class PlaceOS::Driver
       ensure
         socket.try &.close
       end
+    rescue error
+      logger.info(exception: error) { "calling disconnect" }
     end
 
     def send(message) : TransportSSH

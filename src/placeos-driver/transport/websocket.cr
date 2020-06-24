@@ -77,6 +77,8 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
 
   def disconnect : Nil
     @websocket.try &.close
+  rescue error
+    logger.info(exception: error) { "calling disconnect" }
   end
 
   def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = @tls) : Nil
@@ -135,6 +137,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
   rescue error
     logger.error(exception: error) { "error consuming IO" }
   ensure
+    disconnect
     @queue.online = false
     connect
   end
