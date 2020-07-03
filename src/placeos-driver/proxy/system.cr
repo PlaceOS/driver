@@ -138,11 +138,12 @@ class PlaceOS::Driver::Proxy::System
   end
 
   # Manages subscribing to all the non-local subscriptions
-  def subscribe(module_name, index, status = nil, &callback : (PlaceOS::Driver::Subscriptions::IndirectSubscription, String) -> Nil) : PlaceOS::Driver::Subscriptions::IndirectSubscription
-    if status.nil?
-      status = index
-      module_name, index = get_parts(module_name)
-    end
+  def subscribe(module_name, index, status, &callback : (PlaceOS::Driver::Subscriptions::IndirectSubscription, String) -> Nil) : PlaceOS::Driver::Subscriptions::IndirectSubscription
+    @subscriptions.subscribe(@system_id, module_name, index, status, &callback)
+  end
+
+  def subscribe(module_name, status, &callback : (PlaceOS::Driver::Subscriptions::IndirectSubscription, String) -> Nil) : PlaceOS::Driver::Subscriptions::IndirectSubscription
+    module_name, index = get_parts(module_name)
     @subscriptions.subscribe(@system_id, module_name, index, status, &callback)
   end
 
