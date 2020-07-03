@@ -7,7 +7,7 @@ module PlaceOS::Driver::Utilities::Transcoder
   end
 
   # Converts a byte array into bytes
-  def array_to_bytes(array : Array(Int32 | UInt8)) : Bytes
+  def array_to_bytes(array : Array(Int)) : Bytes
     bytes = Bytes.new(array.size)
     array.each_with_index do |byte, index|
       bytes[index] = 0_u8 | byte
