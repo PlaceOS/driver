@@ -45,7 +45,12 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
 
   private def start_socket(connect_timeout)
     # Grab any pre-defined headers
-    header_hash = @settings.get { setting(Hash(String, String | Array(String))?, :headers) }
+    header_hash = begin
+      @settings.get { setting?(Hash(String, String | Array(String)), :headers) }
+    rescue error
+      logger.info(exception: error) { "loading websocket headers" }
+      nil
+    end
     websocket = if header_hash
                   headers = HTTP::Headers.new
                   header_hash.each do |key, value|
