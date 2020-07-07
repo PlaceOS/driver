@@ -167,8 +167,8 @@ module PlaceOS::Driver::Proxy
     def exec(
       security : Clearance,
       function : String,
-      args : Array(JSON::Any)? = nil,
-      named_args : Hash(String, JSON::Any)? = nil,
+      args = nil,
+      named_args = nil,
       request_id : String? = nil
     ) : String
       metadata = metadata?
