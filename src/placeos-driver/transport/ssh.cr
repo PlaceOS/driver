@@ -185,7 +185,7 @@ class PlaceOS::Driver
     end
 
     def keepalive(period)
-      @keepalive = Tasker.instance.every(period.seconds) do
+      @keepalive = Tasker.every(period.seconds) do
         begin
           @session.try &.send_keepalive
         rescue

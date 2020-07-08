@@ -199,7 +199,7 @@ class PlaceOS::Driver::Protocol
 
     # Ensures all outgoing event processing is done on the same thread
     spawn(same_thread: true) do
-      @timeouts = Tasker.instance.every(timeout_period) do
+      @timeouts = Tasker.every(timeout_period) do
         current_requests = @current_requests.values
         @current_requests = @next_requests
         @next_requests = {} of UInt64 => Request

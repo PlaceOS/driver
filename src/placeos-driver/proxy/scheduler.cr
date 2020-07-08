@@ -31,12 +31,9 @@ class PlaceOS::Driver::Proxy::Scheduler
   getter logger : ::Log
 
   def initialize(@logger = ::Log.for("driver.scheduler"))
-    @scheduler = Tasker.instance
     @schedules = [] of TaskWrapper
     @terminated = false
   end
-
-  @scheduler : Tasker
 
   def size
     @schedules.size
@@ -46,7 +43,7 @@ class PlaceOS::Driver::Proxy::Scheduler
     raise "schedule proxy terminated" if @terminated
     spawn(same_thread: true) { run_now(block) } if immediate
     wrapped = nil
-    task = @scheduler.at(time) do
+    task = Tasker.at(time) do
       @schedules.delete(wrapped.not_nil!)
       run_now(block)
     end
@@ -59,7 +56,7 @@ class PlaceOS::Driver::Proxy::Scheduler
     raise "schedule proxy terminated" if @terminated
     spawn(same_thread: true) { run_now(block) } if immediate
     wrapped = nil
-    task = @scheduler.in(time) do
+    task = Tasker.in(time) do
       @schedules.delete(wrapped.not_nil!)
       run_now(block)
     end
@@ -71,7 +68,7 @@ class PlaceOS::Driver::Proxy::Scheduler
   def every(time, immediate = false, &block : -> _)
     raise "schedule proxy terminated" if @terminated
     spawn(same_thread: true) { run_now(block) } if immediate
-    task = @scheduler.every(time) { run_now(block) }
+    task = Tasker.every(time) { run_now(block) }
     wrap = TaskWrapper.new(task, @schedules)
     @schedules << wrap
     wrap
@@ -80,7 +77,7 @@ class PlaceOS::Driver::Proxy::Scheduler
   def cron(string, immediate = false, &block : -> _)
     raise "schedule proxy terminated" if @terminated
     spawn(same_thread: true) { run_now(block) } if immediate
-    task = @scheduler.every(time) { run_now(block) }
+    task = Tasker.every(time) { run_now(block) }
     wrap = TaskWrapper.new(task, @schedules)
     @schedules << wrap
     wrap

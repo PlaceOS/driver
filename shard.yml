@@ -41,6 +41,7 @@ dependencies:
 
   tasker:
     github: spider-gazelle/tasker
+    version: ~> 2.0
 
   tokenizer:
     github: spider-gazelle/tokenizer

@@ -165,7 +165,7 @@ class PlaceOS::Driver::Task
 
   private def start_timers
     stop_timers if @timer
-    @timer = Tasker.instance.in(@timeout) do
+    @timer = Tasker.in(@timeout) do
       @timer = nil
       self.retry("due to timeout")
     end
