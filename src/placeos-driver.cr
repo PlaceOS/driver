@@ -294,7 +294,7 @@ abstract class PlaceOS::Driver
             end
           end,
         {% end %}
-      }
+      } {% if methods.empty? %} of String => Nil {% end %}
 
       def execute(klass : {{@type.id}}) : Task | String
         json = @lookup[@exec]
