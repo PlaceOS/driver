@@ -87,7 +87,19 @@ class PlaceOS::Driver::Settings
       # support Enum value names
       %klass = {{klass}}
       if %klass.responds_to?(:parse)
-        %klass.parse({{json}}.to_json)
+        value = {{json}}.raw
+        case value
+        when String
+          %klass.parse(value)
+        when Int64
+          if %klass.responds_to?(:from_value)
+            %klass.from_value(value)
+          else
+            %klass.from_json({{json}}.to_json)
+          end
+        else
+          %klass.from_json({{json}}.to_json)
+        end
       else
         %klass.from_json({{json}}.to_json)
       end
