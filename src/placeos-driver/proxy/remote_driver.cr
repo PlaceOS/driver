@@ -254,7 +254,8 @@ module PlaceOS::Driver::Proxy
     # Extract module name and module id from string
     # e.g. "Display_3" => {"Display", 3}
     #
-    def self.get_parts(module_id : String)
+    def self.get_parts(module_id : String | Symbol) : {String, Int32}
+      module_id = module_id.to_s if module_id.is_a?(Symbol)
       mod_name, match, index = module_id.rpartition('_')
       if match.empty?
         {module_id, 1}
