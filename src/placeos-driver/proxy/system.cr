@@ -1,6 +1,7 @@
 require "json"
 
 require "../driver_model"
+require "./remote_driver"
 
 class PlaceOS::Driver::Proxy::System
   def initialize(
@@ -193,11 +194,6 @@ class PlaceOS::Driver::Proxy::System
   end
 
   private def get_parts(module_id)
-    module_name, match, index = module_id.to_s.rpartition('_')
-    if match.empty?
-      {module_id, 1}
-    else
-      {module_name, index.to_i}
-    end
+    RemoteDriver.get_parts(module_id)
   end
 end
