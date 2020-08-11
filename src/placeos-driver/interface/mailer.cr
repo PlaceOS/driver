@@ -1,20 +1,20 @@
 # Common Email interface
 module PlaceOS::Driver::Interface; end
 
-module PlaceOS::Driver::Interface::Email
+module PlaceOS::Driver::Interface::Mailer
   # Where `content` is Base64 encoded.
   alias Attachment = NamedTuple(file_name: String, content: String)
   alias ResourceAttachment = NamedTuple(file_name: String, content: String, content_id: String)
 
   abstract def send_email(
-    subject : String,
     to : String | Array(String),
-    from : String | Array(String) | Nil = nil,
-    message_html : String = "",
+    subject : String,
     message_plaintext : String = "",
-    attachments : Array(Attachment) = [] of Attachment,
+    message_html : String = "",
     resource_attachments : Array(ResourceAttachment) = [] of ResourceAttachment,
+    attachments : Array(Attachment) = [] of Attachment,
     cc : String | Array(String) = [] of String,
-    bcc : String | Array(String) = [] of String
+    bcc : String | Array(String) = [] of String,
+    from : String | Array(String) | Nil = nil
   )
 end
