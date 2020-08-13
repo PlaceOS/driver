@@ -4,6 +4,11 @@ require "./constants"
 require "./logger_io"
 
 class PlaceOS::Driver
+  # Set up logging
+  backend = ::Log::IOBackend.new(STDOUT)
+  backend.formatter = LOG_FORMATTER
+  ::Log.builder.setup("*", ::Log::Severity::Info, backend)
+  
   # Allow signals to change the log level at run-time
   log_level_change = Proc(Signal, Nil).new do |signal|
     level = signal.usr1? ? ::Log::Severity::Debug : ::Log::Severity::Info
