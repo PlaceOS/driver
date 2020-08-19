@@ -98,12 +98,19 @@ class PlaceOS::Driver::Proxy::Driver
         # Apply the arguments
         index = 0
         named_keys = named_args.keys.map &.to_s
-        function.each_key do |arg_name|
+        function.each do |arg_name, details|
+          include_arg = false
           value = if named_keys.includes?(arg_name)
                     named_args[arg_name]?
                   else
                     index += 1
-                    arguments[index - 1]?
+                    if index < arguments.size
+                      arguments[index - 1]?
+                    elsif details.size > 1
+                      details[1]
+                    else
+                      raise "missing argument `#{arg_name} : #{details[0]}` for '#{function_name}' on #{@module_name}_#{@index} - #{@module_id}"
+                    end
                   end
 
           # Enums are special case
