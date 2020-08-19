@@ -92,14 +92,14 @@ describe PlaceOS::Driver::Proxy::Driver do
       req_out.payload.should eq(%({"__exec__":"function2","function2":{"arg1":12345}}))
 
       # Execute a remote function with named arguments
-      result = system[:Display_1].function3(arg2: 12_345)
+      result = system[:Display_1].function3(arg2: 12_345, arg1: 123)
       result.is_a?(::Future::Compute(JSON::Any)).should eq(true)
 
       # Check the exec request
       raw_data = Bytes.new(4096)
       bytes_read = output.read(raw_data)
       req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
-      req_out.payload.should eq(%({"__exec__":"function3","function3":{"arg1":null,"arg2":12345}}))
+      req_out.payload.should eq(%({"__exec__":"function3","function3":{"arg1":123,"arg2":12345}}))
 
       # Ensure timeouts work!!
       result = system[:Display_1].function1

@@ -103,9 +103,9 @@ class PlaceOS::Driver::Proxy::Driver
           value = if named_keys.includes?(arg_name)
                     named_args[arg_name]?
                   else
-                    index += 1
                     if index < arguments.size
-                      arguments[index - 1]?
+                      index += 1
+                      arguments[index - 1]
                     elsif details.size > 1
                       details[1]
                     else
