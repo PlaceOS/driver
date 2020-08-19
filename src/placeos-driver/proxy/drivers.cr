@@ -68,7 +68,11 @@ class PlaceOS::Driver::Proxy::Drivers
   # Collect all the futures from the function calls and make them available to the user
   macro method_missing(call)
     results = @drivers.map do |driver|
-      driver.{{call.name.id}}( {{*call.args}} {% if !call.named_args.is_a?(Nop) && call.named_args.size > 0 %}, {{**call.named_args}} {% end %} )
+      begin
+        driver.{{call.name.id}}( {{*call.args}} {% if !call.named_args.is_a?(Nop) && call.named_args.size > 0 %}, {{**call.named_args}} {% end %} )
+      rescue error
+        ::Future::Compute(JSON::Any).new(false) { raise error }
+      end
     end
 
     #}# TODO: at some point in the future use a future here. Currently blows up the compiler
