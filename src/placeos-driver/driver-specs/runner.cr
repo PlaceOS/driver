@@ -262,9 +262,9 @@ class DriverSpecs
               debug = JSON.parse(request.payload.not_nil!)
               severity = debug[0].as_i
               # Warnings and above will already be written to STDOUT
-              if severity < 2
+              if severity < 3
                 text = debug[1].as_s
-                level = severity == 0 ? "DEBUG" : "INFO"
+                level = Log::Severity.from_value(severity).to_s.upcase
                 puts "level=#{level} message=#{text}"
               end
             when "exec"
