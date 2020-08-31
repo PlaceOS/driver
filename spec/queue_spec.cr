@@ -159,8 +159,10 @@ describe PlaceOS::Driver::Queue do
 
     connected.should eq(false)
     queue.online = true
+    Fiber.yield
     connected.should eq(true)
     queue.online = false
+    Fiber.yield
     connected.should eq(false)
 
     # Since we already update connected state via the queue, we might as well
