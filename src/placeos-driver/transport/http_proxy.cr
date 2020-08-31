@@ -2,8 +2,8 @@ require "connect-proxy"
 
 class ConnectProxy::HTTPClient
   # Allows the connection to be re-established
-  def check_socket_valid
+  def __place_socket_invalid?
     socket = @socket
-    @socket = nil if socket && socket.closed?
+    socket && socket.closed?
   end
 end

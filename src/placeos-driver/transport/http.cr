@@ -125,13 +125,13 @@ class PlaceOS::Driver
         base_query.split('&').map(&.split('=')).each { |part| @params_base[part[0]] = part[1]? }
       end
 
-      context = uri_base.starts_with?("https") ? @tls : nil
+      context = __is_https? ? @tls : nil
       @client = new_http_client(@uri_base, context)
     end
 
     @params_base : Hash(String, String?)
     @tls : OpenSSL::SSL::Context::Client
-    @client : HTTP::Client
+    @client : ConnectProxy::HTTPClient
 
     property :received
 
@@ -154,9 +154,26 @@ class PlaceOS::Driver
       @client = new_http_client(@uri_base, @tls)
     end
 
+    protected def __is_https?
+      (@uri_base.scheme || "http").ends_with?('s')
+    end
+
+    protected def __new_http_client
+      @tls = new_tls_context
+      context = __is_https? ? @tls : nil
+      @client = new_http_client(@uri_base, context)
+    end
+
     protected def with_shared_client
       @http_client_mutex.synchronize do
-        yield @client
+        __new_http_client if @client.__place_socket_invalid?
+
+        begin
+          yield @client
+        rescue IO::Error
+          # socket may have been terminated silently so we'll try again
+          yield __new_http_client
+        end
       end
     end
 
@@ -176,7 +193,7 @@ class PlaceOS::Driver
       base_path = @uri_base.path || ""
 
       # Grab a base path that we can pair with the passed in path
-      base_path = base_path[0..-2] if scheme.ends_with?('/')
+      base_path = base_path[0..-2] if base_path.ends_with?('/')
 
       # Build the new URI
       uri = URI.parse("#{scheme}://#{host}#{port}#{base_path}#{path}")
@@ -204,15 +221,13 @@ class PlaceOS::Driver
       # Make the request
       if concurrent
         # Does this request require a TLS context?
-        context = (scheme.try &.ends_with?('s')) ? new_tls_context : nil
+        context = __is_https? ? new_tls_context : nil
         client = new_http_client(uri, context)
         client.exec(method.to_s.upcase, uri.full_path, headers, body)
       else
         # Only a single request can occur at a time
         # crystal does not provide any queuing mechanism so this mutex does the trick
-        with_shared_client do |shared_client|
-          shared_client.exec(method.to_s.upcase, uri.full_path, headers, body)
-        end
+        with_shared_client &.exec(method.to_s.upcase, uri.full_path, headers, body)
       end
     end
 

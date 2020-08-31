@@ -69,9 +69,6 @@ abstract class PlaceOS::Driver::Transport
       protected def new_http_client(uri, context)
         client = ConnectProxy::HTTPClient.new(uri, context)
 
-        # Ensure client socket has not been closed
-        client.before_request { client.check_socket_valid }
-
         # Apply basic auth settings
         if auth = @settings.get { setting?(NamedTuple(username: String, password: String), :basic_auth) }
           client.basic_auth **auth
