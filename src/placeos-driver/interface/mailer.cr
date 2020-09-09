@@ -9,8 +9,8 @@ module PlaceOS::Driver::Interface::Mailer
   abstract def send_email(
     to : String | Array(String),
     subject : String,
-    message_plaintext : String = "",
-    message_html : String = "",
+    message_plaintext : String? = nil,
+    message_html : String? = nil,
     resource_attachments : Array(ResourceAttachment) = [] of ResourceAttachment,
     attachments : Array(Attachment) = [] of Attachment,
     cc : String | Array(String) = [] of String,
