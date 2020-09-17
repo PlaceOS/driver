@@ -1,5 +1,5 @@
 name: placeos-driver
-version: 3.5.11
+version: 3.5.12
 
 dependencies:
   action-controller:
