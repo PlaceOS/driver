@@ -25,24 +25,23 @@ module PlaceOS::Driver::Proxy
       Admin
     end
 
-    @[Flags]
     enum ErrorCode
       # JSON parsing error
-      ParseError # 0
+      ParseError = 0
       # Pre-requisite does not exist (i.e no function)
-      BadRequest # 1
+      BadRequest = 1
       # The current user does not have permissions
-      AccessDenied # 2
+      AccessDenied = 2
       # The request was sent and error occured in core / the module
-      RequestFailed # 3
+      RequestFailed = 3
       # Not one of bind, unbind, exec, debug, ignore
-      UnknownCommand # 4
+      UnknownCommand = 4
       # System ID was not found in the database
-      SystemNotFound # 5
+      SystemNotFound = 5
       # Module does not exist in this system
-      ModuleNotFound # 6
+      ModuleNotFound = 6
       # Some other transient failure like database unavailable
-      UnexpectedFailure # 7
+      UnexpectedFailure = 7
 
       def to_s
         super.underscore
