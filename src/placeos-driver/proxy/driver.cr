@@ -91,41 +91,10 @@ class PlaceOS::Driver::Proxy::Driver
         raise "wrong number of arguments for '#{function_name}' on #{@module_name}_#{@index} - #{@module_id} (given #{num_args}, expected #{minargs}..#{funcsize})" if num_args < minargs
       end
 
-      # Build the request payload
-      request = String.build do |str|
-        str << %({"__exec__":") << function_name << %(",") << function_name << %(":{)
+      # Generate request body
+      request = PlaceOS::Driver::Proxy::Driver.__build_request__(function_name, function, arguments, named_args)
 
-        # Apply the arguments
-        index = 0
-        named_keys = named_args.keys.map &.to_s
-        function.each do |arg_name, details|
-          include_arg = false
-          value = if named_keys.includes?(arg_name)
-                    named_args[arg_name]?
-                  else
-                    if index < arguments.size
-                      index += 1
-                      arguments[index - 1]
-                    elsif details.size > 1
-                      details[1]
-                    else
-                      raise "missing argument `#{arg_name} : #{details[0]}` for '#{function_name}' on #{@module_name}_#{@index} - #{@module_id}"
-                    end
-                  end
-
-          # Enums are special case
-          if value.is_a?(::Enum)
-            str << '"' << arg_name << %(":) << value.to_s.to_json << ','
-          else
-            str << '"' << arg_name << %(":) << value.to_json << ','
-          end
-        end
-        # remove the trailing comma
-        str.back(1) if function.size > 0
-        str << "}}"
-      end
-
-      # parse the execute response
+      # Parse the execute response
       channel = PlaceOS::Driver::Protocol.instance.expect_response(@module_id, @reply_id, "exec", request, raw: true)
 
       # Grab the result if required
@@ -147,5 +116,44 @@ class PlaceOS::Driver::Proxy::Driver
   rescue error
     @system.logger.warn { error.inspect_with_backtrace }
     lazy { raise error; JSON.parse("") }
+  end
+
+  # Build the `exec` request payload
+  protected def self.__build_request__(
+    function_name,
+    function,
+    arguments,
+    named_args
+  )
+    String.build do |str|
+      str << %({"__exec__":") << function_name << %(",") << function_name << %(":{)
+
+      # Apply the arguments
+      index = 0
+      named_keys = named_args.keys.map &.to_s
+      function.each do |arg_name, details|
+        value = if named_keys.includes?(arg_name)
+                  named_args[arg_name]?
+                else
+                  if index < arguments.size
+                    index += 1
+                    arguments[index - 1]
+                  elsif details.size > 1
+                    details[1]
+                  else
+                    raise "missing argument `#{arg_name} : #{details[0]}` for '#{function_name}' on #{@module_name}_#{@index} - #{@module_id}"
+                  end
+                end
+
+        # Enums are special case
+        serialised_value = value.is_a?(::Enum) ? value.to_s.to_json : value.to_json
+
+        str << '"' << arg_name << %(":) << serialised_value << ','
+      end
+
+      # Remove the trailing comma
+      str.back(1) if function.size > 0
+      str << "}}"
+    end
   end
 end
