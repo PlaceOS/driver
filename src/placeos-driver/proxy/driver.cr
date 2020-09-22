@@ -92,7 +92,7 @@ class PlaceOS::Driver::Proxy::Driver
       end
 
       # Generate request body
-      request = PlaceOS::Driver::Proxy::Driver.__build_request__(function_name, function, arguments, named_args)
+      request = PlaceOS::Driver::Proxy::Driver.__build_request__(function_name, function, arguments, named_args, {name: @module_name, index: @index, id: @module_id})
 
       # Parse the execute response
       channel = PlaceOS::Driver::Protocol.instance.expect_response(@module_id, @reply_id, "exec", request, raw: true)
@@ -120,10 +120,11 @@ class PlaceOS::Driver::Proxy::Driver
 
   # Build the `exec` request payload
   protected def self.__build_request__(
-    function_name,
+    function_name : String,
     function,
     arguments,
-    named_args
+    named_args,
+    module_metadata : NamedTuple(name: String, index: Int32, id: String)
   )
     String.build do |str|
       str << %({"__exec__":") << function_name << %(",") << function_name << %(":{)
@@ -141,7 +142,7 @@ class PlaceOS::Driver::Proxy::Driver
                   elsif details.size > 1
                     details[1]
                   else
-                    raise "missing argument `#{arg_name} : #{details[0]}` for '#{function_name}' on #{@module_name}_#{@index} - #{@module_id}"
+                    raise "missing argument `#{arg_name} : #{details[0]}` for '#{function_name}' on #{module_metadata[:name]}_#{module_metadata[:index]} - #{module_metadata[:id]}"
                   end
                 end
 
