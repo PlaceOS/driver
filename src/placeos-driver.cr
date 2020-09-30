@@ -48,6 +48,10 @@ abstract class PlaceOS::Driver
     @__driver_model__
   end
 
+  def module_id
+    @__module_id__
+  end
+
   # Status helpers #}
   def []=(key, value)
     key = key.to_s
