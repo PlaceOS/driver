@@ -242,6 +242,9 @@ class PlaceOS::Driver
     @redis_cluster : Redis::Client? = nil
     @redis : Redis? = nil
 
+    # TODO:: we should look into using a shared client in the future
+    # this would require a decent re-factor however probably warrented
+    # and subscription callbacks could be delivered over channels
     protected def self.new_clustered_redis
       Redis::Client.boot(ENV["REDIS_URL"]? || "redis://localhost:6379")
     end

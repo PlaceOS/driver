@@ -118,20 +118,25 @@ class PlaceOS::Driver::Storage < Hash(String, String)
   end
 
   def self.get(key)
-    client = new_redis_client
-    client.get(key.to_s)
-  ensure
-    client.try &.close
+    new_redis_client.get(key.to_s)
   end
 
   def self.with_redis
-    client = new_redis_client
-    yield client
-  ensure
-    client.try &.close
+    yield new_redis_client
   end
 
-  protected def self.new_redis_client
-    Redis::Client.boot(REDIS_URL)
+  @@redis_lock : Mutex = Mutex.new
+  @@redis_conn : Redis::Client? = nil
+
+  protected def self.new_redis_client : Redis::Client
+    @@redis_lock.synchronize do
+      if client = @@redis_conn
+        client
+      else
+        client = Redis::Client.boot(REDIS_URL)
+        @@redis_conn = client
+        client
+      end
+    end
   end
 end
