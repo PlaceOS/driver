@@ -80,7 +80,19 @@ class PlaceOS::Driver::Settings
     {% for key, value in PlaceOS::Driver::Settings::JSON_TYPES %}
       {% if ks == key %}
         {% found = true %}
-        {{json}}.as_{{value.id}}
+        {% if key.starts_with?("Float") %}
+          value = {{json}}.raw
+          case value
+          when Float64, Int64
+            # Floats can't be implicitly cast from Int64
+            value.to_{{value.id}}
+          else
+            # Raise a casting error if not valid
+            {{json}}.as_{{value.id}}
+          end
+        {% else %}
+          {{json}}.as_{{value.id}}
+        {% end %}
       {% end %}
     {% end %}
     {% if !found %}

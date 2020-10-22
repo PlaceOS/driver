@@ -11,6 +11,10 @@ describe PlaceOS::Driver::Settings do
     settings.get { setting?(String, :string) }.should eq("hello")
     settings.get { setting?(String, :no_exist) }.should eq(nil)
 
+    float = settings.get { setting(Float64, :float) }
+    float.should eq(45.0)
+    float.class.should eq(Float64)
+
     settings[:integer].should eq(1234)
     expect_raises(Exception) do
       settings[:no_exist]

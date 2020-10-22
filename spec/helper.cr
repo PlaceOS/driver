@@ -105,7 +105,8 @@ class Helper
       "integer": 1234,
       "string": "hello",
       "array": [12, 34, 54],
-      "hash": {"hello": "world"}
+      "hash": {"hello": "world"},
+      "float": 45
     })
   end
 end
