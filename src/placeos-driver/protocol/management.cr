@@ -371,20 +371,24 @@ class PlaceOS::Driver::Protocol::Management
       bytes_read = io.read(raw_data)
       break if bytes_read == 0 # IO was closed
 
-      Log.debug { "manager #{@driver_path} received #{bytes_read}" }
+      # These should never be enabled in production.
+      # leaving here in case protocol level debugging is required for development
+      # Log.debug { "manager #{@driver_path} received #{bytes_read}" }
 
       tokenizer.extract(raw_data[0, bytes_read]).each do |message|
         string = nil
         begin
           string = String.new(message[0..-3])
           junk, _, string = string.rpartition(MESSAGE_INDICATOR)
-          Log.debug do
-            if junk.empty?
-              "manager #{@driver_path} processing #{string}"
-            else
-              "manager #{@driver_path} processing #{string}, ignoring #{junk}"
-            end
-          end
+
+          # Log.debug do
+          #  if junk.empty?
+          #    "manager #{@driver_path} processing #{string}"
+          #  else
+          #    "manager #{@driver_path} processing #{string}, ignoring #{junk}"
+          #  end
+          # end
+
           request = Request.from_json(string)
           spawn(same_thread: true) { process(request) }
         rescue error
