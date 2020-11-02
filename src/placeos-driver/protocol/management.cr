@@ -16,6 +16,9 @@ class PlaceOS::Driver::Protocol::Management
   property on_exec : Proc(Request, Proc(Request, Nil), Nil) = ->(request : Request, callback : Proc(Request, Nil)) {}
   property on_setting : Proc(String, String, YAML::Any, Nil) = ->(module_id : String, setting_name : String, setting_value : YAML::Any) {}
 
+  # These are the events coming from the driver where edge is expected to update redis on the drivers behalf
+  property on_redis : Proc(Bool, String, String, String?, Nil) = ->(is_status : Bool, module_id : String, key_name : String, status_value : String?) {}
+
   getter? terminated = false
   getter pid : Int64 = -1
 
@@ -448,6 +451,16 @@ class PlaceOS::Driver::Protocol::Management
       mod_id = request.id
       setting_name, setting_value = Tuple(String, YAML::Any).from_yaml(request.payload.not_nil!)
       on_setting.call(mod_id, setting_name, setting_value)
+    when "status"
+      # Redis proxy driver state (hash)
+      mod_id = request.id
+      key, value = request.payload.not_nil!.split(',', 2)
+      on_redis.call(true, mod_id, key, value.empty? ? nil : value)
+    when "state"
+      # Redis proxy key / value
+      mod_id = request.id
+      key, value = request.payload.not_nil!.split(',', 2)
+      on_redis.call(false, mod_id, key, value.empty? ? nil : value)
     else
       Log.warn { "received unknown request #{request.cmd} - #{request.inspect}" }
     end
