@@ -8,4 +8,3 @@ abstract class PlaceOS::Driver::Storage < Hash(String, String)
 end
 
 require "./storage/redis-storage"
-require "./storage/edge-storage"

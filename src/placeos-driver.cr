@@ -409,6 +409,7 @@ abstract class PlaceOS::Driver
 end
 
 require "./placeos-driver/*"
+require "./placeos-driver/storage/edge-storage"
 require "./placeos-driver/proxy/*"
 require "./placeos-driver/subscriptions/*"
 require "./placeos-driver/transport/*"

@@ -1,4 +1,5 @@
 require "../storage"
+require "../protocol"
 
 class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
   def initialize(@id : String, @prefix = DEFAULT_PREFIX)
