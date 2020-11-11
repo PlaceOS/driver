@@ -22,7 +22,7 @@ abstract class DriverSpecs::MockDriver
   end
 
   def initialize(@module_id : String)
-    @__storage__ = PlaceOS::Driver::Storage.new(module_id)
+    @__storage__ = PlaceOS::Driver::RedisStorage.new(module_id)
     @__status__ = PlaceOS::Driver::Status.new
 
     __init__
@@ -254,7 +254,7 @@ abstract class DriverSpecs::MockDriver
 
     def __init__ : Nil
       @__storage__.clear
-      PlaceOS::Driver::Storage.with_redis do |redis|
+      PlaceOS::Driver::RedisStorage.with_redis do |redis|
         redis.set("interface/#{@module_id}", KlassExecutor.metadata)
       end
       on_load

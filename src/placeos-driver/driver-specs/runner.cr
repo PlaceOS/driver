@@ -46,7 +46,7 @@ class DriverSpecs
     ::Log.builder.bind "*", :debug, ::Log::IOBackend.new
 
     # Ensure the system lookup is not in place
-    storage = PlaceOS::Driver::Storage.new(SYSTEM_ID, "system")
+    storage = PlaceOS::Driver::RedisStorage.new(SYSTEM_ID, "system")
     storage.clear
 
     begin
@@ -561,7 +561,7 @@ class DriverSpecs
 
   # expects {ModuleName: {Klass, Klass}}
   def system(details)
-    system_index = PlaceOS::Driver::Storage.new(SYSTEM_ID, "system")
+    system_index = PlaceOS::Driver::RedisStorage.new(SYSTEM_ID, "system")
     system_index.clear
 
     @mock_drivers.clear
@@ -583,7 +583,7 @@ class DriverSpecs
     end
 
     # Signal that the system has changed for any subscriptions
-    PlaceOS::Driver::Storage.with_redis do |redis|
+    PlaceOS::Driver::RedisStorage.with_redis do |redis|
       redis.publish "lookup-change", SYSTEM_ID
     end
     sleep 5.milliseconds

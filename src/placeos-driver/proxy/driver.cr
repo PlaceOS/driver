@@ -9,7 +9,7 @@ class PlaceOS::Driver::Proxy::Driver
     @system : PlaceOS::Driver::Proxy::System,
     @metadata : PlaceOS::Driver::DriverModel::Metadata
   )
-    @status = PlaceOS::Driver::Storage.new(@module_id)
+    @status = PlaceOS::Driver::RedisStorage.new(@module_id)
   end
 
   getter :module_name, :index

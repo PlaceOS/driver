@@ -87,15 +87,15 @@ module PlaceOS::Driver::Proxy
     getter module_id : String? = nil
     getter :module_name, :index, :sys_id
 
-    @status : Storage? = nil
+    @status : RedisStorage? = nil
 
-    def status : Storage
+    def status : RedisStorage
       redis_store = @status
       return redis_store if redis_store
 
       module_id = module_id?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
-      @status = Storage.new(module_id)
+      @status = RedisStorage.new(module_id)
     end
 
     def module_id? : String?

@@ -45,7 +45,7 @@ module PlaceOS
           channel.close
         end
 
-        storage = Storage.new("mod-123")
+        storage = RedisStorage.new("mod-123")
         storage["power"] = true
         channel.receive?
 
@@ -65,10 +65,10 @@ module PlaceOS
         redis = Subscriptions.new_redis
 
         # Ensure keys don't already exist
-        sys_lookup = Storage.new("sys-123", "system")
+        sys_lookup = RedisStorage.new("sys-123", "system")
         lookup_key = "Display/1"
         sys_lookup.delete lookup_key
-        storage = Storage.new("mod-1234")
+        storage = RedisStorage.new("mod-1234")
         storage.delete("power")
 
         subs = Subscriptions.new
@@ -123,10 +123,10 @@ module PlaceOS
         redis = Subscriptions.new_redis
 
         # Ensure keys don't already exist
-        sys_lookup = Storage.new("sys-1234", "system")
+        sys_lookup = RedisStorage.new("sys-1234", "system")
         lookup_key = "Display/1"
         sys_lookup.delete lookup_key
-        storage = Storage.new("mod-12345")
+        storage = RedisStorage.new("mod-12345")
         storage.delete("power")
 
         subs = Subscriptions.new

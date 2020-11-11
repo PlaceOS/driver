@@ -11,8 +11,8 @@ class PlaceOS::Driver::Proxy::System
     @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new
   )
     @system_id = @model.id
-    @system = PlaceOS::Driver::Storage.new(@system_id, "system")
-    @redis = PlaceOS::Driver::Storage.new_redis_client
+    @system = PlaceOS::Driver::RedisStorage.new(@system_id, "system")
+    @redis = PlaceOS::Driver::RedisStorage.new_redis_client
   end
 
   @system_id : String
@@ -34,7 +34,7 @@ class PlaceOS::Driver::Proxy::System
   # Retrieve module metadata from redis
   #
   def self.module_id?(system_id, module_name, index) : String?
-    PlaceOS::Driver::Storage.new(system_id, "system")["#{module_name}/#{index}"]?
+    PlaceOS::Driver::RedisStorage.new(system_id, "system")["#{module_name}/#{index}"]?
   end
 
   # Retrieve module metadata from redis
@@ -49,7 +49,7 @@ class PlaceOS::Driver::Proxy::System
   # Retrieve module metadata from redis, bypassing module_id lookup
   #
   def self.driver_metadata?(module_id) : PlaceOS::Driver::DriverModel::Metadata?
-    PlaceOS::Driver::Storage
+    PlaceOS::Driver::RedisStorage
       .get("interface/#{module_id}")
       .try(&->DriverModel::Metadata.from_json(String))
   end

@@ -17,15 +17,15 @@ describe PlaceOS::Driver::Proxy::Driver do
     system.id.should eq("sys-1236")
 
     # Create a virtual systems
-    storage = PlaceOS::Driver::Storage.new(cs.id, "system")
+    storage = PlaceOS::Driver::RedisStorage.new(cs.id, "system")
     storage["Display/1"] = "mod-1234"
     system.exists?(:Display_1).should eq(true)
 
     # Create the driver metadata
-    mod_store = PlaceOS::Driver::Storage.new("mod-1234")
+    mod_store = PlaceOS::Driver::RedisStorage.new("mod-1234")
     mod_store["power"] = false
 
-    PlaceOS::Driver::Storage.with_redis do |redis|
+    PlaceOS::Driver::RedisStorage.with_redis do |redis|
       meta = PlaceOS::Driver::DriverModel::Metadata.new({
         "function1" => {} of String => Array(JSON::Any),
         "function2" => {"arg1" => [JSON::Any.new "Int32"]},
@@ -148,7 +148,7 @@ describe PlaceOS::Driver::Proxy::Driver do
     subs = PlaceOS::Driver::Proxy::Subscriptions.new
     system = PlaceOS::Driver::Proxy::System.new cs, "reply_id"
     # Create some virtual systems
-    storage = PlaceOS::Driver::Storage.new(cs.id, "system")
+    storage = PlaceOS::Driver::RedisStorage.new(cs.id, "system")
     storage["Display/1"] = "mod-1234"
 
     in_callback = false
@@ -156,7 +156,7 @@ describe PlaceOS::Driver::Proxy::Driver do
     message_passed = nil
     channel = Channel(Nil).new
 
-    mod_store = PlaceOS::Driver::Storage.new("mod-1234")
+    mod_store = PlaceOS::Driver::RedisStorage.new("mod-1234")
     mod_store.delete("power")
 
     subscription = system[:Display_1].subscribe(:power) do |sub, value|

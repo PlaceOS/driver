@@ -4,8 +4,8 @@ require "./logger"
 class PlaceOS::Driver::ProcessManager
   Log = ::Log.for("driver.process_manager")
 
-  def initialize(@logger_io = ::PlaceOS::Driver.logger_io, @input = STDIN, output = STDERR)
-    @subscriptions = Subscriptions.new(@logger_io)
+  def initialize(@logger_io = ::PlaceOS::Driver.logger_io, @input = STDIN, output = STDERR, @edge_driver = false)
+    @subscriptions = @edge_driver ? Subscriptions.new(@logger_io) : nil
     @protocol = PlaceOS::Driver::Protocol.new_instance(@input, output)
 
     backend = ::Log::IOBackend.new(@logger_io)
@@ -26,6 +26,8 @@ class PlaceOS::Driver::ProcessManager
     @terminated = Channel(Nil).new
   end
 
+  @subscriptions : Subscriptions?
+  @edge_driver : Bool
   @input : IO
   @logger_io : IO
   getter :loaded, terminated
@@ -35,7 +37,7 @@ class PlaceOS::Driver::ProcessManager
     return if @loaded[module_id]?
 
     model = driver_model || PlaceOS::Driver::DriverModel.from_json(request.payload.not_nil!)
-    driver = DriverManager.new module_id, model, @logger_io, @subscriptions
+    driver = DriverManager.new module_id, model, @logger_io, @subscriptions, @edge_driver
     @loaded[module_id] = driver
 
     # Drivers can all run on a different thread
@@ -131,7 +133,7 @@ class PlaceOS::Driver::ProcessManager
     @loaded.clear
 
     # We now want to stop the subscription loop
-    @subscriptions.terminate
+    @subscriptions.try &.terminate
 
     # TODO:: Wait until process have actually completed.
     # Also have a timer that will allow us to force close if required

@@ -16,6 +16,14 @@ class PlaceOS::Driver::Protocol::Management
   property on_exec : Proc(Request, Proc(Request, Nil), Nil) = ->(request : Request, callback : Proc(Request, Nil)) {}
   property on_setting : Proc(String, String, YAML::Any, Nil) = ->(module_id : String, setting_name : String, setting_value : YAML::Any) {}
 
+  # These are the events coming from the driver where edge is expected to update redis on the drivers behalf
+  enum RedisAction
+    HSET
+    SET
+    CLEAR
+  end
+  property on_redis : Proc(RedisAction, String, String, String?, Nil) = ->(action : RedisAction, hash_id : String, key_name : String, status_value : String?) {}
+
   getter? terminated = false
   getter pid : Int64 = -1
 
@@ -33,7 +41,7 @@ class PlaceOS::Driver::Protocol::Management
 
   @io : IO::Stapled? = nil
 
-  def initialize(@driver_path : String)
+  def initialize(@driver_path : String, @on_edge : Bool = false)
     @requests = {} of UInt64 => Promise::DeferredPromise(String)
     @starting = {} of String => Promise::DeferredPromise(Nil)
 
@@ -337,7 +345,7 @@ class PlaceOS::Driver::Protocol::Management
   private def launch_driver(fetch_pid, stdin_reader, stderr_writer) : Nil
     Process.run(
       @driver_path,
-      {"-p"},
+      @on_edge ? {"-p", "-e"} : {"-p"},
       input: stdin_reader,
       output: Process::Redirect::Inherit,
       error: stderr_writer
@@ -448,6 +456,19 @@ class PlaceOS::Driver::Protocol::Management
       mod_id = request.id
       setting_name, setting_value = Tuple(String, YAML::Any).from_yaml(request.payload.not_nil!)
       on_setting.call(mod_id, setting_name, setting_value)
+    when "hset"
+      # Redis proxy driver state (hash)
+      hash_id = request.id
+      key, value = request.payload.not_nil!.split("\x03", 2)
+      on_redis.call(RedisAction::HSET, hash_id, key, value.empty? ? "null" : value)
+    when "set"
+      # Redis proxy key / value
+      key = request.id
+      value = request.payload.not_nil!
+      on_redis.call(RedisAction::SET, key, value, nil)
+    when "clear"
+      hash_id = request.id
+      on_redis.call(RedisAction::CLEAR, hash_id, "clear", nil)
     else
       Log.warn { "received unknown request #{request.cmd} - #{request.inspect}" }
     end
