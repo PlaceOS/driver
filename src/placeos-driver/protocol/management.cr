@@ -21,7 +21,6 @@ class PlaceOS::Driver::Protocol::Management
     HSET
     SET
     CLEAR
-    PUBLISH
   end
   property on_redis : Proc(RedisAction, String, String, String?, Nil) = ->(action : RedisAction, module_id : String, key_name : String, status_value : String?) {}
 
@@ -470,10 +469,6 @@ class PlaceOS::Driver::Protocol::Management
     when "clear"
       mod_id = request.id
       on_redis.call(RedisAction::SET, mod_id, "clear", nil)
-    when "publish"
-      channel_name = request.id
-      payload = request.payload.not_nil!
-      on_redis.call(RedisAction::PUBLISH, channel_name, payload, nil)
     else
       Log.warn { "received unknown request #{request.cmd} - #{request.inspect}" }
     end
