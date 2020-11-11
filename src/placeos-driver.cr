@@ -25,24 +25,39 @@ abstract class PlaceOS::Driver
     @__logger__ : PlaceOS::Driver::Log,
     @__schedule__ = Proxy::Scheduler.new,
     @__subscriptions__ = Proxy::Subscriptions.new,
-    @__driver_model__ = DriverModel.from_json(%({"udp":false,"tls":false,"makebreak":false,"settings":{},"role":1}))
+    @__driver_model__ = DriverModel.from_json(%({"udp":false,"tls":false,"makebreak":false,"settings":{},"role":1})),
+    @__edge_driver__ : Bool = false
   )
     @__status__ = Status.new
-    @__storage__ = Storage.new(@__module_id__)
-    @__storage__.clear
-    @__storage__.redis.set("interface/#{@__module_id__}", {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata)
+    if @__edge_driver__
+      @__storage__ = EdgeStorage.new(@__module_id__)
+      @__storage__.clear
+      PlaceOS::Driver::Protocol.instance.request(@__module_id__, "clear", raw: true)
+    else
+      redis_store = RedisStorage.new(@__module_id__)
+      @__storage__ = redis_store
+      redis_store.clear
+      redis_store.redis.set("interface/#{@__module_id__}", {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata)
+    end
   end
 
   @__system__ : Proxy::System?
+  @__storage__ : Storage
   @__driver_model__ : DriverModel
+  @__subscriptions__ : Proxy::Subscriptions?
 
   # Access to the various components
-  HELPERS = %w(transport logger queue setting schedule subscriptions)
+  HELPERS = %w(transport logger queue setting schedule)
   {% for name in HELPERS %}
     def {{name.id}}
       @__{{name.id}}__
     end
   {% end %}
+
+  def subscriptions
+    raise "unsupported when running on the edge" if @__edge_driver__
+    @__subscriptions__.not_nil!
+  end
 
   def config
     @__driver_model__
@@ -95,7 +110,7 @@ abstract class PlaceOS::Driver
 
     system_model = @__driver_model__.control_system
     raise "not directly associated with a system" unless system_model
-    @__system__ = Proxy::System.new(system_model, @__module_id__, @__logger__, @__subscriptions__)
+    @__system__ = Proxy::System.new(system_model, @__module_id__, @__logger__, @__subscriptions__.not_nil!)
   end
 
   # Settings helpers
@@ -133,16 +148,22 @@ abstract class PlaceOS::Driver
 
   # Subscriptions and channels
   def subscribe(status, &callback : (Subscriptions::DirectSubscription, String) -> Nil) : Subscriptions::DirectSubscription
-    @__subscriptions__.subscribe(@__module_id__, status.to_s, &callback)
+    raise "unsupported when running on the edge" if @__edge_driver__
+    @__subscriptions__.not_nil!.subscribe(@__module_id__, status.to_s, &callback)
   end
 
   def publish(channel, message)
-    @__storage__.redis.publish("placeos/#{channel}", message.to_s)
+    if @__edge_driver__
+      PlaceOS::Driver::Protocol.instance.request(channel, "publish", message, raw: true)
+    else
+      @__storage__.redis.publish("placeos/#{channel}", message.to_s)
+    end
     message
   end
 
   def monitor(channel, &callback : (Subscriptions::ChannelSubscription, String) -> Nil) : Subscriptions::ChannelSubscription
-    @__subscriptions__.channel(channel.to_s, &callback)
+    raise "unsupported when running on the edge" if @__edge_driver__
+    @__subscriptions__.not_nil!.channel(channel.to_s, &callback)
   end
 
   # utilities
@@ -393,6 +414,7 @@ require "./placeos-driver/utilities/*"
 
 macro finished
   exec_process_manager = false
+  is_edge_driver = false
 
   # Command line options
   OptionParser.parse(ARGV.dup) do |parser|
@@ -412,6 +434,10 @@ macro finished
       exec_process_manager = true
     end
 
+    parser.on("-e", "--edge", "launches in edge mode") do
+      is_edge_driver = true
+    end
+
     parser.on("-h", "--help", "show this help") do
       puts parser
       exit 0
@@ -420,7 +446,7 @@ macro finished
 
   # Launch the process manager by default, this can be overriten for testing
   if exec_process_manager
-    process = PlaceOS::Driver::ProcessManager.new
+    process = PlaceOS::Driver::ProcessManager.new(edge_driver: is_edge_driver)
 
     # Detect ctr-c to shutdown gracefully
     Signal::INT.trap do |signal|

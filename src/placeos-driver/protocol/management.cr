@@ -17,7 +17,13 @@ class PlaceOS::Driver::Protocol::Management
   property on_setting : Proc(String, String, YAML::Any, Nil) = ->(module_id : String, setting_name : String, setting_value : YAML::Any) {}
 
   # These are the events coming from the driver where edge is expected to update redis on the drivers behalf
-  property on_redis : Proc(Bool, String, String, String?, Nil) = ->(is_status : Bool, module_id : String, key_name : String, status_value : String?) {}
+  enum RedisAction
+    HSET
+    SET
+    CLEAR
+    PUBLISH
+  end
+  property on_redis : Proc(RedisAction, String, String, String?, Nil) = ->(action : RedisAction, module_id : String, key_name : String, status_value : String?) {}
 
   getter? terminated = false
   getter pid : Int64 = -1
@@ -454,13 +460,20 @@ class PlaceOS::Driver::Protocol::Management
     when "status"
       # Redis proxy driver state (hash)
       mod_id = request.id
-      key, value = request.payload.not_nil!.split(',', 2)
-      on_redis.call(true, mod_id, key, value.empty? ? nil : value)
+      key, value = request.payload.not_nil!.split("\x03", 2)
+      on_redis.call(RedisAction::HSET, mod_id, key, value.empty? ? nil : value)
     when "state"
       # Redis proxy key / value
       mod_id = request.id
-      key, value = request.payload.not_nil!.split(',', 2)
-      on_redis.call(false, mod_id, key, value.empty? ? nil : value)
+      key, value = request.payload.not_nil!.split("\x03", 2)
+      on_redis.call(RedisAction::SET, mod_id, key, value.empty? ? nil : value)
+    when "clear"
+      mod_id = request.id
+      on_redis.call(RedisAction::SET, mod_id, "clear", nil)
+    when "publish"
+      channel_name = request.id
+      payload = request.payload.not_nil!
+      on_redis.call(RedisAction::PUBLISH, channel_name, payload, nil)
     else
       Log.warn { "received unknown request #{request.cmd} - #{request.inspect}" }
     end

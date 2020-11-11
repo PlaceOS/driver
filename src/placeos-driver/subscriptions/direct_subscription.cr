@@ -2,7 +2,7 @@ require "./subscription"
 
 class PlaceOS::Driver::Subscriptions::DirectSubscription < PlaceOS::Driver::Subscriptions::Subscription
   def initialize(@module_id : String, @status : String, &@callback : (DirectSubscription, String) ->)
-    @storage = PlaceOS::Driver::Storage.new(@module_id)
+    @storage = PlaceOS::Driver::RedisStorage.new(@module_id)
   end
 
   def callback(logger : ::Log, message : String) : Nil

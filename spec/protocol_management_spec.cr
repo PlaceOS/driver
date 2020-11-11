@@ -30,6 +30,12 @@ describe PlaceOS::Driver::Protocol::Management do
     }))
     manager.running?.should eq(true)
 
+    # TODO:: implement this
+    redis_callback = 0
+    manager.on_redis = ->(is_status : PlaceOS::Driver::Protocol::Management::RedisAction, module_id : String, key_name : String, status_value : String?) {
+      redis_callback += 1
+    }
+
     # Named params
     manager.execute("mod-management-test", %({
       "__exec__": "add",

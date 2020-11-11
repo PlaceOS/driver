@@ -2,13 +2,12 @@ require "ipaddress"
 require "promise"
 
 class PlaceOS::Driver::DriverManager
-  def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT, subscriptions = nil)
-    subscriptions ||= Subscriptions.new(module_id: @module_id)
+  def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT, subscriptions = nil, edge_driver = false)
     @settings = Settings.new @model.settings
     @logger = PlaceOS::Driver::Log.new(@module_id, logger_io)
     @queue = Queue.new(@logger) { |state| connection(state) }
     @schedule = PlaceOS::Driver::Proxy::Scheduler.new(@logger)
-    @subscriptions = Proxy::Subscriptions.new(subscriptions)
+    @subscriptions = edge_driver ? nil : Proxy::Subscriptions.new(subscriptions || Subscriptions.new(module_id: @module_id))
 
     # Ensures execution all occurs on a single thread
     @requests = ::Channel(Tuple(Promise::DeferredPromise(Nil), Protocol::Request)).new(4)
@@ -51,6 +50,7 @@ class PlaceOS::Driver::DriverManager
     @driver = new_driver
   end
 
+  @subscriptions : Proxy::Subscriptions?
   getter model : ::PlaceOS::Driver::DriverModel
 
   # This hack is required to "dynamically" load the user defined class
@@ -58,7 +58,7 @@ class PlaceOS::Driver::DriverManager
   macro finished
     macro define_new_driver
       macro new_driver
-        {{PlaceOS::Driver::CONCRETE_DRIVERS.keys.first}}.new(@module_id, @settings, @queue, @transport, @logger, @schedule, @subscriptions, @model)
+        {{PlaceOS::Driver::CONCRETE_DRIVERS.keys.first}}.new(@module_id, @settings, @queue, @transport, @logger, @schedule, @subscriptions, @model, edge_driver)
       end
 
       @driver : {{PlaceOS::Driver::CONCRETE_DRIVERS.keys.first}}
@@ -110,7 +110,7 @@ class PlaceOS::Driver::DriverManager
     @requests.close
     @queue.terminate
     @schedule.terminate
-    @subscriptions.terminate
+    @subscriptions.try &.terminate
   end
 
   # TODO:: Core is sending the whole model object - so we should determine if

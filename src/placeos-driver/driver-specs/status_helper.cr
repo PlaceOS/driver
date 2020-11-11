@@ -8,7 +8,7 @@ class DriverSpecs; end
 
 class DriverSpecs::StatusHelper
   def initialize(module_id : String)
-    @storage = PlaceOS::Driver::Storage.new(module_id)
+    @storage = PlaceOS::Driver::RedisStorage.new(module_id)
   end
 
   def []=(key, value)

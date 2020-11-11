@@ -2,7 +2,7 @@ require "./helper"
 
 describe PlaceOS::Driver::Proxy::System do
   Spec.before_each do
-    storage = PlaceOS::Driver::Storage.new("sys-1234", "system")
+    storage = PlaceOS::Driver::RedisStorage.new("sys-1234", "system")
     storage.delete "Display/1"
     storage.delete "Display/2"
     storage.delete "Display/3"
@@ -10,7 +10,7 @@ describe PlaceOS::Driver::Proxy::System do
   end
 
   Spec.after_each do
-    storage = PlaceOS::Driver::Storage.new("sys-1234", "system")
+    storage = PlaceOS::Driver::RedisStorage.new("sys-1234", "system")
     storage.delete "Display/1"
     storage.delete "Display/2"
     storage.delete "Display/3"
@@ -41,7 +41,7 @@ describe PlaceOS::Driver::Proxy::System do
     system.exists?(:Display_1).should eq(false)
 
     # Create some virtual systems
-    storage = PlaceOS::Driver::Storage.new(cs.id, "system")
+    storage = PlaceOS::Driver::RedisStorage.new(cs.id, "system")
     storage["Display/1"] = "mod-1234"
     storage["Display/2"] = "mod-5678"
     storage["Display/3"] = "mod-9000"
@@ -72,7 +72,7 @@ describe PlaceOS::Driver::Proxy::System do
     subs = PlaceOS::Driver::Proxy::Subscriptions.new
     system = PlaceOS::Driver::Proxy::System.new cs, "reply_id"
     # Create some virtual systems
-    storage = PlaceOS::Driver::Storage.new(cs.id, "system")
+    storage = PlaceOS::Driver::RedisStorage.new(cs.id, "system")
     storage["Display/1"] = "mod-1234"
     storage["Display/2"] = "mod-5678"
     storage["Display/3"] = "mod-9000"
@@ -83,7 +83,7 @@ describe PlaceOS::Driver::Proxy::System do
     message_passed = nil
     channel = Channel(Nil).new
 
-    mod_store = PlaceOS::Driver::Storage.new("mod-5678")
+    mod_store = PlaceOS::Driver::RedisStorage.new("mod-5678")
     mod_store.delete("power")
 
     subscription = system.subscribe(:Display_2, :power) do |sub, value|

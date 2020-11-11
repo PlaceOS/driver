@@ -18,7 +18,7 @@ module PlaceOS::Driver::Proxy
       system.id.should eq("sys-1236")
 
       # Create a virtual systems
-      storage = PlaceOS::Driver::Storage.new(cs.id, "system")
+      storage = PlaceOS::Driver::RedisStorage.new(cs.id, "system")
       storage.clear
       storage["Display/1"] = "mod-999"
       storage["Display/2"] = "mod-888"
@@ -29,7 +29,7 @@ module PlaceOS::Driver::Proxy
       system.exists?(:Display_2).should eq(true)
 
       # Create the driver metadata
-      redis = PlaceOS::Driver::Storage.new_redis_client
+      redis = PlaceOS::Driver::RedisStorage.new_redis_client
       meta = PlaceOS::Driver::DriverModel::Metadata.new({
         "function1" => {} of String => Array(JSON::Any),
         "function2" => {"arg1" => [JSON::Any.new "Int32"]},

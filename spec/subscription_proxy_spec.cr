@@ -18,7 +18,7 @@ module PlaceOS::Driver::Proxy
 
       sleep 0.005
 
-      Storage.with_redis &.publish("placeos/test", "whatwhat")
+      RedisStorage.with_redis &.publish("placeos/test", "whatwhat")
 
       channel.receive?
 
@@ -42,7 +42,7 @@ module PlaceOS::Driver::Proxy
         in_callback = true
         channel.close
       end
-      storage = Storage.new("mod-123")
+      storage = RedisStorage.new("mod-123")
       storage["power"] = true
       channel.receive?
 
@@ -59,12 +59,12 @@ module PlaceOS::Driver::Proxy
       sub_passed = nil
       message_passed = nil
       channel = Channel(Nil).new
-      Storage.with_redis do |redis|
+      RedisStorage.with_redis do |redis|
         # Ensure keys don't already exist
-        sys_lookup = Storage.new("sys-123", "system")
+        sys_lookup = RedisStorage.new("sys-123", "system")
         lookup_key = "Display/1"
         sys_lookup.delete lookup_key
-        storage = Storage.new("mod-1234")
+        storage = RedisStorage.new("mod-1234")
         storage.delete("power")
 
         subs = Proxy::Subscriptions.new

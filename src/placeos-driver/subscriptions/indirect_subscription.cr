@@ -12,7 +12,7 @@ class PlaceOS::Driver::Subscriptions::IndirectSubscription < PlaceOS::Driver::Su
     logger.error(exception: e) { "error in subscription callback" }
   end
 
-  @storage : PlaceOS::Driver::Storage?
+  @storage : PlaceOS::Driver::RedisStorage?
   @module_id : String?
 
   getter :system_id, :module_name, :index, :module_id, :status
@@ -38,12 +38,12 @@ class PlaceOS::Driver::Subscriptions::IndirectSubscription < PlaceOS::Driver::Su
     module_id = @module_id
     return module_id if module_id
 
-    lookup = PlaceOS::Driver::Storage.new(@system_id, "system")
+    lookup = PlaceOS::Driver::RedisStorage.new(@system_id, "system")
     module_id = lookup["#{@module_name}/#{@index}"]?
 
     if module_id
       @module_id = module_id
-      @storage = PlaceOS::Driver::Storage.new(module_id)
+      @storage = PlaceOS::Driver::RedisStorage.new(module_id)
     end
   end
 end
