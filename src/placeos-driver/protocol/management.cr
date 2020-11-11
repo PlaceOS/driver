@@ -41,7 +41,7 @@ class PlaceOS::Driver::Protocol::Management
 
   @io : IO::Stapled? = nil
 
-  def initialize(@driver_path : String)
+  def initialize(@driver_path : String, @on_edge : Bool = false)
     @requests = {} of UInt64 => Promise::DeferredPromise(String)
     @starting = {} of String => Promise::DeferredPromise(Nil)
 
@@ -345,7 +345,7 @@ class PlaceOS::Driver::Protocol::Management
   private def launch_driver(fetch_pid, stdin_reader, stderr_writer) : Nil
     Process.run(
       @driver_path,
-      {"-p"},
+      @on_edge ? {"-p", "-e"} : {"-p"},
       input: stdin_reader,
       output: Process::Redirect::Inherit,
       error: stderr_writer

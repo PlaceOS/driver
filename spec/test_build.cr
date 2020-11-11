@@ -74,7 +74,9 @@ class Helper
     def add(a : Int32, b : Int32, *others)
       num = 0
       others.each { |o| num + o }
-      a + b + num
+      result = a + b + num
+      self[:last_added] = result
+      result
     end
 
     # Public API will ignore splat arguments
