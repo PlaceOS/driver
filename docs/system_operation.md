@@ -15,7 +15,7 @@ So HSET "system/system_id", "Display/3" => driver_id
 * Use the existing helper at `require "placeos-driver/storage"`
 
 ```crystal
-status = PlaceOS::Driver::Storage.new(system_id, prefix: "system")
+status = PlaceOS::Driver::RedisStorage.new(system_id, prefix: "system")
 module_name = "Display"
 index = 1
 system["#{module_name}/#{index}"]? => "module_id" / nil
@@ -34,7 +34,7 @@ So HSET "status/module_id", "power" => true / false
 * Use the existing helper at `require "placeos-driver/storage"`
 
 ```crystal
-status = PlaceOS::Driver::Storage.new(module_id)
+status = PlaceOS::Driver::RedisStorage.new(module_id)
 status["power"]? => true / false / nil
 status["power"] => true / false / raise KeyError.new("not found")
 ```
@@ -129,4 +129,4 @@ Should perform the following operations:
 6. Mark self as ready
 7. Once all Engine Core instances are ready, engine core leader to signal system ready
    * Use a channel called `system`
-   * `PlaceOS::Driver::Storage.with_redis &.publish("engine/system", "ready")`
+   * `PlaceOS::Driver::RedisStorage.with_redis &.publish("engine/system", "ready")`
