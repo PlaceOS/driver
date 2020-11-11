@@ -29,15 +29,17 @@ abstract class PlaceOS::Driver
     @__edge_driver__ : Bool = false
   )
     @__status__ = Status.new
+
+    metadata = {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
     if @__edge_driver__
       @__storage__ = EdgeStorage.new(@__module_id__)
       @__storage__.clear
-      PlaceOS::Driver::Protocol.instance.request(@__module_id__, "clear", raw: true)
+      PlaceOS::Driver::Protocol.instance.request("interface/#{@__module_id__}", "set", metadata, raw: true)
     else
       redis_store = RedisStorage.new(@__module_id__)
       @__storage__ = redis_store
       redis_store.clear
-      redis_store.redis.set("interface/#{@__module_id__}", {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata)
+      redis_store.redis.set("interface/#{@__module_id__}", metadata)
     end
   end
 

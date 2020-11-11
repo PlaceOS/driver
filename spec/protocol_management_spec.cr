@@ -10,6 +10,12 @@ describe PlaceOS::Driver::Protocol::Management do
     manager = PlaceOS::Driver::Protocol::Management.new("./test_build")
     manager.running?.should eq(false)
 
+    # Called when the driver interacts with redis
+    redis_callback = 0
+    manager.on_redis = ->(is_status : PlaceOS::Driver::Protocol::Management::RedisAction, module_id : String, key_name : String, status_value : String?) {
+      redis_callback += 1
+    }
+
     # Launch an instance of the driver
     manager.start("mod-management-test", %({
       "ip": "localhost",
@@ -29,12 +35,6 @@ describe PlaceOS::Driver::Protocol::Management do
       }
     }))
     manager.running?.should eq(true)
-
-    # Called when the driver interacts with redis
-    redis_callback = 0
-    manager.on_redis = ->(is_status : PlaceOS::Driver::Protocol::Management::RedisAction, module_id : String, key_name : String, status_value : String?) {
-      redis_callback += 1
-    }
 
     # Named params
     manager.execute("mod-management-test", %({
@@ -77,6 +77,23 @@ describe PlaceOS::Driver::Protocol::Management do
     manager = PlaceOS::Driver::Protocol::Management.new("./test_build", on_edge: true)
     manager.running?.should eq(false)
 
+    # Called when the driver interacts with redis
+    redis_set = 0
+    redis_hset = 0
+    redis_clear = 0
+    manager.on_redis = ->(action : PlaceOS::Driver::Protocol::Management::RedisAction, hash : String, key : String, value : String?) {
+      puts "\n#{hash} -> #{key} -> #{value}\n"
+
+      case action
+      in PlaceOS::Driver::Protocol::Management::RedisAction::SET
+        redis_set += 1
+      in PlaceOS::Driver::Protocol::Management::RedisAction::HSET
+        redis_hset += 1
+      in PlaceOS::Driver::Protocol::Management::RedisAction::CLEAR
+        redis_clear += 1
+      end
+    }
+
     # Launch an instance of the driver
     manager.start("mod-management-test", %({
       "ip": "localhost",
@@ -97,11 +114,14 @@ describe PlaceOS::Driver::Protocol::Management do
     }))
     manager.running?.should eq(true)
 
-    # Called when the driver interacts with redis
-    redis_callback = 0
-    manager.on_redis = ->(is_status : PlaceOS::Driver::Protocol::Management::RedisAction, module_id : String, key_name : String, status_value : String?) {
-      redis_callback += 1
-    }
+    sleep 0.5
+
+    # Clears the module state
+    redis_clear.should eq 1
+    # Sets the function list metadata
+    redis_set.should eq 1
+    # Connected status
+    redis_hset.should eq 1
 
     # Named params
     manager.execute("mod-management-test", %({
@@ -112,7 +132,7 @@ describe PlaceOS::Driver::Protocol::Management do
       }
     })).should eq("3")
 
-    redis_callback.should eq 1
+    redis_hset.should eq 2
 
     # Regular arguments
     manager.execute("mod-management-test", %({
@@ -121,7 +141,7 @@ describe PlaceOS::Driver::Protocol::Management do
     })).should eq("3")
 
     # Status shouldn't have changed, so we only expect this to be 1
-    redis_callback.should eq 1
+    redis_hset.should eq 2
 
     logged = nil
     manager.debug("mod-management-test") do |debug_json|

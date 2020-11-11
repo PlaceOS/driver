@@ -22,7 +22,7 @@ class PlaceOS::Driver::Protocol::Management
     SET
     CLEAR
   end
-  property on_redis : Proc(RedisAction, String, String, String?, Nil) = ->(action : RedisAction, module_id : String, key_name : String, status_value : String?) {}
+  property on_redis : Proc(RedisAction, String, String, String?, Nil) = ->(action : RedisAction, hash_id : String, key_name : String, status_value : String?) {}
 
   getter? terminated = false
   getter pid : Int64 = -1
@@ -456,19 +456,19 @@ class PlaceOS::Driver::Protocol::Management
       mod_id = request.id
       setting_name, setting_value = Tuple(String, YAML::Any).from_yaml(request.payload.not_nil!)
       on_setting.call(mod_id, setting_name, setting_value)
-    when "status"
+    when "hset"
       # Redis proxy driver state (hash)
-      mod_id = request.id
+      hash_id = request.id
       key, value = request.payload.not_nil!.split("\x03", 2)
-      on_redis.call(RedisAction::HSET, mod_id, key, value.empty? ? nil : value)
-    when "state"
+      on_redis.call(RedisAction::HSET, hash_id, key, value.empty? ? "null" : value)
+    when "set"
       # Redis proxy key / value
-      mod_id = request.id
-      key, value = request.payload.not_nil!.split("\x03", 2)
-      on_redis.call(RedisAction::SET, mod_id, key, value.empty? ? nil : value)
+      key = request.id
+      value = request.payload.not_nil!
+      on_redis.call(RedisAction::SET, key, value, nil)
     when "clear"
-      mod_id = request.id
-      on_redis.call(RedisAction::SET, mod_id, "clear", nil)
+      hash_id = request.id
+      on_redis.call(RedisAction::CLEAR, hash_id, "clear", nil)
     else
       Log.warn { "received unknown request #{request.cmd} - #{request.inspect}" }
     end

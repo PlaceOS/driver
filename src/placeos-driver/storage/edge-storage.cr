@@ -16,7 +16,7 @@ class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
 
     if adjusted_value
       upsert(status_name, adjusted_value)
-      PlaceOS::Driver::Protocol.instance.request(@id, "status", "#{hash_key}/#{status_name}\x03#{adjusted_value}", raw: true)
+      PlaceOS::Driver::Protocol.instance.request(hash_key, "hset", "#{status_name}\x03#{adjusted_value}", raw: true)
     else
       delete(status_name)
     end
@@ -29,7 +29,7 @@ class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
     status_name = status_name.to_s
     json_value = self[status_name]?
     adjusted_value = json_value || "null"
-    PlaceOS::Driver::Protocol.instance.request(@id, "status", "#{hash_key}/#{status_name}\x03#{adjusted_value}", raw: true)
+    PlaceOS::Driver::Protocol.instance.request(hash_key, "hset", "#{status_name}\x03#{adjusted_value}", raw: true)
     json_value
   end
 
@@ -37,7 +37,7 @@ class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
     key = key.to_s
     value = delete_impl(key)
     if value
-      PlaceOS::Driver::Protocol.instance.request(@id, "status", "#{hash_key}/#{key}\x03null", raw: true)
+      PlaceOS::Driver::Protocol.instance.request(hash_key, "hset", "#{key}\x03null", raw: true)
       return value
     end
     yield key
@@ -45,7 +45,7 @@ class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
 
   def clear
     clear_impl
-    PlaceOS::Driver::Protocol.instance.request(@id, "clear", hash_key, raw: true)
+    PlaceOS::Driver::Protocol.instance.request(hash_key, "clear", raw: true)
     self
   end
 end
