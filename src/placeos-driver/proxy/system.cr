@@ -16,6 +16,7 @@ class PlaceOS::Driver::Proxy::System
   end
 
   @system_id : String
+  @mutex : Mutex = Mutex.new
 
   getter logger : ::Log
 
@@ -59,7 +60,7 @@ class PlaceOS::Driver::Proxy::System
     index = index.to_i
 
     module_id = @system["#{module_name}/#{index}"]?
-    metadata = @redis.get("interface/#{module_id}") if module_id
+    metadata = @mutex.synchronize { @redis.get("interface/#{module_id}") } if module_id
     metadata = if module_id && metadata
                  DriverModel::Metadata.from_json metadata
                else
@@ -84,7 +85,7 @@ class PlaceOS::Driver::Proxy::System
 
       if mod_name == module_name
         module_id = @system[key]
-        metadata = @redis.get("interface/#{module_id}")
+        metadata = @mutex.synchronize { @redis.get("interface/#{module_id}") }
         metadata = if module_id && metadata
                      DriverModel::Metadata.from_json metadata
                    else
@@ -110,7 +111,7 @@ class PlaceOS::Driver::Proxy::System
       index = parts[1]
 
       module_id = @system[key]
-      metadata = @redis.get("interface/#{module_id}")
+      metadata = @mutex.synchronize { @redis.get("interface/#{module_id}") }
       if module_id && metadata
         data = DriverModel::Metadata.from_json metadata
         next unless data.implements.includes?(interface) || data.functions[interface]?
