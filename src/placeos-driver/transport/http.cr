@@ -162,6 +162,8 @@ class PlaceOS::Driver
       @tls = new_tls_context
       context = __is_https? ? @tls : nil
       @client = new_http_client(@uri_base, context)
+      @client.compress = true
+      @client
     end
 
     protected def with_shared_client
