@@ -106,11 +106,8 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
   # Redis
   #############################################################################
 
-  @redis : Redis::Client? = nil
-
-  def redis
-    @redis ||= self.class.shared_redis_client
-  end
+  private getter redis : Redis::Client { self.class.shared_redis_client }
+  protected class_getter shared_redis_client : Redis::Client { @@mutex.synchronize { new_redis_client } }
 
   def self.get(key)
     @@mutex.synchronize { shared_redis_client.get(key.to_s) }
@@ -122,11 +119,5 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
 
   protected def self.new_redis_client
     Redis::Client.boot(REDIS_URL)
-  end
-
-  @@redis : Redis::Client? = nil
-
-  protected def self.shared_redis_client
-    @@mutex.synchronize { @@redis ||= new_redis_client }
   end
 end
