@@ -59,44 +59,48 @@ module PlaceOS::Driver::Proxy
       sub_passed = nil
       message_passed = nil
       channel = Channel(Nil).new
-      RedisStorage.with_redis do |redis|
-        # Ensure keys don't already exist
-        sys_lookup = RedisStorage.new("sys-123", "system")
-        lookup_key = "Display/1"
-        sys_lookup.delete lookup_key
-        storage = RedisStorage.new("mod-1234")
-        storage.delete("power")
 
-        subs = Proxy::Subscriptions.new
-        subscription = subs.subscribe "sys-123", "Display", 1, :power do |sub, message|
-          sub_passed = sub
-          message_passed = message
-          in_callback = true
-          channel.close
-        end
+      # Ensure keys don't already exist
+      sys_lookup = RedisStorage.new("sys-123", "system")
+      lookup_key = "Display/1"
+      sys_lookup.delete lookup_key
+      storage = RedisStorage.new("mod-1234")
+      storage.delete("power")
 
-        # Subscription should not exist yet - i.e. no lookup
-        subscription.module_id.should eq(nil)
-
-        # Create the lookup and signal the change
-        sys_lookup[lookup_key] = "mod-1234"
-        redis.publish "lookup-change", "sys-123"
-
-        sleep 0.05
-
-        # Update the status
-        storage["power"] = true
-        channel.receive?
-
-        subscription.module_id.should eq("mod-1234")
-        in_callback.should eq(true)
-        message_passed.should eq("true")
-        sub_passed.should eq(subscription)
-
-        storage.delete("power")
-        sys_lookup.delete lookup_key
-        subs.terminate
+      subs = Proxy::Subscriptions.new
+      subscription = subs.subscribe "sys-123", "Display", 1, :power do |sub, message|
+        sub_passed = sub
+        message_passed = message
+        in_callback = true
+        channel.close
       end
+
+      # Subscription should not exist yet - i.e. no lookup
+      subscription.module_id.should eq(nil)
+
+      # Create the lookup and signal the change
+      sys_lookup[lookup_key] = "mod-1234"
+      RedisStorage.with_redis &.publish("lookup-change", "sys-123")
+
+      sleep 0.05
+
+      # Update the status
+      storage["power"] = true
+
+      select
+      when channel.receive?
+      when timeout(5.seconds)
+        raise "timed out waiting for subscription callback"
+      end
+
+      subscription.module_id.should eq("mod-1234")
+      in_callback.should eq(true)
+      message_passed.should eq("true")
+      sub_passed.should eq(subscription)
+
+      storage.delete("power")
+      sys_lookup.delete lookup_key
+      subs.terminate
     end
   end
 end
