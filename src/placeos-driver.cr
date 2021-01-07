@@ -39,7 +39,7 @@ abstract class PlaceOS::Driver
       redis_store = RedisStorage.new(@__module_id__)
       @__storage__ = redis_store
       redis_store.clear
-      redis_store.redis.set("interface/#{@__module_id__}", metadata)
+      RedisStorage.with_redis &.set("interface/#{@__module_id__}", metadata)
     end
   end
 

@@ -12,11 +12,9 @@ class PlaceOS::Driver::Proxy::System
   )
     @system_id = @model.id
     @system = PlaceOS::Driver::RedisStorage.new(@system_id, "system")
-    @redis = PlaceOS::Driver::RedisStorage.new_redis_client
   end
 
   @system_id : String
-  @mutex : Mutex = Mutex.new
 
   getter logger : ::Log
 
@@ -50,7 +48,7 @@ class PlaceOS::Driver::Proxy::System
   # Retrieve module metadata from redis, bypassing module_id lookup
   #
   def self.driver_metadata?(module_id) : PlaceOS::Driver::DriverModel::Metadata?
-    PlaceOS::Driver::RedisStorage
+    RedisStorage
       .get("interface/#{module_id}")
       .try(&->DriverModel::Metadata.from_json(String))
   end
@@ -60,15 +58,7 @@ class PlaceOS::Driver::Proxy::System
     index = index.to_i
 
     module_id = @system["#{module_name}/#{index}"]?
-    metadata = @mutex.synchronize { @redis.get("interface/#{module_id}") } if module_id
-    metadata = if module_id && metadata
-                 DriverModel::Metadata.from_json metadata
-               else
-                 # return a hollow proxy - we don't want to error
-                 # code can execute against a non-existance driver
-                 DriverModel::Metadata.new
-               end
-
+    metadata = get_metadata(module_id)
     module_id ||= "driver index unavailable"
 
     Proxy::Driver.new(@reply_id, module_name, index, module_id, self, metadata)
@@ -85,19 +75,23 @@ class PlaceOS::Driver::Proxy::System
 
       if mod_name == module_name
         module_id = @system[key]
-        metadata = @mutex.synchronize { @redis.get("interface/#{module_id}") }
-        metadata = if module_id && metadata
-                     DriverModel::Metadata.from_json metadata
-                   else
-                     # return a hollow proxy - we don't want to error
-                     # code can execute against a non-existance driver
-                     DriverModel::Metadata.new
-                   end
+        metadata = get_metadata(module_id)
         drivers << Proxy::Driver.new(@reply_id, module_name, index.to_i, module_id, self, metadata)
       end
     end
 
     PlaceOS::Driver::Proxy::Drivers.new(drivers)
+  end
+
+  private def get_metadata(module_id : String?) : DriverModel::Metadata
+    metadata_json = RedisStorage.get("interface/#{module_id}") if module_id.presence
+    if metadata_json && !metadata_json.empty?
+      DriverModel::Metadata.from_json metadata_json
+    else
+      # return a hollow proxy - we don't want to error
+      # code can execute against a non-existance driver
+      DriverModel::Metadata.new
+    end
   end
 
   # grabs all modules implementing(Powerable) for example
@@ -111,7 +105,7 @@ class PlaceOS::Driver::Proxy::System
       index = parts[1]
 
       module_id = @system[key]
-      metadata = @mutex.synchronize { @redis.get("interface/#{module_id}") }
+      metadata = RedisStorage.get("interface/#{module_id}")
       if module_id && metadata
         data = DriverModel::Metadata.from_json metadata
         next unless data.implements.includes?(interface) || data.functions[interface]?
