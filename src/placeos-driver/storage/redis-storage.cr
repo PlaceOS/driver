@@ -10,7 +10,7 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
     @hash_key = "#{prefix}/#{@id}"
   end
 
-  @mutex : Mutex = Mutex.new
+  @@mutex : Mutex = Mutex.new(:reentrant)
 
   getter hash_key : String
   getter id : String
@@ -22,7 +22,7 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
 
     if adjusted_value
       key = hash_key
-      @mutex.synchronize do
+      @@mutex.synchronize do
         redis.pipelined(key, reconnect: true) do |pipeline|
           pipeline.hset(key, status_name, adjusted_value)
           pipeline.publish("#{key}/#{status_name}", adjusted_value)
@@ -39,13 +39,13 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
     key = "#{hash_key}/#{status_name}"
     json_value = self[status_name]?
     adjusted_value = json_value || "null"
-    @mutex.synchronize { redis.publish(key, adjusted_value) }
+    @@mutex.synchronize { redis.publish(key, adjusted_value) }
     json_value
   end
 
   def fetch(key)
     key = key.to_s
-    entry = @mutex.synchronize { redis.hget(hash_key, key) }
+    entry = @@mutex.synchronize { redis.hget(hash_key, key) }
     entry ? entry.to_s : yield key
   end
 
@@ -54,7 +54,7 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
     value = self[key]?
     if value
       hkey = hash_key
-      @mutex.synchronize do
+      @@mutex.synchronize do
         redis.pipelined(hkey, reconnect: true) do |pipeline|
           pipeline.hdel(hkey, key)
           pipeline.publish("#{hkey}/#{key}", "null")
@@ -66,15 +66,15 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
   end
 
   def keys
-    @mutex.synchronize { redis.hkeys(hash_key) }.map &.to_s
+    @@mutex.synchronize { redis.hkeys(hash_key) }.map &.to_s
   end
 
   def values
-    @mutex.synchronize { redis.hvals(hash_key) }.map &.to_s
+    @@mutex.synchronize { redis.hvals(hash_key) }.map &.to_s
   end
 
   def size
-    @mutex.synchronize { redis.hlen(hash_key) }
+    @@mutex.synchronize { redis.hlen(hash_key) }
   end
 
   def empty?
@@ -83,7 +83,7 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
 
   def to_h
     hash = {} of String => String
-    @mutex.synchronize { redis.hgetall(hash_key) }.each_slice(2) do |slice|
+    @@mutex.synchronize { redis.hgetall(hash_key) }.each_slice(2) do |slice|
       hash[slice[0].to_s] = slice[1].to_s
     end
     hash
@@ -91,7 +91,7 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
 
   def clear
     hkey = hash_key
-    @mutex.synchronize do
+    @@mutex.synchronize do
       keys = redis.hkeys(hkey)
       redis.pipelined(hkey, reconnect: true) do |pipeline|
         keys.each do |key|
@@ -109,24 +109,24 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
   @redis : Redis::Client? = nil
 
   def redis
-    @redis ||= self.class.new_redis_client
+    @redis ||= self.class.shared_redis_client
   end
 
   def self.get(key)
-    client = new_redis_client
-    client.get(key.to_s)
-  ensure
-    client.try &.close
+    @@mutex.synchronize { shared_redis_client.get(key.to_s) }
   end
 
   def self.with_redis
-    client = new_redis_client
-    yield client
-  ensure
-    client.try &.close
+    @@mutex.synchronize { yield shared_redis_client }
   end
 
   protected def self.new_redis_client
     Redis::Client.boot(REDIS_URL)
+  end
+
+  @@redis : Redis::Client? = nil
+
+  protected def self.shared_redis_client
+    @@mutex.synchronize { @@redis ||= new_redis_client }
   end
 end
