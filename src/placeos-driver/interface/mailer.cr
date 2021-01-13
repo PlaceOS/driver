@@ -40,7 +40,7 @@ module PlaceOS::Driver::Interface::Mailer
     text = build_template(template["text"]?, args)
     html = build_template(template["html"]?, args)
 
-    send_mail(to, subject, text || "", html || "", resource_attachments, attachments, cc, bcc, from)
+    send_email(to, subject, text || "", html || "", resource_attachments, attachments, cc, bcc, from)
   end
 
   def build_template(string : String?, args : TemplateItems)
