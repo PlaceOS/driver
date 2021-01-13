@@ -6,7 +6,7 @@ module PlaceOS::Driver::Interface::Mailer
   alias Attachment = NamedTuple(file_name: String, content: String)
   alias ResourceAttachment = NamedTuple(file_name: String, content: String, content_id: String)
 
-  abstract def send_email(
+  abstract def send_mail(
     to : String | Array(String),
     subject : String,
     message_plaintext : String? = nil,
@@ -40,7 +40,7 @@ module PlaceOS::Driver::Interface::Mailer
     text = build_template(template["text"]?, args)
     html = build_template(template["html"]?, args)
 
-    send_email(to, subject, text || "", html || "", resource_attachments, attachments, cc, bcc, from)
+    send_mail(to, subject, text || "", html || "", resource_attachments, attachments, cc, bcc, from)
   end
 
   def build_template(string : String?, args : TemplateItems)
