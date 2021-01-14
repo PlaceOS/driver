@@ -5,7 +5,7 @@ class PlaceOS::Driver::ProcessManager
   Log = ::Log.for("driver.process_manager")
 
   def initialize(@logger_io = ::PlaceOS::Driver.logger_io, @input = STDIN, output = STDERR, @edge_driver = false)
-    @subscriptions = @edge_driver ? Subscriptions.new(@logger_io) : nil
+    @subscriptions = @edge_driver ? nil : Subscriptions.new(@logger_io)
     @protocol = PlaceOS::Driver::Protocol.new_instance(@input, output)
 
     backend = ::Log::IOBackend.new(@logger_io)
