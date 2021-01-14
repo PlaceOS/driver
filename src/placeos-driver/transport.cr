@@ -10,6 +10,11 @@ abstract class PlaceOS::Driver::Transport
   abstract def connect(connect_timeout : Int32) : Nil
 
   property tokenizer : ::Tokenizer? = nil
+  property pre_processor : ((Bytes) -> Bytes?) | Nil = nil
+
+  def pre_processor(&block : (Bytes) -> Bytes?)
+    @pre_processor = block
+  end
 
   # Only SSH implements exec
   def exec(message) : SSH2::Channel
@@ -131,6 +136,13 @@ abstract class PlaceOS::Driver::Transport
   end
 
   private def process(data : Bytes) : Nil
+    if pre = @pre_processor
+      tmp_data = pre.call(data)
+      return unless tmp_data
+      return if tmp_data.empty?
+      data = tmp_data
+    end
+
     if tokenize = @tokenizer
       messages = tokenize.extract(data)
       if messages.size == 1
