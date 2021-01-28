@@ -30,6 +30,7 @@ class PlaceOS::Driver
     getter protocol : Protocol
 
     def initialize(@protocol = Protocol.instance)
+      @dispatcher = ::Log::Dispatcher.for(:async)
     end
 
     def write(entry : ::Log::Entry)

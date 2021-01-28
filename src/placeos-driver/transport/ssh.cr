@@ -90,7 +90,7 @@ class PlaceOS::Driver
                   if prikey = settings.private_key
                     begin
                       pubkey = settings.public_key.not_nil!
-                      session.login_with_data(settings.username, prikey, pubkey, settings.passphrase.try &.to_slice.to_unsafe)
+                      session.login_with_data(settings.username, prikey, pubkey, settings.passphrase)
                     rescue SSH2::SessionError
                       logger.warn { "publickey auth failed, incorrect key" }
                     end
@@ -139,7 +139,7 @@ class PlaceOS::Driver
               if !session.authenticated? && (prikey = settings.private_key)
                 begin
                   pubkey = settings.public_key.not_nil!
-                  session.login_with_data(settings.username, prikey, pubkey, settings.passphrase.try &.to_slice.to_unsafe)
+                  session.login_with_data(settings.username, prikey, pubkey, settings.passphrase)
                 rescue SSH2::SessionError
                   logger.warn { "publickey auth failed, either not supported or incorrect key" }
                 end
