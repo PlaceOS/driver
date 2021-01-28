@@ -1,8 +1,6 @@
 name: placeos-driver
 version: 4.0.0
 
-crystal: 0.36.0
-
 dependencies:
   action-controller:
     github: spider-gazelle/action-controller
