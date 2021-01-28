@@ -66,7 +66,7 @@ abstract class PlaceOS::Driver::Transport
 
         # Make the request
         client = new_http_client(uri, context)
-        client.exec(method.to_s.upcase, uri.full_path, headers, body)
+        client.exec(method.to_s.upcase, uri.request_target, headers, body)
       {% end %}
     end
 

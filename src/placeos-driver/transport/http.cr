@@ -225,11 +225,11 @@ class PlaceOS::Driver
         # Does this request require a TLS context?
         context = __is_https? ? new_tls_context : nil
         client = new_http_client(uri, context)
-        client.exec(method.to_s.upcase, uri.full_path, headers, body)
+        client.exec(method.to_s.upcase, uri.request_target, headers, body)
       else
         # Only a single request can occur at a time
         # crystal does not provide any queuing mechanism so this mutex does the trick
-        with_shared_client &.exec(method.to_s.upcase, uri.full_path, headers, body)
+        with_shared_client &.exec(method.to_s.upcase, uri.request_target, headers, body)
       end
     end
 
