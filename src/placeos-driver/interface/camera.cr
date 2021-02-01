@@ -29,7 +29,7 @@ module PlaceOS::Driver::Interface::Camera
   @tilt_range = 0..1
 
   # Most cameras support sending a move speed
-  abstract def joystick(pan_speed : Int32, tilt_speed : Int32, index : Int32 | String = 1)
+  abstract def joystick(pan_speed : Int32, tilt_speed : Int32, index : Int32 | String = 0)
 
   # Natively supported on the device
   alias NativePreset = String
@@ -38,8 +38,8 @@ module PlaceOS::Driver::Interface::Camera
   alias DiscretePreset = NamedTuple(pan: Int32, tilt: Int32, zoom: Int32, focus: Int32?, iris: Int32?)
 
   # Most cameras support presets (either as a feature or via manual positioning)
-  abstract def recall(position : String, index : Int32 | String = 1)
-  abstract def save_position(name : String, index : Int32 | String = 1)
+  abstract def recall(position : String, index : Int32 | String = 0)
+  abstract def save_position(name : String, index : Int32 | String = 0)
 
   enum TiltDirection
     Down
@@ -47,7 +47,7 @@ module PlaceOS::Driver::Interface::Camera
     Stop
   end
 
-  def tilt(direction : TiltDirection, index : Int32 | String = 1)
+  def tilt(direction : TiltDirection, index : Int32 | String = 0)
     case direction
     when TiltDirection::Up
       move(MoveablePosition::Up, index)
@@ -64,7 +64,7 @@ module PlaceOS::Driver::Interface::Camera
     Stop
   end
 
-  def pan(direction : PanDirection, index : Int32 | String = 1)
+  def pan(direction : PanDirection, index : Int32 | String = 0)
     case direction
     when PanDirection::Left
       move(MoveablePosition::Left, index)

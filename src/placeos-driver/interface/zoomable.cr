@@ -5,7 +5,7 @@ module PlaceOS::Driver::Interface::Zoomable
   @zoom_range = 0..1
 
   # This a discrete level on most cameras
-  abstract def zoom_to(position : Int32, auto_focus : Bool = true, index : Int32 | String = 1)
+  abstract def zoom_to(position : Int32, auto_focus : Bool = true, index : Int32 | String = 0)
 
   enum ZoomDirection
     In
@@ -18,7 +18,7 @@ module PlaceOS::Driver::Interface::Zoomable
 
   # As zoom is typically discreet we manually implement the analogue version
   # Simple enough to overwrite this as required
-  def zoom(direction : ZoomDirection, index : Int32 | String = 1)
+  def zoom(direction : ZoomDirection, index : Int32 | String = 0)
     if zoom_timer = @zoom_timer
       zoom_timer.cancel(reason: "new request", terminate: true)
       @zoom_timer = nil
