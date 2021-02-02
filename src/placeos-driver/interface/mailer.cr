@@ -22,7 +22,7 @@ module PlaceOS::Driver::Interface::Mailer
   alias Templates = Hash(String, Hash(String, Hash(String, String)))
   @templates : Templates = Templates.new
 
-  alias TemplateItems = Hash(String, String | Int64 | Float64 | Bool)
+  alias TemplateItems = Hash(String, String | Int64 | Float64 | Bool | Nil)
 
   def send_template(
     to : String | Array(String),
