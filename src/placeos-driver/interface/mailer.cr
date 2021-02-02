@@ -34,7 +34,12 @@ module PlaceOS::Driver::Interface::Mailer
     bcc : String | Array(String) = [] of String,
     from : String | Array(String) | Nil = nil
   )
-    template = @templates[template[0]][template[1]]
+    template = begin
+      @templates[template[0]][template[1]]
+    rescue
+      logger.warn { "no template found with: #{template}" }
+      return
+    end
 
     subject = build_template(template["subject"], args)
     text = build_template(template["text"]?, args)
