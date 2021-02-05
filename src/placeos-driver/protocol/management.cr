@@ -35,6 +35,7 @@ class PlaceOS::Driver::Protocol::Management
 
   private getter debug_lock : Mutex = Mutex.new
   private getter request_lock : Mutex = Mutex.new
+  private getter settings_update_lock : Mutex = Mutex.new
 
   private getter modules : Hash(String, String) = {} of String => String
   private getter events : Channel(Request) = Channel(Request).new
@@ -455,7 +456,7 @@ class PlaceOS::Driver::Protocol::Management
     when "setting"
       mod_id = request.id
       setting_name, setting_value = Tuple(String, YAML::Any).from_yaml(request.payload.not_nil!)
-      on_setting.call(mod_id, setting_name, setting_value)
+      settings_update_lock.synchronize { on_setting.call(mod_id, setting_name, setting_value) }
     when "hset"
       # Redis proxy driver state (hash)
       hash_id = request.id
