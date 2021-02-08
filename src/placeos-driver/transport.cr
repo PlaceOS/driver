@@ -72,7 +72,7 @@ abstract class PlaceOS::Driver::Transport
 
     {% if @type.name.stringify != "PlaceOS::Driver::TransportLogic" %}
       protected def new_http_client(uri, context)
-        client = ConnectProxy::HTTPClient.new(uri, context)
+        client = ConnectProxy::HTTPClient.new(uri, context, ignore_env: true)
         client.compress = true
 
         # Apply basic auth settings
@@ -82,8 +82,18 @@ abstract class PlaceOS::Driver::Transport
 
         # Apply proxy settings
         if proxy_config = @settings.get { setting?(NamedTuple(host: String, port: Int32, auth: NamedTuple(username: String, password: String)?), :proxy) }
-          proxy = ConnectProxy.new(**proxy_config)
-          client.before_request { client.set_proxy(proxy) }
+          if !proxy_config[:host].empty?
+            proxy = ConnectProxy.new(**proxy_config)
+            client.before_request { client.set_proxy(proxy) }
+          end
+        elsif ConnectProxy.behind_proxy?
+          # Apply environment defined proxy
+          begin
+            proxy = ConnectProxy.new(*ConnectProxy.parse_proxy_url)
+            client.before_request { client.set_proxy(proxy) }
+          rescue error
+            logger.warn(exception: error) { "failed to apply environment proxy URI" }
+          end
         end
 
         client

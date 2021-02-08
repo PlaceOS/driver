@@ -7,6 +7,7 @@ dependencies:
 
   connect-proxy:
     github: spider-gazelle/connect-proxy
+    version: ~> 1.2
 
   debug:
     github: Sija/debug.cr
