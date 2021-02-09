@@ -458,7 +458,11 @@ class PlaceOS::Driver::Protocol::Management
       # pass the unparsed message down the pipe
       payload = request.payload.not_nil!
       watchers = debug_lock.synchronize { @debugging[request.id].dup }
-      watchers.each { |callback| callback.call(payload) }
+      watchers.each do |callback|
+        callback.call(payload)
+      rescue error
+        Log.warn(exception: error) { "error forwarding debug payload #{request.inspect}" }
+      end
     when "exec"
       # need to route this internally to the correct module
       on_exec.call(request, ->(response : Request) {
