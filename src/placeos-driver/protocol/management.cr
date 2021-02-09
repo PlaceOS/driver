@@ -402,7 +402,7 @@ class PlaceOS::Driver::Protocol::Management
         string = nil
         begin
           string = String.new(message[0..-3])
-          junk, _, string = string.rpartition(MESSAGE_INDICATOR)
+          _junk, _, string = string.rpartition(MESSAGE_INDICATOR)
 
           # Log.debug do
           #  if junk.empty?
@@ -434,6 +434,7 @@ class PlaceOS::Driver::Protocol::Management
   end
 
   # This function is used to process comms coming from the driver
+  # ameba:disable Metrics/CyclomaticComplexity
   private def process(request)
     case request.cmd
     when "start"

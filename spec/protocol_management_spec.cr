@@ -12,7 +12,7 @@ describe PlaceOS::Driver::Protocol::Management do
 
     # Called when the driver interacts with redis
     redis_callback = 0
-    manager.on_redis = ->(is_status : PlaceOS::Driver::Protocol::Management::RedisAction, module_id : String, key_name : String, status_value : String?) {
+    manager.on_redis = ->(_is_status : PlaceOS::Driver::Protocol::Management::RedisAction, _module_id : String, _key_name : String, _status_value : String?) {
       redis_callback += 1
     }
 
