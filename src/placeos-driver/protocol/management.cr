@@ -12,6 +12,8 @@ require "./request"
 class PlaceOS::Driver::Protocol::Management
   Log = ::Log.for("driver.protocol.management")
 
+  alias DebugCallback = String -> Nil
+
   # Core should update this callback to route requests
   property on_exec : Proc(Request, Proc(Request, Nil), Nil) = ->(request : Request, callback : Proc(Request, Nil)) {}
   property on_setting : Proc(String, String, YAML::Any, Nil) = ->(module_id : String, setting_name : String, setting_value : YAML::Any) {}
@@ -46,8 +48,8 @@ class PlaceOS::Driver::Protocol::Management
     @requests = {} of UInt64 => Promise::DeferredPromise(String)
     @starting = {} of String => Promise::DeferredPromise(Nil)
 
-    @debugging = Hash(String, Array(Proc(String, Nil))).new do |hash, key|
-      hash[key] = [] of Proc(String, Nil)
+    @debugging = Hash(String, Array(DebugCallback)).new do |hash, key|
+      hash[key] = [] of DebugCallback
     end
 
     @sequence = 1_u64
@@ -137,7 +139,7 @@ class PlaceOS::Driver::Protocol::Management
     @events.send(Request.new(module_id, "debug"))
   end
 
-  def ignore(module_id : String, &callback : (String) -> Nil) : Nil
+  def ignore(module_id : String, &callback : DebugCallback) : Nil
     signal = debug_lock.synchronize do
       array = @debugging[module_id]
       initial_size = array.size
@@ -154,6 +156,18 @@ class PlaceOS::Driver::Protocol::Management
     return unless signal
 
     @events.send(Request.new(module_id, "ignore"))
+  end
+
+  # Remove all debug listeners on a module, returning the debug callback array
+  #
+  def ignore_all(module_id : String) : Array(DebugCallback)
+    debug_lock.synchronize do
+      @debugging[module_id].dup.tap do |callbacks|
+        callbacks.each do |callback|
+          ignore(module_id, &callback)
+        end
+      end
+    end
   end
 
   # ameba:disable Metrics/CyclomaticComplexity
