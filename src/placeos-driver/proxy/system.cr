@@ -4,19 +4,42 @@ require "../driver_model"
 require "./remote_driver"
 
 class PlaceOS::Driver::Proxy::System
+  # Local system available to logic driver
   def initialize(
-    @model : DriverModel::ControlSystem,
+    model : DriverModel::ControlSystem,
     @reply_id : String,
     @logger : ::Log = ::Log.for("driver.proxy.system"),
     @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new
   )
-    @system_id = @model.id
+    @config = model
+    @system_id = model.id
     @system = PlaceOS::Driver::RedisStorage.new(@system_id, "system")
   end
 
+  # Remote system (lazily loaded config)
+  def initialize(
+    @system_id : String,
+    @reply_id : String,
+    @logger : ::Log = ::Log.for("driver.proxy.system"),
+    @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new
+  )
+    @system = PlaceOS::Driver::RedisStorage.new(@system_id, "system")
+  end
+
+  @system : PlaceOS::Driver::RedisStorage
   @system_id : String
+  @subscriptions : Proxy::Subscriptions
+  @reply_id : String
 
   getter logger : ::Log
+
+  getter config : DriverModel::ControlSystem do
+    # Request the remote systems model
+    channel = PlaceOS::Driver::Protocol.instance.expect_response(@system_id, @reply_id, "sys")
+    response = channel.receive
+    raise response.build_error if response.error
+    DriverModel::ControlSystem.from_json response.payload.not_nil!
+  end
 
   def [](module_name)
     get_driver(*get_parts(module_name))
@@ -143,10 +166,6 @@ class PlaceOS::Driver::Proxy::System
     @subscriptions.subscribe(@system_id, module_name, index, status, &callback)
   end
 
-  def config
-    @model
-  end
-
   # Checks for the existence of a particular module
   def exists?(module_name, index = nil) : Bool
     module_name, index = get_parts(module_name) unless index
@@ -164,28 +183,28 @@ class PlaceOS::Driver::Proxy::System
     @system.keys.map { |key| key.split("/")[0] }.count { |key| key == module_name }
   end
 
+  def id
+    @system_id
+  end
+
   def name
-    @model.name
+    config.name
   end
 
   def email
-    @model.email
+    config.email
   end
 
   def capacity
-    @model.capacity
+    config.capacity
   end
 
   def features
-    @model.features
+    config.features
   end
 
   def bookable
-    @model.bookable
-  end
-
-  def id
-    @system_id
+    config.bookable
   end
 
   private def get_parts(module_id)
