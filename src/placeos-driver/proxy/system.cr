@@ -40,6 +40,8 @@ class PlaceOS::Driver::Proxy::System
     DriverModel::ControlSystem.from_json response.payload.not_nil!
   end
 
+  delegate bookable, capacity, email, features, name, to: config
+
   def [](module_name)
     get_driver(*get_parts(module_name))
   end
@@ -184,26 +186,6 @@ class PlaceOS::Driver::Proxy::System
 
   def id
     @system_id
-  end
-
-  def name
-    config.name
-  end
-
-  def email
-    config.email
-  end
-
-  def capacity
-    config.capacity
-  end
-
-  def features
-    config.features
-  end
-
-  def bookable
-    config.bookable
   end
 
   private def get_parts(module_id)
