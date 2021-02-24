@@ -115,6 +115,10 @@ abstract class PlaceOS::Driver
     @__system__ = Proxy::System.new(system_model, @__module_id__, @__logger__, @__subscriptions__.not_nil!)
   end
 
+  def system(id : String) : Proxy::System
+    Proxy::System.new(id, @__module_id__, @__logger__, @__subscriptions__.not_nil!)
+  end
+
   # Settings helpers
   macro setting(klass, *types)
     @__setting__.get { setting({{klass}}, {{*types}}) }

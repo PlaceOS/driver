@@ -18,6 +18,9 @@ class PlaceOS::Driver::Protocol::Management
   property on_exec : Proc(Request, Proc(Request, Nil), Nil) = ->(request : Request, callback : Proc(Request, Nil)) {}
   property on_setting : Proc(String, String, YAML::Any, Nil) = ->(module_id : String, setting_name : String, setting_value : YAML::Any) {}
 
+  # A request for the system model as defined in the database
+  property on_system_model : Proc(Request, Proc(Request, Nil), Nil) = ->(request : Request, callback : Proc(Request, Nil)) {}
+
   # These are the events coming from the driver where edge is expected to update redis on the drivers behalf
   enum RedisAction
     HSET
@@ -468,6 +471,13 @@ class PlaceOS::Driver::Protocol::Management
       # need to route this internally to the correct module
       on_exec.call(request, ->(response : Request) {
         # The event queue is for sending data to the driver
+        response.cmd = "result"
+        @events.send(response)
+        nil
+      })
+    when "sys"
+      # the response payload should return the requested systems database model
+      on_system_model.call(request, ->(response : Request) {
         response.cmd = "result"
         @events.send(response)
         nil
