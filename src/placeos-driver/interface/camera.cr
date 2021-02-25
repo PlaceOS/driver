@@ -24,9 +24,11 @@ module PlaceOS::Driver::Interface::Camera
   # Adjust these to appropriate values in on_load or on_connect
   @pan = 0
   @tilt = 0
+  @aperture = 0
 
   @pan_range = 0..1
   @tilt_range = 0..1
+  @iris_range = 0..1
 
   # Most cameras support sending a move speed
   abstract def joystick(pan_speed : Int32, tilt_speed : Int32, index : Int32 | String = 0)
@@ -71,6 +73,23 @@ module PlaceOS::Driver::Interface::Camera
     when PanDirection::Right
       move(MoveablePosition::Right, index)
     when PanDirection::Stop
+      stop(index)
+    end
+  end
+
+  enum IrisAperture
+    Open
+    Close
+    Stop
+  end
+
+  def adjust(direction : IrisAperture, index : Int32 | String = 0)
+    case direction
+    when IrisAperture::Open
+      move(MoveablePosition::Open, index)
+    when IrisAperture::Close
+      move(MoveablePosition::Close, index)
+    when IrisAperture::Stop
       stop(index)
     end
   end
