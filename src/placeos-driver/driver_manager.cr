@@ -41,7 +41,8 @@ class PlaceOS::Driver::DriverManager
                    # nothing required to be done here
                    PlaceOS::Driver::TransportLogic.new(@queue)
                  when DriverModel::Role::WEBSOCKET
-                   PlaceOS::Driver::TransportWebsocket.new(@queue, @model.uri.not_nil!, @settings) do |data, task|
+                   headers_callback = Proc(HTTP::Headers).new { websocket_headers }
+                   PlaceOS::Driver::TransportWebsocket.new(@queue, @model.uri.not_nil!, @settings, headers_callback) do |data, task|
                      received(data, task)
                    end
                  else
@@ -199,6 +200,18 @@ class PlaceOS::Driver::DriverManager
     rescue error
       logger.warn(exception: error) { "error changing connected state #{driver.class} (#{@module_id})" }
     end
+  end
+
+  private def websocket_headers : HTTP::Headers
+    driver = @driver
+    if driver.responds_to?(:websocket_headers)
+      driver.websocket_headers
+    else
+      HTTP::Headers.new
+    end
+  rescue error
+    logger.info(exception: error) { "error building websocket headers" }
+    HTTP::Headers.new
   end
 
   private def received(data, task)
