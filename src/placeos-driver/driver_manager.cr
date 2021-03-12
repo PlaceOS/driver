@@ -210,7 +210,7 @@ class PlaceOS::Driver::DriverManager
       HTTP::Headers.new
     end
   rescue error
-    logger.info(exception: error) { "building websocket headers" }
+    logger.info(exception: error) { "error building websocket headers" }
     HTTP::Headers.new
   end
 
