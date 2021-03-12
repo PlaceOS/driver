@@ -5,7 +5,12 @@ require "../transport"
 
 class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
   # timeouts in seconds
-  def initialize(@queue : PlaceOS::Driver::Queue, @uri : String, @settings : ::PlaceOS::Driver::Settings, &@received : (Bytes, PlaceOS::Driver::Task?) -> Nil)
+  def initialize(
+    @queue : PlaceOS::Driver::Queue,
+    @uri : String, @settings : ::PlaceOS::Driver::Settings,
+    @headers_callback,
+    &@received : (Bytes, PlaceOS::Driver::Task?) -> Nil
+  )
     @terminated = false
 
     parts = URI.parse(@uri)
@@ -16,6 +21,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     @tls = @use_tls ? new_tls_context : nil
   end
 
+  @headers_callback : -> HTTP::Headers
   @ip : String
   @path : String
   @port : Int32?
@@ -44,24 +50,21 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
   end
 
   private def start_socket(connect_timeout)
+    # Get dynamically defined headers
+    headers = @headers_callback.call
+
     # Grab any pre-defined headers
-    header_hash = begin
-      @settings.get { setting?(Hash(String, String | Array(String)), :headers) }
+    begin
+      if header_hash = @settings.get { setting?(Hash(String, String | Array(String)), :headers) }
+        header_hash.each { |key, value| headers[key] = value }
+      end
     rescue error
       logger.info(exception: error) { "loading websocket headers" }
       nil
     end
-    websocket = if header_hash
-                  headers = HTTP::Headers.new
-                  header_hash.each do |key, value|
-                    headers[key] = value
-                  end
-                  @websocket = HTTP::WebSocket.new(@ip, @path, @port, @tls, headers)
-                else
-                  @websocket = HTTP::WebSocket.new(@ip, @path, @port, @tls)
-                end
 
-    # Auto pong
+    # Configure websocket to auto pong
+    websocket = @websocket = HTTP::WebSocket.new(@ip, @path, @port, @tls, headers)
     websocket.on_ping { |message| websocket.pong(message) }
 
     # Enable queuing
