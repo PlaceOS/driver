@@ -213,6 +213,7 @@ abstract class PlaceOS::Driver
   {% RESERVED_METHODS["on_load"] = true %}
   {% RESERVED_METHODS["on_update"] = true %}
   {% RESERVED_METHODS["on_unload"] = true %}
+  {% RESERVED_METHODS["websocket_headers"] = true %}
   {% RESERVED_METHODS["[]?"] = true %}
   {% RESERVED_METHODS["[]"] = true %}
   {% RESERVED_METHODS["[]="] = true %}
@@ -315,7 +316,12 @@ abstract class PlaceOS::Driver
             when JSON::Serializable
               ret_val.to_json
             else
-              ret_val = ret_val.responds_to?(:get) ? ret_val.get : ret_val
+              ret_val = if ret_val.is_a?(::Future::Compute) || ret_val.is_a?(::Promise)
+                ret_val.responds_to?(:get) ? ret_val.get : ret_val
+              else
+                ret_val
+              end
+
               begin
                 ret_val.try_to_json("null")
               rescue error
