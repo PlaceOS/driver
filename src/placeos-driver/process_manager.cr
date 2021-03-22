@@ -2,18 +2,11 @@ require "json"
 require "./logger"
 
 class PlaceOS::Driver::ProcessManager
-  Log = ::Log.for("driver.process_manager")
+  Log = ::Log.for("driver.process_manager", ::Log::Severity::Info)
 
   def initialize(@logger_io = ::PlaceOS::Driver.logger_io, @input = STDIN, output = STDERR, @edge_driver = false)
-    @subscriptions = @edge_driver ? nil : Subscriptions.new(@logger_io)
+    @subscriptions = @edge_driver ? nil : Subscriptions.new
     @protocol = PlaceOS::Driver::Protocol.new_instance(@input, output)
-
-    backend = ::Log::IOBackend.new(@logger_io)
-    backend.formatter = PlaceOS::Driver::LOG_FORMATTER
-    ::Log.builder.bind("driver.process_manager", ::Log::Severity::Info, backend)
-
-    @loaded = {} of String => DriverManager
-
     @protocol.register :start { |request| start(request) }
     @protocol.register :stop { |request| stop(request) }
     @protocol.register :update { |request| update(request) }
@@ -22,23 +15,24 @@ class PlaceOS::Driver::ProcessManager
     @protocol.register :ignore { |request| ignore(request) }
     @protocol.register :info { |request| info(request) }
     @protocol.register :terminate { terminate }
-
-    @terminated = Channel(Nil).new
   end
 
-  @subscriptions : Subscriptions?
-  @edge_driver : Bool
-  @input : IO
-  @logger_io : IO
-  getter :loaded, terminated
+  private getter input : IO
+  private getter logger_io : IO
+
+  private getter subscriptions : Subscriptions?
+  private getter? edge_driver : Bool
+
+  getter loaded : Hash(String, DriverManager) { {} of String => DriverManager }
+  getter terminated : Channel(Nil) { Channel(Nil).new }
 
   def start(request : Protocol::Request, driver_model = nil)
     module_id = request.id
-    return if @loaded[module_id]?
+    return if loaded[module_id]?
 
     model = driver_model || PlaceOS::Driver::DriverModel.from_json(request.payload.not_nil!)
-    driver = DriverManager.new module_id, model, @logger_io, @subscriptions, @edge_driver
-    @loaded[module_id] = driver
+    driver = DriverManager.new module_id, model, logger_io, @subscriptions, edge_driver?
+    loaded[module_id] = driver
 
     # Drivers can all run on a different thread
     spawn(same_thread: true) { driver.start }
@@ -51,7 +45,7 @@ class PlaceOS::Driver::ProcessManager
   end
 
   def stop(request : Protocol::Request) : Nil
-    driver = @loaded.delete request.id
+    driver = loaded.delete request.id
     if driver
       promise = Promise.new(Nil)
       driver.requests.send({promise, request})
@@ -61,7 +55,7 @@ class PlaceOS::Driver::ProcessManager
 
   def update(request : Protocol::Request) : Nil
     module_id = request.id
-    driver = @loaded[module_id]?
+    driver = loaded[module_id]?
     return unless driver
     existing = driver.model
     updated = PlaceOS::Driver::DriverModel.from_json(request.payload.not_nil!)
@@ -86,7 +80,7 @@ class PlaceOS::Driver::ProcessManager
   end
 
   def exec(request : Protocol::Request) : Protocol::Request
-    driver = @loaded[request.id]?
+    driver = loaded[request.id]?
 
     begin
       raise "driver not available" unless driver
@@ -104,39 +98,40 @@ class PlaceOS::Driver::ProcessManager
   end
 
   def debug(request : Protocol::Request) : Nil
-    driver = @loaded[request.id]?
+    driver = loaded[request.id]?
     driver.try &.logger.debugging = true
   end
 
   def ignore(request : Protocol::Request) : Nil
-    driver = @loaded[request.id]?
+    driver = loaded[request.id]?
     driver.try &.logger.debugging = false
   end
 
   def info(request : Protocol::Request) : Protocol::Request
-    request.payload = @loaded.keys.to_json
+    request.payload = loaded.keys.to_json
     request.cmd = "result"
     request
   end
 
   def terminate : Nil
     # Stop the core protocol handler (no more bets)
-    @input.close
+    input.close
 
     # Shutdown all the connections gracefully
     req = Protocol::Request.new("", "stop")
-    @loaded.each_value do |driver|
+    loaded.each_value do |driver|
       promise = Promise.new(Nil)
       driver.requests.send({promise, req})
       promise.get
     end
-    @loaded.clear
+
+    loaded.clear
 
     # We now want to stop the subscription loop
-    @subscriptions.try &.terminate
+    subscriptions.try &.terminate
 
     # TODO:: Wait until process have actually completed.
     # Also have a timer that will allow us to force close if required
-    @terminated.close
+    terminated.close
   end
 end

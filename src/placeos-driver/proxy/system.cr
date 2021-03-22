@@ -175,17 +175,21 @@ class PlaceOS::Driver::Proxy::System
 
   # Returns a list of all the module names in the system
   def modules
-    @system.keys.map { |key| key.split("/")[0] }.uniq
+    module_keys.uniq!
   end
 
   # Grabs the number of a particular device type
   def count(module_name)
     module_name = module_name.to_s
-    @system.keys.map { |key| key.split("/")[0] }.count { |key| key == module_name }
+    module_keys.count { |key| key == module_name }
   end
 
   def id
     @system_id
+  end
+
+  private def module_keys
+    @system.keys.compact_map(&.split('/').first?)
   end
 
   private def get_parts(module_id)

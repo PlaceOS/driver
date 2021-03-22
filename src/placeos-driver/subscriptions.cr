@@ -3,13 +3,12 @@ require "redis"
 require "simple_retry"
 
 require "./constants"
-require "./logger_io"
 
 # TODO:: we need to be scheduling these onto the correct thread
 class PlaceOS::Driver
   class Subscriptions
     SYSTEM_ORDER_UPDATE = "lookup-change"
-    Log                 = ::Log.for("driver.subscriptions")
+    Log                 = ::Log.for("driver.subscriptions", ::Log::Severity::Info)
 
     # Mutex for indirect subscriptions as it involves two hashes, a redis lookup
     # and the possibility of an index change. The redis lookup pauses the
@@ -35,14 +34,7 @@ class PlaceOS::Driver
 
     private property subscription_channel : Channel(Tuple(Bool, String)) = Channel(Tuple(Bool, String)).new
 
-    def initialize(logger_io : IO = ::PlaceOS::Driver.logger_io, module_id : String = "")
-      backend = ::Log::IOBackend.new(logger_io)
-
-      # Note: formatter set globally via PlaceOS::Driver::LOG_FORMATTER
-      #       this change is to prevent the Driver::Log bleeding into other namespaces
-      backend.formatter = PlaceOS::Driver::LOG_FORMATTER
-      ::Log.builder.bind("driver.subscriptions", ::Log::Severity::Info, backend)
-
+    def initialize(module_id : String = "")
       spawn(same_thread: true) { monitor_changes }
     end
 
