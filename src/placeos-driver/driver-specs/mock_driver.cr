@@ -111,9 +111,9 @@ abstract class DriverSpecs::MockDriver
     {% klasses.map { |a| methods = methods + a.methods } %}
     {% methods = methods.reject { |method| RESERVED_METHODS[method.name.stringify] } %}
     {% methods = methods.reject { |method| method.visibility != :public } %}
-    {% methods = methods.reject { |method| method.accepts_block? } %}
+    {% methods = methods.reject &.accepts_block? %}
     # Filter out abstract methods
-    {% methods = methods.reject { |method| method.body.stringify.empty? } %}
+    {% methods = methods.reject &.body.stringify.empty? %}
 
     class KlassExecutor < BaseExecutor
       EXECUTORS = {
@@ -132,7 +132,7 @@ abstract class DriverSpecs::MockDriver
 
               # Support argument lists
               if json.raw.is_a?(Array)
-                arg_names = { {{*args.map { |arg| arg.name.stringify }}} }
+                arg_names = { {{*args.map(&.name.stringify)}} }
                 args = json.as_a
 
                 raise "wrong number of arguments for '#{{{method.name.stringify}}}' (given #{args.size}, expected #{arg_names.size})" if args.size > arg_names.size

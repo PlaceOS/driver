@@ -208,7 +208,7 @@ class PlaceOS::Driver
           query.split('&').map(&.split('=')).each { |part| params[part[0]] = part[1]? }
         end
 
-        uri.query = params.map { |key, value| value ? "#{key}=#{value}" : key }.join("&")
+        uri.query = params.join('&') { |key, value| value ? "#{key}=#{value}" : key }
       end
 
       # Apply a default fragment

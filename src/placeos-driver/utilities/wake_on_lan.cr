@@ -36,7 +36,7 @@ module PlaceOS::Driver::Utilities::WakeOnLAN
             raise "Unsupported subnet type: #{address.family} (#{address.family.value})"
           end
 
-    mac_address = mac_address.gsub(/(0x|[^0-9A-Fa-f])*/, "").scan(/.{2}/).map(&.[0]).join("")
+    mac_address = mac_address.gsub(/(0x|[^0-9A-Fa-f])*/, "").scan(/.{2}/).join("", &.[0])
     magicpacket = "ff" * 6 + mac_address * 16
 
     # The send methods may sporadically fail with Errno::ECONNREFUSED when sending datagrams to a non-listening server

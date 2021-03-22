@@ -30,7 +30,8 @@ class PlaceOS::Driver::ProcessManager
   @edge_driver : Bool
   @input : IO
   @logger_io : IO
-  getter :loaded, terminated
+
+  getter loaded, terminated
 
   def start(request : Protocol::Request, driver_model = nil)
     module_id = request.id
