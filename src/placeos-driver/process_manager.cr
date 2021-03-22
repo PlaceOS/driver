@@ -2,15 +2,11 @@ require "json"
 require "./logger"
 
 class PlaceOS::Driver::ProcessManager
-  Log = ::Log.for("driver.process_manager")
+  Log = ::Log.for("driver.process_manager", ::Log::Severity::Info)
 
   def initialize(@logger_io = ::PlaceOS::Driver.logger_io, @input = STDIN, output = STDERR, @edge_driver = false)
-    @subscriptions = @edge_driver ? nil : Subscriptions.new(@logger_io)
+    @subscriptions = @edge_driver ? nil : Subscriptions.new
     @protocol = PlaceOS::Driver::Protocol.new_instance(@input, output)
-
-    backend = ::Log::IOBackend.new(@logger_io)
-    backend.formatter = PlaceOS::Driver::LOG_FORMATTER
-    ::Log.builder.bind("driver.process_manager", ::Log::Severity::Info, backend)
     @protocol.register :start { |request| start(request) }
     @protocol.register :stop { |request| stop(request) }
     @protocol.register :update { |request| update(request) }
