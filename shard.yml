@@ -1,5 +1,6 @@
 name: placeos-driver
-version: 5.0.1
+version: 5.0.2
+crystal: ">= 0.36.1"
 
 dependencies:
   action-controller:
