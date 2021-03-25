@@ -41,9 +41,9 @@ class PlaceOS::Driver
     def write(entry : ::Log::Entry)
       if exception = entry.exception
         message = "#{entry.message}\n#{exception.inspect_with_backtrace}"
-        protocol.request entry.source, "debug", [entry.severity, message]
+        protocol.request entry.source, "debug", [entry.severity.to_i, message]
       else
-        protocol.request entry.source, "debug", [entry.severity, entry.message]
+        protocol.request entry.source, "debug", [entry.severity.to_i, entry.message]
       end
     end
   end

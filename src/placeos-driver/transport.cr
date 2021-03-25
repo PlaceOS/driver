@@ -66,14 +66,38 @@ abstract class PlaceOS::Driver::Transport
 
         # Make the request
         client = new_http_client(uri, context)
-        client.exec(method.to_s.upcase, uri.request_target, headers, body)
+        check_http_response_encoding client.exec(method.to_s.upcase, uri.request_target, headers, body)
       {% end %}
+    end
+
+    protected def check_http_response_encoding(response)
+      headers = response.headers
+      encoding = headers["Content-Encoding"]?
+      if encoding.in?({"gzip", "deflate"})
+        response.consume_body_io
+        body = response.body
+
+        if !body.blank?
+          body_io = IO::Memory.new(body)
+          body = case encoding
+                 when "gzip"
+                   Compress::Gzip::Reader.open(body_io, &.gets_to_end)
+                 when "deflate"
+                   Compress::Deflate::Reader.open(body_io, &.gets_to_end)
+                 end
+
+          headers.delete("Content-Encoding")
+          headers.delete("Content-Length")
+
+          response = HTTP::Client::Response.new(response.status, body, headers, response.status_message, response.version)
+        end
+      end
+      response
     end
 
     {% if @type.name.stringify != "PlaceOS::Driver::TransportLogic" %}
       protected def new_http_client(uri, context)
         client = ConnectProxy::HTTPClient.new(uri, context, ignore_env: true)
-        client.compress = true
 
         # Apply basic auth settings
         if auth = @settings.get { setting?(NamedTuple(username: String, password: String), :basic_auth) }
@@ -96,6 +120,7 @@ abstract class PlaceOS::Driver::Transport
           end
         end
 
+        client.compress = true
         client
       end
     {% end %}
