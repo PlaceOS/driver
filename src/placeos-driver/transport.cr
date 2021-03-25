@@ -80,11 +80,11 @@ abstract class PlaceOS::Driver::Transport
         if !body.blank?
           body_io = IO::Memory.new(body)
           body = case encoding
-                when "gzip"
-                  Compress::Gzip::Reader.open(body_io, &.gets_to_end)
-                when "deflate"
-                  Compress::Deflate::Reader.open(body_io, &.gets_to_end)
-                end
+                 when "gzip"
+                   Compress::Gzip::Reader.open(body_io, &.gets_to_end)
+                 when "deflate"
+                   Compress::Deflate::Reader.open(body_io, &.gets_to_end)
+                 end
 
           headers.delete("Content-Encoding")
           headers.delete("Content-Length")
