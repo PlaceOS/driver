@@ -81,9 +81,9 @@ abstract class PlaceOS::Driver::Transport
           body_io = IO::Memory.new(body)
           body = case encoding
                 when "gzip"
-                  Compress::Gzip::Reader.open(body_io) { |gzip| gzip.gets_to_end }
+                  Compress::Gzip::Reader.open(body_io, &.gets_to_end)
                 when "deflate"
-                  Compress::Deflate::Reader.open(body_io) { |deflate| deflate.gets_to_end }
+                  Compress::Deflate::Reader.open(body_io, &.gets_to_end)
                 end
 
           headers.delete("Content-Encoding")
