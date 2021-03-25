@@ -55,11 +55,5 @@ struct PlaceOS::Driver::DriverModel
   property makebreak : Bool
   property uri : String?
   property settings : Hash(String, JSON::Any)
-
-  {% if compare_versions(Crystal::VERSION, "1.0.0") < 0 %}
-    @[JSON::Field(converter: Enum::ValueConverter(Role))]
-    property role : Role
-  {% else %}
-    property role : Role
-  {% end %}
+  property role : Role
 end
