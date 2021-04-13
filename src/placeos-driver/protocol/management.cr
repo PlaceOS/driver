@@ -38,7 +38,7 @@ class PlaceOS::Driver::Protocol::Management
 
   private getter tokenizer : Tokenizer = Tokenizer.new(Bytes[0x00, 0x03])
 
-  private getter debug_lock : Mutex = Mutex.new
+  private getter debug_lock : Mutex = Mutex.new(protection: :reentrant)
   private getter request_lock : Mutex = Mutex.new
   private getter settings_update_lock : Mutex = Mutex.new
 
