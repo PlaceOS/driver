@@ -233,8 +233,14 @@ class PlaceOS::Driver
                    with_shared_client &.exec(method.to_s.upcase, uri.request_target, headers, body)
                  end
 
+      # assuming we're typically online, this check before assignment is more performant
+      @queue.online = true unless @queue.online
+
       # fallback in case the HTTP client lib doesn't decompress the response
       check_http_response_encoding response
+    rescue error : Socket::Addrinfo::Error | IO::Error | ArgumentError
+      @queue.online = false
+      raise error
     end
 
     def terminate : Nil
