@@ -103,15 +103,10 @@ class PlaceOS::Driver::Proxy::Driver
 
         if error = result.error
           backtrace = result.backtrace || [] of String
-          exception = PlaceOS::Driver::RemoteException.new(result.payload, error, backtrace)
-          runtime_error = RuntimeError.new "remote exception", exception
-
-          begin
-            raise runtime_error
-          rescue error_with_backtrace
-            @system.logger.warn(exception: error_with_backtrace) { exception.message }
-            raise error_with_backtrace
-          end
+          cause = PlaceOS::Driver::RemoteException.new(result.payload, error, backtrace)
+          local = PlaceOS::Driver::RemoteException.new "remote exception", cause, caller
+          @system.logger.warn(exception: local) { local.message }
+          raise local
         else
           JSON.parse(result.payload.not_nil!)
         end
