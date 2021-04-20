@@ -238,7 +238,7 @@ class PlaceOS::Driver
 
       # fallback in case the HTTP client lib doesn't decompress the response
       check_http_response_encoding response
-    rescue error : Socket::Addrinfo::Error | IO::Error | ArgumentError
+    rescue error : IO::Error | ArgumentError
       @queue.online = false
       raise error
     end
