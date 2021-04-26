@@ -118,7 +118,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
         bytes_read = socket.read(raw_data)
         break if bytes_read == 0 # IO was closed
 
-        data = raw_data[0, bytes_read]
+        data = raw_data[0, bytes_read].dup
         spawn(same_thread: true) { process data }
       end
     end
