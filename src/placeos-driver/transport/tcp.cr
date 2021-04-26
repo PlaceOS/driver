@@ -118,8 +118,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
         bytes_read = socket.read(raw_data)
         break if bytes_read == 0 # IO was closed
 
-        data = raw_data[0, bytes_read].dup
-        spawn(same_thread: true) { process data }
+        spawn_process raw_data[0, bytes_read].dup
       end
     end
   rescue IO::Error
@@ -131,5 +130,9 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
       @queue.online = false
       connect
     end
+  end
+
+  private def spawn_process(data)
+    spawn(same_thread: true) { process data }
   end
 end
