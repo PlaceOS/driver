@@ -46,7 +46,6 @@ class PlaceOS::Driver::Settings
     # We check for key size == 1 as hard to build schema for sub keys
     # this won't prevent the setting from working, just not part of the schema
     {% if keys.size == 1 %}
-      {% puts "\n\nADDING SETTING #{keys[0]}\n" %}
       {% ::PlaceOS::SETTINGS_REQ[keys[0]] = {klass, true} %}
     {% end %}
     %keys = {{keys}}.map &.to_s
@@ -65,8 +64,7 @@ class PlaceOS::Driver::Settings
 
   macro setting?(klass, *keys)
     {% if keys.size == 1 %}
-      {% puts "\n\nADDING SETTING #{keys[0]}\n" %}
-      {% ::PlaceOS::SETTINGS_REQ[keys[0]] = {klass, true} %}
+      {% ::PlaceOS::SETTINGS_REQ[keys[0]] = {klass, false} %}
     {% end %}
     %keys = {{keys}}.map &.to_s
     %json = json.dig?(*%keys)
@@ -200,7 +198,6 @@ class PlaceOS::Driver::Settings
   end
 
   macro generate_json_schema
-    {% puts "\n\nGENERATING SCHEMA #{::PlaceOS::SETTINGS_REQ.size}\n" %}
     {
       type: "object",
       {% if !::PlaceOS::SETTINGS_REQ.empty? %}

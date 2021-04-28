@@ -67,8 +67,8 @@ class PlaceOS::Driver
         supported_methods = nil
 
         begin
-          # Grab the authentication settings
-          settings = @settings.get { setting(Settings, :ssh) }
+          # Grab the authentication settings (using not_nil for schema generation)
+          settings = @settings.get { setting?(Settings, :ssh) }.not_nil!
 
           # Open a connection
           socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)

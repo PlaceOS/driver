@@ -87,7 +87,7 @@ describe PlaceOS::Driver::Settings do
     PlaceOS::Driver::Settings.introspect(Tuple(String, Bool)).should eq({type: "array", items: [{type: "string"}, {type: "boolean"}]})
     PlaceOS::Driver::Settings.introspect(SomeType).should eq({anyOf: [
       {type: "string"},
-      {type: "array", items: [{type: "string"}, {type: "boolean"}]}
+      {type: "array", items: [{type: "string"}, {type: "boolean"}]},
     ]})
     PlaceOS::Driver::Settings.introspect(Bool | String).should eq({anyOf: [{type: "boolean"}, {type: "string"}]})
     PlaceOS::Driver::Settings.introspect(SchemaKlass).should eq({type: "object"})

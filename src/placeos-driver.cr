@@ -405,17 +405,22 @@ abstract class PlaceOS::Driver
         return metadata if metadata
 
         implements = {{@type.ancestors.map(&.stringify.split("(")[0])}}.reject { |obj| IGNORE_KLASSES.includes?(obj) }
-        schema = PlaceOS::Driver::Settings.get { generate_json_schema }
 
         details = %({
           "functions": #{self.functions},
           "implements": #{implements.to_json},
           "requirements": #{Utilities::Discovery.requirements.to_json},
-          "security": #{self.security},
-          "settings": #{schema}
+          "security": #{self.security}
         }).gsub(/\s/, "")
 
         @@metadata = details
+      end
+
+      # unlike metadata, the schema is not required for runtime
+      def self.metadata_with_schema
+        meta = metadata.rchop
+        schema = PlaceOS::Driver::Settings.get { generate_json_schema }
+        %(#{meta},"settings":#{schema}})
       end
     end
   end
@@ -431,14 +436,14 @@ require "./placeos-driver/utilities/*"
 macro finished
   exec_process_manager = false
   is_edge_driver = false
+  print_meta = false
 
   # Command line options
   OptionParser.parse(ARGV.dup) do |parser|
     parser.banner = "Usage: #{PROGRAM_NAME} [arguments]"
 
     parser.on("-m", "--metadata", "output driver metadata") do
-      puts {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
-      exit 0
+      print_meta = true
     end
 
     parser.on("-d", "--defaults", "output driver defaults") do
@@ -473,4 +478,8 @@ macro finished
 
     process.terminated.receive?
   end
+
+  # This is here so we can be certain that settings macros have expanded
+  # metadata needed to be compiled after process manager
+  puts {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata_with_schema if print_meta
 end
