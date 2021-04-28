@@ -37,11 +37,21 @@ class PlaceOS::Driver::Settings
     @json[key.to_s]?
   end
 
+  macro add_setting_key(key, klass, required)
+    {% arg_name = klass.stringify %}
+    {% if !arg_name.starts_with?("Union") && arg_name.includes?("|") %}
+      PlaceOS::Driver::Settings.add_setting_key(key, Union({{klass}}), {{required}})
+    {% else %}
+      {% klass = klass.resolve %}
+      {% ::PlaceOS::SETTINGS_REQ[key] = {klass, required} %}
+    {% end %}
+  end
+
   macro setting(klass, *keys)
     # We check for key size == 1 as hard to build schema for sub keys
     # this won't prevent the setting from working, just not part of the schema
     {% if keys.size == 1 %}
-      {% ::PlaceOS::SETTINGS_REQ[keys[0]] = {klass, true} %}
+      add_setting_key {{keys[0].id}}, {{klass}}, true
     {% end %}
     %keys = {{keys}}.map &.to_s
     %json = json.dig?(*%keys)
@@ -59,7 +69,7 @@ class PlaceOS::Driver::Settings
 
   macro setting?(klass, *keys)
     {% if keys.size == 1 %}
-      {% ::PlaceOS::SETTINGS_REQ[keys[0]] = {klass, false} %}
+      add_setting_key {{keys[0].id}}, {{klass}}, false
     {% end %}
     %keys = {{keys}}.map &.to_s
     %json = json.dig?(*%keys)
