@@ -39,7 +39,7 @@ struct PlaceOS::Driver::DriverModel
     # Function access control, map of access level to function names
     property security : Hash(String, Array(String))
     # JSON Schema derived from the settings used in the driver
-    property settings : NamedTuple(type: String, properties: Hash(String, JSON::Any)?, required: Array(String)?)
+    property settings : NamedTuple(type: String, properties: Hash(String, JSON::Any)?, required: Array(String)?)?
   end
 
   enum Role
