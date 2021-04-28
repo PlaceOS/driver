@@ -25,7 +25,8 @@ struct PlaceOS::Driver::DriverModel
       @functions = {} of String => Hash(String, Array(JSON::Any)),
       @implements = [] of String,
       @requirements = {} of String => Array(String),
-      @security = {} of String => Array(String)
+      @security = {} of String => Array(String),
+      @settings = {type: "object", properties: {} of String => JSON::Any, required: [] of String}
     )
     end
 
@@ -37,6 +38,8 @@ struct PlaceOS::Driver::DriverModel
     property requirements : Hash(String, Array(String))
     # Function access control, map of access level to function names
     property security : Hash(String, Array(String))
+    # JSON Schema derived from the settings used in the driver
+    property settings : NamedTuple(type: String, properties: Hash(String, JSON::Any)?, required: Array(String)?)
   end
 
   enum Role

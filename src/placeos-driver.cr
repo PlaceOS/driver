@@ -405,11 +405,14 @@ abstract class PlaceOS::Driver
         return metadata if metadata
 
         implements = {{@type.ancestors.map(&.stringify.split("(")[0])}}.reject { |obj| IGNORE_KLASSES.includes?(obj) }
+        schema = PlaceOS::Driver::Settings.get { generate_json_schema }
+
         details = %({
           "functions": #{self.functions},
           "implements": #{implements.to_json},
           "requirements": #{Utilities::Discovery.requirements.to_json},
-          "security": #{self.security}
+          "security": #{self.security},
+          "settings": #{schema}
         }).gsub(/\s/, "")
 
         @@metadata = details

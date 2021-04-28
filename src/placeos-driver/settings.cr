@@ -1,5 +1,10 @@
 require "json"
 
+module PlaceOS
+  # key => {class, required}
+  SETTINGS_REQ = {} of Nil => Nil
+end
+
 class PlaceOS::Driver::Settings
   def initialize(settings : String)
     @json = JSON.parse(settings).as_h
@@ -12,6 +17,10 @@ class PlaceOS::Driver::Settings
   property :json
 
   def get
+    with self yield
+  end
+
+  def self.get
     with self yield
   end
 
@@ -34,6 +43,12 @@ class PlaceOS::Driver::Settings
   end
 
   macro setting(klass, *keys)
+    # We check for key size == 1 as hard to build schema for sub keys
+    # this won't prevent the setting from working, just not part of the schema
+    {% if keys.size == 1 %}
+      {% puts "\n\nADDING SETTING #{keys[0]}\n" %}
+      {% ::PlaceOS::SETTINGS_REQ[keys[0]] = {klass, true} %}
+    {% end %}
     %keys = {{keys}}.map &.to_s
     %json = json.dig?(*%keys)
     if %json
@@ -49,6 +64,10 @@ class PlaceOS::Driver::Settings
   end
 
   macro setting?(klass, *keys)
+    {% if keys.size == 1 %}
+      {% puts "\n\nADDING SETTING #{keys[0]}\n" %}
+      {% ::PlaceOS::SETTINGS_REQ[keys[0]] = {klass, true} %}
+    {% end %}
     %keys = {{keys}}.map &.to_s
     %json = json.dig?(*%keys)
     # Explicitly check for nil here as this is a valid return value for ?
@@ -116,5 +135,90 @@ class PlaceOS::Driver::Settings
         %klass.from_json({{json}}.to_json)
       end
     {% end %}
+  end
+
+  macro introspect(klass)
+    {% arg_name = klass.stringify %}
+    {% if !arg_name.starts_with?("Union") && arg_name.includes?("|") %}
+      PlaceOS::Driver::Settings.introspect(Union({{klass}}))
+    {% else %}
+      {% klass = klass.resolve %}
+      {% klass_name = klass.name(generic_args: false) %}
+
+      {% if klass <= Array %}
+        has_items = PlaceOS::Driver::Settings.introspect {{klass.type_vars[0]}}
+        if has_items.empty?
+          {type: "array"}
+        else
+          {type: "array", items: has_items}
+        end
+      {% elsif klass.union? %}
+        { anyOf: [
+          {% for type in klass.union_types %}
+            PlaceOS::Driver::Settings.introspect({{type}}),
+          {% end %}
+        ]}
+      {% elsif klass_name.starts_with? "Tuple(" %}
+        has_items = [
+          {% for generic in klass.type_vars %}
+            PlaceOS::Driver::Settings.introspect({{generic}}),
+          {% end %}
+        ]
+        {type: "array", items: has_items}
+      {% elsif klass_name.starts_with? "NamedTuple(" %}
+        {type: "object",  properties: {
+          {% for key in klass.keys %}
+            {{key.id}}: PlaceOS::Driver::Settings.introspect({{klass[key]}}),
+          {% end %}
+        }, required: [
+          {% for key in klass.keys %}
+            {% if !klass[key].resolve.nilable? %}
+              {{key.id.stringify}},
+            {% end %}
+          {% end %}
+        ] of String}
+      {% elsif klass < Enum %}
+        {type: "string",  enum: {{klass.constants.map(&.stringify)}} }
+      {% elsif klass <= String %}
+        { type: "string" }
+      {% elsif klass <= Bool %}
+        { type: "boolean" }
+      {% elsif klass <= Int %}
+        { type: "integer" }
+      {% elsif klass <= Float %}
+        { type: "number" }
+      {% elsif klass <= Hash %}
+        { type: "object" }
+      {% elsif klass.ancestors.includes? JSON::Serializable %}
+        # TODO:: would like to improve on this, but it's challenging
+        {type: "object"}
+      {% else %}
+        # anything will validate (JSON::Any)
+        {} of String => String
+      {% end %}
+    {% end %}
+  end
+
+  macro generate_json_schema
+    {% puts "\n\nGENERATING SCHEMA #{::PlaceOS::SETTINGS_REQ.size}\n" %}
+    {
+      type: "object",
+      {% if !::PlaceOS::SETTINGS_REQ.empty? %}
+        properties: {
+          {% for key, details in ::PlaceOS::SETTINGS_REQ %}
+            {% klass = details[0] %}
+            {{key.id}}: PlaceOS::Driver::Settings.introspect({{klass}}),
+          {% end %}
+        },
+        required: [
+          {% for key, details in ::PlaceOS::SETTINGS_REQ %}
+            {% required = details[1] %}
+            {% if required %}
+              {{key.id.stringify}},
+            {% end %}
+          {% end %}
+        ] of String
+      {% end %}
+    }.to_json
   end
 end
