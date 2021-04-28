@@ -1,9 +1,4 @@
-require "json"
-
-module PlaceOS
-  # key => {class, required}
-  SETTINGS_REQ = {} of Nil => Nil
-end
+require "./settings/introspect"
 
 class PlaceOS::Driver::Settings
   def initialize(settings : String)
@@ -135,68 +130,6 @@ class PlaceOS::Driver::Settings
     {% end %}
   end
 
-  macro introspect(klass)
-    {% arg_name = klass.stringify %}
-    {% if !arg_name.starts_with?("Union") && arg_name.includes?("|") %}
-      PlaceOS::Driver::Settings.introspect(Union({{klass}}))
-    {% else %}
-      {% klass = klass.resolve %}
-      {% klass_name = klass.name(generic_args: false) %}
-
-      {% if klass <= Array %}
-        has_items = PlaceOS::Driver::Settings.introspect {{klass.type_vars[0]}}
-        if has_items.empty?
-          {type: "array"}
-        else
-          {type: "array", items: has_items}
-        end
-      {% elsif klass.union? %}
-        { anyOf: [
-          {% for type in klass.union_types %}
-            PlaceOS::Driver::Settings.introspect({{type}}),
-          {% end %}
-        ]}
-      {% elsif klass_name.starts_with? "Tuple(" %}
-        has_items = [
-          {% for generic in klass.type_vars %}
-            PlaceOS::Driver::Settings.introspect({{generic}}),
-          {% end %}
-        ]
-        {type: "array", items: has_items}
-      {% elsif klass_name.starts_with? "NamedTuple(" %}
-        {type: "object",  properties: {
-          {% for key in klass.keys %}
-            {{key.id}}: PlaceOS::Driver::Settings.introspect({{klass[key]}}),
-          {% end %}
-        }, required: [
-          {% for key in klass.keys %}
-            {% if !klass[key].resolve.nilable? %}
-              {{key.id.stringify}},
-            {% end %}
-          {% end %}
-        ] of String}
-      {% elsif klass < Enum %}
-        {type: "string",  enum: {{klass.constants.map(&.stringify)}} }
-      {% elsif klass <= String %}
-        { type: "string" }
-      {% elsif klass <= Bool %}
-        { type: "boolean" }
-      {% elsif klass <= Int %}
-        { type: "integer" }
-      {% elsif klass <= Float %}
-        { type: "number" }
-      {% elsif klass <= Hash %}
-        { type: "object", additionalProperties: PlaceOS::Driver::Settings.introspect({{klass.type_vars[1]}}) }
-      {% elsif klass.ancestors.includes? JSON::Serializable %}
-        # TODO:: would like to improve on this, but it's challenging
-        {type: "object"}
-      {% else %}
-        # anything will validate (JSON::Any)
-        {} of String => String
-      {% end %}
-    {% end %}
-  end
-
   macro generate_json_schema
     {
       type: "object",
@@ -204,7 +137,7 @@ class PlaceOS::Driver::Settings
         properties: {
           {% for key, details in ::PlaceOS::SETTINGS_REQ %}
             {% klass = details[0] %}
-            {{key.id}}: PlaceOS::Driver::Settings.introspect({{klass}}),
+            {{key.id}}: PlaceOS.introspect({{klass}}),
           {% end %}
         },
         required: [

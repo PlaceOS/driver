@@ -12,6 +12,7 @@ end
 class SchemaKlass
   include JSON::Serializable
   property cmd : String
+  property other : Int32?
 end
 
 alias SomeType = Tuple(String, Bool) | String
@@ -76,22 +77,22 @@ describe PlaceOS::Driver::Settings do
   end
 
   it "should generate JSON schema from objects" do
-    PlaceOS::Driver::Settings.introspect(Array(String)).should eq({type: "array", items: {type: "string"}})
-    PlaceOS::Driver::Settings.introspect(AliasTest::Array).should eq({type: "array", items: {type: "string"}})
-    PlaceOS::Driver::Settings.introspect(Array(Int32)).should eq({type: "array", items: {type: "integer"}})
-    PlaceOS::Driver::Settings.introspect(Array(Float32)).should eq({type: "array", items: {type: "number"}})
-    PlaceOS::Driver::Settings.introspect(Array(Bool)).should eq({type: "array", items: {type: "boolean"}})
-    PlaceOS::Driver::Settings.introspect(Array(JSON::Any)).should eq({type: "array"})
-    PlaceOS::Driver::Settings.introspect(NamedTuple(steve: String)).should eq({type: "object", properties: {steve: {type: "string"}}, required: ["steve"]})
-    PlaceOS::Driver::Settings.introspect(TestEnum).should eq({type: "string", enum: ["Bob", "Jane"]})
-    PlaceOS::Driver::Settings.introspect(Tuple(String, Bool)).should eq({type: "array", items: [{type: "string"}, {type: "boolean"}]})
-    PlaceOS::Driver::Settings.introspect(SomeType).should eq({anyOf: [
+    PlaceOS.introspect(Array(String)).should eq({type: "array", items: {type: "string"}})
+    PlaceOS.introspect(AliasTest::Array).should eq({type: "array", items: {type: "string"}})
+    PlaceOS.introspect(Array(Int32)).should eq({type: "array", items: {type: "integer"}})
+    PlaceOS.introspect(Array(Float32)).should eq({type: "array", items: {type: "number"}})
+    PlaceOS.introspect(Array(Bool)).should eq({type: "array", items: {type: "boolean"}})
+    PlaceOS.introspect(Array(JSON::Any)).should eq({type: "array"})
+    PlaceOS.introspect(NamedTuple(steve: String)).should eq({type: "object", properties: {steve: {type: "string"}}, required: ["steve"]})
+    PlaceOS.introspect(TestEnum).should eq({type: "string", enum: ["Bob", "Jane"]})
+    PlaceOS.introspect(Tuple(String, Bool)).should eq({type: "array", items: [{type: "string"}, {type: "boolean"}]})
+    PlaceOS.introspect(SomeType).should eq({anyOf: [
       {type: "string"},
       {type: "array", items: [{type: "string"}, {type: "boolean"}]},
     ]})
-    PlaceOS::Driver::Settings.introspect(Hash(String, Int32)).should eq({type: "object", additionalProperties: {type: "integer"}})
-    PlaceOS::Driver::Settings.introspect(Bool | String).should eq({anyOf: [{type: "boolean"}, {type: "string"}]})
-    PlaceOS::Driver::Settings.introspect(SchemaKlass).should eq({type: "object"})
+    PlaceOS.introspect(Hash(String, Int32)).should eq({type: "object", additionalProperties: {type: "integer"}})
+    PlaceOS.introspect(Bool | String).should eq({anyOf: [{type: "boolean"}, {type: "string"}]})
+    PlaceOS.introspect(SchemaKlass).should eq({type: "object", properties: {cmd: {type: "string"}, other: {anyOf: [{type: "integer"}, {type: "null"}]}}, required: ["cmd"]})
   end
 
   it "should generate JSON schema from settings access" do
