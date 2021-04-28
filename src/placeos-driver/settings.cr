@@ -186,7 +186,7 @@ class PlaceOS::Driver::Settings
       {% elsif klass <= Float %}
         { type: "number" }
       {% elsif klass <= Hash %}
-        { type: "object" }
+        { type: "object", additionalProperties: PlaceOS::Driver::Settings.introspect({{klass.type_vars[1]}}) }
       {% elsif klass.ancestors.includes? JSON::Serializable %}
         # TODO:: would like to improve on this, but it's challenging
         {type: "object"}

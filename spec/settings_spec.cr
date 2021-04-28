@@ -89,6 +89,7 @@ describe PlaceOS::Driver::Settings do
       {type: "string"},
       {type: "array", items: [{type: "string"}, {type: "boolean"}]},
     ]})
+    PlaceOS::Driver::Settings.introspect(Hash(String, Int32)).should eq({type: "object", additionalProperties: {type: "integer"}})
     PlaceOS::Driver::Settings.introspect(Bool | String).should eq({anyOf: [{type: "boolean"}, {type: "string"}]})
     PlaceOS::Driver::Settings.introspect(SchemaKlass).should eq({type: "object"})
   end
