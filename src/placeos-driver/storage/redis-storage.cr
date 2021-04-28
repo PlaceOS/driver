@@ -5,34 +5,7 @@ require "../storage"
 class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
   REDIS_URL = ENV["REDIS_URL"]? || "redis://localhost:6379"
 
-  def initialize(@id : String, @prefix = DEFAULT_PREFIX)
-    super()
-    @hash_key = "#{prefix}/#{@id}"
-  end
-
   @@mutex : Mutex = Mutex.new(:reentrant)
-
-  getter hash_key : String
-  getter id : String
-  getter prefix : String
-
-  def []=(status_name, json_value)
-    status_name = status_name.to_s
-    adjusted_value = json_value.to_s.presence
-
-    if adjusted_value
-      key = hash_key
-      @@mutex.synchronize do
-        redis.pipelined(key, reconnect: true) do |pipeline|
-          pipeline.hset(key, status_name, adjusted_value)
-          pipeline.publish("#{key}/#{status_name}", adjusted_value)
-        end
-      end
-    else
-      delete(status_name)
-    end
-    json_value
-  end
 
   def signal_status(status_name) : String?
     status_name = status_name.to_s
@@ -43,26 +16,75 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
     json_value
   end
 
+  # Hash methods
+  #################################################################################################
+
+  forward_missing_to to_h
+
+  def to_h
+    hash = {} of String => String
+    @@mutex.synchronize { redis.hgetall(hash_key) }.each_slice(2) do |slice|
+      hash[slice[0].to_s] = slice[1].to_s
+    end
+    hash
+  end
+
+  def []=(status_name, json_value)
+    status_name = status_name.to_s
+    adjusted_value = json_value.to_s.presence
+
+    if adjusted_value
+      @@mutex.synchronize do
+        redis.pipelined(hash_key, reconnect: true) do |pipeline|
+          pipeline.hset(hash_key, status_name, adjusted_value)
+          pipeline.publish("#{hash_key}/#{status_name}", adjusted_value)
+        end
+      end
+    else
+      delete(status_name)
+    end
+    json_value
+  end
+
   def fetch(key)
     key = key.to_s
     entry = @@mutex.synchronize { redis.hget(hash_key, key) }
     entry ? entry.to_s : yield key
   end
 
+  def fetch(key, default)
+    fetch(key) { default }
+  end
+
+  def [](key, & : String -> String)
+    fetch(key) { yield }
+  end
+
+  def [](key)
+    fetch(key) { raise KeyError.new "Missing hash key: #{key.inspect}" }
+  end
+
+  def []?(key)
+    fetch(key, nil)
+  end
+
   def delete(key)
     key = key.to_s
     value = self[key]?
     if value
-      hkey = hash_key
       @@mutex.synchronize do
-        redis.pipelined(hkey, reconnect: true) do |pipeline|
-          pipeline.hdel(hkey, key)
-          pipeline.publish("#{hkey}/#{key}", "null")
+        redis.pipelined(hash_key, reconnect: true) do |pipeline|
+          pipeline.hdel(hash_key, key)
+          pipeline.publish("#{hash_key}/#{key}", "null")
         end
       end
       return value.to_s
     end
     yield key
+  end
+
+  def delete(key)
+    delete(key) { nil }
   end
 
   def keys
@@ -79,14 +101,6 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
 
   def empty?
     size == 0
-  end
-
-  def to_h
-    hash = {} of String => String
-    @@mutex.synchronize { redis.hgetall(hash_key) }.each_slice(2) do |slice|
-      hash[slice[0].to_s] = slice[1].to_s
-    end
-    hash
   end
 
   def clear
@@ -106,6 +120,7 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
   # Redis
   #############################################################################
 
+  private class_getter redis_lock = Mutex.new
   private getter redis : Redis::Client { self.class.shared_redis_client }
 
   def self.get(key)

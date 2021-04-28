@@ -1,8 +1,16 @@
 abstract class PlaceOS::Driver; end
 
 # Abstraction of a redis hset
-abstract class PlaceOS::Driver::Storage < Hash(String, String)
+abstract class PlaceOS::Driver::Storage
   DEFAULT_PREFIX = "status"
+
+  getter hash_key : String
+  getter id : String
+  getter prefix : String
+
+  def initialize(@id : String, @prefix = DEFAULT_PREFIX)
+    @hash_key = "#{prefix}/#{@id}"
+  end
 
   abstract def signal_status(status_name) : String?
 end
