@@ -26,7 +26,7 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
   end
 
   def to_h
-    each.each.each_with_object({} of String => String) do |(key, value), hash|
+    each.each_with_object({} of String => String) do |(key, value), hash|
       hash[key] = value
     end
   end
