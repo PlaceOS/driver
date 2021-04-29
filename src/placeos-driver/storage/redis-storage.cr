@@ -19,8 +19,6 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
   # Hash methods
   #################################################################################################
 
-  forward_missing_to to_h
-
   def each
     @@redis_lock.synchronize { redis.hgetall(hash_key) }
       .each_slice(2, reuse: true)

@@ -42,6 +42,8 @@ abstract class PlaceOS::Driver::Storage
     delete(key) { nil }
   end
 
+  abstract def to_h
+
   abstract def keys
 
   abstract def values
