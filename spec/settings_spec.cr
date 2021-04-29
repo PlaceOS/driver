@@ -15,6 +15,12 @@ class SchemaKlass
   property other : Int32?
 end
 
+class SuperHash < Hash(String, Int32)
+end
+
+class SuperArray < Array(Int32)
+end
+
 alias SomeType = Tuple(String, Bool) | String
 
 describe PlaceOS::Driver::Settings do
@@ -78,6 +84,7 @@ describe PlaceOS::Driver::Settings do
 
   it "should generate JSON schema from objects" do
     PlaceOS.introspect(Array(String)).should eq({type: "array", items: {type: "string"}})
+    PlaceOS.introspect(SuperArray).should eq({type: "array"})
     PlaceOS.introspect(AliasTest::Array).should eq({type: "array", items: {type: "string"}})
     PlaceOS.introspect(Array(Int32)).should eq({type: "array", items: {type: "integer"}})
     PlaceOS.introspect(Array(Float32)).should eq({type: "array", items: {type: "number"}})
@@ -91,6 +98,7 @@ describe PlaceOS::Driver::Settings do
       {type: "array", items: [{type: "string"}, {type: "boolean"}]},
     ]})
     PlaceOS.introspect(Hash(String, Int32)).should eq({type: "object", additionalProperties: {type: "integer"}})
+    PlaceOS.introspect(SuperHash).should eq({type: "object"})
     PlaceOS.introspect(Bool | String).should eq({anyOf: [{type: "boolean"}, {type: "string"}]})
     PlaceOS.introspect(SchemaKlass).should eq({type: "object", properties: {cmd: {type: "string"}, other: {anyOf: [{type: "integer"}, {type: "null"}]}}, required: ["cmd"]})
   end

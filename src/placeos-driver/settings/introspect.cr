@@ -49,7 +49,11 @@ module PlaceOS
       {% klass_name = klass.name(generic_args: false) %}
 
       {% if klass <= Array %}
-        has_items = PlaceOS.introspect {{klass.type_vars[0]}}
+        {% if klass.type_vars.size == 1 %}
+          has_items = PlaceOS.introspect {{klass.type_vars[0]}}
+        {% else %}
+          has_items = {} of String => String
+        {% end %}
         if has_items.empty?
           {type: "array"}
         else
@@ -93,7 +97,12 @@ module PlaceOS
       {% elsif klass <= Nil %}
         { type: "null" }
       {% elsif klass <= Hash %}
-        { type: "object", additionalProperties: PlaceOS.introspect({{klass.type_vars[1]}}) }
+        {% if klass.type_vars.size == 2 %}
+          { type: "object", additionalProperties: PlaceOS.introspect({{klass.type_vars[1]}}) }
+        {% else %}
+          # As inheritance might include the type_vars it's hard to work them out
+          { type: "object" }
+        {% end %}
       {% elsif klass.ancestors.includes? JSON::Serializable %}
         {{klass}}.__generate_json_schema__
       {% else %}
