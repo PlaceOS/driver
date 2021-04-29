@@ -22,11 +22,12 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
   forward_missing_to to_h
 
   def to_h
-    hash = {} of String => String
-    @@mutex.synchronize { redis.hgetall(hash_key) }.each_slice(2) do |slice|
-      hash[slice[0].to_s] = slice[1].to_s
-    end
-    hash
+    @@mutex.synchronize { redis.hgetall(hash_key) }
+      .each_slice(2, reuse: true)
+      .each_with_object({} of String => String) do |(key, value), hash|
+        key, value = key.to_s, value.to_s unless key.is_a? String && value.is_a? String
+        hash[key] = value
+      end
   end
 
   def []=(status_name, json_value)
