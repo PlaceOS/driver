@@ -1,5 +1,5 @@
 class PlaceOS::Driver::Status
-  private getter hash : Hash(String, String) = {} of String => String
+  private getter hash = {} of String => String
   forward_missing_to hash
 
   def set_json(key, value)
