@@ -63,7 +63,8 @@ module PlaceOS
           has_items = {} of String => String
         {% end %}
         if has_items.empty?
-          {type: "array"}
+          %klass = {{klass}}
+          %klass.responds_to?(:json_schema) ? %klass.json_schema : {type: "array"}
         else
           {type: "array", items: has_items}
         end
@@ -117,13 +118,19 @@ module PlaceOS
           { type: "object", additionalProperties: PlaceOS.introspect({{klass.type_vars[1]}}) }
         {% else %}
           # As inheritance might include the type_vars it's hard to work them out
-          { type: "object" }
+          %klass = {{klass}}
+          %klass.responds_to?(:json_schema) ? %klass.json_schema : { type: "object" }
         {% end %}
       {% elsif klass.ancestors.includes? JSON::Serializable %}
         {{klass}}.__generate_json_schema__
       {% else %}
-        # anything will validate (JSON::Any)
-        {} of String => String
+        %klass = {{klass}}
+        if %klass.responds_to?(:json_schema)
+          %klass.json_schema
+        else
+          # anything will validate (JSON::Any)
+          {} of String => String
+        end
       {% end %}
     {% end %}
   end

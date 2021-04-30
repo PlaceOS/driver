@@ -21,6 +21,12 @@ class SchemaKlassNoRequired
   property other : Int32?
 end
 
+class RandomCustomKlass
+  def self.json_schema
+    { type: "object", require: ["something"] }
+  end
+end
+
 class SuperHash < Hash(String, Int32)
 end
 
@@ -111,6 +117,9 @@ describe PlaceOS::Driver::Settings do
     # test where no fields are required
     PlaceOS.introspect(NamedTuple(steve: String?)).should eq({type: "object", properties: {steve: {anyOf: [{type: "null"}, {type: "string"}]}}})
     PlaceOS.introspect(SchemaKlassNoRequired).should eq({type: "object", properties: {cmd: {anyOf: [{type: "null"}, {type: "string"}]}, other: {anyOf: [{type: "integer"}, {type: "null"}]}}})
+
+    # allow totally custom classes to define their own schema
+    PlaceOS.introspect(RandomCustomKlass).should eq({ type: "object", require: ["something"] })
   end
 
   it "should generate JSON schema from settings access" do
