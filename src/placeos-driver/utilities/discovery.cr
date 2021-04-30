@@ -105,7 +105,7 @@ abstract class PlaceOS::Driver
       {% if compiler_enforced %}
         {% methods = methods.reject { |method| RESERVED_METHODS[method.name.stringify] } %}
         {% methods = methods.reject { |method| method.visibility != :public } %}
-        {% methods = methods.reject(&.accepts_block?) %}
+        {% methods = methods.reject &.accepts_block? %}
       {% else %}
         {% methods = [] of Crystal::Macros::TypeNode %}
       {% end %}

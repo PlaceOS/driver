@@ -1,4 +1,7 @@
-class PlaceOS::Driver::Status < Hash(String, String)
+class PlaceOS::Driver::Status
+  private getter hash = {} of String => String
+  forward_missing_to hash
+
   def set_json(key, value)
     key = key.to_s
     current_value = self[key]?

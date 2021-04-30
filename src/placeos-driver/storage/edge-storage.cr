@@ -2,30 +2,11 @@ require "../storage"
 require "../protocol"
 
 class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
-  def initialize(@id : String, @prefix = DEFAULT_PREFIX)
-    super()
-    @hash_key = "#{prefix}/#{@id}"
-  end
-
-  getter hash_key : String
-  getter id : String
-  getter prefix : String
-
-  def []=(status_name, json_value)
-    status_name = status_name.to_s
-    adjusted_value = json_value.to_s.presence
-
-    if adjusted_value
-      upsert(status_name, adjusted_value)
-      PlaceOS::Driver::Protocol.instance.request(hash_key, "hset", "#{status_name}\x03#{adjusted_value}", raw: true)
-    else
-      delete(status_name)
-    end
-    json_value
-  end
+  private getter hash : Hash(String, String) = {} of String => String
+  delegate fetch, each, keys, values, size, to_h, to: hash
 
   # This is the same as setting a value as this is often used when
-  # a hash value is updated and we want to notify of this change
+  # a hash value is updated and we want to notify of this change.
   def signal_status(status_name) : String?
     status_name = status_name.to_s
     json_value = self[status_name]?
@@ -34,9 +15,25 @@ class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
     json_value
   end
 
-  def delete(key)
+  # Hash methods
+  #################################################################################################
+
+  def []=(status_name, json_value)
+    status_name = status_name.to_s
+    adjusted_value = json_value.to_s.presence
+
+    if adjusted_value
+      hash[status_name] = adjusted_value
+      PlaceOS::Driver::Protocol.instance.request(hash_key, "hset", "#{status_name}\x03#{adjusted_value}", raw: true)
+    else
+      delete(status_name)
+    end
+    json_value
+  end
+
+  def delete(key, &block : String ->)
     key = key.to_s
-    value = delete_impl(key)
+    value = hash.delete(key)
     if value
       PlaceOS::Driver::Protocol.instance.request(hash_key, "hset", "#{key}\x03null", raw: true)
       return value
@@ -45,7 +42,7 @@ class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
   end
 
   def clear
-    clear_impl
+    hash.clear
     PlaceOS::Driver::Protocol.instance.request(hash_key, "clear", raw: true)
     self
   end
