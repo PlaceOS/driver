@@ -22,13 +22,21 @@ module PlaceOS
             {% for key, ivar in properties %}
               {{key}}: PlaceOS.introspect({{ivar.resolve.name}}),
             {% end %}
-          }, required: [
+          },
+            {% required = [] of String %}
             {% for key, ivar in properties %}
               {% if !ivar.nilable? %}
-                {{key.stringify}},
+                {% required << key.stringify %}
               {% end %}
             {% end %}
-          ] of String}
+            {% if !required.empty? %}
+              required: [
+              {% for key in required %}
+                {{key}},
+              {% end %}
+              ]
+            {% end %}
+          }
         {% end %}
       {% end %}
     end
@@ -77,13 +85,21 @@ module PlaceOS
           {% for key in klass.keys %}
             {{key.id}}: PlaceOS.introspect({{klass[key].resolve.name}}),
           {% end %}
-        }, required: [
+        },
+          {% required = [] of String %}
           {% for key in klass.keys %}
             {% if !klass[key].resolve.nilable? %}
-              {{key.id.stringify}},
+              {% required << key.id.stringify %}
             {% end %}
           {% end %}
-        ] of String}
+          {% if !required.empty? %}
+            required: [
+            {% for key in required %}
+              {{key}},
+            {% end %}
+            ]
+          {% end %}
+        }
       {% elsif klass < Enum %}
         {type: "string",  enum: {{klass.constants.map(&.stringify)}} }
       {% elsif klass <= String %}

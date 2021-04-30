@@ -15,6 +15,12 @@ class SchemaKlass
   property other : Int32?
 end
 
+class SchemaKlassNoRequired
+  include JSON::Serializable
+  property cmd : String?
+  property other : Int32?
+end
+
 class SuperHash < Hash(String, Int32)
 end
 
@@ -101,6 +107,10 @@ describe PlaceOS::Driver::Settings do
     PlaceOS.introspect(SuperHash).should eq({type: "object"})
     PlaceOS.introspect(Bool | String).should eq({anyOf: [{type: "boolean"}, {type: "string"}]})
     PlaceOS.introspect(SchemaKlass).should eq({type: "object", properties: {cmd: {type: "string"}, other: {anyOf: [{type: "integer"}, {type: "null"}]}}, required: ["cmd"]})
+
+    # test where no fields are required
+    PlaceOS.introspect(NamedTuple(steve: String?)).should eq({type: "object", properties: {steve: {anyOf: [{type: "null"}, {type: "string"}]}}})
+    PlaceOS.introspect(SchemaKlassNoRequired).should eq({type: "object", properties: {cmd: {anyOf: [{type: "null"}, {type: "string"}]}, other: {anyOf: [{type: "integer"}, {type: "null"}]}}})
   end
 
   it "should generate JSON schema from settings access" do
