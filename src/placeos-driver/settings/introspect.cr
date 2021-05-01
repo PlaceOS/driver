@@ -29,7 +29,7 @@ module PlaceOS
                 {% required << key.stringify %}
               {% end %}
             {% end %}
-            {% if !required.empty? %}
+            {% unless required.empty? %}
               required: [
               {% for key in required %}
                 {{key}},
