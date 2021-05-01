@@ -23,7 +23,7 @@ end
 
 class RandomCustomKlass
   def self.json_schema
-    {type: "object", require: ["something"]}
+    {type: "object", required: ["something"]}
   end
 end
 
