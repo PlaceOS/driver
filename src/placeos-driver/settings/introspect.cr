@@ -25,7 +25,7 @@ module PlaceOS
           },
             {% required = [] of String %}
             {% for key, ivar in properties %}
-              {% if !ivar.nilable? %}
+              {% unless ivar.nilable? %}
                 {% required << key.stringify %}
               {% end %}
             {% end %}
