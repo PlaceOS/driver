@@ -1,6 +1,6 @@
 require "json"
 
-module PlaceOS
+class PlaceOS::Driver::Settings
   # key => {class, required}
   SETTINGS_REQ = {} of Nil => Nil
 
@@ -20,7 +20,7 @@ module PlaceOS
         {% else %}
           {type: "object",  properties: {
             {% for key, ivar in properties %}
-              {{key}}: PlaceOS.introspect({{ivar.resolve.name}}),
+              {{key}}: PlaceOS::Driver::Settings.introspect({{ivar.resolve.name}}),
             {% end %}
           },
             {% required = [] of String %}
@@ -44,21 +44,21 @@ module PlaceOS
 
   module ::JSON::Serializable
     macro included
-      extend ::PlaceOS::Introspect
+      extend ::PlaceOS::Driver::Settings::Introspect
     end
   end
 
   macro introspect(klass)
     {% arg_name = klass.stringify %}
     {% if !arg_name.starts_with?("Union") && arg_name.includes?("|") %}
-      PlaceOS.introspect(Union({{klass}}))
+      PlaceOS::Driver::Settings.introspect(Union({{klass}}))
     {% else %}
       {% klass = klass.resolve %}
       {% klass_name = klass.name(generic_args: false) %}
 
       {% if klass <= Array %}
         {% if klass.type_vars.size == 1 %}
-          has_items = PlaceOS.introspect {{klass.type_vars[0]}}
+          has_items = PlaceOS::Driver::Settings.introspect {{klass.type_vars[0]}}
         {% else %}
           has_items = {} of String => String
         {% end %}
@@ -71,20 +71,20 @@ module PlaceOS
       {% elsif klass.union? %}
         { anyOf: [
           {% for type in klass.union_types %}
-            PlaceOS.introspect({{type}}),
+            PlaceOS::Driver::Settings.introspect({{type}}),
           {% end %}
         ]}
       {% elsif klass_name.starts_with? "Tuple(" %}
         has_items = [
           {% for generic in klass.type_vars %}
-            PlaceOS.introspect({{generic}}),
+            PlaceOS::Driver::Settings.introspect({{generic}}),
           {% end %}
         ]
         {type: "array", items: has_items}
       {% elsif klass_name.starts_with? "NamedTuple(" %}
         {type: "object",  properties: {
           {% for key in klass.keys %}
-            {{key.id}}: PlaceOS.introspect({{klass[key].resolve.name}}),
+            {{key.id}}: PlaceOS::Driver::Settings.introspect({{klass[key].resolve.name}}),
           {% end %}
         },
           {% required = [] of String %}
@@ -115,7 +115,7 @@ module PlaceOS
         { type: "null" }
       {% elsif klass <= Hash %}
         {% if klass.type_vars.size == 2 %}
-          { type: "object", additionalProperties: PlaceOS.introspect({{klass.type_vars[1]}}) }
+          { type: "object", additionalProperties: PlaceOS::Driver::Settings.introspect({{klass.type_vars[1]}}) }
         {% else %}
           # As inheritance might include the type_vars it's hard to work them out
           %klass = {{klass}}

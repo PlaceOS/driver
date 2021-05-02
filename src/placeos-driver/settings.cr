@@ -1,5 +1,3 @@
-require "./settings/introspect"
-
 class PlaceOS::Driver::Settings
   def initialize(settings : String)
     @json = JSON.parse(settings).as_h
@@ -43,7 +41,7 @@ class PlaceOS::Driver::Settings
       PlaceOS::Driver::Settings.add_setting_key(key, Union({{klass}}), {{required}})
     {% else %}
       {% klass = klass.resolve %}
-      {% ::PlaceOS::SETTINGS_REQ[key] = {klass, required} %}
+      {% ::PlaceOS::Driver::Settings::SETTINGS_REQ[key] = {klass, required} %}
     {% end %}
   end
 
@@ -143,15 +141,15 @@ class PlaceOS::Driver::Settings
   macro generate_json_schema
     {
       type: "object",
-      {% if !::PlaceOS::SETTINGS_REQ.empty? %}
+      {% if !::PlaceOS::Driver::Settings::SETTINGS_REQ.empty? %}
         properties: {
-          {% for key, details in ::PlaceOS::SETTINGS_REQ %}
+          {% for key, details in ::PlaceOS::Driver::Settings::SETTINGS_REQ %}
             {% klass = details[0] %}
-            {{key.id}}: PlaceOS.introspect({{klass}}),
+            {{key.id}}: PlaceOS::Driver::Settings.introspect({{klass}}),
           {% end %}
         },
         required: [
-          {% for key, details in ::PlaceOS::SETTINGS_REQ %}
+          {% for key, details in ::PlaceOS::Driver::Settings::SETTINGS_REQ %}
             {% required = details[1] %}
             {% if required %}
               {{key.id.stringify}},
@@ -162,3 +160,5 @@ class PlaceOS::Driver::Settings
     }.to_json
   end
 end
+
+require "./settings/introspect"
