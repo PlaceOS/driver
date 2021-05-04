@@ -1,5 +1,40 @@
 require "./helper"
 
+module AliasTest
+  alias Array = ::Array(String)
+end
+
+enum TestEnum
+  Bob
+  Jane
+end
+
+class SchemaKlass
+  include JSON::Serializable
+  property cmd : String
+  property other : Int32?
+end
+
+class SchemaKlassNoRequired
+  include JSON::Serializable
+  property cmd : String?
+  property other : Int32?
+end
+
+class RandomCustomKlass
+  def self.json_schema
+    {type: "object", required: ["something"]}
+  end
+end
+
+class SuperHash < Hash(String, Int32)
+end
+
+class SuperArray < Array(Int32)
+end
+
+alias SomeType = Tuple(String, Bool) | String
+
 describe PlaceOS::Driver::Settings do
   it "should provide simplified access to settings" do
     settings = Helper.settings
@@ -57,5 +92,37 @@ describe PlaceOS::Driver::Settings do
 
     settings.raw?(:hash, :hello).should eq("world")
     settings.raw?(:hash, :no_exist).should eq(nil)
+  end
+
+  it "should generate JSON schema from objects" do
+    PlaceOS::Driver::Settings.introspect(Array(String)).should eq({type: "array", items: {type: "string"}})
+    PlaceOS::Driver::Settings.introspect(SuperArray).should eq({type: "array"})
+    PlaceOS::Driver::Settings.introspect(AliasTest::Array).should eq({type: "array", items: {type: "string"}})
+    PlaceOS::Driver::Settings.introspect(Array(Int32)).should eq({type: "array", items: {type: "integer"}})
+    PlaceOS::Driver::Settings.introspect(Array(Float32)).should eq({type: "array", items: {type: "number"}})
+    PlaceOS::Driver::Settings.introspect(Array(Bool)).should eq({type: "array", items: {type: "boolean"}})
+    PlaceOS::Driver::Settings.introspect(Array(JSON::Any)).should eq({type: "array"})
+    PlaceOS::Driver::Settings.introspect(NamedTuple(steve: String)).should eq({type: "object", properties: {steve: {type: "string"}}, required: ["steve"]})
+    PlaceOS::Driver::Settings.introspect(TestEnum).should eq({type: "string", enum: ["Bob", "Jane"]})
+    PlaceOS::Driver::Settings.introspect(Tuple(String, Bool)).should eq({type: "array", items: [{type: "string"}, {type: "boolean"}]})
+    PlaceOS::Driver::Settings.introspect(SomeType).should eq({anyOf: [
+      {type: "string"},
+      {type: "array", items: [{type: "string"}, {type: "boolean"}]},
+    ]})
+    PlaceOS::Driver::Settings.introspect(Hash(String, Int32)).should eq({type: "object", additionalProperties: {type: "integer"}})
+    PlaceOS::Driver::Settings.introspect(SuperHash).should eq({type: "object"})
+    PlaceOS::Driver::Settings.introspect(Bool | String).should eq({anyOf: [{type: "boolean"}, {type: "string"}]})
+    PlaceOS::Driver::Settings.introspect(SchemaKlass).should eq({type: "object", properties: {cmd: {type: "string"}, other: {anyOf: [{type: "integer"}, {type: "null"}]}}, required: ["cmd"]})
+
+    # test where no fields are required
+    PlaceOS::Driver::Settings.introspect(NamedTuple(steve: String?)).should eq({type: "object", properties: {steve: {anyOf: [{type: "null"}, {type: "string"}]}}})
+    PlaceOS::Driver::Settings.introspect(SchemaKlassNoRequired).should eq({type: "object", properties: {cmd: {anyOf: [{type: "null"}, {type: "string"}]}, other: {anyOf: [{type: "integer"}, {type: "null"}]}}})
+
+    # allow totally custom classes to define their own schema
+    PlaceOS::Driver::Settings.introspect(RandomCustomKlass).should eq({type: "object", required: ["something"]})
+  end
+
+  it "should generate JSON schema from settings access" do
+    PlaceOS::Driver::Settings.get { generate_json_schema }.starts_with?(%({"type":"object","properties":{)).should be_true
   end
 end

@@ -32,6 +32,15 @@ class Helper
       },
     })
 
+    def on_load
+      @username = setting(String, :username)
+      @password = setting?(String, :password) || ""
+    rescue
+    end
+
+    @username : String = ""
+    @password : String = ""
+
     accessor thing : Thing, implementing: IncludedAble
     accessor main_lcd : Display_1, implementing: Powerable
     accessor switcher : Switcher

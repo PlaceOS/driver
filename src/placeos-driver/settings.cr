@@ -1,5 +1,3 @@
-require "json"
-
 class PlaceOS::Driver::Settings
   def initialize(settings : String)
     @json = JSON.parse(settings).as_h
@@ -12,6 +10,10 @@ class PlaceOS::Driver::Settings
   property :json
 
   def get
+    with self yield
+  end
+
+  def self.get
     with self yield
   end
 
@@ -33,7 +35,22 @@ class PlaceOS::Driver::Settings
     @json[key.to_s]?
   end
 
+  macro add_setting_key(key, klass, required)
+    {% arg_name = klass.stringify %}
+    {% if !arg_name.starts_with?("Union") && arg_name.includes?("|") %}
+      PlaceOS::Driver::Settings.add_setting_key(key, Union({{klass}}), {{required}})
+    {% else %}
+      {% klass = klass.resolve %}
+      {% ::PlaceOS::Driver::Settings::SETTINGS_REQ[key] = {klass, required} %}
+    {% end %}
+  end
+
   macro setting(klass, *keys)
+    # We check for key size == 1 as hard to build schema for sub keys
+    # this won't prevent the setting from working, just not part of the schema
+    {% if keys.size == 1 %}
+      add_setting_key {{keys[0].id}}, {{klass}}, true
+    {% end %}
     %keys = {{keys}}.map &.to_s
     %json = json.dig?(*%keys)
     if %json
@@ -49,6 +66,9 @@ class PlaceOS::Driver::Settings
   end
 
   macro setting?(klass, *keys)
+    {% if keys.size == 1 %}
+      add_setting_key {{keys[0].id}}, {{klass}}, false
+    {% end %}
     %keys = {{keys}}.map &.to_s
     %json = json.dig?(*%keys)
     # Explicitly check for nil here as this is a valid return value for ?
@@ -117,4 +137,28 @@ class PlaceOS::Driver::Settings
       end
     {% end %}
   end
+
+  macro generate_json_schema
+    {
+      type: "object",
+      {% if !::PlaceOS::Driver::Settings::SETTINGS_REQ.empty? %}
+        properties: {
+          {% for key, details in ::PlaceOS::Driver::Settings::SETTINGS_REQ %}
+            {% klass = details[0] %}
+            {{key.id}}: PlaceOS::Driver::Settings.introspect({{klass}}),
+          {% end %}
+        },
+        required: [
+          {% for key, details in ::PlaceOS::Driver::Settings::SETTINGS_REQ %}
+            {% required = details[1] %}
+            {% if required %}
+              {{key.id.stringify}},
+            {% end %}
+          {% end %}
+        ] of String
+      {% end %}
+    }.to_json
+  end
 end
+
+require "./settings/introspect"
