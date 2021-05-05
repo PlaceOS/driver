@@ -2,7 +2,7 @@ require "./helper"
 
 describe PlaceOS::Driver::TransportSSH do
   it "should work with a received function" do
-    pending!("spec is hanging on travis") if ENV["TRAVIS"]?
+    pending!("spec is hanging in CI") if ENV["CI"]?
 
     queue = Helper.queue
     count = 0
