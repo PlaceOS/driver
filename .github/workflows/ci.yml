@@ -28,6 +28,6 @@ jobs:
           with:
             crystal: ${{ matrix.crystal }}
         - name: Install dependencies
-          run: shards install
+          run: shards install --ignore-crystal-version
         - name: Run tests
           run: crystal spec
