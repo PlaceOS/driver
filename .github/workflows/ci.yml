@@ -1,6 +1,18 @@
 name: CI
 on: push
 jobs:
+  style:
+      steps:
+        - name: Install Crystal
+          uses: oprypin/install-crystal@v1
+        - name: Check out repository code
+          uses: actions/checkout@v2
+        - name: Format
+          run: crystal tool format --check
+        - name: Lint
+          uses: crystal-ameba/github-action@v0.2.12
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   test:
       strategy:
         fail-fast: false
@@ -15,14 +27,6 @@ jobs:
           uses: oprypin/install-crystal@v1
           with:
             crystal: ${{ matrix.crystal }}
-        - name: Check out repository code
-          uses: actions/checkout@v2
-        - name: Format
-          run: crystal tool format --check
-        - name: Lint
-          uses: crystal-ameba/github-action@v0.2.12
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         - name: Install dependencies
           run: shards install
         - name: Run tests
