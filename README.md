@@ -1,6 +1,6 @@
 # PlaceOS Driver
 
-[![Build Status](https://travis-ci.com/PlaceOS/driver.svg?branch=master)](https://travis-ci.com/PlaceOS/driver)
+[![CI](https://github.com/PlaceOS/driver/actions/workflows/ci.yml/badge.svg)](https://github.com/PlaceOS/driver/actions/workflows/ci.yml)
 
 The framework for running drivers on PlaceOS.
 
