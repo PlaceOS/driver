@@ -35,9 +35,13 @@ describe PlaceOS::Driver::Proxy::Scheduler do
   it "should be possible to obtain the return value of the task" do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
 
+    puts "checking get"
+
     # Test execution
     task = sched.at(2.milliseconds.from_now) { true }
     task.get.should eq true
+
+    puts "checking raise"
 
     # Test failure
     task = sched.at(2.milliseconds.from_now) { raise "was error" }
@@ -48,6 +52,8 @@ describe PlaceOS::Driver::Proxy::Scheduler do
       error.message.should eq "was error"
     end
 
+    puts "checking cancel"
+
     # Test cancelation
     task = sched.at(2.milliseconds.from_now) { true }
     spawn(same_thread: true) { task.cancel }
@@ -57,28 +63,42 @@ describe PlaceOS::Driver::Proxy::Scheduler do
     rescue error
       error.message.should eq "Task canceled"
     end
+
+    puts "completed"
   end
 
   it "should schedule a repeating task" do
+    puts "checking schedule"
+
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
     task = sched.every(4.milliseconds) { ran += 1 }
+
+    puts "did it run?"
 
     sleep 2.milliseconds
     sched.size.should eq(1)
     ran.should eq(0)
 
+    puts "did it run? 2"
+
     sleep 3.milliseconds
     ran.should eq(1)
     sched.size.should eq(1)
+
+    puts "did it run? 3"
 
     sleep 4.milliseconds
     ran.should eq(2)
     sched.size.should eq(1)
 
+    puts "did it run? 4"
+
     sleep 4.milliseconds
     ran.should eq(3)
     sched.size.should eq(1)
+
+    puts "did it run? 5"
 
     task.cancel
     sched.size.should eq(0)
