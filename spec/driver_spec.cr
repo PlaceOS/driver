@@ -49,20 +49,20 @@ describe PlaceOS::Driver::DriverManager do
 
     {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.functions.should eq(%({
       "switch_input":{
-        "input":["String"]
+        "input":["{\\"type\\":\\"string\\",\\"enum\\":[\\"HDMI\\",\\"DisplayPort\\",\\"HDBaseT\\"]}"]
       },
       "add":{
-        "a":["Int32"],
-        "b":["Int32"]
+        "a":["{\\"type\\":\\"integer\\"}"],
+        "b":["{\\"type\\":\\"integer\\"}"]
       },
       "splat_add":{},
       "perform_task":{
-        "name":["String | Int32"]
+        "name":["{\\"anyOf\\":[{\\"type\\":\\"integer\\"},{\\"type\\":\\"string\\"}]}"]
       },
       "error_task":{},
       "future_add":{
-        "a":["Int32"],
-        "b":["Int32", 200]
+        "a":["{\\"type\\":\\"integer\\"}"],
+        "b":["{\\"type\\":\\"integer\\"}", 200]
       },
       "future_error":{},
       "raise_error":{},

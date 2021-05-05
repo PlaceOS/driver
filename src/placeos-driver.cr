@@ -359,19 +359,12 @@ abstract class PlaceOS::Driver
 
             {{method.name.stringify}} => {
               {% for arg in args %}
-                {{arg.name.stringify}} => [
-                  {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}
-                    "String",
-                    {% if !arg.default_value.is_a?(Nop) %}
-                      {{arg.default_value}}.to_s
-                    {% end %}
-                  {% else %}
-                    {{arg.restriction.stringify}},
-                    {% if !arg.default_value.is_a?(Nop) %}
-                      {{arg.default_value}}
-                    {% end %}
+                {{arg.name.stringify}} => {
+                  PlaceOS::Driver::Settings.introspect({{arg.restriction.resolve}}).to_json,
+                  {% if !arg.default_value.is_a?(Nop) %}
+                    {{arg.default_value}}
                   {% end %}
-                ],
+                },
               {% end %}
             }{% if args.size == 0 %} of String => Array(String){% end %},
           {% end %}
