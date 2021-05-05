@@ -1,0 +1,29 @@
+name: CI
+on: push
+jobs:
+  test:
+      strategy:
+        fail-fast: false
+        matrix:
+          os: [ubuntu-latest, macos-latest]
+          crystal: [latest, nightly]
+      runs-on: ${{ matrix.os }}
+      steps:
+        - name: Install Redis
+          run: docker run -d -p 6379:6379 redis:6-alpine
+        - name: Install Crystal
+          uses: oprypin/install-crystal@v1
+          with:
+            crystal: ${{ matrix.crystal }}
+        - name: Check out repository code
+          uses: actions/checkout@v2
+        - name: Format
+          run: crystal tool format --check
+        - name: Lint
+          uses: crystal-ameba/github-action@v0.2.12
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        - name: Install dependencies
+          run: shards install
+        - name: Run tests
+          run: crystal spec
