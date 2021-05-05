@@ -359,12 +359,12 @@ abstract class PlaceOS::Driver
 
             {{method.name.stringify}} => {
               {% for arg in args %}
-                {{arg.name.stringify}} => [
-                  PlaceOS::Driver::Settings.introspect({{arg.restriction.resolve}}).to_json,
+                {{arg.name.stringify}} => {
+                  PlaceOS::Driver::Settings.introspect({{arg.restriction.resolve}}),
                   {% if !arg.default_value.is_a?(Nop) %}
                     {{arg.default_value}}
                   {% end %}
-                ],
+                },
               {% end %}
             }{% if args.size == 0 %} of String => Array(String) {% end %},
           {% end %}
