@@ -360,9 +360,12 @@ abstract class PlaceOS::Driver
             {{method.name.stringify}} => {
               {% for arg in args %}
                 {{arg.name.stringify}} => {
-                  PlaceOS::Driver::Settings.introspect({{arg.restriction.resolve}}),
-                  {% if !arg.default_value.is_a?(Nop) %}
-                    {{arg.default_value}}
+                  PlaceOS::Driver::Settings.introspect({{arg.restriction.resolve}}).
+                  {% if arg.default_value.is_a?(Nop) %}
+                    merge({ title: {{arg.restriction.resolve.stringify}} }),
+                  {% else %}
+                    merge({ title: {{arg.restriction.resolve.stringify}}, default: {{arg.default_value}} }),
+                    {{arg.default_value}},
                   {% end %}
                 },
               {% end %}
