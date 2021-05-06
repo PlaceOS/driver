@@ -49,7 +49,7 @@ describe PlaceOS::Driver::DriverManager do
 
     {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.functions.should eq(%({
       "switch_input":{
-        "input":[{"type":"string","enum":["HDMI","DisplayPort","HDBaseT"],"title":"Helper::TestDriver::Input"}]
+        "input":[{"type":"string","enum":["hdmi","display_port","hd_base_t"],"title":"Helper::TestDriver::Input"}]
       },
       "add":{
         "a":[{"type":"integer","title":"Int32"}],
