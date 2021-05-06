@@ -342,9 +342,35 @@ abstract class PlaceOS::Driver
 
       # provide introspection into available functions
       @@functions : String?
-      def self.functions : String
-        functions = @@functions
-        return functions if functions
+      @@interface : String?
+
+      def self.functions
+        functions = @@interface
+        return {functions, @@functions.not_nil!} if functions
+
+        @@interface = iface = {
+          {% for method in methods %}
+            {% index = 0 %}
+            {% args = [] of Crystal::Macros::Arg %}
+            {% for arg in method.args %}
+              {% if !method.splat_index || index < method.splat_index %}
+                {% args << arg %}
+              {% end %}
+              {% index = index + 1 %}
+            {% end %}
+
+            {{method.name.stringify}} => {
+              {% for arg in args %}
+                {{arg.name.stringify}} => PlaceOS::Driver::Settings.introspect({{arg.restriction.resolve}}).
+                  {% if arg.default_value.is_a?(Nop) %}
+                    merge({ title: {{arg.restriction.resolve.stringify}} }),
+                  {% else %}
+                    merge({ title: {{arg.restriction.resolve.stringify}}, default: {{arg.default_value}} }),
+                  {% end %}
+              {% end %}
+            }{% if args.size == 0 %} of String => Array(String) {% end %},
+          {% end %}
+        }.to_json
 
         @@functions = funcs = {
           {% for method in methods %}
@@ -360,11 +386,8 @@ abstract class PlaceOS::Driver
             {{method.name.stringify}} => {
               {% for arg in args %}
                 {{arg.name.stringify}} => {
-                  PlaceOS::Driver::Settings.introspect({{arg.restriction.resolve}}).
-                  {% if arg.default_value.is_a?(Nop) %}
-                    merge({ title: {{arg.restriction.resolve.stringify}} }),
-                  {% else %}
-                    merge({ title: {{arg.restriction.resolve.stringify}}, default: {{arg.default_value}} }),
+                  {{arg.restriction.stringify}},
+                  {% unless arg.default_value.is_a?(Nop) %}
                     {{arg.default_value}},
                   {% end %}
                 },
@@ -372,7 +395,8 @@ abstract class PlaceOS::Driver
             }{% if args.size == 0 %} of String => Array(String) {% end %},
           {% end %}
         }.to_json
-        funcs
+
+        {iface, funcs}
       end
 
       @@security : String?
@@ -401,9 +425,11 @@ abstract class PlaceOS::Driver
         return metadata if metadata
 
         implements = {{@type.ancestors.map(&.stringify.split("(")[0])}}.reject { |obj| IGNORE_KLASSES.includes?(obj) }
+        iface, funcs = self.functions
 
         details = %({
-          "functions": #{self.functions},
+          "interface": #{iface},
+          "functions": #{funcs},
           "implements": #{implements.to_json},
           "requirements": #{Utilities::Discovery.requirements.to_json},
           "security": #{self.security}

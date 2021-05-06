@@ -39,7 +39,7 @@ class PlaceOS::Driver::Proxy::Driver
   end
 
   def implements?(interface) : Bool
-    @metadata.implements.includes?(interface.to_s) || !!@metadata.functions[interface.to_s]?
+    @metadata.implements.includes?(interface.to_s) || !!@metadata.interface[interface.to_s]?
   end
 
   # All subscriptions to external drivers should be indirect as the driver might
@@ -53,7 +53,7 @@ class PlaceOS::Driver::Proxy::Driver
   # Ensure they are logged and raise if the response is requested
   macro method_missing(call)
     function_name = {{call.name.id.stringify}}
-    function = @metadata.functions[function_name]?
+    function = @metadata.interface[function_name]?
 
     # obtain the arguments provided
     arguments = {{call.args}} {% if call.args.size == 0 %} of String {% end %}
@@ -84,7 +84,7 @@ class PlaceOS::Driver::Proxy::Driver
 
         # check for defaults if there are not enough arguments
         function.each_value do |arg_details|
-          defaults += 1 if arg_details.size > 1
+          defaults += 1 if arg_details["default"]?
         end
 
         minargs = funcsize - defaults
@@ -141,9 +141,9 @@ class PlaceOS::Driver::Proxy::Driver
                     index += 1
                     arguments[index - 1]
                   elsif details.size > 1
-                    details[1]
+                    details["default"]
                   else
-                    raise "missing argument `#{arg_name} : #{details[0]}` for '#{function_name}' on #{module_metadata[:name]}_#{module_metadata[:index]} - #{module_metadata[:id]}"
+                    raise "missing argument `#{arg_name} : #{details["title"]}` for '#{function_name}' on #{module_metadata[:name]}_#{module_metadata[:index]} - #{module_metadata[:id]}"
                   end
                 end
 
