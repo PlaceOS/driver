@@ -6,6 +6,7 @@ jobs:
       container:
         image: crystallang/crystal
       steps:
+
         - name: Check out repository code
           uses: actions/checkout@v2
         - name: Format
@@ -17,24 +18,15 @@ jobs:
   test:
       strategy:
         fail-fast: false
-      runs-on: ubuntu-latest
+        matrix:
+          os: [ubuntu-latest]
+          crystal: [crystallang/crystal:latest-alpine, crystallang/crystal:nightly-alpine]
+      runs-on: ${{ matrix.os }}
       container:
-        image: crystallang/crystal
+        image: ${{ matrix.crystal }}
       steps:
-        - name: Install the latest version of LibSSH2
-          run: |
-            wget https://launchpad.net/ubuntu/+source/libgcrypt20/1.8.3-1ubuntu1/+build/15106861/+files/libgcrypt20-dev_1.8.3-1ubuntu1_amd64.deb
-            wget https://launchpad.net/ubuntu/+source/libgcrypt20/1.8.3-1ubuntu1/+build/15106861/+files/libgcrypt20_1.8.3-1ubuntu1_amd64.deb
-            wget https://launchpad.net/ubuntu/+source/libgpg-error/1.32-1/+build/15118612/+files/libgpg-error-dev_1.32-1_amd64.deb
-            wget https://launchpad.net/ubuntu/+source/libgpg-error/1.32-1/+build/15118612/+files/libgpg-error0_1.32-1_amd64.deb
-            wget https://launchpad.net/ubuntu/+source/libssh2/1.8.0-2/+build/15151524/+files/libssh2-1-dev_1.8.0-2_amd64.deb
-            wget https://launchpad.net/ubuntu/+source/libssh2/1.8.0-2/+build/15151524/+files/libssh2-1_1.8.0-2_amd64.deb
-            sudo dpkg -i libgpg-error0_1.32-1_amd64.deb
-            sudo dpkg -i libgcrypt20_1.8.3-1ubuntu1_amd64.deb
-            sudo dpkg -i libssh2-1_1.8.0-2_amd64.deb
-            sudo dpkg -i libgpg-error-dev_1.32-1_amd64.deb
-            sudo dpkg -i libgcrypt20-dev_1.8.3-1ubuntu1_amd64.deb
-            sudo dpkg -i libssh2-1-dev_1.8.0-2_amd64.deb
+        - name: Install LibSSH2
+          run: apk add --no-cache libssh2 libssh2-dev libssh2-static iputils
         - name: Install Redis
           run: docker run -d -p 6379:6379 redis:6-alpine
         - name: Check out repository code
