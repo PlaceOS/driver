@@ -5,8 +5,7 @@ require "../driver_manager"
 
 class PlaceOS::Driver::Proxy::Scheduler
   class TaskWrapper
-    def initialize(@task : Tasker::Task, @schedules : Set(TaskWrapper))
-      @terminated = false
+    def initialize(@task : Tasker::Task, @callback : (TaskWrapper, Bool) -> Bool)
     end
 
     PROXY = %w(created trigger_count last_scheduled next_scheduled next_epoch trigger get)
@@ -17,18 +16,12 @@ class PlaceOS::Driver::Proxy::Scheduler
     {% end %}
 
     def cancel(reason = "Task canceled", terminate = false)
-      if terminate
-        @terminated = true
-      else
-        @schedules.delete(self)
-      end
+      @callback.call(self, false) unless terminate
       @task.cancel reason
     end
 
     def resume
-      raise "schedule proxy terminated" if @terminated
-      @schedules << self
-      @task.resume
+      @task.resume unless @callback.call(self, true)
     end
   end
 
@@ -37,6 +30,14 @@ class PlaceOS::Driver::Proxy::Scheduler
   def initialize(@logger = ::Log.for("driver.scheduler"))
     @schedules = Set(TaskWrapper).new
     @terminated = false
+    @callback = Proc(TaskWrapper, Bool, Bool).new do |wrapped, add|
+      if add
+        @schedules << wrapped
+      else
+        @schedules.delete(wrapped)
+      end
+      @terminated
+    end
   end
 
   def size
@@ -51,7 +52,7 @@ class PlaceOS::Driver::Proxy::Scheduler
       @schedules.delete(wrapped.not_nil!)
       run_now(block)
     end
-    wrap = wrapped = TaskWrapper.new(task, @schedules)
+    wrap = wrapped = TaskWrapper.new(task, @callback)
     @schedules << wrap
     wrap
   end
@@ -64,7 +65,7 @@ class PlaceOS::Driver::Proxy::Scheduler
       @schedules.delete(wrapped.not_nil!)
       run_now(block)
     end
-    wrap = wrapped = TaskWrapper.new(task, @schedules)
+    wrap = wrapped = TaskWrapper.new(task, @callback)
     @schedules << wrap
     wrap
   end
@@ -73,7 +74,7 @@ class PlaceOS::Driver::Proxy::Scheduler
     raise "schedule proxy terminated" if @terminated
     spawn(same_thread: true) { run_now(block) } if immediate
     task = Tasker.every(time) { run_now(block) }
-    wrap = TaskWrapper.new(task, @schedules)
+    wrap = TaskWrapper.new(task, @callback)
     @schedules << wrap
     wrap
   end
@@ -82,7 +83,7 @@ class PlaceOS::Driver::Proxy::Scheduler
     raise "schedule proxy terminated" if @terminated
     spawn(same_thread: true) { run_now(block) } if immediate
     task = Tasker.cron(string, timezone) { run_now(block) }
-    wrap = TaskWrapper.new(task, @schedules)
+    wrap = TaskWrapper.new(task, @callback)
     @schedules << wrap
     wrap
   end
