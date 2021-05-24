@@ -1,10 +1,11 @@
 require "tasker"
+require "set"
 
 require "../driver_manager"
 
 class PlaceOS::Driver::Proxy::Scheduler
   class TaskWrapper
-    def initialize(@task : Tasker::Task, @schedules : Hash(UInt64, TaskWrapper))
+    def initialize(@task : Tasker::Task, @schedules : Set(TaskWrapper))
       @terminated = false
     end
 
@@ -16,14 +17,17 @@ class PlaceOS::Driver::Proxy::Scheduler
     {% end %}
 
     def cancel(reason = "Task canceled", terminate = false)
-      @terminated = true if terminate
-      @schedules.delete(self.object_id)
+      if terminate
+        @terminated = true
+      else
+        @schedules.delete(self)
+      end
       @task.cancel reason
     end
 
     def resume
       raise "schedule proxy terminated" if @terminated
-      @schedules[self.object_id] = self unless @schedules.has_key?(self.object_id)
+      @schedules << self
       @task.resume
     end
   end
@@ -31,7 +35,7 @@ class PlaceOS::Driver::Proxy::Scheduler
   getter logger : ::Log
 
   def initialize(@logger = ::Log.for("driver.scheduler"))
-    @schedules = {} of UInt64 => TaskWrapper
+    @schedules = Set(TaskWrapper).new
     @terminated = false
   end
 
@@ -44,11 +48,11 @@ class PlaceOS::Driver::Proxy::Scheduler
     spawn(same_thread: true) { run_now(block) } if immediate
     wrapped = nil
     task = Tasker.at(time) do
-      @schedules.delete(wrapped.not_nil!.object_id)
+      @schedules.delete(wrapped.not_nil!)
       run_now(block)
     end
     wrap = wrapped = TaskWrapper.new(task, @schedules)
-    @schedules[wrap.object_id] = wrap
+    @schedules << wrap
     wrap
   end
 
@@ -57,11 +61,11 @@ class PlaceOS::Driver::Proxy::Scheduler
     spawn(same_thread: true) { run_now(block) } if immediate
     wrapped = nil
     task = Tasker.in(time) do
-      @schedules.delete(wrapped.not_nil!.object_id)
+      @schedules.delete(wrapped.not_nil!)
       run_now(block)
     end
     wrap = wrapped = TaskWrapper.new(task, @schedules)
-    @schedules[wrap.object_id] = wrap
+    @schedules << wrap
     wrap
   end
 
@@ -70,7 +74,7 @@ class PlaceOS::Driver::Proxy::Scheduler
     spawn(same_thread: true) { run_now(block) } if immediate
     task = Tasker.every(time) { run_now(block) }
     wrap = TaskWrapper.new(task, @schedules)
-    @schedules[wrap.object_id] = wrap
+    @schedules << wrap
     wrap
   end
 
@@ -79,7 +83,7 @@ class PlaceOS::Driver::Proxy::Scheduler
     spawn(same_thread: true) { run_now(block) } if immediate
     task = Tasker.cron(string, timezone) { run_now(block) }
     wrap = TaskWrapper.new(task, @schedules)
-    @schedules[wrap.object_id] = wrap
+    @schedules << wrap
     wrap
   end
 
@@ -90,8 +94,8 @@ class PlaceOS::Driver::Proxy::Scheduler
 
   def clear
     schedules = @schedules
-    @schedules = {} of UInt64 => TaskWrapper
-    schedules.each_value &.cancel(terminate: @terminated)
+    @schedules = Set(TaskWrapper).new
+    schedules.each &.cancel(terminate: @terminated)
   end
 
   private def run_now(block)
