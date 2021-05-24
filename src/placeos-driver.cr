@@ -399,43 +399,27 @@ abstract class PlaceOS::Driver
         {iface, funcs}
       end
 
-      @@security : String?
-      def self.security : String
-        security = @@security
-        return security if security
-
-        sec = {} of String => Array(String)
-
-        {% for method in methods %}
-          {% if method.annotation(Security) %}
+      class_getter security : String do
+        Hash(String, Array(String)).new { |h, k| h[k] = [] of String }.tap { |sec|
+          {% for method in methods.select { |m| !!m.annotation(Security) } %}
             level = {{method.annotation(Security)[0]}}.as(::PlaceOS::Driver::Level).to_s.downcase
-            array = sec[level]? || [] of String
-            array << {{method.name.stringify}}
-            sec[level] = array
+            sec[level] << {{ method.name.stringify }}
           {% end %}
-        {% end %}
-
-        @@security = sec = sec.to_json
-        sec
+        }.to_json
       end
 
-      @@metadata : String?
-      def self.metadata : String
-        metadata = @@metadata
-        return metadata if metadata
-
+      class_getter metadata : String do
         implements = {{@type.ancestors.map(&.stringify.split("(")[0])}}.reject { |obj| IGNORE_KLASSES.includes?(obj) }
         iface, funcs = self.functions
 
-        details = %({
+        %({
+          "functions": #{self.functions},
           "interface": #{iface},
           "functions": #{funcs},
           "implements": #{implements.to_json},
           "requirements": #{Utilities::Discovery.requirements.to_json},
           "security": #{self.security}
         }).gsub(/\s/, "")
-
-        @@metadata = details
       end
 
       # unlike metadata, the schema is not required for runtime
