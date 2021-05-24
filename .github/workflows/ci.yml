@@ -41,7 +41,7 @@ jobs:
 
       steps:
         - name: Install LibSSH2
-          run: apt install libssh2-1 libssh2-1-dev
+          run: apt update && apt -y install libssh2-1 libssh2-1-dev
         - name: Check out repository code
           uses: actions/checkout@v2
         - name: Install dependencies
