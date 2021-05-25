@@ -62,21 +62,21 @@ describe PlaceOS::Driver::Proxy::Scheduler do
   it "should schedule a repeating task" do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
-    task = sched.every(16.milliseconds) { ran += 1 }
+    task = sched.every(32.milliseconds) { ran += 1 }
 
-    sleep 8.milliseconds
+    sleep 16.milliseconds
     sched.size.should eq(1)
     ran.should eq(0)
 
-    sleep 12.milliseconds
+    sleep 24.milliseconds
     ran.should eq(1)
     sched.size.should eq(1)
 
-    sleep 16.milliseconds
+    sleep 32.milliseconds
     ran.should eq(2)
     sched.size.should eq(1)
 
-    sleep 16.milliseconds
+    sleep 32.milliseconds
     ran.should eq(3)
     sched.size.should eq(1)
 
@@ -88,23 +88,23 @@ describe PlaceOS::Driver::Proxy::Scheduler do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
     single = 0
-    sched.in(8.milliseconds) { single += 1 }
-    task = sched.every(16.milliseconds) { ran += 1 }
+    sched.in(16.milliseconds) { single += 1 }
+    task = sched.every(32.milliseconds) { ran += 1 }
 
-    sleep 12.milliseconds
+    sleep 24.milliseconds
     sched.size.should eq(1)
     ran.should eq(0)
     single.should eq(1)
 
-    sleep 8.milliseconds
+    sleep 16.milliseconds
     ran.should eq(1)
     sched.size.should eq(1)
 
-    sleep 16.milliseconds
+    sleep 32.milliseconds
     ran.should eq(2)
     sched.size.should eq(1)
 
-    sleep 16.milliseconds
+    sleep 32.milliseconds
     ran.should eq(3)
     sched.size.should eq(1)
 
@@ -115,27 +115,27 @@ describe PlaceOS::Driver::Proxy::Scheduler do
   it "should pause and resume a repeating task" do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
-    task = sched.every(12.milliseconds) { ran += 1; ran }
+    task = sched.every(24.milliseconds) { ran += 1; ran }
 
-    sleep 18.milliseconds
+    sleep 36.milliseconds
     ran.should eq(1)
     sched.size.should eq(1)
 
-    sleep 12.milliseconds
+    sleep 24.milliseconds
     ran.should eq(2)
     sched.size.should eq(1)
 
     task.cancel
     sched.size.should eq(0)
 
-    sleep 12.milliseconds
+    sleep 24.milliseconds
     ran.should eq(2)
     sched.size.should eq(0)
 
     task.resume
     sched.size.should eq(1)
 
-    sleep 18.milliseconds
+    sleep 36.milliseconds
     ran.should eq(3)
     sched.size.should eq(1)
 
