@@ -47,9 +47,35 @@ describe PlaceOS::Driver::DriverManager do
     ))
     executor.execute(driver).should eq(%("DisplayPort"))
 
-    {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.functions.should eq(%({
+    iface, funcs = {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.functions
+    iface.should eq(%({
       "switch_input":{
-        "input":["String"]
+        "input":{"type":"string","enum":["hdmi","display_port","hd_base_t"],"title":"Helper::TestDriver::Input"}
+      },
+      "add":{
+        "a":{"type":"integer","title":"Int32"},
+        "b":{"type":"integer","title":"Int32"}
+      },
+      "splat_add":{},
+      "perform_task":{
+        "name":{"anyOf":[{"type":"integer"},{"type":"string"}],"title":"(Int32 | String)"}
+      },
+      "error_task":{},
+      "future_add":{
+        "a":{"type":"integer","title":"Int32"},
+        "b":{"type":"integer","title":"Int32","default":200}
+      },
+      "future_error":{},
+      "raise_error":{},
+      "not_json":{},
+      "test_http":{},
+      "test_exec":{},
+      "implemented_in_base_class":{}
+    }).gsub(/\s/, "").gsub(/\|/, " | "))
+
+    funcs.should eq(%({
+      "switch_input":{
+          "input":["Input"]
       },
       "add":{
         "a":["Int32"],
@@ -62,7 +88,7 @@ describe PlaceOS::Driver::DriverManager do
       "error_task":{},
       "future_add":{
         "a":["Int32"],
-        "b":["Int32", 200]
+        "b":["Int32",200]
       },
       "future_error":{},
       "raise_error":{},

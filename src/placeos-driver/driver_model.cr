@@ -22,16 +22,32 @@ struct PlaceOS::Driver::DriverModel
     include JSON::Serializable
 
     def initialize(
-      @functions = {} of String => Hash(String, Array(JSON::Any)),
+      @interface : Hash(String, Hash(String, JSON::Any))? = nil,
       @implements = [] of String,
       @requirements = {} of String => Array(String),
       @security = {} of String => Array(String),
       @settings = {type: "object", properties: {} of String => JSON::Any, required: [] of String}
     )
+      @interface ||= {} of String => Hash(String, JSON::Any)
+      @functions = nil
+    end
+
+    @[Deprecated("Use `#interface` instead of functions")]
+    def initialize(
+      @functions : Hash(String, Hash(String, Array(JSON::Any)))? = nil,
+      @implements = [] of String,
+      @requirements = {} of String => Array(String),
+      @security = {} of String => Array(String),
+      @settings = {type: "object", properties: {} of String => JSON::Any, required: [] of String}
+    )
+      @functions ||= {} of String => Hash(String, Array(JSON::Any))
+      @interface = nil
     end
 
     # Functions available on module, map of function name to args
-    property functions : Hash(String, Hash(String, Array(JSON::Any)))
+    property interface : Hash(String, Hash(String, JSON::Any))?
+    property functions : Hash(String, Hash(String, Array(JSON::Any)))?
+
     # Interfaces implemented by module
     property implements : Array(String)
     # Module requirements, map of module name to required interfaces
@@ -40,6 +56,51 @@ struct PlaceOS::Driver::DriverModel
     property security : Hash(String, Array(String))
     # JSON Schema derived from the settings used in the driver
     property settings : NamedTuple(type: String, properties: Hash(String, JSON::Any)?, required: Array(String)?)?
+
+    # Note:: the use of both these functions is temporary
+    @[Deprecated("Use `#interface` instead")]
+    def functions : Hash(String, Hash(String, Array(JSON::Any)))
+      funcs = @functions
+      return funcs if funcs
+
+      funcs = {} of String => Hash(String, Array(JSON::Any))
+      @interface.not_nil!.each do |func_name, arguments|
+        arg_hash = {} of String => Array(JSON::Any)
+        arguments.each do |arg_name, schema|
+          values = [schema]
+          default = schema["default"]?
+          values << default if default
+
+          arg_hash[arg_name] = values
+        end
+        funcs[func_name] = arg_hash
+      end
+
+      @functions = funcs
+    end
+
+    def interface : Hash(String, Hash(String, JSON::Any))
+      iface = @interface
+      return iface if iface
+
+      Log.warn { "Deprecated metadata in use. A driver update is required" }
+
+      funcs = {} of String => Hash(String, JSON::Any)
+      @functions.not_nil!.each do |func_name, arguments|
+        arg_hash = {} of String => JSON::Any
+        arguments.each do |arg_name, values|
+          default = values[1]?
+          if default
+            arg_hash[arg_name] = JSON::Any.new({"default" => default})
+          else
+            arg_hash[arg_name] = JSON::Any.new({} of String => JSON::Any)
+          end
+        end
+        funcs[func_name] = arg_hash
+      end
+
+      @interface = funcs
+    end
   end
 
   enum Role

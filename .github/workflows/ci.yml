@@ -1,11 +1,15 @@
 name: CI
-on: push
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
 jobs:
   style:
       runs-on: ubuntu-latest
+      container:
+        image: crystallang/crystal
       steps:
-        - name: Install Crystal
-          uses: oprypin/install-crystal@v1
         - name: Check out repository code
           uses: actions/checkout@v2
         - name: Format
@@ -19,32 +23,35 @@ jobs:
         fail-fast: false
         matrix:
           os: [ubuntu-latest]
-          crystal: [latest, nightly]
+          crystal:
+            - latest
+            - nightly
+            - 1.0.0
+            - 0.36.1
       runs-on: ${{ matrix.os }}
+      container: crystallang/crystal:${{ matrix.crystal }}-alpine
+
+      # Service containers to run with `container-job`
+      services:
+        # Label used to access the service container
+        redis:
+          # Docker Hub image
+          image: redis
+          # Set health checks to wait until redis has started
+          options: >-
+            --health-cmd "redis-cli ping"
+            --health-interval 10s
+            --health-timeout 5s
+            --health-retries 5
+
       steps:
-        - name: Install Crystal
-          uses: oprypin/install-crystal@v1
-          with:
-            crystal: ${{ matrix.crystal }}
-        - name: Install the latest version of LibSSH2
-          run: |
-            wget https://launchpad.net/ubuntu/+source/libgcrypt20/1.8.3-1ubuntu1/+build/15106861/+files/libgcrypt20-dev_1.8.3-1ubuntu1_amd64.deb
-            wget https://launchpad.net/ubuntu/+source/libgcrypt20/1.8.3-1ubuntu1/+build/15106861/+files/libgcrypt20_1.8.3-1ubuntu1_amd64.deb
-            wget https://launchpad.net/ubuntu/+source/libgpg-error/1.32-1/+build/15118612/+files/libgpg-error-dev_1.32-1_amd64.deb
-            wget https://launchpad.net/ubuntu/+source/libgpg-error/1.32-1/+build/15118612/+files/libgpg-error0_1.32-1_amd64.deb
-            wget https://launchpad.net/ubuntu/+source/libssh2/1.8.0-2/+build/15151524/+files/libssh2-1-dev_1.8.0-2_amd64.deb
-            wget https://launchpad.net/ubuntu/+source/libssh2/1.8.0-2/+build/15151524/+files/libssh2-1_1.8.0-2_amd64.deb
-            sudo dpkg -i libgpg-error0_1.32-1_amd64.deb
-            sudo dpkg -i libgcrypt20_1.8.3-1ubuntu1_amd64.deb
-            sudo dpkg -i libssh2-1_1.8.0-2_amd64.deb
-            sudo dpkg -i libgpg-error-dev_1.32-1_amd64.deb
-            sudo dpkg -i libgcrypt20-dev_1.8.3-1ubuntu1_amd64.deb
-            sudo dpkg -i libssh2-1-dev_1.8.0-2_amd64.deb
-        - name: Install Redis
-          run: docker run -d -p 6379:6379 redis:6-alpine
+        - name: Install LibSSH2
+          run: apk add --no-cache libssh2 libssh2-dev libssh2-static iputils
         - name: Check out repository code
           uses: actions/checkout@v2
         - name: Install dependencies
           run: shards install --ignore-crystal-version
         - name: Run tests
           run: crystal spec -v --error-trace
+          env:
+            REDIS_URL: redis://redis:6379

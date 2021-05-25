@@ -13,6 +13,13 @@ class SchemaKlass
   include JSON::Serializable
   property cmd : String
   property other : Int32?
+
+  {% if compare_versions(Crystal::VERSION, "1.0.0") >= 0 %}
+    @[JSON::Field(converter: Enum::ValueConverter(TestEnum))]
+    property foo : TestEnum
+  {% else %}
+    property foo : TestEnum
+  {% end %}
 end
 
 class SchemaKlassNoRequired
@@ -103,7 +110,7 @@ describe PlaceOS::Driver::Settings do
     PlaceOS::Driver::Settings.introspect(Array(Bool)).should eq({type: "array", items: {type: "boolean"}})
     PlaceOS::Driver::Settings.introspect(Array(JSON::Any)).should eq({type: "array"})
     PlaceOS::Driver::Settings.introspect(NamedTuple(steve: String)).should eq({type: "object", properties: {steve: {type: "string"}}, required: ["steve"]})
-    PlaceOS::Driver::Settings.introspect(TestEnum).should eq({type: "string", enum: ["Bob", "Jane"]})
+    PlaceOS::Driver::Settings.introspect(TestEnum).should eq({type: "string", enum: ["bob", "jane"]})
     PlaceOS::Driver::Settings.introspect(Tuple(String, Bool)).should eq({type: "array", items: [{type: "string"}, {type: "boolean"}]})
     PlaceOS::Driver::Settings.introspect(SomeType).should eq({anyOf: [
       {type: "string"},
@@ -112,7 +119,10 @@ describe PlaceOS::Driver::Settings do
     PlaceOS::Driver::Settings.introspect(Hash(String, Int32)).should eq({type: "object", additionalProperties: {type: "integer"}})
     PlaceOS::Driver::Settings.introspect(SuperHash).should eq({type: "object"})
     PlaceOS::Driver::Settings.introspect(Bool | String).should eq({anyOf: [{type: "boolean"}, {type: "string"}]})
-    PlaceOS::Driver::Settings.introspect(SchemaKlass).should eq({type: "object", properties: {cmd: {type: "string"}, other: {anyOf: [{type: "integer"}, {type: "null"}]}}, required: ["cmd"]})
+
+    {% unless compare_versions(Crystal::VERSION, "1.0.0") < 0 %}
+      PlaceOS::Driver::Settings.introspect(SchemaKlass).should eq({type: "object", properties: {cmd: {type: "string"}, other: {anyOf: [{type: "integer"}, {type: "null"}]}, foo: {enum: [0, 1]}}, required: ["cmd", "foo"]})
+    {% end %}
 
     # test where no fields are required
     PlaceOS::Driver::Settings.introspect(NamedTuple(steve: String?)).should eq({type: "object", properties: {steve: {anyOf: [{type: "null"}, {type: "string"}]}}})

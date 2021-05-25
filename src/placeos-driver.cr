@@ -342,9 +342,35 @@ abstract class PlaceOS::Driver
 
       # provide introspection into available functions
       @@functions : String?
-      def self.functions : String
-        functions = @@functions
-        return functions if functions
+      @@interface : String?
+
+      def self.functions
+        functions = @@interface
+        return {functions, @@functions.not_nil!} if functions
+
+        @@interface = iface = {
+          {% for method in methods %}
+            {% index = 0 %}
+            {% args = [] of Crystal::Macros::Arg %}
+            {% for arg in method.args %}
+              {% if !method.splat_index || index < method.splat_index %}
+                {% args << arg %}
+              {% end %}
+              {% index = index + 1 %}
+            {% end %}
+
+            {{method.name.stringify}} => {
+              {% for arg in args %}
+                {{arg.name.stringify}} => PlaceOS::Driver::Settings.introspect({{arg.restriction.resolve}}).
+                  {% if arg.default_value.is_a?(Nop) %}
+                    merge({ title: {{arg.restriction.resolve.stringify}} }),
+                  {% else %}
+                    merge({ title: {{arg.restriction.resolve.stringify}}, default: {{arg.default_value}} }),
+                  {% end %}
+              {% end %}
+            }{% if args.size == 0 %} of String => Array(String) {% end %},
+          {% end %}
+        }.to_json
 
         @@functions = funcs = {
           {% for method in methods %}
@@ -359,61 +385,40 @@ abstract class PlaceOS::Driver
 
             {{method.name.stringify}} => {
               {% for arg in args %}
-                {{arg.name.stringify}} => [
-                  {% if !arg.restriction.is_a?(Union) && arg.restriction.resolve < ::Enum %}
-                    "String",
-                    {% if !arg.default_value.is_a?(Nop) %}
-                      {{arg.default_value}}.to_s
-                    {% end %}
-                  {% else %}
-                    {{arg.restriction.stringify}},
-                    {% if !arg.default_value.is_a?(Nop) %}
-                      {{arg.default_value}}
-                    {% end %}
+                {{arg.name.stringify}} => {
+                  {{arg.restriction.stringify}},
+                  {% unless arg.default_value.is_a?(Nop) %}
+                    {{arg.default_value}},
                   {% end %}
-                ],
+                },
               {% end %}
-            }{% if args.size == 0 %} of String => Array(String){% end %},
+            }{% if args.size == 0 %} of String => Array(String) {% end %},
           {% end %}
         }.to_json
-        funcs
+
+        {iface, funcs}
       end
 
-      @@security : String?
-      def self.security : String
-        security = @@security
-        return security if security
-
-        sec = {} of String => Array(String)
-
-        {% for method in methods %}
-          {% if method.annotation(Security) %}
+      class_getter security : String do
+        Hash(String, Array(String)).new { |h, k| h[k] = [] of String }.tap { |sec|
+          {% for method in methods.select { |m| !!m.annotation(Security) } %}
             level = {{method.annotation(Security)[0]}}.as(::PlaceOS::Driver::Level).to_s.downcase
-            array = sec[level]? || [] of String
-            array << {{method.name.stringify}}
-            sec[level] = array
+            sec[level] << {{ method.name.stringify }}
           {% end %}
-        {% end %}
-
-        @@security = sec = sec.to_json
-        sec
+        }.to_json
       end
 
-      @@metadata : String?
-      def self.metadata : String
-        metadata = @@metadata
-        return metadata if metadata
-
+      class_getter metadata : String do
         implements = {{@type.ancestors.map(&.stringify.split("(")[0])}}.reject { |obj| IGNORE_KLASSES.includes?(obj) }
+        iface, funcs = self.functions
 
-        details = %({
-          "functions": #{self.functions},
+        %({
+          "interface": #{iface},
+          "functions": #{funcs},
           "implements": #{implements.to_json},
           "requirements": #{Utilities::Discovery.requirements.to_json},
           "security": #{self.security}
         }).gsub(/\s/, "")
-
-        @@metadata = details
       end
 
       # unlike metadata, the schema is not required for runtime

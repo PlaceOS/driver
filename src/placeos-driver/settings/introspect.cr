@@ -11,7 +11,7 @@ class PlaceOS::Driver::Settings
         {% for ivar in @type.instance_vars %}
           {% ann = ivar.annotation(::JSON::Field) %}
           {% unless ann && (ann[:ignore] || ann[:ignore_deserialize]) %}
-            {% properties[((ann && ann[:key]) || ivar).id] = ivar.type %}
+            {% properties[((ann && ann[:key]) || ivar).id] = {ivar.type.resolve, (ann && ann[:converter])} %}
           {% end %}
         {% end %}
 
@@ -19,12 +19,25 @@ class PlaceOS::Driver::Settings
           { type: "object" }
         {% else %}
           {type: "object",  properties: {
-            {% for key, ivar in properties %}
-              {{key}}: PlaceOS::Driver::Settings.introspect({{ivar.resolve.name}}),
+            {% for key, details in properties %}
+              {% ivar = details[0] %}
+              {% converter = details[1] %}
+              {% if ivar < Enum && converter %}
+                # we don't specify the type of the enum as we don't know what will be output
+                # all we know is that it can be parsed as JSON
+                {{key}}: { enum: [
+                  {% for const in ivar.constants %}
+                    JSON.parse({{converter.resolve}}.to_json({{ivar.name}}::{{const}})),
+                  {% end %}
+                ]},
+              {% else %}
+                {{key}}: PlaceOS::Driver::Settings.introspect({{ivar.name}}),
+              {% end %}
             {% end %}
           },
             {% required = [] of String %}
-            {% for key, ivar in properties %}
+            {% for key, details in properties %}
+              {% ivar = details[0] %}
               {% unless ivar.nilable? %}
                 {% required << key.stringify %}
               {% end %}
@@ -102,7 +115,7 @@ class PlaceOS::Driver::Settings
           {% end %}
         }
       {% elsif klass < Enum %}
-        {type: "string",  enum: {{klass.constants.map(&.stringify)}} }
+        {type: "string",  enum: {{klass.constants.map(&.stringify.underscore)}} }
       {% elsif klass <= String %}
         { type: "string" }
       {% elsif klass <= Bool %}

@@ -1,54 +1,58 @@
 require "tasker"
+require "set"
 
 require "../driver_manager"
 
 class PlaceOS::Driver::Proxy::Scheduler
-  class TaskWrapper
-    def initialize(@task : Tasker::Task, @schedules : Hash(UInt64, TaskWrapper))
-      @terminated = false
+  private class TaskWrapper
+    enum Action
+      Add
+      Remove
     end
 
-    PROXY = %w(created trigger_count last_scheduled next_scheduled next_epoch trigger get)
-    {% for method in PROXY %}
-      def {{method.id}}
-        @task.{{method.id}}
-      end
-    {% end %}
+    alias Callback = (TaskWrapper, Action) -> Bool
 
-    def cancel(reason = "Task canceled", terminate = false)
-      @terminated = true if terminate
-      @schedules.delete(self.object_id)
+    def initialize(@task : Tasker::Task, @callback : Callback)
+    end
+
+    delegate created, get, last_scheduled, next_epoch, next_scheduled, trigger, trigger_count, to: @task
+
+    def cancel(reason = "Task cancelled", terminate = false)
+      @callback.call(self, Action::Remove) unless terminate
       @task.cancel reason
     end
 
     def resume
-      raise "schedule proxy terminated" if @terminated
-      @schedules[self.object_id] = self unless @schedules.has_key?(self.object_id)
-      @task.resume
+      @task.resume unless @callback.call(self, Action::Add)
     end
   end
 
   getter logger : ::Log
 
   def initialize(@logger = ::Log.for("driver.scheduler"))
-    @schedules = {} of UInt64 => TaskWrapper
+    @schedules = Set(TaskWrapper).new
     @terminated = false
+    @callback = TaskWrapper::Callback.new do |wrapped, action|
+      case action
+      in .add?    then @schedules << wrapped
+      in .remove? then @schedules.delete(wrapped)
+      end
+      @terminated
+    end
   end
 
-  def size
-    @schedules.size
-  end
+  delegate size, to: @schedules
 
   def at(time, immediate = false, &block : -> _)
     raise "schedule proxy terminated" if @terminated
     spawn(same_thread: true) { run_now(block) } if immediate
     wrapped = nil
     task = Tasker.at(time) do
-      @schedules.delete(wrapped.not_nil!.object_id)
+      @schedules.delete(wrapped)
       run_now(block)
     end
-    wrap = wrapped = TaskWrapper.new(task, @schedules)
-    @schedules[wrap.object_id] = wrap
+    wrap = wrapped = TaskWrapper.new(task, @callback)
+    @schedules << wrap
     wrap
   end
 
@@ -57,11 +61,11 @@ class PlaceOS::Driver::Proxy::Scheduler
     spawn(same_thread: true) { run_now(block) } if immediate
     wrapped = nil
     task = Tasker.in(time) do
-      @schedules.delete(wrapped.not_nil!.object_id)
+      @schedules.delete(wrapped)
       run_now(block)
     end
-    wrap = wrapped = TaskWrapper.new(task, @schedules)
-    @schedules[wrap.object_id] = wrap
+    wrap = wrapped = TaskWrapper.new(task, @callback)
+    @schedules << wrap
     wrap
   end
 
@@ -69,18 +73,14 @@ class PlaceOS::Driver::Proxy::Scheduler
     raise "schedule proxy terminated" if @terminated
     spawn(same_thread: true) { run_now(block) } if immediate
     task = Tasker.every(time) { run_now(block) }
-    wrap = TaskWrapper.new(task, @schedules)
-    @schedules[wrap.object_id] = wrap
-    wrap
+    TaskWrapper.new(task, @callback).tap { |wrapper| @schedules << wrapper }
   end
 
   def cron(string, timezone : Time::Location = Time::Location.local, immediate = false, &block : -> _)
     raise "schedule proxy terminated" if @terminated
     spawn(same_thread: true) { run_now(block) } if immediate
     task = Tasker.cron(string, timezone) { run_now(block) }
-    wrap = TaskWrapper.new(task, @schedules)
-    @schedules[wrap.object_id] = wrap
-    wrap
+    TaskWrapper.new(task, @callback).tap { |wrapper| @schedules << wrapper }
   end
 
   def terminate
@@ -90,8 +90,8 @@ class PlaceOS::Driver::Proxy::Scheduler
 
   def clear
     schedules = @schedules
-    @schedules = {} of UInt64 => TaskWrapper
-    schedules.each_value &.cancel(terminate: @terminated)
+    @schedules = Set(TaskWrapper).new
+    schedules.each &.cancel(terminate: @terminated)
   end
 
   private def run_now(block)

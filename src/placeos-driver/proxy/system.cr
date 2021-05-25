@@ -132,7 +132,7 @@ class PlaceOS::Driver::Proxy::System
       metadata = RedisStorage.get("interface/#{module_id}")
       if module_id && metadata
         data = DriverModel::Metadata.from_json metadata
-        next unless data.implements.includes?(interface) || data.functions[interface]?
+        next unless data.implements.includes?(interface) || data.interface[interface]?
         drivers << Proxy::Driver.new(@reply_id, mod_name, index.to_i, module_id, self, data)
       end
     end

@@ -41,42 +41,38 @@ describe PlaceOS::Driver::Proxy::Scheduler do
 
     # Test failure
     task = sched.at(2.milliseconds.from_now) { raise "was error" }
-    begin
+    expect_raises(Exception, "was error") do
       task.get
       raise "not here"
-    rescue error
-      error.message.should eq "was error"
     end
 
-    # Test cancelation
+    # Test cancellation
     task = sched.at(2.milliseconds.from_now) { true }
     spawn(same_thread: true) { task.cancel }
-    begin
+    expect_raises(Exception, "Task cancelled") do
       task.get
       raise "failed"
-    rescue error
-      error.message.should eq "Task canceled"
     end
   end
 
   it "should schedule a repeating task" do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
-    task = sched.every(4.milliseconds) { ran += 1 }
+    task = sched.every(32.milliseconds) { ran += 1 }
 
-    sleep 2.milliseconds
+    sleep 16.milliseconds
     sched.size.should eq(1)
     ran.should eq(0)
 
-    sleep 3.milliseconds
+    sleep 24.milliseconds
     ran.should eq(1)
     sched.size.should eq(1)
 
-    sleep 4.milliseconds
+    sleep 32.milliseconds
     ran.should eq(2)
     sched.size.should eq(1)
 
-    sleep 4.milliseconds
+    sleep 32.milliseconds
     ran.should eq(3)
     sched.size.should eq(1)
 
@@ -88,23 +84,23 @@ describe PlaceOS::Driver::Proxy::Scheduler do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
     single = 0
-    sched.in(2.milliseconds) { single += 1 }
-    task = sched.every(4.milliseconds) { ran += 1 }
+    sched.in(16.milliseconds) { single += 1 }
+    task = sched.every(32.milliseconds) { ran += 1 }
 
-    sleep 3.milliseconds
+    sleep 24.milliseconds
     sched.size.should eq(1)
     ran.should eq(0)
     single.should eq(1)
 
-    sleep 2.milliseconds
+    sleep 16.milliseconds
     ran.should eq(1)
     sched.size.should eq(1)
 
-    sleep 4.milliseconds
+    sleep 32.milliseconds
     ran.should eq(2)
     sched.size.should eq(1)
 
-    sleep 4.milliseconds
+    sleep 32.milliseconds
     ran.should eq(3)
     sched.size.should eq(1)
 
@@ -115,27 +111,27 @@ describe PlaceOS::Driver::Proxy::Scheduler do
   it "should pause and resume a repeating task" do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
-    task = sched.every(2.milliseconds) { ran += 1; ran }
+    task = sched.every(24.milliseconds) { ran += 1; ran }
 
-    sleep 3.milliseconds
+    sleep 36.milliseconds
     ran.should eq(1)
     sched.size.should eq(1)
 
-    sleep 2.milliseconds
+    sleep 24.milliseconds
     ran.should eq(2)
     sched.size.should eq(1)
 
     task.cancel
     sched.size.should eq(0)
 
-    sleep 2.milliseconds
+    sleep 24.milliseconds
     ran.should eq(2)
     sched.size.should eq(0)
 
     task.resume
     sched.size.should eq(1)
 
-    sleep 3.milliseconds
+    sleep 36.milliseconds
     ran.should eq(3)
     sched.size.should eq(1)
 
@@ -155,21 +151,16 @@ describe PlaceOS::Driver::Proxy::Scheduler do
     task.get.should eq 1
     task.get.should eq 2
     task.get.should eq 3
-    begin
+    expect_raises(Exception, "some error") do
       task.get.should eq 4
       raise "failed"
-    rescue error
-      error.message.should eq "some error"
     end
     task.get.should eq 5
 
     # Test cancelation
     spawn(same_thread: true) { task.cancel }
-    begin
+    expect_raises(Exception, "Task cancelled") do
       task.get
-      raise "failed"
-    rescue error
-      error.message.should eq "Task canceled"
     end
   end
 end
