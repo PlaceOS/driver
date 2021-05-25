@@ -62,21 +62,21 @@ describe PlaceOS::Driver::Proxy::Scheduler do
   it "should schedule a repeating task" do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
-    task = sched.every(8.milliseconds) { ran += 1 }
+    task = sched.every(16.milliseconds) { ran += 1 }
 
-    sleep 4.milliseconds
+    sleep 8.milliseconds
     sched.size.should eq(1)
     ran.should eq(0)
 
-    sleep 6.milliseconds
+    sleep 12.milliseconds
     ran.should eq(1)
     sched.size.should eq(1)
 
-    sleep 8.milliseconds
+    sleep 16.milliseconds
     ran.should eq(2)
     sched.size.should eq(1)
 
-    sleep 8.milliseconds
+    sleep 16.milliseconds
     ran.should eq(3)
     sched.size.should eq(1)
 
@@ -88,23 +88,23 @@ describe PlaceOS::Driver::Proxy::Scheduler do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
     single = 0
-    sched.in(4.milliseconds) { single += 1 }
-    task = sched.every(8.milliseconds) { ran += 1 }
+    sched.in(8.milliseconds) { single += 1 }
+    task = sched.every(16.milliseconds) { ran += 1 }
 
-    sleep 6.milliseconds
+    sleep 12.milliseconds
     sched.size.should eq(1)
     ran.should eq(0)
     single.should eq(1)
 
-    sleep 4.milliseconds
+    sleep 8.milliseconds
     ran.should eq(1)
     sched.size.should eq(1)
 
-    sleep 8.milliseconds
+    sleep 16.milliseconds
     ran.should eq(2)
     sched.size.should eq(1)
 
-    sleep 8.milliseconds
+    sleep 16.milliseconds
     ran.should eq(3)
     sched.size.should eq(1)
 
