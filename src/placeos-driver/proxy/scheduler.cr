@@ -48,7 +48,7 @@ class PlaceOS::Driver::Proxy::Scheduler
     spawn(same_thread: true) { run_now(block) } if immediate
     wrapped = nil
     task = Tasker.at(time) do
-      @schedules.delete(wrapped.not_nil!)
+      @schedules.delete(wrapped)
       run_now(block)
     end
     wrap = wrapped = TaskWrapper.new(task, @callback)
@@ -61,7 +61,7 @@ class PlaceOS::Driver::Proxy::Scheduler
     spawn(same_thread: true) { run_now(block) } if immediate
     wrapped = nil
     task = Tasker.in(time) do
-      @schedules.delete(wrapped.not_nil!)
+      @schedules.delete(wrapped)
       run_now(block)
     end
     wrap = wrapped = TaskWrapper.new(task, @callback)
