@@ -115,27 +115,27 @@ describe PlaceOS::Driver::Proxy::Scheduler do
   it "should pause and resume a repeating task" do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
-    task = sched.every(4.milliseconds) { ran += 1; ran }
+    task = sched.every(12.milliseconds) { ran += 1; ran }
 
-    sleep 6.milliseconds
+    sleep 18.milliseconds
     ran.should eq(1)
     sched.size.should eq(1)
 
-    sleep 4.milliseconds
+    sleep 12.milliseconds
     ran.should eq(2)
     sched.size.should eq(1)
 
     task.cancel
     sched.size.should eq(0)
 
-    sleep 4.milliseconds
+    sleep 12.milliseconds
     ran.should eq(2)
     sched.size.should eq(0)
 
     task.resume
     sched.size.should eq(1)
 
-    sleep 6.milliseconds
+    sleep 18.milliseconds
     ran.should eq(3)
     sched.size.should eq(1)
 
