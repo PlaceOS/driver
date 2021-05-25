@@ -41,21 +41,17 @@ describe PlaceOS::Driver::Proxy::Scheduler do
 
     # Test failure
     task = sched.at(2.milliseconds.from_now) { raise "was error" }
-    begin
+    expect_raises(Exception, "was error") do
       task.get
       raise "not here"
-    rescue error
-      error.message.should eq "was error"
     end
 
-    # Test cancelation
+    # Test cancellation
     task = sched.at(2.milliseconds.from_now) { true }
     spawn(same_thread: true) { task.cancel }
-    begin
+    expect_raises(Exception, "Task cancelled") do
       task.get
       raise "failed"
-    rescue error
-      error.message.should eq "Task canceled"
     end
   end
 
@@ -155,21 +151,16 @@ describe PlaceOS::Driver::Proxy::Scheduler do
     task.get.should eq 1
     task.get.should eq 2
     task.get.should eq 3
-    begin
+    expect_raises(Exception, "some error") do
       task.get.should eq 4
       raise "failed"
-    rescue error
-      error.message.should eq "some error"
     end
     task.get.should eq 5
 
     # Test cancelation
     spawn(same_thread: true) { task.cancel }
-    begin
+    expect_raises(Exception, "Task cancelled") do
       task.get
-      raise "failed"
-    rescue error
-      error.message.should eq "Task canceled"
     end
   end
 end

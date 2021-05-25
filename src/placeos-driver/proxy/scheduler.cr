@@ -17,7 +17,7 @@ class PlaceOS::Driver::Proxy::Scheduler
 
     delegate created, get, last_scheduled, next_epoch, next_scheduled, trigger, trigger_count, to: @task
 
-    def cancel(reason = "Task canceled", terminate = false)
+    def cancel(reason = "Task cancelled", terminate = false)
       @callback.call(self, Action::Remove) unless terminate
       @task.cancel reason
     end
