@@ -413,7 +413,6 @@ abstract class PlaceOS::Driver
         iface, funcs = self.functions
 
         %({
-          "functions": #{self.functions},
           "interface": #{iface},
           "functions": #{funcs},
           "implements": #{implements.to_json},
