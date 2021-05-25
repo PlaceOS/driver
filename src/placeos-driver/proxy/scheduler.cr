@@ -4,8 +4,13 @@ require "set"
 require "../driver_manager"
 
 class PlaceOS::Driver::Proxy::Scheduler
+  enum Action
+    Add
+    Remove
+  end
+
   class TaskWrapper
-    def initialize(@task : Tasker::Task, @callback : (TaskWrapper, Bool) -> Bool)
+    def initialize(@task : Tasker::Task, @callback : (TaskWrapper, Action) -> Bool)
     end
 
     PROXY = %w(created trigger_count last_scheduled next_scheduled next_epoch trigger get)
@@ -16,12 +21,12 @@ class PlaceOS::Driver::Proxy::Scheduler
     {% end %}
 
     def cancel(reason = "Task canceled", terminate = false)
-      @callback.call(self, false) unless terminate
+      @callback.call(self, Action::Remove) unless terminate
       @task.cancel reason
     end
 
     def resume
-      @task.resume unless @callback.call(self, true)
+      @task.resume unless @callback.call(self, Action::Add)
     end
   end
 
@@ -30,10 +35,11 @@ class PlaceOS::Driver::Proxy::Scheduler
   def initialize(@logger = ::Log.for("driver.scheduler"))
     @schedules = Set(TaskWrapper).new
     @terminated = false
-    @callback = Proc(TaskWrapper, Bool, Bool).new do |wrapped, add|
-      if add
+    @callback = Proc(TaskWrapper, Action, Bool).new do |wrapped, action|
+      case action
+      in Action::Add
         @schedules << wrapped
-      else
+      in Action::Remove
         @schedules.delete(wrapped)
       end
       @terminated
