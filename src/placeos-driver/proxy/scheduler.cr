@@ -4,13 +4,15 @@ require "set"
 require "../driver_manager"
 
 class PlaceOS::Driver::Proxy::Scheduler
-  enum Action
-    Add
-    Remove
-  end
+  private class TaskWrapper
+    enum Action
+      Add
+      Remove
+    end
 
-  class TaskWrapper
-    def initialize(@task : Tasker::Task, @callback : (TaskWrapper, Action) -> Bool)
+    alias Callback = (TaskWrapper, Action) -> Bool
+
+    def initialize(@task : Tasker::Task, @callback : Callback)
     end
 
     delegate created, get, last_scheduled, next_epoch, next_scheduled, trigger, trigger_count, to: @task
@@ -30,7 +32,7 @@ class PlaceOS::Driver::Proxy::Scheduler
   def initialize(@logger = ::Log.for("driver.scheduler"))
     @schedules = Set(TaskWrapper).new
     @terminated = false
-    @callback = Proc(TaskWrapper, Action, Bool).new do |wrapped, action|
+    @callback = TaskWrapper::Callback.new do |wrapped, action|
       case action
       in .add?    then @schedules << wrapped
       in .remove? then @schedules.delete(wrapped)
