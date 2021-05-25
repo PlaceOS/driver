@@ -14,8 +14,12 @@ class SchemaKlass
   property cmd : String
   property other : Int32?
 
-  @[JSON::Field(converter: Enum::ValueConverter(TestEnum))]
-  property foo : TestEnum
+  {% if compare_versions(Crystal::VERSION, "1.0.0") >= 0 %}
+    @[JSON::Field(converter: Enum::ValueConverter(TestEnum))]
+    property foo : TestEnum
+  {% else %}
+    property foo : TestEnum
+  {% end %}
 end
 
 class SchemaKlassNoRequired
@@ -115,7 +119,10 @@ describe PlaceOS::Driver::Settings do
     PlaceOS::Driver::Settings.introspect(Hash(String, Int32)).should eq({type: "object", additionalProperties: {type: "integer"}})
     PlaceOS::Driver::Settings.introspect(SuperHash).should eq({type: "object"})
     PlaceOS::Driver::Settings.introspect(Bool | String).should eq({anyOf: [{type: "boolean"}, {type: "string"}]})
-    PlaceOS::Driver::Settings.introspect(SchemaKlass).should eq({type: "object", properties: {cmd: {type: "string"}, other: {anyOf: [{type: "integer"}, {type: "null"}]}, foo: {enum: [0, 1]}}, required: ["cmd", "foo"]})
+
+    {% unless compare_versions(Crystal::VERSION, "1.0.0") < 0 %}
+      PlaceOS::Driver::Settings.introspect(SchemaKlass).should eq({type: "object", properties: {cmd: {type: "string"}, other: {anyOf: [{type: "integer"}, {type: "null"}]}, foo: {enum: [0, 1]}}, required: ["cmd", "foo"]})
+    {% end %}
 
     # test where no fields are required
     PlaceOS::Driver::Settings.introspect(NamedTuple(steve: String?)).should eq({type: "object", properties: {steve: {anyOf: [{type: "null"}, {type: "string"}]}}})
