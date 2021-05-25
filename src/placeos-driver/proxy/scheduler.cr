@@ -73,18 +73,14 @@ class PlaceOS::Driver::Proxy::Scheduler
     raise "schedule proxy terminated" if @terminated
     spawn(same_thread: true) { run_now(block) } if immediate
     task = Tasker.every(time) { run_now(block) }
-    wrap = TaskWrapper.new(task, @callback)
-    @schedules << wrap
-    wrap
+    TaskWrapper.new(task, @callback).tap { |wrapper| @schedules << wrapper }
   end
 
   def cron(string, timezone : Time::Location = Time::Location.local, immediate = false, &block : -> _)
     raise "schedule proxy terminated" if @terminated
     spawn(same_thread: true) { run_now(block) } if immediate
     task = Tasker.cron(string, timezone) { run_now(block) }
-    wrap = TaskWrapper.new(task, @callback)
-    @schedules << wrap
-    wrap
+    TaskWrapper.new(task, @callback).tap { |wrapper| @schedules << wrapper }
   end
 
   def terminate
