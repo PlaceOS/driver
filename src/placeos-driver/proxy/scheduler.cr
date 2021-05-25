@@ -13,12 +13,7 @@ class PlaceOS::Driver::Proxy::Scheduler
     def initialize(@task : Tasker::Task, @callback : (TaskWrapper, Action) -> Bool)
     end
 
-    PROXY = %w(created trigger_count last_scheduled next_scheduled next_epoch trigger get)
-    {% for method in PROXY %}
-      def {{method.id}}
-        @task.{{method.id}}
-      end
-    {% end %}
+    delegate created, get, last_scheduled, next_epoch, next_scheduled, trigger, trigger_count, to: @task
 
     def cancel(reason = "Task canceled", terminate = false)
       @callback.call(self, Action::Remove) unless terminate
@@ -37,18 +32,14 @@ class PlaceOS::Driver::Proxy::Scheduler
     @terminated = false
     @callback = Proc(TaskWrapper, Action, Bool).new do |wrapped, action|
       case action
-      in Action::Add
-        @schedules << wrapped
-      in Action::Remove
-        @schedules.delete(wrapped)
+      in .add?    then @schedules << wrapped
+      in .remove? then @schedules.delete(wrapped)
       end
       @terminated
     end
   end
 
-  def size
-    @schedules.size
-  end
+  delegate size, to: @schedules
 
   def at(time, immediate = false, &block : -> _)
     raise "schedule proxy terminated" if @terminated
