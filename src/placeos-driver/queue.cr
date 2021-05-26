@@ -103,9 +103,7 @@ class PlaceOS::Driver::Queue
       end
 
       # Check if the previous task should effect the current task
-      if previous = @previous
-        previous.delay_required?
-      end
+      previous.try &.delay_required?
 
       # Perform tasks
       task = @mutex.synchronize { @queue.pop }
