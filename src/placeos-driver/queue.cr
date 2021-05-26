@@ -7,7 +7,7 @@ class PlaceOS::Driver::Queue
     @queue = Array(Task).new
 
     # Queue controls
-    @channel = Channel(Nil).new
+    @channel = Channel(Nil).new(1)
     @terminated = false
     @waiting = false
     @mutex = Mutex.new
@@ -33,7 +33,8 @@ class PlaceOS::Driver::Queue
     @online = state
     spawn(same_thread: true) { @connected_callback.call(state) } if state_changed
     if @online && @waiting && @queue.size > 0
-      spawn(same_thread: true) { @channel.send nil }
+      @waiting = false
+      @channel.send(nil)
     end
   end
 
@@ -134,8 +135,11 @@ class PlaceOS::Driver::Queue
       @queue = @queue.sort { |a, b| a.apparent_priority <=> b.apparent_priority }
       @queue = @queue.reject { |t| t != task && t.name == name } if task.name
 
-      # Spawn so the channel send occurs next tick
-      spawn(same_thread: true) { @channel.send nil } if @waiting
+      # buffered channel so this shouldn't block receive
+      if @waiting
+        @waiting = false
+        @channel.send(nil)
+      end
     elsif name
       @queue.unshift task
       @queue = @queue
