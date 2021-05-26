@@ -53,7 +53,7 @@ class PlaceOS::Driver::Queue
     end
 
     # Abort all the queued tasks
-    old_queue.each { |task| task.abort("queue cleared") }
+    old_queue.each(&.abort("queue cleared"))
 
     self
   end

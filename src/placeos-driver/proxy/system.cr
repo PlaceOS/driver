@@ -181,7 +181,7 @@ class PlaceOS::Driver::Proxy::System
   # Grabs the number of a particular device type
   def count(module_name)
     module_name = module_name.to_s
-    module_keys.count { |key| key == module_name }
+    module_keys.count(&.==(module_name))
   end
 
   def id

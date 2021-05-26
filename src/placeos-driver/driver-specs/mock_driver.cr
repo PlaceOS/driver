@@ -111,7 +111,7 @@ abstract class DriverSpecs::MockDriver
     # {{klasses.map &.stringify}} <- in case we need to filter out more classes
     {% klasses.map { |a| methods = methods + a.methods } %}
     {% methods = methods.reject { |method| RESERVED_METHODS[method.name.stringify] } %}
-    {% methods = methods.reject { |method| method.visibility != :public } %}
+    {% methods = methods.reject(&.visibility.!=(:public)) %}
     {% methods = methods.reject &.accepts_block? %}
     # Filter out abstract methods
     {% methods = methods.reject &.body.stringify.empty? %}
