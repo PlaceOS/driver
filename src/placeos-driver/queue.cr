@@ -133,7 +133,7 @@ class PlaceOS::Driver::Queue
     if @online
       @queue.unshift task
       @queue = @queue.sort { |a, b| a.apparent_priority <=> b.apparent_priority }
-      @queue = @queue.reject { |t| t != task && t.name == name } if task.name
+      @queue = @queue.reject { |t| t != task && t.name == name } if name
 
       # buffered channel so this shouldn't block receive
       if @waiting
