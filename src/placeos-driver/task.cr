@@ -35,6 +35,7 @@ class PlaceOS::Driver::Task
   getter last_executed, state, payload, backtrace, error_class
   getter name, delay, wait
   property processing, retries, priority, clear_queue
+  property apparent_priority : Int32 = 0
 
   # Use the Queue's custom logger
   delegate logger, to: @queue

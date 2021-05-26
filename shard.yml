@@ -19,9 +19,6 @@ dependencies:
   ipaddress:
     github: Sija/ipaddress.cr
 
-  priority-queue:
-    github: spider-gazelle/priority-queue
-
   promise:
     github: spider-gazelle/promise
 

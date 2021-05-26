@@ -1,11 +1,10 @@
 require "json"
 require "log"
-require "priority-queue"
 require "tasker"
 
 class PlaceOS::Driver::Queue
   def initialize(@logger : ::Log = ::Log.for("driver.queue"), &@connected_callback : Bool -> Nil)
-    @queue = Priority::Queue(Task).new
+    @queue = Array(Task).new
 
     # Queue controls
     @channel = Channel(Nil).new
@@ -44,7 +43,7 @@ class PlaceOS::Driver::Queue
   # removes all jobs currently in the queue
   def clear(abort_current = false)
     old_queue = @queue
-    @queue = Priority::Queue(Task).new
+    @queue = Array(Task).new
 
     # Abort any currently running tasks
     if abort_current
@@ -54,11 +53,7 @@ class PlaceOS::Driver::Queue
     end
 
     # Abort all the queued tasks
-    size = old_queue.size
-    (0...size).each do
-      task = old_queue.pop.value
-      task.abort("queue cleared")
-    end
+    old_queue.each { |task| task.abort("queue cleared") }
 
     self
   end
@@ -112,7 +107,7 @@ class PlaceOS::Driver::Queue
       end
 
       # Perform tasks
-      task = @queue.pop.value
+      task = @queue.pop
       @current = task
       complete = task.execute!.__get
 
@@ -132,12 +127,20 @@ class PlaceOS::Driver::Queue
   end
 
   protected def queue_task(priority, task)
+    task.apparent_priority = priority
+    name = task.name
+
     if @online
-      @queue.push priority, task
+      @queue.unshift task
+      @queue = @queue.sort { |a, b| a.apparent_priority <=> b.apparent_priority }
+      @queue = @queue.reject { |t| t != task && t.name == name } if task.name
+
       # Spawn so the channel send occurs next tick
       spawn(same_thread: true) { @channel.send nil } if @waiting
-    elsif task.name
-      @queue.push priority, task
+    elsif name
+      @queue.unshift task
+      @queue = @queue.sort { |a, b| a.apparent_priority <=> b.apparent_priority }
+      @queue = @queue.reject { |t| t != task && t.name == name }
     else
       spawn(same_thread: true) { task.abort("transport is currently offline") }
     end
