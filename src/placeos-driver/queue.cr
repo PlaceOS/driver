@@ -10,6 +10,7 @@ class PlaceOS::Driver::Queue
     @channel = Channel(Nil).new
     @terminated = false
     @waiting = false
+    @mutex = Mutex.new
 
     spawn(same_thread: true) { process! }
   end
@@ -43,7 +44,7 @@ class PlaceOS::Driver::Queue
   # removes all jobs currently in the queue
   def clear(abort_current = false)
     old_queue = @queue
-    @queue = Array(Task).new
+    @mutex.synchronize { @queue = Array(Task).new }
 
     # Abort any currently running tasks
     if abort_current
@@ -76,7 +77,7 @@ class PlaceOS::Driver::Queue
   )
     # Task returned so response_required! can be called as required
     task = Task.new(self, callback, priority, timeout, retries, wait, name.try &.to_s, delay, clear_queue)
-    queue_task(priority, task)
+    @mutex.synchronize { queue_task(priority, task) }
   end
 
   def terminate
@@ -107,7 +108,7 @@ class PlaceOS::Driver::Queue
       end
 
       # Perform tasks
-      task = @queue.pop
+      task = @mutex.synchronize { @queue.pop }
       @current = task
       complete = task.execute!.__get
 
@@ -121,7 +122,7 @@ class PlaceOS::Driver::Queue
       else
         # re-queue the current task
         priority = task.priority + @retry_bonus
-        queue_task(priority, task)
+        @mutex.synchronize { queue_task(priority, task) }
       end
     end
   end
@@ -139,8 +140,9 @@ class PlaceOS::Driver::Queue
       spawn(same_thread: true) { @channel.send nil } if @waiting
     elsif name
       @queue.unshift task
-      @queue = @queue.sort { |a, b| a.apparent_priority <=> b.apparent_priority }
-      @queue = @queue.reject { |t| t != task && t.name == name }
+      @queue = @queue
+        .sort! { |a, b| a.apparent_priority <=> b.apparent_priority }
+        .reject { |t| t != task && t.name == name }
     else
       spawn(same_thread: true) { task.abort("transport is currently offline") }
     end
