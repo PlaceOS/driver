@@ -52,7 +52,7 @@ class PlaceOS::Driver::Queue
     end
 
     # Abort any currently running tasks
-    current.abort("queue cleared") if abort_current && (current = @current)
+    @current.try &.abort("queue cleared") if abort_current
 
     # Abort all the queued tasks
     old_queue.each(&.abort("queue cleared"))
