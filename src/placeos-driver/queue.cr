@@ -44,11 +44,12 @@ class PlaceOS::Driver::Queue
 
   # removes all jobs currently in the queue
   def clear(abort_current = false)
-    old_queue = @queue # assignment here to avoid nilable object
-    @mutex.synchronize do
-      # ensure we have the latest version of the queue
-      old_queue = @queue
+    old_queue = @mutex.synchronize do
+      # Ensure we have a reference to the latest version of the queue
+      old = @queue
+      # Create a new queue so tasks can be added as old tasks are cleared
       @queue = Array(Task).new
+      old
     end
 
     # Abort any currently running tasks
