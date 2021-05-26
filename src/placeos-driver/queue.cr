@@ -142,9 +142,8 @@ class PlaceOS::Driver::Queue
       end
     elsif name
       @queue.unshift task
-      @queue = @queue
-        .sort! { |a, b| a.apparent_priority <=> b.apparent_priority }
-        .reject { |t| t != task && t.name == name }
+      @queue = @queue.sort { |a, b| a.apparent_priority <=> b.apparent_priority }
+      @queue = @queue.reject { |t| t != task && t.name == name }
     else
       spawn(same_thread: true) { task.abort("transport is currently offline") }
     end
