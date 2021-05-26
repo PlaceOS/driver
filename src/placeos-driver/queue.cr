@@ -78,7 +78,7 @@ class PlaceOS::Driver::Queue
   )
     # Task returned so response_required! can be called as required
     task = Task.new(self, callback, priority, timeout, retries, wait, name.try &.to_s, delay, clear_queue)
-    @mutex.synchronize { queue_task(priority, task) }
+    queue_task(priority, task)
   end
 
   def terminate
@@ -121,7 +121,7 @@ class PlaceOS::Driver::Queue
       else
         # re-queue the current task
         priority = task.priority + @retry_bonus
-        @mutex.synchronize { queue_task(priority, task) }
+        queue_task(priority, task)
       end
     end
   end
@@ -131,9 +131,11 @@ class PlaceOS::Driver::Queue
     name = task.name
 
     if @online
-      @queue.unshift task
-      @queue = @queue.sort { |a, b| a.apparent_priority <=> b.apparent_priority }
-      @queue = @queue.reject { |t| t != task && t.name == name } if name
+      @mutex.synchronize do
+        @queue.unshift task
+        @queue = @queue.sort { |a, b| a.apparent_priority <=> b.apparent_priority }
+        @queue = @queue.reject { |t| t != task && t.name == name } if name
+      end
 
       # buffered channel so this shouldn't block receive
       if @waiting
@@ -141,9 +143,11 @@ class PlaceOS::Driver::Queue
         @channel.send(nil)
       end
     elsif name
-      @queue.unshift task
-      @queue = @queue.sort { |a, b| a.apparent_priority <=> b.apparent_priority }
-      @queue = @queue.reject { |t| t != task && t.name == name }
+      @mutex.synchronize do
+        @queue.unshift task
+        @queue = @queue.sort { |a, b| a.apparent_priority <=> b.apparent_priority }
+        @queue = @queue.reject { |t| t != task && t.name == name }
+      end
     else
       spawn(same_thread: true) { task.abort("transport is currently offline") }
     end
