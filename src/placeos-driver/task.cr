@@ -1,4 +1,3 @@
-require "priority-queue"
 require "tasker"
 require "json"
 
