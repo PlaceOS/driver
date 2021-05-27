@@ -137,8 +137,8 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
 
   private def consume_io
     if websocket = @websocket
-      websocket.on_binary { |bytes| spawn(same_thread: true) { process bytes } }
-      websocket.on_message { |string| spawn(same_thread: true) { process string.to_slice } }
+      websocket.on_binary { |bytes| process bytes }
+      websocket.on_message { |string| process string.to_slice }
       websocket.run
     end
   rescue IO::Error

@@ -190,6 +190,9 @@ abstract class PlaceOS::Driver::Transport
     end
   rescue error
     Log.error(exception: error) { "error processing data" }
+
+    # if there was an error here, we don't really want to be buffering anything
+    @tokenizer.try &.clear
   end
 
   private def process_message(data)

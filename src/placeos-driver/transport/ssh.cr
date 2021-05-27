@@ -250,7 +250,7 @@ class PlaceOS::Driver
           bytes_read = socket.read(raw_data)
           break if bytes_read == 0 # IO was closed
 
-          spawn_process raw_data[0, bytes_read].dup
+          process raw_data[0, bytes_read].dup
         end
       end
     rescue IO::Error | SSH2::SessionError
@@ -260,10 +260,6 @@ class PlaceOS::Driver
       disconnect
       @queue.online = false
       connect
-    end
-
-    private def spawn_process(data)
-      spawn(same_thread: true) { process data }
     end
 
     def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = nil) : Nil
