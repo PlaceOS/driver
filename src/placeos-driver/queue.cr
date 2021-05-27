@@ -108,7 +108,7 @@ class PlaceOS::Driver::Queue
       previous.try &.delay_required?
 
       # Perform tasks
-      task = @mutex.synchronize { @queue.pop }
+      task = @mutex.synchronize { @queue.shift }
       @current = task
       complete = task.execute!.__get
 
@@ -133,9 +133,9 @@ class PlaceOS::Driver::Queue
 
     if @online
       @mutex.synchronize do
-        @queue.unshift task
-        @queue = @queue.sort { |a, b| a.apparent_priority <=> b.apparent_priority }
-        @queue = @queue.reject { |t| t != task && t.name == name } if name
+        @queue.push task
+        @queue.sort! { |a, b| b.apparent_priority <=> a.apparent_priority }
+        @queue.reject! { |t| t != task && t.name == name } if name
       end
 
       # buffered channel so this shouldn't block receive
@@ -145,9 +145,9 @@ class PlaceOS::Driver::Queue
       end
     elsif name
       @mutex.synchronize do
-        @queue.unshift task
-        @queue = @queue.sort { |a, b| a.apparent_priority <=> b.apparent_priority }
-        @queue = @queue.reject { |t| t != task && t.name == name }
+        @queue.push task
+        @queue.sort! { |a, b| b.apparent_priority <=> a.apparent_priority }
+        @queue.reject! { |t| t != task && t.name == name }
       end
     else
       spawn(same_thread: true) { task.abort("transport is currently offline") }
