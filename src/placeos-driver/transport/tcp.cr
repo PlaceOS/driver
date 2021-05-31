@@ -130,7 +130,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
 
     while (socket = @socket) && !socket.closed?
       bytes_read = socket.read(raw_data)
-      break if bytes_read == 0 # IO was closed
+      break if bytes_read.zero? # IO was closed
 
       # Processing occurs on this fiber to provide backpressure and allow
       # for TLS to be started in received function
