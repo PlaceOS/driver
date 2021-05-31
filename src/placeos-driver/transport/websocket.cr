@@ -102,19 +102,17 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     websocket = @websocket
     return self if websocket.nil? || websocket.closed?
 
-    if message.is_a?(String)
+    case message
+    when .is_a?(String | Bytes)
       websocket.send(message)
-    elsif message.is_a?(Bytes)
-      websocket.send(message)
-    elsif message.responds_to? :to_io
+    when .responds_to? :to_io
       # TODO:: Resolve this once fixed in crystal lib
       # websocket.stream(true) { |io| io.write_bytes message }
       io = IO::Memory.new
       io.write_bytes message
       websocket.send(io.to_slice)
-    elsif message.responds_to? :to_slice
-      data = message.to_slice
-      websocket.send(data)
+    when .responds_to? :to_slice
+      websocket.send(message.to_slice)
     else
       websocket.send(message)
     end
