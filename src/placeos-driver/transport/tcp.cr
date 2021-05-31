@@ -107,11 +107,9 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
       socket = @socket
       return self if socket.nil? || socket.closed?
 
-      if message.responds_to? :to_io
-        socket.write_bytes(message)
-      elsif message.responds_to? :to_slice
-        data = message.to_slice
-        socket.write data
+      case message
+      when .responds_to? :to_io    then socket.write_bytes(message)
+      when .responds_to? :to_slice then socket.write message.to_slice
       else
         socket << message
       end
