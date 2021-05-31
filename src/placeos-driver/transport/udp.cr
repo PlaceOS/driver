@@ -143,7 +143,7 @@ class PlaceOS::Driver::TransportUDP < PlaceOS::Driver::Transport
 
     while (socket = @socket) && !socket.closed?
       bytes_read = socket.read(raw_data)
-      break if bytes_read == 0 # IO was closed
+      break if bytes_read.zero? # IO was closed
 
       process raw_data[0, bytes_read].dup
     end
