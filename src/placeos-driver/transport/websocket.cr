@@ -73,7 +73,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     # Start consuming data from the socket
     spawn(same_thread: true) { consume_io }
   rescue error
-    logger.info(exception: error) { "connecting to device" }
+    logger.info(exception: error) { "error connecting to device on #{@ip}:#{@port}#{@path}" }
     @queue.online = false
     raise error
   end
