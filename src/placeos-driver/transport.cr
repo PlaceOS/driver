@@ -36,15 +36,17 @@ abstract class PlaceOS::Driver::Transport
       {% else %}
         uri_config = @uri.try(&.strip)
         if uri_config && !uri_config.empty?
-          base_path = uri_config
-          context = if base_path.starts_with?("https")
+          uri = URI.parse uri_config
+          context = case uri.scheme
+                    when "https", "wss"
+                      uri.scheme = "https"
                       OpenSSL::SSL::Context::Client.new.tap &.verify_mode = OpenSSL::SSL::VerifyMode::NONE
                     else
                       nil
                     end
         else
           context = if secure
-                      base_path = "https://#{@ip}"
+                      uri = URI.parse "https://#{@ip}"
 
                       if secure.is_a?(OpenSSL::SSL::Context::Client)
                         secure
@@ -52,13 +54,13 @@ abstract class PlaceOS::Driver::Transport
                         OpenSSL::SSL::Context::Client.new.tap &.verify_mode = OpenSSL::SSL::VerifyMode::NONE
                       end
                     else
-                      base_path = "http://#{@ip}"
+                      uri = URI.parse "http://#{@ip}"
                       nil
                     end
         end
 
         # Build the new URI
-        uri = URI.parse("#{base_path}#{path}")
+        uri.path = path
         uri.query = params.map { |key, value| value ? "#{key}=#{value}" : key }.join("&") unless params.empty?
 
         # Apply headers
