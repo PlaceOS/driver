@@ -227,11 +227,10 @@ class PlaceOS::Driver
     def send(message) : TransportSSH
       socket = @shell
       return self if socket.nil? || socket.closed?
-      if message.responds_to? :to_io
-        socket.write_bytes(message)
-      elsif message.responds_to? :to_slice
-        data = message.to_slice
-        socket.write data
+
+      case message
+      when .responds_to? :to_io    then socket.write_bytes(message)
+      when .responds_to? :to_slice then socket.write message.to_slice
       else
         socket << message
       end
@@ -250,7 +249,7 @@ class PlaceOS::Driver
           bytes_read = socket.read(raw_data)
           break if bytes_read == 0 # IO was closed
 
-          spawn_process raw_data[0, bytes_read].dup
+          process raw_data[0, bytes_read].dup
         end
       end
     rescue IO::Error | SSH2::SessionError
@@ -260,10 +259,6 @@ class PlaceOS::Driver
       disconnect
       @queue.online = false
       connect
-    end
-
-    private def spawn_process(data)
-      spawn(same_thread: true) { process data }
     end
 
     def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = nil) : Nil

@@ -41,6 +41,10 @@ dependencies:
     github: spider-gazelle/tokenizer
     version: ~> 1.0
 
+  dtls:
+    github: spider-gazelle/crystal-dtls
+    version: ~> 0.9
+
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba

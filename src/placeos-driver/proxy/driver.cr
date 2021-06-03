@@ -94,6 +94,8 @@ class PlaceOS::Driver::Proxy::Driver
       # Generate request body
       request = PlaceOS::Driver::Proxy::Driver.__build_request__(function_name, function, arguments, named_args, {name: @module_name, index: @index, id: @module_id})
 
+      @system.logger.debug { "executing request on #{@module_name}_#{@index}: #{request}" }
+
       # Parse the execute response
       channel = PlaceOS::Driver::Protocol.instance.expect_response(@module_id, @reply_id, "exec", request, raw: true)
 

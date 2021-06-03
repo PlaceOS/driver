@@ -78,9 +78,9 @@ abstract class PlaceOS::Driver
       # ensures that setting a key and then reading it back as the next
       # operation will always result in the expected value
       spawn(same_thread: true) { @__storage__[key] = json_data }
-      @__logger__.debug { "status updated: #{key} = #{value}" }
+      @__logger__.debug { "status updated: #{key} = #{json_data}" }
     else
-      @__logger__.debug { "no change for: #{key} = #{value}" }
+      @__logger__.debug { "no change for: #{key} = #{json_data}" }
     end
     value
   end

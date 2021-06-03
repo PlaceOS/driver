@@ -9,6 +9,10 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
     # TODO:: makebreak needs a little more consideration around setting connected / disconnected status
     @terminated = false
     @tls_started = false
+
+    # to ensure we don't send anything while negotiating TLS
+    # as a TLS upgrade can happen at anytime in the module lifecycle
+    @mutex = Mutex.new(:reentrant)
   end
 
   @uri : String?
@@ -23,8 +27,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
     end
 
     # Clear any buffered data before we re-connect
-    tokenizer = @tokenizer
-    tokenizer.clear if tokenizer
+    @tokenizer.try &.clear
 
     if @makebreak
       start_socket(connect_timeout)
@@ -40,42 +43,50 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
   end
 
   private def start_socket(connect_timeout)
-    @socket = socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
-    socket.tcp_nodelay = true
-    socket.sync = true
+    @mutex.synchronize do
+      @socket = socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
+      socket.tcp_nodelay = true
 
-    @tls_started = false
-    start_tls if @start_tls
+      @tls_started = false
+      start_tls if @start_tls
+
+      # We'll manually manage buffering.
+      # Classes that support `#write_bytes` may write to the IO multiple times
+      # however we don't want packets sent for every call to write
+      socket.sync = false
+    end
 
     # Enable queuing
     @queue.online = true
 
-    # We'll manually manage buffering.
-    # Classes that support `#write_bytes` may write to the IO multiple times
-    # however we don't want packets sent for every call to write
-    socket.sync = false
-
     # Start consuming data from the socket
     spawn(same_thread: true) { consume_io }
   rescue error
-    logger.info(exception: error) { "connecting to device" }
+    logger.info(exception: error) { "error connecting to device on #{@ip}:#{@port}" }
     @queue.online = false
     raise error
   end
 
+  # upgrades to an encrpyted socket, can be called from a received function
   def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = @tls) : Nil
-    return if @tls_started
-    socket = @socket
-    raise "cannot start tls while disconnected" if socket.nil? || socket.closed?
+    @mutex.synchronize do
+      return if @tls_started
+      raise "cannot start tls while disconnected" if @socket.nil? || @socket.try(&.closed?)
 
-    # we can re-use the context
-    tls = context || OpenSSL::SSL::Context::Client.new
-    tls.verify_mode = verify_mode
-    @tls = tls
+      # we want negotiation to happen without manual flushing of the IO
+      socket = @socket.as(TCPSocket)
+      socket.sync = true
 
-    # upgrade the socket to TLS
-    @socket = OpenSSL::SSL::Socket::Client.new(socket, context: tls, sync_close: true, hostname: @ip)
-    @tls_started = true
+      # we can re-use the context
+      tls = context || OpenSSL::SSL::Context::Client.new
+      tls.verify_mode = verify_mode
+      @tls = tls
+
+      # upgrade the socket to TLS
+      @socket = OpenSSL::SSL::Socket::Client.new(socket, context: tls, sync_close: true, hostname: @ip)
+      @tls_started = true
+      socket.sync = false
+    end
   end
 
   def terminate : Nil
@@ -92,17 +103,18 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
   def send(message) : PlaceOS::Driver::TransportTCP
     connect if @makebreak
 
-    socket = @socket
-    return self if socket.nil? || socket.closed?
-    if message.responds_to? :to_io
-      socket.write_bytes(message)
-    elsif message.responds_to? :to_slice
-      data = message.to_slice
-      socket.write data
-    else
-      socket << message
+    @mutex.synchronize do
+      socket = @socket
+      return self if socket.nil? || socket.closed?
+
+      case message
+      when .responds_to? :to_io    then socket.write_bytes(message)
+      when .responds_to? :to_slice then socket.write message.to_slice
+      else
+        socket << message
+      end
+      socket.flush
     end
-    socket.flush
     self
   end
 
@@ -113,26 +125,23 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
 
   private def consume_io
     raw_data = Bytes.new(2048)
-    if socket = @socket
-      while !socket.closed?
-        bytes_read = socket.read(raw_data)
-        break if bytes_read == 0 # IO was closed
 
-        spawn_process raw_data[0, bytes_read].dup
-      end
+    while (socket = @socket) && !socket.closed?
+      bytes_read = socket.read(raw_data)
+      break if bytes_read.zero? # IO was closed
+
+      # Processing occurs on this fiber to provide backpressure and allow
+      # for TLS to be started in received function
+      process raw_data[0, bytes_read].dup
     end
   rescue IO::Error
   rescue error
     logger.error(exception: error) { "error consuming IO" }
   ensure
     disconnect
-    if !@makebreak
+    unless @makebreak
       @queue.online = false
       connect
     end
-  end
-
-  private def spawn_process(data)
-    spawn(same_thread: true) { process data }
   end
 end
