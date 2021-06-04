@@ -438,7 +438,13 @@ abstract class PlaceOS::Driver
           current_process = Process.executable_path.not_nil!
 
           # ensure the data here is correct, raise error if not
-          JSON.parse(`#{current_process} -m`.strip).to_json
+          begin
+            JSON.parse(`#{current_process} -m`.strip).to_json
+          rescue error
+            Log.error(exception: error) { "failed to extract JSON schema for interface" }
+            # fallback to interface without schema
+            {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
+          end
         else
           {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
         end
