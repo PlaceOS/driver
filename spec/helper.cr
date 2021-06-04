@@ -2,6 +2,8 @@ require "spec"
 require "promise"
 require "./test_build"
 
+PlaceOS::Driver.include_json_schema_in_interface = false
+
 class Helper
   # Creates the input / output IO required to test protocol functions
   def self.protocol
