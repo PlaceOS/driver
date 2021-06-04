@@ -508,10 +508,10 @@ macro finished
 
   # This is here so we can be certain that settings macros have expanded
   # metadata needed to be compiled after process manager
-  if print_meta
-     metadata = {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata_with_schema
-     puts print_defaults ?  %(#{metadata.rchop},#{PlaceOS::Driver::Utilities::Discovery.defaults.lchop}) : metadata
-  elsif print_defaults
-    puts PlaceOS::Driver::Utilities::Discovery.defaults
+  if print_defaults
+    defaults = PlaceOS::Driver::Utilities::Discovery.defaults
+    puts print_meta ? %(#{defaults.rchop},#{ {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata.lchop }) : defaults
+  elsif print_meta
+    {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata_with_schema
   end
 end
