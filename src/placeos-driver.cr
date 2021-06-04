@@ -3,6 +3,8 @@ require "option_parser"
 require "./placeos-driver/logger"
 
 abstract class PlaceOS::Driver
+  class_property include_json_schema_in_interface : Bool = true
+
   module Proxy
   end
 
@@ -30,7 +32,7 @@ abstract class PlaceOS::Driver
   )
     @__status__ = Status.new
 
-    metadata = {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
+    metadata = {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.driver_interface
     if @__edge_driver__
       @__storage__ = EdgeStorage.new(@__module_id__)
       @__storage__.clear
@@ -425,7 +427,21 @@ abstract class PlaceOS::Driver
       def self.metadata_with_schema
         meta = metadata.rchop
         schema = PlaceOS::Driver::Settings.get { generate_json_schema }
-        %(#{meta},"settings":#{schema}})
+        %(#{meta},"json_schema":#{schema}})
+      end
+
+      # this is what will be stored in redis for cross driver comms
+      # we need to use the command line to obtain this as the data is not available
+      # at this point in compilation and the JSON schema is useful for logic drivers
+      class_getter driver_interface : String do
+        if PlaceOS::Driver.include_json_schema_in_interface
+          current_process = Process.executable_path.not_nil!
+
+          # ensure the data here is correct, raise error if not
+          JSON.parse(`#{current_process} -m`.strip).to_json
+        else
+          {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
+        end
       end
     end
   end
@@ -442,6 +458,7 @@ macro finished
   exec_process_manager = false
   is_edge_driver = false
   print_meta = false
+  print_defaults = false
 
   # Command line options
   OptionParser.parse(ARGV.dup) do |parser|
@@ -452,8 +469,7 @@ macro finished
     end
 
     parser.on("-d", "--defaults", "output driver defaults") do
-      puts PlaceOS::Driver::Utilities::Discovery.defaults
-      exit 0
+      print_defaults = true
     end
 
     parser.on("-p", "--process", "starts the process manager (expects to have been launched by PlaceOS core)") do
@@ -486,5 +502,11 @@ macro finished
 
   # This is here so we can be certain that settings macros have expanded
   # metadata needed to be compiled after process manager
-  puts {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata_with_schema if print_meta
+  if print_meta && print_defaults
+    metadata = {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
+    puts %(#{metadata.rchop},#{PlaceOS::Driver::Utilities::Discovery.defaults.lchop})
+  else
+    puts {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata_with_schema if print_meta
+    puts PlaceOS::Driver::Utilities::Discovery.defaults if print_defaults
+  end
 end

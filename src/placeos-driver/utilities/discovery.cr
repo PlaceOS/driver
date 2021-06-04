@@ -13,8 +13,9 @@ abstract class PlaceOS::Driver
       end
 
       def self.defaults : String
+        json_schema = PlaceOS::Driver::Settings.get { generate_json_schema }
         @@settings[:default_settings] ||= "{}"
-        @@settings.to_json
+        %(#{@@settings.to_json.rchop},"json_schema":#{json_schema}})
       end
     end
   end
