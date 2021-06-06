@@ -438,10 +438,12 @@ abstract class PlaceOS::Driver
           current_process = Process.executable_path.not_nil!
 
           # ensure the data here is correct, raise error if not
+          iface_data = ""
           begin
-            JSON.parse(`#{current_process} -m`.strip).to_json
+            iface_data = `#{current_process} -m`.strip
+            JSON.parse(iface_data).to_json
           rescue error
-            Log.error(exception: error) { "failed to extract JSON schema for interface" }
+            Log.error(exception: error) { "failed to extract JSON schema for interface\n#{iface_data.inspect}" }
             # fallback to interface without schema
             {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
           end
@@ -512,6 +514,6 @@ macro finished
     defaults = PlaceOS::Driver::Utilities::Discovery.defaults
     puts print_meta ? %(#{defaults.rchop},#{ {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata.lchop }) : defaults
   elsif print_meta
-    {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata_with_schema
+    puts {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata_with_schema
   end
 end
