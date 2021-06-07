@@ -26,7 +26,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
   @path : String
   @port : Int32?
   @use_tls : Bool
-  @websocket : HTTP::WebSocket?
+  @websocket : ConnectProxy::WebSocket?
   @tls : OpenSSL::SSL::Context::Client?
   property :received
 
@@ -63,8 +63,22 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
       nil
     end
 
+    proxy = if proxy_config = @settings.get { setting?(NamedTuple(host: String, port: Int32, auth: NamedTuple(username: String, password: String)?), :proxy) }
+              if !proxy_config[:host].empty?
+                ConnectProxy.new(**proxy_config)
+              end
+            elsif ConnectProxy.behind_proxy?
+              # Apply environment defined proxy
+              begin
+                ConnectProxy.new(*ConnectProxy.parse_proxy_url)
+              rescue error
+                logger.warn(exception: error) { "failed to apply environment proxy URI" }
+                nil
+              end
+            end
+
     # Configure websocket to auto pong
-    websocket = @websocket = HTTP::WebSocket.new(@ip, @path, @port, @tls, headers)
+    websocket = @websocket = ConnectProxy::WebSocket.new(@ip, @path, @port, @tls, headers, proxy)
     websocket.on_ping { |message| websocket.pong(message) }
 
     # Enable queuing
