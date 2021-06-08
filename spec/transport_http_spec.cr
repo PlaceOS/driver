@@ -3,7 +3,9 @@ require "./helper"
 describe PlaceOS::Driver::TransportHTTP do
   it "should perform a secure request" do
     queue = Helper.queue
-    transport = PlaceOS::Driver::TransportHTTP.new(queue, "https://www.google.com.au/", ::PlaceOS::Driver::Settings.new("{}"))
+    transport = PlaceOS::Driver::TransportHTTP.new(queue, "https://www.google.com.au/", ::PlaceOS::Driver::Settings.new("{}")) do |request|
+      request.hostname.should eq "www.google.com.au"
+    end
     transport.connect
     queue.online.should eq(true)
 
@@ -19,7 +21,9 @@ describe PlaceOS::Driver::TransportHTTP do
     queue = Helper.queue
 
     # Selected from: https://whynohttps.com/
-    transport = PlaceOS::Driver::TransportHTTP.new(queue, "http://blog.jp/", ::PlaceOS::Driver::Settings.new("{}"))
+    transport = PlaceOS::Driver::TransportHTTP.new(queue, "http://blog.jp/", ::PlaceOS::Driver::Settings.new("{}")) do |request|
+      request.hostname.should eq "blog.jp"
+    end
     transport.connect
     queue.online.should eq(true)
 

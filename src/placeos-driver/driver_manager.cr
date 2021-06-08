@@ -36,7 +36,9 @@ class PlaceOS::Driver::DriverManager
                      end
                    end
                  when DriverModel::Role::HTTP
-                   PlaceOS::Driver::TransportHTTP.new(@queue, @model.uri.not_nil!, @settings)
+                   PlaceOS::Driver::TransportHTTP.new(@queue, @model.uri.not_nil!, @settings) do |request|
+                     before_request(request)
+                   end
                  when DriverModel::Role::LOGIC
                    # nothing required to be done here
                    PlaceOS::Driver::TransportLogic.new(@queue)
@@ -221,6 +223,13 @@ class PlaceOS::Driver::DriverManager
     else
       logger.warn { "no received function provided for #{driver.class} (#{@module_id})" }
       task.try &.abort("no received function provided")
+    end
+  end
+
+  private def before_request(request : HTTP::Request)
+    driver = @driver
+    if driver.responds_to? :before_request
+      driver.before_request(request)
     end
   end
 end
