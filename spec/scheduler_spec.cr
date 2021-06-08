@@ -4,13 +4,13 @@ describe PlaceOS::Driver::Proxy::Scheduler do
   it "should wrap Tasker objects so we can effectively track them" do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = false
-    sched.at(2.milliseconds.from_now) { ran = true }
+    sched.at(20.milliseconds.from_now) { ran = true }
 
-    sleep 1.milliseconds
+    sleep 10.milliseconds
     sched.size.should eq(1)
     ran.should eq(false)
 
-    sleep 2.milliseconds
+    sleep 20.milliseconds
     ran.should eq(true)
     sched.size.should eq(0)
   end
@@ -18,16 +18,16 @@ describe PlaceOS::Driver::Proxy::Scheduler do
   it "should cancel Tasker objects" do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = false
-    sched.at(2.milliseconds.from_now) { ran = true }
+    sched.at(20.milliseconds.from_now) { ran = true }
 
-    sleep 1.milliseconds
+    sleep 10.milliseconds
     sched.size.should eq(1)
     ran.should eq(false)
 
     sched.clear
     sched.size.should eq(0)
 
-    sleep 2.milliseconds
+    sleep 20.milliseconds
     ran.should eq(false)
     sched.size.should eq(0)
   end
@@ -47,7 +47,7 @@ describe PlaceOS::Driver::Proxy::Scheduler do
     end
 
     # Test cancellation
-    task = sched.at(2.milliseconds.from_now) { true }
+    task = sched.at(20.milliseconds.from_now) { true }
     spawn(same_thread: true) { task.cancel }
     expect_raises(Exception, "Task cancelled") do
       task.get

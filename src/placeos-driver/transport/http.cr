@@ -112,24 +112,25 @@ class PlaceOS::Driver
   # Implement transport
   class TransportHTTP < Transport
     # timeouts in seconds
-    def initialize(@queue : PlaceOS::Driver::Queue, uri_base : String, @settings : ::PlaceOS::Driver::Settings)
+    def initialize(
+      @queue : PlaceOS::Driver::Queue,
+      uri_base : String,
+      @settings : ::PlaceOS::Driver::Settings,
+      &@before_request : HTTP::Request ->
+    )
       @terminated = false
       @tls = new_tls_context
       @uri_base = URI.parse(uri_base)
       @http_client_mutex = Mutex.new
-
-      base_query = @uri_base.query
-
-      @params_base = {} of String => String?
-      if base_query && !base_query.empty?
-        base_query.split('&').map(&.split('=')).each { |part| @params_base[part[0]] = part[1]? }
-      end
+      @params_base = @uri_base.query_params
 
       context = __is_https? ? @tls : nil
       @client = new_http_client(@uri_base, context)
+      @client.before_request(&@before_request)
+      @client.compress = true
     end
 
-    @params_base : Hash(String, String?)
+    @params_base : URI::Params
     @tls : OpenSSL::SSL::Context::Client
     @client : ConnectProxy::HTTPClient
 
@@ -161,7 +162,9 @@ class PlaceOS::Driver
     protected def __new_http_client
       @tls = new_tls_context
       context = __is_https? ? @tls : nil
+      # NOTE:: modify in initializer if editing here
       @client = new_http_client(@uri_base, context)
+      @client.before_request(&@before_request)
       @client.compress = true
       @client
     end
@@ -182,7 +185,7 @@ class PlaceOS::Driver
 
     # ameba:disable Metrics/CyclomaticComplexity
     def http(method, path, body : ::HTTP::Client::BodyType = nil,
-             params : Hash(String, String?) = {} of String => String?,
+             params : Hash(String, String?) | URI::Params = URI::Params.new,
              headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
              secure = false, concurrent = false) : ::HTTP::Client::Response
       raise "driver terminated" if @terminated
@@ -202,14 +205,16 @@ class PlaceOS::Driver
       uri = URI.parse("#{scheme}://#{host}#{port}#{base_path}#{path}")
 
       # Apply any default params
-      params = @params_base.merge(params)
-      if !params.empty?
-        if (query = uri.query) && !uri.query.try &.empty?
-          # merge
-          query.split('&').map(&.split('=')).each { |part| params[part[0]] = part[1]? }
-        end
+      params = if params.is_a?(Hash(String, String?))
+                 URI::Params.new(params.transform_values { |v| v ? [v] : [] of String })
+               else
+                 params
+               end
+      @params_base.each { |key, value| params[key] = value }
 
-        uri.query = params.join('&') { |key, value| value ? "#{key}=#{value}" : key }
+      if !params.empty?
+        uri.query_params.each { |key, value| params[key] = value }
+        uri.query_params = params
       end
 
       # Apply a default fragment
@@ -226,6 +231,7 @@ class PlaceOS::Driver
                    # Does this request require a TLS context?
                    context = __is_https? ? new_tls_context : nil
                    client = new_http_client(uri, context)
+                   client.before_request(&@before_request)
                    client.exec(method.to_s.upcase, uri.request_target, headers, body)
                  else
                    # Only a single request can occur at a time

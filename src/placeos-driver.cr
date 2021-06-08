@@ -216,6 +216,7 @@ abstract class PlaceOS::Driver
   {% RESERVED_METHODS["on_update"] = true %}
   {% RESERVED_METHODS["on_unload"] = true %}
   {% RESERVED_METHODS["websocket_headers"] = true %}
+  {% RESERVED_METHODS["before_request"] = true %}
   {% RESERVED_METHODS["[]?"] = true %}
   {% RESERVED_METHODS["[]"] = true %}
   {% RESERVED_METHODS["[]="] = true %}

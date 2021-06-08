@@ -27,7 +27,7 @@ abstract class PlaceOS::Driver::Transport
   # Many devices have a HTTP service. Might as well make it easy to access.
   macro inherited
     def http(method, path, body : ::HTTP::Client::BodyType = nil,
-      params : Hash(String, String?) = {} of String => String?,
+      params : Hash(String, String?) | URI::Params = URI::Params.new,
       headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
       secure = false, concurrent = true
     ) : ::HTTP::Client::Response
@@ -61,7 +61,12 @@ abstract class PlaceOS::Driver::Transport
 
         # Build the new URI
         uri.path = path
-        uri.query = params.map { |key, value| value ? "#{key}=#{value}" : key }.join("&") unless params.empty?
+        params = if params.is_a?(Hash(String, String?))
+                  URI::Params.new(params.transform_values { |v| v ? [v] : [] of String })
+                else
+                  params
+                end
+        uri.query_params = params
 
         # Apply headers
         headers = headers.is_a?(Hash) ? HTTP::Headers.new.tap { |head| headers.map { |key, value| head[key] = value } } : headers
