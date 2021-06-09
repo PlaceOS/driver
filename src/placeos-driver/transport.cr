@@ -61,7 +61,7 @@ abstract class PlaceOS::Driver::Transport
 
         # Build the new URI
         uri.path = path
-        params = if params.is_a?(Hash(String, String?))
+        params = if params.is_a?(Hash)
                   URI::Params.new(params.transform_values { |v| v ? [v] : [] of String })
                 else
                   params

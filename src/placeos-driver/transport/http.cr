@@ -206,7 +206,7 @@ class PlaceOS::Driver
       uri = URI.parse("#{scheme}://#{host}#{port}#{base_path}#{path}")
 
       # Apply any default params
-      params = if params.is_a?(Hash(String, String?))
+      params = if params.is_a?(Hash)
                  URI::Params.new(params.transform_values { |v| v ? [v] : [] of String })
                else
                  params
