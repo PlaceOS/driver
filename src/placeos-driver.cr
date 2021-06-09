@@ -37,7 +37,7 @@ OptionParser.parse(ARGV.dup) do |parser|
 end
 
 # If we are launching for the purposes of printing messages then we want to
-# disable outputing of log messages
+# disable outputting of log messages
 if PlaceOS::Startup.print_meta || PlaceOS::Startup.print_defaults
   Log.setup do |c|
     backend = Log::IOBackend.new
