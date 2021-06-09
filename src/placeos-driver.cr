@@ -1,6 +1,49 @@
 require "option_parser"
-
 require "./placeos-driver/logger"
+
+class PlaceOS::Startup
+  class_property exec_process_manager : Bool = false
+  class_property is_edge_driver : Bool = false
+  class_property print_meta : Bool = false
+  class_property print_defaults : Bool = false
+end
+
+# Command line options
+OptionParser.parse(ARGV.dup) do |parser|
+  parser.banner = "Usage: #{PROGRAM_NAME} [arguments]"
+
+  parser.on("-m", "--metadata", "output driver metadata") do
+    PlaceOS::Startup.print_meta = true
+  end
+
+  parser.on("-d", "--defaults", "output driver defaults") do
+    PlaceOS::Startup.print_defaults = true
+  end
+
+  parser.on("-p", "--process", "starts the process manager (expects to have been launched by PlaceOS core)") do
+    PlaceOS::Startup.exec_process_manager = true
+    PlaceOS::Startup.print_defaults = false
+    PlaceOS::Startup.print_meta = false
+  end
+
+  parser.on("-e", "--edge", "launches in edge mode") do
+    PlaceOS::Startup.is_edge_driver = true
+  end
+
+  parser.on("-h", "--help", "show this help") do
+    puts parser
+    exit 0
+  end
+end
+
+# If we are launching for the purposes of printing messages then we want to
+# disable outputting of log messages
+if PlaceOS::Startup.print_meta || PlaceOS::Startup.print_defaults
+  Log.setup do |c|
+    backend = Log::IOBackend.new
+    c.bind "*", :fatal, backend
+  end
+end
 
 abstract class PlaceOS::Driver
   class_property include_json_schema_in_interface : Bool = true
@@ -464,40 +507,9 @@ require "./placeos-driver/transport/*"
 require "./placeos-driver/utilities/*"
 
 macro finished
-  exec_process_manager = false
-  is_edge_driver = false
-  print_meta = false
-  print_defaults = false
-
-  # Command line options
-  OptionParser.parse(ARGV.dup) do |parser|
-    parser.banner = "Usage: #{PROGRAM_NAME} [arguments]"
-
-    parser.on("-m", "--metadata", "output driver metadata") do
-      print_meta = true
-    end
-
-    parser.on("-d", "--defaults", "output driver defaults") do
-      print_defaults = true
-    end
-
-    parser.on("-p", "--process", "starts the process manager (expects to have been launched by PlaceOS core)") do
-      exec_process_manager = true
-    end
-
-    parser.on("-e", "--edge", "launches in edge mode") do
-      is_edge_driver = true
-    end
-
-    parser.on("-h", "--help", "show this help") do
-      puts parser
-      exit 0
-    end
-  end
-
   # Launch the process manager by default, this can be overriten for testing
-  if exec_process_manager
-    process = PlaceOS::Driver::ProcessManager.new(edge_driver: is_edge_driver)
+  if PlaceOS::Startup.exec_process_manager
+    process = PlaceOS::Driver::ProcessManager.new(edge_driver: PlaceOS::Startup.is_edge_driver)
 
     # Detect ctr-c to shutdown gracefully
     Signal::INT.trap do |signal|
@@ -511,10 +523,10 @@ macro finished
 
   # This is here so we can be certain that settings macros have expanded
   # metadata needed to be compiled after process manager
-  if print_defaults
+  if PlaceOS::Startup.print_defaults
     defaults = PlaceOS::Driver::Utilities::Discovery.defaults
-    puts print_meta ? %(#{defaults.rchop},#{ {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata.lchop }) : defaults
-  elsif print_meta
+    puts PlaceOS::Startup.print_meta ? %(#{defaults.rchop},#{ {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata.lchop }) : defaults
+  elsif PlaceOS::Startup.print_meta
     puts {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata_with_schema
   end
 end
