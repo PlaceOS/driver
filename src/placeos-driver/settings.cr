@@ -38,7 +38,7 @@ class PlaceOS::Driver::Settings
   macro add_setting_key(key, klass, required)
     {% arg_name = klass.stringify %}
     {% if !arg_name.starts_with?("Union") && arg_name.includes?("|") %}
-      PlaceOS::Driver::Settings.add_setting_key(key, Union({{klass}}), {{required}})
+      PlaceOS::Driver::Settings.add_setting_key({{key}}, Union({{klass}}), {{required}})
     {% else %}
       {% klass = klass.resolve %}
       {% ::PlaceOS::Driver::Settings::SETTINGS_REQ[key] = {klass, required} %}
