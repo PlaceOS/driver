@@ -14,7 +14,7 @@ class PlaceOS::Driver
     #
     # Us *as* to specify a JSON parse-able model that the response should be
     # piped into. If unspecified a `JSON::Any` will be returned.
-    private macro {{method.id}}_request(path, params = {} of String => String?, headers = HTTP::Headers.new, body = nil, secure = false, concurrent = false, as model = nil)
+    private macro {{method.id}}_request(path, params = URI::Params.new, headers = HTTP::Headers.new, body = nil, secure = false, concurrent = false, as model = nil)
       {% verbatim do %}
         path = {{path}}
         headers = {{headers}}
@@ -43,6 +43,7 @@ class PlaceOS::Driver
         method: {{method.upcase.stringify.id}},
         path: path,
         body: body,
+        params: params,
         headers: headers,
         concurrent: concurrent,
         secure: secure,
@@ -68,42 +69,42 @@ class PlaceOS::Driver
 
   # Implement the HTTP helpers
   protected def http(method, path, body : ::HTTP::Client::BodyType = nil,
-                     params : Hash(String, String?) = {} of String => String?,
+                     params : Hash(String, String?) | URI::Params = URI::Params.new,
                      headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
                      secure = false, concurrent = false) : ::HTTP::Client::Response
     transport.http(method, path, body, params, headers, secure, concurrent)
   end
 
   protected def get(path,
-                    params : Hash(String, String?) = {} of String => String?,
+                    params : Hash(String, String?) | URI::Params = URI::Params.new,
                     headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
                     secure = false, concurrent = false)
     transport.http("GET", path, params: params, headers: headers, secure: secure, concurrent: concurrent)
   end
 
   protected def post(path, body : ::HTTP::Client::BodyType = nil,
-                     params : Hash(String, String?) = {} of String => String?,
+                     params : Hash(String, String?) | URI::Params = URI::Params.new,
                      headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
                      secure = false, concurrent = false)
     transport.http("POST", path, body, params, headers, secure, concurrent)
   end
 
   protected def put(path, body : ::HTTP::Client::BodyType = nil,
-                    params : Hash(String, String?) = {} of String => String?,
+                    params : Hash(String, String?) | URI::Params = URI::Params.new,
                     headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
                     secure = false, concurrent = false)
     transport.http("PUT", path, body, params, headers, secure, concurrent)
   end
 
   protected def patch(path, body : ::HTTP::Client::BodyType = nil,
-                      params : Hash(String, String?) = {} of String => String?,
+                      params : Hash(String, String?) | URI::Params = URI::Params.new,
                       headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
                       secure = false, concurrent = false)
     transport.http("PATCH", path, body, params, headers, secure, concurrent)
   end
 
   protected def delete(path,
-                       params : Hash(String, String?) = {} of String => String?,
+                       params : Hash(String, String?) | URI::Params = URI::Params.new,
                        headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
                        secure = false, concurrent = false)
     transport.http("DELETE", path, params: params, headers: headers, secure: secure, concurrent: concurrent)
