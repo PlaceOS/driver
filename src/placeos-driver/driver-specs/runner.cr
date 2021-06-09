@@ -89,7 +89,14 @@ class DriverSpecs
         output: defaults_io,
         error: Process::Redirect::Close
       )
-      defaults = JSON.parse(defaults_io.to_s.strip)
+
+      defaults_raw = defaults_io.to_s.strip
+      defaults = begin
+                   JSON.parse(defaults_raw)
+                 rescue error
+                   puts "error parsing driver defaults:\n#{defaults_raw.inspect}"
+                   raise error
+                 end
       default_settings = JSON.parse(defaults["default_settings"].as_s)
       puts "... got default settings: #{default_settings.inspect.colorize(:green)}"
 
