@@ -348,7 +348,7 @@ abstract class PlaceOS::Driver
         functions = @@interface
         return {functions, @@functions.not_nil!} if functions
 
-        @@interface = iface = {
+        @@interface = iface = ({
           {% for method in methods %}
             {% index = 0 %}
             {% args = [] of Crystal::Macros::Arg %}
@@ -370,9 +370,9 @@ abstract class PlaceOS::Driver
               {% end %}
             }{% if args.size == 0 %} of String => Array(String) {% end %},
           {% end %}
-        }.to_json
+        }{% if methods.size == 0 %} of Nil => Nil {% end %}).to_json
 
-        @@functions = funcs = {
+        @@functions = funcs = ({
           {% for method in methods %}
             {% index = 0 %}
             {% args = [] of Crystal::Macros::Arg %}
@@ -394,7 +394,7 @@ abstract class PlaceOS::Driver
               {% end %}
             }{% if args.size == 0 %} of String => Array(String) {% end %},
           {% end %}
-        }.to_json
+        }{% if methods.size == 0 %} of Nil => Nil {% end %}).to_json
 
         {iface, funcs}
       end
