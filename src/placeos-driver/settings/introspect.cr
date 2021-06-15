@@ -73,7 +73,7 @@ class PlaceOS::Driver::Settings
         {% if klass.type_vars.size == 1 %}
           has_items = PlaceOS::Driver::Settings.introspect {{klass.type_vars[0]}}
         {% else %}
-          has_items = {} of String => String
+          has_items = NamedTuple.new
         {% end %}
         if has_items.empty?
           %klass = {{klass}}
@@ -142,7 +142,7 @@ class PlaceOS::Driver::Settings
           %klass.json_schema
         else
           # anything will validate (JSON::Any)
-          {} of String => String
+          NamedTuple.new
         end
       {% end %}
     {% end %}
