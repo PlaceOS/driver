@@ -128,7 +128,6 @@ class PlaceOS::Driver
       context = __is_https? ? @tls : nil
       @client = new_http_client(@uri_base, context)
       @client.before_request(&@before_request)
-      @client.compress = true
     end
 
     @params_base : URI::Params
@@ -166,7 +165,6 @@ class PlaceOS::Driver
       # NOTE:: modify in initializer if editing here
       @client = new_http_client(@uri_base, context)
       @client.before_request(&@before_request)
-      @client.compress = true
       @client
     end
 
@@ -175,7 +173,6 @@ class PlaceOS::Driver
         __new_http_client if @client.__place_socket_invalid?
 
         begin
-          @client.compress = true
           yield @client
         rescue IO::Error
           # socket may have been terminated silently so we'll try again
