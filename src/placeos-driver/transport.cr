@@ -127,6 +127,11 @@ abstract class PlaceOS::Driver::Transport
           end
         end
 
+        # Check if we need to override the Host header
+        if host_header = @settings.get { setting?(String, :host_header) }
+          client.before_request { |request| request.headers["Host"] = host_header }
+        end
+
         client.compress = true
         client
       end
