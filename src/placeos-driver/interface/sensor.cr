@@ -73,46 +73,46 @@ module PlaceOS::Driver::Interface::Sensor
     Second
     Litre
     PH
-  end
 
-  def unit
-    case self
-    in Temperature          then Unit::Celsius
-    in Humidity             then Unit::Percentage
-    in Illuminance          then Unit::Lux
-    in Pressure             then Unit::Pascal
-    in Trigger              then Unit::Boolean
-    in Switch               then Unit::Boolean
-    in Level                then Unit::Percentage
-    in Flow                 then Unit::CubicMetrePerSecond
-    in Counter              then Unit::Integer
-    in Acceleration         then Unit::MetrePerSecondSquared
-    in Speed                then Unit::MetrePerSecond
-    in Roll                 then Unit::Angle
-    in Pitch                then Unit::Angle
-    in Yaw                  then Unit::Angle
-    in Compass              then Unit::Angle
-    in Current              then Unit::Ampere
-    in Voltage              then Unit::Volt
-    in ElectricalResistance then Unit::Ohm
-    in Power                then Unit::Watt
-    in Radiation            then Unit::Sievert
-    in Distance             then Unit::Metre
-    in Area                 then Unit::SquareMeter
-    in SoundPressure        then Unit::Decibel
-    in Capacitance          then Unit::Farad
-    in Inductance           then Unit::Henry
-    in Conductance          then Unit::Siemens
-    in MagneticFlux         then Unit::Weber
-    in MagneticFluxDensity  then Unit::Tesla
-    in Energy               then Unit::WattSecond
-    in Force                then Unit::Newton
-    in Frequency            then Unit::Hertz
-    in Mass                 then Unit::Kilogram
-    in Momentum             then Unit::NewtonSecond
-    in TimePeriod           then Unit::Second
-    in Volume               then Unit::Litre
-    in Acidity              then Unit::PH
+    def unit
+      case self
+      in Temperature          then Unit::Celsius
+      in Humidity             then Unit::Percentage
+      in Illuminance          then Unit::Lux
+      in Pressure             then Unit::Pascal
+      in Trigger              then Unit::Boolean
+      in Switch               then Unit::Boolean
+      in Level                then Unit::Percentage
+      in Flow                 then Unit::CubicMetrePerSecond
+      in Counter              then Unit::Integer
+      in Acceleration         then Unit::MetrePerSecondSquared
+      in Speed                then Unit::MetrePerSecond
+      in Roll                 then Unit::Angle
+      in Pitch                then Unit::Angle
+      in Yaw                  then Unit::Angle
+      in Compass              then Unit::Angle
+      in Current              then Unit::Ampere
+      in Voltage              then Unit::Volt
+      in ElectricalResistance then Unit::Ohm
+      in Power                then Unit::Watt
+      in Radiation            then Unit::Sievert
+      in Distance             then Unit::Metre
+      in Area                 then Unit::SquareMeter
+      in SoundPressure        then Unit::Decibel
+      in Capacitance          then Unit::Farad
+      in Inductance           then Unit::Henry
+      in Conductance          then Unit::Siemens
+      in MagneticFlux         then Unit::Weber
+      in MagneticFluxDensity  then Unit::Tesla
+      in Energy               then Unit::WattSecond
+      in Force                then Unit::Newton
+      in Frequency            then Unit::Hertz
+      in Mass                 then Unit::Kilogram
+      in Momentum             then Unit::NewtonSecond
+      in TimePeriod           then Unit::Second
+      in Volume               then Unit::Litre
+      in Acidity              then Unit::PH
+      end
     end
   end
 
