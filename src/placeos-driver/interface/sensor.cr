@@ -22,8 +22,24 @@ module PlaceOS::Driver::Interface::Sensor
     Current              # https://en.wikipedia.org/wiki/Ampere
     Voltage              # https://en.wikipedia.org/wiki/Volt
     ElectricalResistance # https://en.wikipedia.org/wiki/Ohm
-    Radiation            # https://en.wikipedia.org/wiki/Sievert
+    Power                # https://en.wikipedia.org/wiki/Watt
+    Energy               # https://en.wikipedia.org/wiki/Joule as WattSecond
+    Capacitance
+    Inductance
+    Conductance
+    MagneticFlux # https://en.wikipedia.org/wiki/Weber_(unit)
+    MagneticFluxDensity
+    Radiation # https://en.wikipedia.org/wiki/Sievert
     Distance
+    Area
+    SoundPressure
+    Force
+    Frequency
+    Mass
+    Momentum
+    TimePeriod
+    Volume
+    Acidity
   end
 
   # Using SI units and SI derived units
@@ -41,8 +57,68 @@ module PlaceOS::Driver::Interface::Sensor
     Ampere                # Current
     Volt                  # Voltage
     Ohm                   # ElectricalResistance
-    Sievert               # Radiation
-    Metre                 # Distance
+    Watt                  # Power
+    WattSecond
+    Sievert # Radiation
+    Metre   # Distance
+    SquareMeter
+    Decibel
+    Farad
+    Henry
+    Weber
+    Newton
+    Hertz
+    Kilogram
+    NewtonSecond
+    Second
+    Litre
+    PH
+  end
+
+  SENSOR_UNIT = {
+    SensorType::Temperature          => Unit::Celsius,
+    SensorType::Humidity             => Unit::Percentage,
+    SensorType::Illuminance          => Unit::Lux,
+    SensorType::Pressure             => Unit::Pascal,
+    SensorType::Trigger              => Unit::Boolean,
+    SensorType::Switch               => Unit::Boolean,
+    SensorType::Level                => Unit::Percentage,
+    SensorType::Flow                 => Unit::CubicMetrePerSecond,
+    SensorType::Counter              => Unit::Integer,
+    SensorType::Acceleration         => Unit::MetrePerSecondSquared,
+    SensorType::Speed                => Unit::MetrePerSecond,
+    SensorType::Roll                 => Unit::Angle,
+    SensorType::Pitch                => Unit::Angle,
+    SensorType::Yaw                  => Unit::Angle,
+    SensorType::Compass              => Unit::Angle,
+    SensorType::Current              => Unit::Ampere,
+    SensorType::Voltage              => Unit::Volt,
+    SensorType::ElectricalResistance => Unit::Ohm,
+    SensorType::Power                => Unit::Watt,
+    SensorType::Radiation            => Unit::Sievert,
+    SensorType::Distance             => Unit::Metre,
+    SensorType::Area                 => Unit::SquareMeter,
+    SensorType::SoundPressure        => Unit::Decibel,
+    SensorType::Capacitance          => Unit::Farad,
+    SensorType::Inductance           => Unit::Henry,
+    SensorType::Conductance          => Unit::Siemens,
+    SensorType::MagneticFlux         => Unit::Weber,
+    SensorType::MagneticFluxDensity  => Unit::Tesla,
+    SensorType::Energy               => Unit::WattSecond,
+    SensorType::Force                => Unit::Newton,
+    SensorType::Frequency            => Unit::Hertz,
+    SensorType::Mass                 => Unit::Kilogram,
+    SensorType::Momentum             => Unit::NewtonSecond,
+    SensorType::TimePeriod           => Unit::Second,
+    SensorType::Volume               => Unit::Litre,
+    SensorType::Acidity              => Unit::PH,
+  }
+
+  enum Status
+    Normal
+    Alarm
+    Fault
+    OutOfService
   end
 
   # return the specified sensor details
@@ -89,17 +165,28 @@ module PlaceOS::Driver::Interface::Sensor
 
   abstract class Detail
     include JSON::Serializable
+    include JSON::Serializable::Unmapped
 
-    def initialize(@type, @unit, @value, @unix_ms, @mac, @id, @name, @raw, @loc)
+    def initialize(
+      @type, @value, @unix_ms, @mac, @id,
+      @name, @raw, @loc, @status = Status::Normal
+    )
     end
 
+    property status : Status
     property type : SensorType
-    property unit : Unit
+
+    @[JSON::Field(ignore: true)]
+    getter unit : Unit { SENSOR_UNIT[@type] }
 
     property value : Float64
     property unix_ms : Int64
 
-    # the unique id can be optional if the mac address represents a single value
+    property limit_high : Float64?
+    property limit_low : Float64?
+    property resolution : Float64?
+
+    # the id can be optional if the mac address represents a single value
     property mac : String
     property id : String?
 
@@ -114,10 +201,6 @@ module PlaceOS::Driver::Interface::Sensor
 
     # unadjusted location if the sensor platform has this information
     property loc : Location?
-
-    def unique_id : String
-      @id || mac
-    end
 
     def value
       case unit
