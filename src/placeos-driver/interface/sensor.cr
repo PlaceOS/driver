@@ -75,44 +75,46 @@ module PlaceOS::Driver::Interface::Sensor
     PH
   end
 
-  SENSOR_UNIT = {
-    SensorType::Temperature          => Unit::Celsius,
-    SensorType::Humidity             => Unit::Percentage,
-    SensorType::Illuminance          => Unit::Lux,
-    SensorType::Pressure             => Unit::Pascal,
-    SensorType::Trigger              => Unit::Boolean,
-    SensorType::Switch               => Unit::Boolean,
-    SensorType::Level                => Unit::Percentage,
-    SensorType::Flow                 => Unit::CubicMetrePerSecond,
-    SensorType::Counter              => Unit::Integer,
-    SensorType::Acceleration         => Unit::MetrePerSecondSquared,
-    SensorType::Speed                => Unit::MetrePerSecond,
-    SensorType::Roll                 => Unit::Angle,
-    SensorType::Pitch                => Unit::Angle,
-    SensorType::Yaw                  => Unit::Angle,
-    SensorType::Compass              => Unit::Angle,
-    SensorType::Current              => Unit::Ampere,
-    SensorType::Voltage              => Unit::Volt,
-    SensorType::ElectricalResistance => Unit::Ohm,
-    SensorType::Power                => Unit::Watt,
-    SensorType::Radiation            => Unit::Sievert,
-    SensorType::Distance             => Unit::Metre,
-    SensorType::Area                 => Unit::SquareMeter,
-    SensorType::SoundPressure        => Unit::Decibel,
-    SensorType::Capacitance          => Unit::Farad,
-    SensorType::Inductance           => Unit::Henry,
-    SensorType::Conductance          => Unit::Siemens,
-    SensorType::MagneticFlux         => Unit::Weber,
-    SensorType::MagneticFluxDensity  => Unit::Tesla,
-    SensorType::Energy               => Unit::WattSecond,
-    SensorType::Force                => Unit::Newton,
-    SensorType::Frequency            => Unit::Hertz,
-    SensorType::Mass                 => Unit::Kilogram,
-    SensorType::Momentum             => Unit::NewtonSecond,
-    SensorType::TimePeriod           => Unit::Second,
-    SensorType::Volume               => Unit::Litre,
-    SensorType::Acidity              => Unit::PH,
-  }
+  def unit
+    case self
+    in Temperature          then Unit::Celsius
+    in Humidity             then Unit::Percentage
+    in Illuminance          then Unit::Lux
+    in Pressure             then Unit::Pascal
+    in Trigger              then Unit::Boolean
+    in Switch               then Unit::Boolean
+    in Level                then Unit::Percentage
+    in Flow                 then Unit::CubicMetrePerSecond
+    in Counter              then Unit::Integer
+    in Acceleration         then Unit::MetrePerSecondSquared
+    in Speed                then Unit::MetrePerSecond
+    in Roll                 then Unit::Angle
+    in Pitch                then Unit::Angle
+    in Yaw                  then Unit::Angle
+    in Compass              then Unit::Angle
+    in Current              then Unit::Ampere
+    in Voltage              then Unit::Volt
+    in ElectricalResistance then Unit::Ohm
+    in Power                then Unit::Watt
+    in Radiation            then Unit::Sievert
+    in Distance             then Unit::Metre
+    in Area                 then Unit::SquareMeter
+    in SoundPressure        then Unit::Decibel
+    in Capacitance          then Unit::Farad
+    in Inductance           then Unit::Henry
+    in Conductance          then Unit::Siemens
+    in MagneticFlux         then Unit::Weber
+    in MagneticFluxDensity  then Unit::Tesla
+    in Energy               then Unit::WattSecond
+    in Force                then Unit::Newton
+    in Frequency            then Unit::Hertz
+    in Mass                 then Unit::Kilogram
+    in Momentum             then Unit::NewtonSecond
+    in TimePeriod           then Unit::Second
+    in Volume               then Unit::Litre
+    in Acidity              then Unit::PH
+    end
+  end
 
   enum Status
     Normal
