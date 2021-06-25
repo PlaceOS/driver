@@ -178,8 +178,7 @@ module PlaceOS::Driver::Interface::Sensor
     property status : Status
     property type : SensorType
 
-    @[JSON::Field(ignore: true)]
-    getter unit : Unit { SENSOR_UNIT[@type] }
+    delegate unit, to: type
 
     property value : Float64
     property unix_ms : Int64
