@@ -50,7 +50,7 @@ module PlaceOS::Driver::Interface::Sensor
     Pascal                # Pressure
     Boolean               # Trigger, Switch
     Integer               # Counter
-    CubicMetrePerSecond   # Liquid or gas flow rate
+    LitrePerSecond        # Liquid or gas flow rate
     MetrePerSecondSquared # Acceleration
     MetrePerSecond        # Speed
     Angle                 # Compass, Accel, Gyro
@@ -83,7 +83,7 @@ module PlaceOS::Driver::Interface::Sensor
       in Trigger              then Unit::Boolean
       in Switch               then Unit::Boolean
       in Level                then Unit::Percentage
-      in Flow                 then Unit::CubicMetrePerSecond
+      in Flow                 then Unit::LitrePerSecond
       in Counter              then Unit::Integer
       in Acceleration         then Unit::MetrePerSecondSquared
       in Speed                then Unit::MetrePerSecond
