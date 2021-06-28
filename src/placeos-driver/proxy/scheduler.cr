@@ -4,7 +4,7 @@ require "set"
 require "../driver_manager"
 
 class PlaceOS::Driver::Proxy::Scheduler
-  private class TaskWrapper
+  class TaskWrapper
     enum Action
       Add
       Remove
