@@ -40,39 +40,6 @@ module PlaceOS::Driver::Interface::Sensor
     TimePeriod
     Volume
     Acidity
-  end
-
-  # Using SI units and SI derived units
-  enum Unit
-    Celsius               # Temperature - celsius over Kelvin to avoid some conversions
-    Percentage            # Humidity, Level
-    Lux                   # Illuminance
-    Pascal                # Pressure
-    Boolean               # Trigger, Switch
-    Integer               # Counter
-    LitrePerSecond        # Liquid or gas flow rate
-    MetrePerSecondSquared # Acceleration
-    MetrePerSecond        # Speed
-    Angle                 # Compass, Accel, Gyro
-    Ampere                # Current
-    Volt                  # Voltage
-    Ohm                   # ElectricalResistance
-    Watt                  # Power
-    WattSecond
-    Sievert # Radiation
-    Metre   # Distance
-    SquareMeter
-    Decibel
-    Farad
-    Henry
-    Weber
-    Newton
-    Hertz
-    Kilogram
-    NewtonSecond
-    Second
-    Litre
-    PH
 
     def unit
       case self
@@ -114,6 +81,39 @@ module PlaceOS::Driver::Interface::Sensor
       in Acidity              then Unit::PH
       end
     end
+  end
+
+  # Using SI units and SI derived units
+  enum Unit
+    Celsius               # Temperature - celsius over Kelvin to avoid some conversions
+    Percentage            # Humidity, Level
+    Lux                   # Illuminance
+    Pascal                # Pressure
+    Boolean               # Trigger, Switch
+    Integer               # Counter
+    LitrePerSecond        # Liquid or gas flow rate
+    MetrePerSecondSquared # Acceleration
+    MetrePerSecond        # Speed
+    Angle                 # Compass, Accel, Gyro
+    Ampere                # Current
+    Volt                  # Voltage
+    Ohm                   # ElectricalResistance
+    Watt                  # Power
+    WattSecond
+    Sievert # Radiation
+    Metre   # Distance
+    SquareMeter
+    Decibel
+    Farad
+    Henry
+    Weber
+    Newton
+    Hertz
+    Kilogram
+    NewtonSecond
+    Second
+    Litre
+    PH
   end
 
   enum Status
