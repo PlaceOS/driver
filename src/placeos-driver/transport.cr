@@ -41,6 +41,9 @@ abstract class PlaceOS::Driver::Transport
                     when "https", "wss"
                       uri.scheme = "https"
                       OpenSSL::SSL::Context::Client.new.tap &.verify_mode = OpenSSL::SSL::VerifyMode::NONE
+                    when "ws"
+                      uri.scheme = "http"
+                      nil
                     else
                       nil
                     end
@@ -113,7 +116,8 @@ abstract class PlaceOS::Driver::Transport
 
         # Apply proxy settings
         if proxy_config = @settings.get { setting?(NamedTuple(host: String, port: Int32, auth: NamedTuple(username: String, password: String)?), :proxy) }
-          if !proxy_config[:host].empty?
+          # this check is here so we can disable proxies as required
+          if proxy_config[:host].presence
             proxy = ConnectProxy.new(**proxy_config)
             client.before_request { client.set_proxy(proxy) }
           end
