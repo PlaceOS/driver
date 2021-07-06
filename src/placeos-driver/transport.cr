@@ -12,8 +12,10 @@ abstract class PlaceOS::Driver::Transport
   property tokenizer : ::Tokenizer? = nil
   property pre_processor : ((Bytes) -> Bytes?) | Nil = nil
 
-  def pre_processor(&block : (Bytes) -> Bytes?)
-    @pre_processor = block
+  def pre_processor(&@pre_processor : (Bytes) -> Bytes?)
+  end
+
+  def before_request(&@before_request : HTTP::Request ->)
   end
 
   # Only SSH implements exec
@@ -137,6 +139,9 @@ abstract class PlaceOS::Driver::Transport
         end
 
         client.compress = true
+        if before_req = @before_request
+          client.before_request &before_req
+        end
         client
       end
     {% end %}

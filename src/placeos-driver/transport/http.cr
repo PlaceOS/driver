@@ -103,11 +103,11 @@ class PlaceOS::Driver
     transport.http("PATCH", path, body, params, headers, secure, concurrent)
   end
 
-  protected def delete(path,
+  protected def delete(path, body : ::HTTP::Client::BodyType = nil,
                        params : Hash(String, String?) | URI::Params = URI::Params.new,
                        headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
                        secure = false, concurrent = false)
-    transport.http("DELETE", path, params: params, headers: headers, secure: secure, concurrent: concurrent)
+    transport.http("DELETE", path, body, params, headers, secure, concurrent)
   end
 
   # Implement transport
@@ -116,8 +116,7 @@ class PlaceOS::Driver
     def initialize(
       @queue : PlaceOS::Driver::Queue,
       uri_base : String,
-      @settings : ::PlaceOS::Driver::Settings,
-      &@before_request : HTTP::Request ->
+      @settings : ::PlaceOS::Driver::Settings
     )
       @terminated = false
       @tls = new_tls_context
@@ -132,7 +131,6 @@ class PlaceOS::Driver
 
       context = __is_https? ? @tls : nil
       @client = new_http_client(@uri_base, context)
-      @client.before_request(&@before_request)
     end
 
     @params_base : URI::Params
@@ -171,7 +169,6 @@ class PlaceOS::Driver
       context = __is_https? ? @tls : nil
       # NOTE:: modify in initializer if editing here
       @client = new_http_client(@uri_base, context)
-      @client.before_request(&@before_request)
       @client_requests = 0
       @client
     end
@@ -241,7 +238,6 @@ class PlaceOS::Driver
                    # Does this request require a TLS context?
                    context = __is_https? ? new_tls_context : nil
                    client = new_http_client(uri, context)
-                   client.before_request(&@before_request)
                    client.exec(method.to_s.upcase, uri.request_target, headers, body)
                  else
                    # Only a single request can occur at a time
