@@ -20,11 +20,11 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
   #################################################################################################
 
   def each
-    @@redis_lock.synchronize { redis.hgetall(hash_key) }
+    to_h.each
   end
 
   def to_h
-    each
+    @@redis_lock.synchronize { redis.hgetall(hash_key) }
   end
 
   def []=(status_name, json_value)
