@@ -207,7 +207,7 @@ abstract class PlaceOS::Driver
     if @__edge_driver__
       PlaceOS::Driver::Protocol.instance.request(channel, "publish", message, raw: true)
     else
-      @__storage__.as(RedisStorage).with_redis &.publish("placeos/#{channel}", message.to_s)
+      RedisStorage.with_redis &.publish("placeos/#{channel}", message.to_s)
     end
     message
   end
