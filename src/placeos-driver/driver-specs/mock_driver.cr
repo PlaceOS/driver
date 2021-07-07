@@ -116,6 +116,7 @@ abstract class DriverSpecs::MockDriver
     # Filter out abstract methods
     {% methods = methods.reject &.body.stringify.empty? %}
 
+    # :nodoc:
     class KlassExecutor < BaseExecutor
       EXECUTORS = {
         {% for method in methods %}

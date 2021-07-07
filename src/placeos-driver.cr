@@ -279,14 +279,14 @@ abstract class PlaceOS::Driver
     # Filter out abstract methods
     {% methods = methods.reject &.body.stringify.empty? %}
 
-    # A class that handles executing every public method defined
-    # NOTE:: currently doesn't handle multiple methods signatures (except block
-    # and no block). Technically we could add the support however the JSON
-    # parsing does not reliably pick the closest match and instead picks the
-    # first or simplest match. So simpler to have a single method signature for
-    # all public API methods
     # :nodoc:
     class KlassExecutor
+      # A class that handles executing every public method defined
+      # NOTE:: currently doesn't handle multiple methods signatures (except block
+      # and no block). Technically we could add the support however the JSON
+      # parsing does not reliably pick the closest match and instead picks the
+      # first or simplest match. So simpler to have a single method signature for
+      # all public API methods
       def initialize(json : String)
         @lookup = Hash(String, JSON::Any).from_json(json)
         @exec = @lookup["__exec__"].as_s
@@ -295,6 +295,7 @@ abstract class PlaceOS::Driver
       @lookup : Hash(String, JSON::Any)
       @exec : String
 
+      # :nodoc:
       EXECUTORS = {
         {% for method in methods %}
           {% index = 0 %}
@@ -500,7 +501,22 @@ abstract class PlaceOS::Driver
   end
 end
 
-require "./placeos-driver/*"
+require "./placeos-driver/constants"
+require "./placeos-driver/core_ext"
+require "./placeos-driver/driver_manager"
+require "./placeos-driver/driver_model"
+require "./placeos-driver/exception"
+require "./placeos-driver/logger_io"
+require "./placeos-driver/process_manager"
+require "./placeos-driver/protocol"
+require "./placeos-driver/queue"
+require "./placeos-driver/settings"
+require "./placeos-driver/status"
+require "./placeos-driver/storage"
+require "./placeos-driver/subscriptions"
+require "./placeos-driver/task"
+require "./placeos-driver/transport"
+
 require "./placeos-driver/storage/edge-storage"
 require "./placeos-driver/proxy/*"
 require "./placeos-driver/subscriptions/*"
