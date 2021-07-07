@@ -207,7 +207,7 @@ abstract class PlaceOS::Driver
     if @__edge_driver__
       PlaceOS::Driver::Protocol.instance.request(channel, "publish", message, raw: true)
     else
-      @__storage__.redis.publish("placeos/#{channel}", message.to_s)
+      @__storage__.as(RedisStorage).redis.publish("placeos/#{channel}", message.to_s)
     end
     message
   end
@@ -285,6 +285,7 @@ abstract class PlaceOS::Driver
     # parsing does not reliably pick the closest match and instead picks the
     # first or simplest match. So simpler to have a single method signature for
     # all public API methods
+    # :nodoc:
     class KlassExecutor
       def initialize(json : String)
         @lookup = Hash(String, JSON::Any).from_json(json)
