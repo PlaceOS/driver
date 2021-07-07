@@ -21,14 +21,10 @@ class PlaceOS::Driver::RedisStorage < PlaceOS::Driver::Storage
 
   def each
     @@redis_lock.synchronize { redis.hgetall(hash_key) }
-      .each_slice(2, reuse: true)
-      .map { |(key, value)| {key.to_s, value.to_s} }
   end
 
   def to_h
-    each.each_with_object({} of String => String) do |(key, value), hash|
-      hash[key] = value
-    end
+    each
   end
 
   def []=(status_name, json_value)
