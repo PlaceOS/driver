@@ -105,10 +105,9 @@ class PlaceOS::Driver::Proxy::Driver
 
         if error = result.error
           backtrace = result.backtrace || [] of String
-          cause = PlaceOS::Driver::RemoteException.new(result.payload, error, backtrace)
-          local = PlaceOS::Driver::RemoteException.new "remote exception", cause, caller
-          @system.logger.warn(exception: local) { local.message }
-          raise local
+          remote_error = PlaceOS::Driver::RemoteException.new "remote exception: #{result.payload}", error, backtrace
+          @system.logger.warn(exception: remote_error) { remote_error.message }
+          raise remote_error
         else
           JSON.parse(result.payload.not_nil!)
         end
@@ -142,10 +141,10 @@ class PlaceOS::Driver::Proxy::Driver
                   if index < arguments.size
                     index += 1
                     arguments[index - 1]
-                  elsif details.size > 1
+                  elsif details.as_h.has_key?("default")
                     details["default"]
                   else
-                    raise "missing argument `#{arg_name} : #{details["title"]}` for '#{function_name}' on #{module_metadata[:name]}_#{module_metadata[:index]} - #{module_metadata[:id]}"
+                    raise "missing argument `#{arg_name} : #{details}` for '#{function_name}' on #{module_metadata[:name]}_#{module_metadata[:index]} - #{module_metadata[:id]}"
                   end
                 end
 
