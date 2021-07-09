@@ -141,7 +141,7 @@ class PlaceOS::Driver::Proxy::Driver
                   if index < arguments.size
                     index += 1
                     arguments[index - 1]
-                  elsif details.as_h?.try &.has_key?("default")
+                  elsif details.as_h.has_key?("default")
                     details["default"]
                   else
                     raise "missing argument `#{arg_name} : #{details}` for '#{function_name}' on #{module_metadata[:name]}_#{module_metadata[:index]} - #{module_metadata[:id]}"
