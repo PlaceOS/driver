@@ -460,6 +460,7 @@ abstract class PlaceOS::Driver
         implements = {{@type.ancestors.map(&.stringify.split("(")[0])}}.reject { |obj| IGNORE_KLASSES.includes?(obj) }
         iface, funcs = self.functions
 
+        # TODO:: remove functions eventually (once fully deprecated in driver model)
         %({
           "interface": #{iface},
           "functions": #{funcs},
