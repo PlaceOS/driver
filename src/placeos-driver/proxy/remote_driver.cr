@@ -8,6 +8,8 @@ require "../subscriptions"
 require "./subscriptions"
 require "./system"
 
+require "placeos-core/client"
+
 # This is a helper class for integrating internal components that communicate
 # directly to core but are external to core, such as the API or Triggers
 #
@@ -68,7 +70,8 @@ module PlaceOS::Driver::Proxy
       @sys_id : String,
       @module_name : String,
       @index : Int32,
-      @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE)
+      @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE),
+      @client : Core::Client = Core::Client.new(which_core)
     )
       @error_details = {@sys_id, @module_name, @index}
     end
@@ -78,7 +81,8 @@ module PlaceOS::Driver::Proxy
       @sys_id : String,
       @module_name : String,
       @index : Int32 = 1,
-      @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE)
+      @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE),
+      @client : Core::Client = Core::Client.new(which_core)
     )
       @error_details = {@sys_id, @module_name, 1}
     end
@@ -178,31 +182,9 @@ module PlaceOS::Driver::Proxy
       module_id = module_id?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
 
-      core_uri = which_core(module_id)
+      exec_args = args || named_args
 
-      # build request
-      core_uri.path = "/api/core/v1/command/#{module_id}/execute"
-      response = HTTP::Client.post(
-        core_uri,
-        headers: HTTP::Headers{"X-Request-ID" => request_id || UUID.random.to_s},
-        body: {
-          "__exec__" => function,
-          function   => args || named_args,
-        }.to_json
-      )
-
-      case response.status_code
-      when 200
-        # exec was successful, json string returned
-        response.body
-      when 203
-        # exec sent to module and it raised an error
-        info = NamedTuple(message: String, backtrace: Array(String)?).from_json(response.body)
-        raise Error.new(ErrorCode::RequestFailed, "module raised: #{info[:message]}", *@error_details, info[:backtrace])
-      else
-        # some other failure 3
-        raise Error.new(ErrorCode::UnexpectedFailure, "unexpected response code #{response.status_code}", *@error_details)
-      end
+      @client.execute(module_id, function, exec_args)
     end
 
     def [](status)
@@ -232,11 +214,7 @@ module PlaceOS::Driver::Proxy
       module_id = module_id?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
 
-      core_uri = which_core(module_id)
-
-      # build request
-      core_uri.path = "/api/core/v1/command/#{module_id}/debugger"
-      HTTP::WebSocket.new(core_uri)
+      @client.debug(module_id)
     end
 
     # All subscriptions to external drivers should be indirect as the driver might
