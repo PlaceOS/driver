@@ -124,12 +124,12 @@ module PlaceOS::Driver::Interface::Sensor
   end
 
   # return the specified sensor details
-  abstract def sensor(unique_id : String) : Detail?
+  abstract def sensor(mac : String, id : String? = nil) : Detail?
 
   # return an array of sensor details
   # zone_id can be ignored if location is unknown by the sensor provider
   # mac_address can be used to grab data from a single device (basic grouping)
-  abstract def sensors(type : String? = nil, mac_address : String? = nil, zone_id : String? = nil) : Array(Detail)
+  abstract def sensors(type : String? = nil, mac : String? = nil, zone_id : String? = nil) : Array(Detail)
 
   abstract class Location
     include JSON::Serializable
