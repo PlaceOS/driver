@@ -70,8 +70,7 @@ module PlaceOS::Driver::Proxy
       @sys_id : String,
       @module_name : String,
       @index : Int32,
-      @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE),
-      @client : Core::Client = Core::Client.new(which_core)
+      @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE)
     )
       @error_details = {@sys_id, @module_name, @index}
     end
@@ -81,8 +80,7 @@ module PlaceOS::Driver::Proxy
       @sys_id : String,
       @module_name : String,
       @index : Int32 = 1,
-      @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE),
-      @client : Core::Client = Core::Client.new(which_core)
+      @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE)
     )
       @error_details = {@sys_id, @module_name, 1}
     end
@@ -184,7 +182,8 @@ module PlaceOS::Driver::Proxy
 
       exec_args = args || named_args
 
-      @client.execute(module_id, function, exec_args)
+      client = Core::Client.new(which_core)
+      client.execute(module_id, function, exec_args)
     end
 
     def [](status)
@@ -213,8 +212,8 @@ module PlaceOS::Driver::Proxy
     def debug
       module_id = module_id?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
-
-      @client.debug(module_id)
+      client = Core::Client.new(which_core)
+      client.debug(module_id)
     end
 
     # All subscriptions to external drivers should be indirect as the driver might
