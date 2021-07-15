@@ -31,7 +31,8 @@ describe PlaceOS::Driver::Protocol::Management do
         "email": "name@email.com",
         "capacity": 20,
         "features": ["in-house-pc","projector"],
-        "bookable": true
+        "bookable": true,
+        "zones": ["zone-1234"]
       }
     }))
     manager.running?.should eq(true)
@@ -109,7 +110,8 @@ describe PlaceOS::Driver::Protocol::Management do
         "email": "name@email.com",
         "capacity": 20,
         "features": ["in-house-pc","projector"],
-        "bookable": true
+        "bookable": true,
+        "zones": ["zone-1234"]
       }
     }))
     manager.running?.should eq(true)

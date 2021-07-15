@@ -124,6 +124,7 @@ class DriverSpecs
             capacity: 4,
             features: ["many", "modules"],
             bookable: true,
+            zones:    ["zone-1234"],
           },
           ip:        "127.0.0.1",
           uri:       "http://127.0.0.1:#{HTTP_PORT}",

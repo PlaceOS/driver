@@ -4,13 +4,13 @@ describe PlaceOS::Driver::Proxy::Scheduler do
   it "should wrap Tasker objects so we can effectively track them" do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = false
-    sched.at(20.milliseconds.from_now) { ran = true }
+    sched.at(40.milliseconds.from_now) { ran = true }
 
-    sleep 10.milliseconds
+    sleep 20.milliseconds
     sched.size.should eq(1)
     ran.should eq(false)
 
-    sleep 20.milliseconds
+    sleep 40.milliseconds
     ran.should eq(true)
     sched.size.should eq(0)
   end
@@ -18,16 +18,16 @@ describe PlaceOS::Driver::Proxy::Scheduler do
   it "should cancel Tasker objects" do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = false
-    sched.at(20.milliseconds.from_now) { ran = true }
+    sched.at(40.milliseconds.from_now) { ran = true }
 
-    sleep 10.milliseconds
+    sleep 20.milliseconds
     sched.size.should eq(1)
     ran.should eq(false)
 
     sched.clear
     sched.size.should eq(0)
 
-    sleep 20.milliseconds
+    sleep 40.milliseconds
     ran.should eq(false)
     sched.size.should eq(0)
   end
@@ -84,23 +84,23 @@ describe PlaceOS::Driver::Proxy::Scheduler do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
     single = 0
-    sched.in(16.milliseconds) { single += 1 }
-    task = sched.every(32.milliseconds) { ran += 1 }
+    sched.in(32.milliseconds) { single += 1 }
+    task = sched.every(64.milliseconds) { ran += 1 }
 
-    sleep 24.milliseconds
+    sleep 48.milliseconds
     sched.size.should eq(1)
     ran.should eq(0)
     single.should eq(1)
 
-    sleep 16.milliseconds
+    sleep 32.milliseconds
     ran.should eq(1)
     sched.size.should eq(1)
 
-    sleep 32.milliseconds
+    sleep 64.milliseconds
     ran.should eq(2)
     sched.size.should eq(1)
 
-    sleep 32.milliseconds
+    sleep 64.milliseconds
     ran.should eq(3)
     sched.size.should eq(1)
 

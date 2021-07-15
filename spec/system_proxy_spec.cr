@@ -25,7 +25,8 @@ describe PlaceOS::Driver::Proxy::System do
           "email": "name@email.com",
           "capacity": 20,
           "features": ["in-house-pc","projector"],
-          "bookable": true
+          "bookable": true,
+          "zones": ["zone-1234"]
         }
     ))
 
@@ -65,7 +66,8 @@ describe PlaceOS::Driver::Proxy::System do
           "email": "name@email.com",
           "capacity": 20,
           "features": ["in-house-pc","projector"],
-          "bookable": true
+          "bookable": true,
+          "zones": ["zone-1234"]
         }
     ))
 

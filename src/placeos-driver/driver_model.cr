@@ -16,6 +16,8 @@ struct PlaceOS::Driver::DriverModel
     property type : String?
     property capacity : Int32
     property map_id : String?
+    property timezone : String?
+    property zones : Array(String)
   end
 
   struct Metadata

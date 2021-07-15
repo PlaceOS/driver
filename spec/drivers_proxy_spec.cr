@@ -10,7 +10,8 @@ module PlaceOS::Driver::Proxy
           "email": "name@email.com",
           "capacity": 20,
           "features": ["in-house-pc","projector"],
-          "bookable": true
+          "bookable": true,
+          "zones": ["zone-1234"]
         }
     ))
 
