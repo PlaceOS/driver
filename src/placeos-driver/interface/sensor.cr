@@ -41,6 +41,7 @@ module PlaceOS::Driver::Interface::Sensor
     Volume
     Acidity
 
+    # ameba:disable Metrics/CyclomaticComplexity
     def unit
       case self
       in Temperature          then Unit::Celsius
