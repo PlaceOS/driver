@@ -4,6 +4,7 @@ require "../storage"
 require "../task"
 require "../status"
 require "./status_helper"
+require "../settings"
 
 class DriverSpecs; end
 
@@ -116,6 +117,7 @@ abstract class DriverSpecs::MockDriver
     # Filter out abstract methods
     {% methods = methods.reject &.body.stringify.empty? %}
 
+    # :nodoc:
     class KlassExecutor < BaseExecutor
       EXECUTORS = {
         {% for method in methods %}
@@ -150,6 +152,8 @@ abstract class DriverSpecs::MockDriver
               tuple = {
                 {% for arg in args %}
                   {% arg_name = arg.name.stringify %}
+
+                  {% raise "#{@type}##{method.name} argument `#{arg.name}` is missing a type" if arg.restriction.is_a?(Nop) %}
 
                   {% if !arg.restriction.is_a?(Union) && !arg.restriction.is_a?(Nop) && arg.restriction.resolve < ::Enum %}
                     {% if arg.default_value.is_a?(Nop) %}
@@ -204,11 +208,13 @@ abstract class DriverSpecs::MockDriver
 
       # provide introspection into available functions
       @@functions : String?
-      def self.functions : String
-        functions = @@functions
-        return functions if functions
+      @@interface : String?
 
-        @@functions = funcs = {
+      def self.functions
+        functions = @@interface
+        return {functions, @@functions.not_nil!} if functions
+
+        @@interface = iface = ({
           {% for method in methods %}
             {% index = 0 %}
             {% args = [] of Crystal::Macros::Arg %}
@@ -221,34 +227,52 @@ abstract class DriverSpecs::MockDriver
 
             {{method.name.stringify}} => {
               {% for arg in args %}
-                {{arg.name.stringify}} => [
-                  {% if !arg.restriction.is_a?(Union) && !arg.restriction.is_a?(Nop) && arg.restriction.resolve < ::Enum %}
-                    "String",
-                    {% if !arg.default_value.is_a?(Nop) %}
-                      {{arg.default_value}}.to_s
-                    {% end %}
+                {{arg.name.stringify}} => PlaceOS::Driver::Settings.introspect({{arg.restriction.resolve}}).
+                  {% if arg.default_value.is_a?(Nop) %}
+                    merge({ title: {{arg.restriction.resolve.stringify}} }),
                   {% else %}
-                    {{arg.restriction.stringify}},
-                    {% if !arg.default_value.is_a?(Nop) %}
-                      {{arg.default_value}}
-                    {% end %}
+                    merge({ title: {{arg.restriction.resolve.stringify}}, default: {{arg.default_value}} }),
                   {% end %}
-                ],
               {% end %}
-            }{% if args.size == 0 %} of String => Array(String){% end %},
+            }{% if args.size == 0 %} of String => Array(String) {% end %},
           {% end %}
-        }.to_json
-        funcs
+        }{% if methods.size == 0 %} of Nil => Nil {% end %}).to_json
+
+        @@functions = funcs = ({
+          {% for method in methods %}
+            {% index = 0 %}
+            {% args = [] of Crystal::Macros::Arg %}
+            {% for arg in method.args %}
+              {% if !method.splat_index || index < method.splat_index %}
+                {% args << arg %}
+              {% end %}
+              {% index = index + 1 %}
+            {% end %}
+
+            {{method.name.stringify}} => {
+              {% for arg in args %}
+                {{arg.name.stringify}} => {
+                  {{arg.restriction.stringify}},
+                  {% unless arg.default_value.is_a?(Nop) %}
+                    {{arg.default_value}},
+                  {% end %}
+                },
+              {% end %}
+            }{% if args.size == 0 %} of String => Array(String) {% end %},
+          {% end %}
+        }{% if methods.size == 0 %} of Nil => Nil {% end %}).to_json
+
+        {iface, funcs}
       end
 
-      @@metadata : String?
-      def self.metadata : String
-        metadata = @@metadata
-        return metadata if metadata
-
+      class_getter metadata : String do
         implements = {{@type.ancestors.map(&.stringify.split("(")[0])}}.reject { |obj| IGNORE_KLASSES.includes?(obj) }
+        iface, funcs = self.functions
+
+        # TODO:: remove functions eventually (once fully deprecated in driver model)
         details = %({
-          "functions": #{self.functions},
+          "interface": #{iface},
+          "functions": #{funcs},
           "implements": #{implements.to_json},
           "requirements": {},
           "security": {}

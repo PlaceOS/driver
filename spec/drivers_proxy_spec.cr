@@ -91,6 +91,28 @@ module PlaceOS::Driver::Proxy
       req_out.id.should eq("mod-888")
       req_out.reply.should eq("reply_id")
 
+      # Execute a remote function with default values
+      result = system.all(:Display).function3(30)
+      result.is_a?(PlaceOS::Driver::Proxy::Drivers::Responses).should eq(true)
+
+      # Check the exec request
+      raw_data = Bytes.new(4096)
+      bytes_read = output.read(raw_data)
+      tokenizer = Tokenizer.new(Bytes[0x00, 0x03])
+      messages = tokenizer.extract(raw_data[0, bytes_read])
+
+      message = messages[0]
+      req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(message[2, message.bytesize - 4]))
+      req_out.payload.should eq %({"__exec__":"function3","function3":{"arg1":30,"arg2":200}})
+      req_out.id.should eq("mod-999")
+      req_out.reply.should eq("reply_id")
+
+      message = messages[1]
+      req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(message[2, message.bytesize - 4]))
+      req_out.payload.should eq %({"__exec__":"function3","function3":{"arg1":30,"arg2":200}})
+      req_out.id.should eq("mod-888")
+      req_out.reply.should eq("reply_id")
+
       storage.clear
     end
   end

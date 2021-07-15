@@ -2,6 +2,7 @@ abstract class PlaceOS::Driver
   BINDINGS = {} of Nil => Nil
 
   macro __build_apply_bindings__
+    # :nodoc:
     def __apply_bindings__
       return if @__edge_driver__
       {% for name, details in BINDINGS %}

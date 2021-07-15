@@ -103,11 +103,11 @@ class PlaceOS::Driver
     transport.http("PATCH", path, body, params, headers, secure, concurrent)
   end
 
-  protected def delete(path,
+  protected def delete(path, body : ::HTTP::Client::BodyType = nil,
                        params : Hash(String, String?) | URI::Params = URI::Params.new,
                        headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
                        secure = false, concurrent = false)
-    transport.http("DELETE", path, params: params, headers: headers, secure: secure, concurrent: concurrent)
+    transport.http("DELETE", path, body, params, headers, secure, concurrent)
   end
 
   # Implement transport
@@ -116,8 +116,7 @@ class PlaceOS::Driver
     def initialize(
       @queue : PlaceOS::Driver::Queue,
       uri_base : String,
-      @settings : ::PlaceOS::Driver::Settings,
-      &@before_request : HTTP::Request ->
+      @settings : ::PlaceOS::Driver::Settings
     )
       @terminated = false
       @tls = new_tls_context
@@ -125,14 +124,20 @@ class PlaceOS::Driver
       @http_client_mutex = Mutex.new
       @params_base = @uri_base.query_params
 
+      @keep_alive = 5.seconds
+      @max_requests = 20
+      @client_idle = Time.monotonic
+      @client_requests = 0
+
       context = __is_https? ? @tls : nil
       @client = new_http_client(@uri_base, context)
-      @client.before_request(&@before_request)
     end
 
     @params_base : URI::Params
     @tls : OpenSSL::SSL::Context::Client
     @client : ConnectProxy::HTTPClient
+    @client_idle : Time::Span
+    @keep_alive : Time::Span
 
     property :received
 
@@ -164,13 +169,17 @@ class PlaceOS::Driver
       context = __is_https? ? @tls : nil
       # NOTE:: modify in initializer if editing here
       @client = new_http_client(@uri_base, context)
-      @client.before_request(&@before_request)
+      @client_requests = 0
       @client
     end
 
     protected def with_shared_client
       @http_client_mutex.synchronize do
-        __new_http_client if @client.__place_socket_invalid?
+        now = Time.monotonic
+        idle_for = now - @client_idle
+        __new_http_client if @client.__place_socket_invalid? || idle_for >= @keep_alive || @client_requests >= @max_requests
+        @client_idle = now
+        @client_requests += 1
 
         begin
           yield @client
@@ -229,7 +238,6 @@ class PlaceOS::Driver
                    # Does this request require a TLS context?
                    context = __is_https? ? new_tls_context : nil
                    client = new_http_client(uri, context)
-                   client.before_request(&@before_request)
                    client.exec(method.to_s.upcase, uri.request_target, headers, body)
                  else
                    # Only a single request can occur at a time
@@ -239,12 +247,27 @@ class PlaceOS::Driver
 
       # assuming we're typically online, this check before assignment is more performant
       @queue.online = true unless @queue.online
+      if keep_alive = response.headers["Keep-Alive"]?
+        parse_keep_alive(keep_alive)
+      end
 
       # fallback in case the HTTP client lib doesn't decompress the response
       check_http_response_encoding response
     rescue error : IO::Error | ArgumentError
       @queue.online = false
       raise error
+    end
+
+    private def parse_keep_alive(keep_alive : String) : Nil
+      keep_alive.split(',').each do |value|
+        parts = value.strip.split('=')
+        case parts[0]
+        when "timeout"
+          @keep_alive = parts[1].to_i.seconds
+        when "max"
+          @max_requests = parts[1].to_i
+        end
+      end
     end
 
     def terminate : Nil

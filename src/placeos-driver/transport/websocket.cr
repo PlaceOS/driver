@@ -64,7 +64,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     end
 
     proxy = if proxy_config = @settings.get { setting?(NamedTuple(host: String, port: Int32, auth: NamedTuple(username: String, password: String)?), :proxy) }
-              if !proxy_config[:host].empty?
+              if proxy_config[:host].presence
                 ConnectProxy.new(**proxy_config)
               end
             elsif ConnectProxy.behind_proxy?
@@ -78,7 +78,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
             end
 
     # Configure websocket to auto pong
-    websocket = @websocket = ConnectProxy::WebSocket.new(@ip, @path, @port, @tls, headers, proxy)
+    websocket = @websocket = ConnectProxy::WebSocket.new(@ip, @path, @port, @tls, headers, proxy, ignore_env: true)
     websocket.on_ping { |message| websocket.pong(message) }
 
     # Enable queuing
