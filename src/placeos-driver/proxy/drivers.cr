@@ -57,10 +57,17 @@ class PlaceOS::Driver::Proxy::Drivers
 
     @computed : Array(JSON::Any)?
 
-    def get : Array(JSON::Any)
+    def get(raise_on_error : Bool = false) : Array(JSON::Any)
       computed = @computed
       return computed if computed
-      @computed = computed = @results.map &.get
+      @computed = computed = @results.compact_map do |result|
+        begin
+          result.get
+        rescue error
+          raise error if raise_on_error
+          nil
+        end
+      end
       computed
     end
   end
