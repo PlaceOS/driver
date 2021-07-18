@@ -44,32 +44,42 @@ abstract class PlaceOS::Driver
       Down
       Up
       Stop
+
+      def move : MoveablePosition?
+        case self
+        in .up?   then :up
+        in .down? then :down
+        in .stop? then nil
+        end
+      end
     end
 
     def tilt(direction : TiltDirection, index : Int32 | String = 0)
-      case direction
-      when TiltDirection::Up
-        move(MoveablePosition::Up, index)
-      when TiltDirection::Down
-        move(MoveablePosition::Down, index)
-      when TiltDirection::Stop
-        stop(index)
-      end
+      move_in_direction(direction, index)
     end
 
     enum PanDirection
       Left
       Right
       Stop
+
+      def move : MoveablePosition?
+        case self
+        in .left?  then :left
+        in .right? then :right
+        in .stop?  then nil
+        end
+      end
     end
 
     def pan(direction : PanDirection, index : Int32 | String = 0)
-      case direction
-      when PanDirection::Left
-        move(MoveablePosition::Left, index)
-      when PanDirection::Right
-        move(MoveablePosition::Right, index)
-      when PanDirection::Stop
+      move_in_direction(direction, index)
+    end
+
+    private def move_in_direction(direction : PanDirection | TiltDirection, index)
+      if position = direction.move
+        move(position, index)
+      else
         stop(index)
       end
     end
