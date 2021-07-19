@@ -292,7 +292,7 @@ class DriverSpecs
                 @io.flush
               end
             else
-              puts "ignoring command #{request.cmd} in driver-runner server"
+              puts "ignoring command #{request.cmd} in driver-runner server #{request.error}"
             end
           end
         rescue error
@@ -514,25 +514,18 @@ class DriverSpecs
     transmit(data)
   end
 
-  def expect_http_request(timeout = 500.milliseconds)
+  def expect_http_request(timeout = 1.seconds)
     mock_http = if @received_http.empty?
-                  temp_http = nil
                   channel = Channel(MockHTTP).new(1)
 
-                  # Timeout
-                  spawn(same_thread: true) do
-                    sleep timeout
-                    if temp_http.nil?
-                      puts "level=ERROR : timeout waiting for expected HTTP request".colorize(:red)
-                      channel.close
-                    end
-                  end
-
                   @expected_http << channel
-                  begin
-                    temp_http = channel.receive
-                  ensure
+                  select
+                  when temp_http = channel.receive
+                    temp_http
+                  when timeout(timeout)
+                    puts "level=ERROR : timeout waiting for expected HTTP request".colorize(:red)
                     @expected_http.delete(channel)
+                    raise "timeout waiting for expected HTTP request"
                   end
                 else
                   @received_http.shift
@@ -621,6 +614,7 @@ class DriverSpecs
           capacity: 4,
           features: ["many", "modules"],
           bookable: true,
+          zones:    ["zone-1234"],
         },
         ip:        "127.0.0.1",
         uri:       "http://127.0.0.1:#{HTTP_PORT}",
@@ -633,6 +627,8 @@ class DriverSpecs
         settings: new_settings,
       }.to_json,
     }.to_json
+
+    puts "... updating settings: #{new_settings.inspect.colorize(:green)}"
 
     @write_mutex.synchronize do
       @io.write_bytes json.bytesize
