@@ -1,37 +1,34 @@
 module PlaceOS::Driver::Utilities::WakeOnLAN
-  @@udp_server_v4 : UDPSocket?
-  @@udp_server_v6 : UDPSocket?
-
-  def self.upd_v4
-    udp = @@udp_server_v4
-    return udp if udp
-    @@udp_server_v4 = udp = UDPSocket.new Socket::Family::INET
-    udp.broadcast = true
-
-    # allow for a custom port to be defined
-    udp.bind "0.0.0.0", ENV["PLACEOS_WOL_PORT"]?.try(&.to_i) || 0
-    udp
+  def self.udp_v4 : UDPSocket?
+    udp_server_v4
   end
 
-  def self.upd_v6
-    udp = @@udp_server_v6
-    return udp if udp
-    @@udp_server_v6 = udp = UDPSocket.new Socket::Family::INET6
-    # iNet6 doesn't have broadcast - destination address should be FF02::1
-    # https://msdn.microsoft.com/en-us/library/ff361877.aspx
+  def self.udp_v6 : UDPSocket?
+    udp_server_v6
+  end
 
-    # allow for a custom port to be defined
-    udp.bind "::", ENV["PLACEOS_WOL_PORT"]?.try(&.to_i) || 0
-    udp
+  protected class_getter udp_server_v4 : UDPSocket? do
+    UDPSocket.new(Socket::Family::INET).tap do |udp|
+      udp.broadcast = true
+      # allow for a custom port to be defined
+      udp.bind "0.0.0.0", ENV["PLACEOS_WOL_PORT"]?.try(&.to_i) || 0
+    end
+  end
+
+  protected class_getter udp_server_v6 : UDPSocket? do
+    UDPSocket.new(Socket::Family::INET6).tap do |udp|
+      # iNet6 doesn't have broadcast - destination address should be FF02::1
+      # https://msdn.microsoft.com/en-us/library/ff361877.aspx
+      # Allow for a custom port to be defined
+      udp.bind "::", ENV["PLACEOS_WOL_PORT"]?.try(&.to_i) || 0
+    end
   end
 
   def self.wake_device(mac_address, subnet = "255.255.255.255", port = 9, address : Socket::Address? = nil)
     address = address || Socket::Address.parse("ip://#{subnet}:#{port}/")
     udp = case address.family
-          when Socket::Family::INET6
-            upd_v6
-          when Socket::Family::INET
-            upd_v4
+          when .inet6? then udp_v6
+          when .inet?  then udp_v4
           else
             raise "Unsupported subnet type: #{address.family} (#{address.family.value})"
           end
