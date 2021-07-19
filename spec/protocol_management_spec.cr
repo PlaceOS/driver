@@ -86,12 +86,9 @@ describe PlaceOS::Driver::Protocol::Management do
       puts "\n#{hash} -> #{key} -> #{value}\n"
 
       case action
-      in PlaceOS::Driver::Protocol::Management::RedisAction::SET
-        redis_set += 1
-      in PlaceOS::Driver::Protocol::Management::RedisAction::HSET
-        redis_hset += 1
-      in PlaceOS::Driver::Protocol::Management::RedisAction::CLEAR
-        redis_clear += 1
+      in .set?   then redis_set += 1
+      in .hset?  then redis_hset += 1
+      in .clear? then redis_clear += 1
       end
     }
 
