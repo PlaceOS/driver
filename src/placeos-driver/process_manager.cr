@@ -93,7 +93,7 @@ class PlaceOS::Driver::ProcessManager
       request.set_error(error)
     end
 
-    request.cmd = "result"
+    request.cmd = :result
     request
   end
 
@@ -109,7 +109,7 @@ class PlaceOS::Driver::ProcessManager
 
   def info(request : Protocol::Request) : Protocol::Request
     request.payload = loaded.keys.to_json
-    request.cmd = "result"
+    request.cmd = :result
     request
   end
 
@@ -118,7 +118,7 @@ class PlaceOS::Driver::ProcessManager
     input.close
 
     # Shutdown all the connections gracefully
-    req = Protocol::Request.new("", "stop")
+    req = Protocol::Request.new("", :stop)
     loaded.each_value do |driver|
       promise = Promise.new(Nil)
       driver.requests.send({promise, req})

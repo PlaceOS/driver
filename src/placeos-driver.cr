@@ -79,7 +79,7 @@ abstract class PlaceOS::Driver
     if @__edge_driver__
       @__storage__ = EdgeStorage.new(@__module_id__)
       @__storage__.clear
-      PlaceOS::Driver::Protocol.instance.request("interface/#{@__module_id__}", "set", metadata, raw: true)
+      PlaceOS::Driver::Protocol.instance.request("interface/#{@__module_id__}", :set, metadata, raw: true)
     else
       redis_store = RedisStorage.new(@__module_id__)
       @__storage__ = redis_store

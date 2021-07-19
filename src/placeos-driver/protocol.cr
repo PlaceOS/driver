@@ -16,6 +16,8 @@ STDOUT.sync = true
 class PlaceOS::Driver::Protocol
   Log = ::Log.for("driver.protocol")
 
+  getter callbacks
+
   # NOTE:: potentially move to using https://github.com/jeromegn/protobuf.cr
   # 10_000 decodes
   # Proto decoding   0.020000   0.040000   0.060000 (  0.020322)
@@ -34,16 +36,10 @@ class PlaceOS::Driver::Protocol
         0
       end
     end
-    @callbacks = {
-      start:     [] of Request -> Request?,
-      stop:      [] of Request -> Request?,
-      update:    [] of Request -> Request?,
-      terminate: [] of Request -> Request?,
-      exec:      [] of Request -> Request?,
-      debug:     [] of Request -> Request?,
-      ignore:    [] of Request -> Request?,
-      info:      [] of Request -> Request?,
-    }
+
+    @callbacks = Hash(Request::Command, Array(Request -> Request?)).new(Request::Command.values.size) do |h, k|
+      h[k] = [] of Request -> Request?
+    end
 
     # Tracks request IDs that expect responses
     @tracking = {} of UInt64 => Channel(Request)
@@ -67,7 +63,7 @@ class PlaceOS::Driver::Protocol
 
   def timeout(error, request)
     request.set_error(error)
-    request.cmd = "result"
+    request.cmd = :result
     @processor.send request
   end
 
@@ -81,16 +77,10 @@ class PlaceOS::Driver::Protocol
   end
 
   # For other classes
-  def self.instance : PlaceOS::Driver::Protocol
-    @@instance.not_nil!
-  end
+  class_getter! instance : PlaceOS::Driver::Protocol?
 
-  def self.instance? : PlaceOS::Driver::Protocol?
-    @@instance
-  end
-
-  def register(type, &block : Request -> Request?)
-    @callbacks[type] << block
+  def register(type : Request::Command, &block : Request -> Request?)
+    callbacks[type] << block
   end
 
   private def process!
@@ -103,47 +93,19 @@ class PlaceOS::Driver::Protocol
 
   def process(message : Request)
     Log.debug { "protocol processing: #{message.inspect}" }
-    callbacks = case message.cmd
-                when "start"
-                  # New instance of id == mod_id
-                  # payload == module details
-                  @callbacks[:start]
-                when "stop"
-                  # Stop instance of id
-                  @callbacks[:stop]
-                when "update"
-                  # New settings for id
-                  @callbacks[:update]
-                when "terminate"
-                  # Stop all the modules and exit the process
-                  @callbacks[:terminate]
-                when "exec"
-                  # Run payload on id
-                  @callbacks[:exec]
-                when "debug"
-                  # enable debugging on id
-                  @callbacks[:debug]
-                when "ignore"
-                  # stop debugging on id
-                  @callbacks[:ignore]
-                when "info"
-                  # return the number of running instances (for debugging purposes)
-                  @callbacks[:info]
-                when "result"
-                  # result of an executed request
-                  # seq == request id
-                  # payload or error response
-                  seq = message.seq
-                  @current_requests.delete(seq)
-                  @next_requests.delete(seq)
-                  channel = @tracking.delete(seq)
-                  channel.try &.send(message)
-                  return
-                else
-                  raise "unknown request cmd type"
-                end
+    if message.cmd.result?
+      # result of an executed request
+      # seq == request id
+      # payload or error response
+      seq = message.seq
+      @current_requests.delete(seq)
+      @next_requests.delete(seq)
+      channel = @tracking.delete(seq)
+      channel.try &.send(message)
+      return
+    end
 
-    callbacks.each do |callback|
+    callbacks[message.cmd].each do |callback|
       response = callback.call(message)
       if response
         Log.debug { "protocol queuing response: #{response.inspect}" }
@@ -159,8 +121,8 @@ class PlaceOS::Driver::Protocol
     @producer.send({message, nil})
   end
 
-  def request(id, command, payload = nil, raw = false, user_id = nil)
-    req = Request.new(id.to_s, command.to_s, user_id: user_id)
+  def request(id, command : Request::Command, payload = nil, raw = false, user_id = nil)
+    req = Request.new(id.to_s, command, user_id: user_id)
     if payload
       req.payload = raw ? payload.to_s : payload.to_json
     end
@@ -175,8 +137,8 @@ class PlaceOS::Driver::Protocol
     req
   end
 
-  def expect_response(id, reply_id, command, payload = nil, raw = false, user_id = nil) : Channel(Request)
-    req = Request.new(id, command.to_s, reply: reply_id, user_id: user_id)
+  def expect_response(id, reply_id, command : Request::Command, payload = nil, raw = false, user_id = nil) : Channel(Request)
+    req = Request.new(id, command, reply: reply_id, user_id: user_id)
     if payload
       req.payload = raw ? payload.to_s : payload.to_json
     end

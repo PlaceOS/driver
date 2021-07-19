@@ -58,7 +58,7 @@ describe PlaceOS::Driver::Proxy::Driver do
       req_out.id.should eq("mod-1234")
 
       # reply to the execute request
-      req_out.cmd = "result"
+      req_out.cmd = :result
       req_out.payload = "12345"
       json_resp = req_out.to_json
       input.write_bytes json_resp.bytesize
@@ -117,7 +117,7 @@ describe PlaceOS::Driver::Proxy::Driver do
       sleep 0.5
 
       # reply to the execute request
-      req_out.cmd = "result"
+      req_out.cmd = :result
       req_out.payload = "12345"
       json_resp = req_out.to_json
       input.write_bytes json_resp.bytesize

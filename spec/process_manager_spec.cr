@@ -34,7 +34,7 @@ describe PlaceOS::Driver::ProcessManager do
     # Check response was returned
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
-    req_out.cmd.should eq("result")
+    req_out.cmd.result?.should be_true
     req_out.payload.should eq("3")
 
     # execute an ENUM request (not a task response)
@@ -56,7 +56,7 @@ describe PlaceOS::Driver::ProcessManager do
     # Check response was returned
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
-    req_out.cmd.should eq("result")
+    req_out.cmd.result?.should be_true
     req_out.payload.should eq("\"DisplayPort\"")
 
     # Enable debugging
@@ -192,7 +192,7 @@ describe PlaceOS::Driver::ProcessManager do
     # Check response was returned
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
-    req_out.cmd.should eq("result")
+    req_out.cmd.result?.should be_true
     req_out.payload.should eq("you fool!")
     req_out.error.should eq("ArgumentError")
     (req_out.backtrace.not_nil!.size > 0).should eq(true)
@@ -221,7 +221,7 @@ describe PlaceOS::Driver::ProcessManager do
     # Check response was returned
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
-    req_out.cmd.should eq("result")
+    req_out.cmd.result?.should be_true
     req_out.payload.should eq("null")
     req_out.error.should eq(nil)
     req_out.backtrace.should eq(nil)
@@ -265,7 +265,7 @@ describe PlaceOS::Driver::ProcessManager do
     # Check response was returned
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
-    req_out.cmd.should eq("result")
+    req_out.cmd.result?.should be_true
     req_out.payload.should eq(%("hello steve"))
 
     # execute a task response
@@ -291,7 +291,7 @@ describe PlaceOS::Driver::ProcessManager do
     # Check response was returned
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
-    req_out.cmd.should eq("result")
+    req_out.cmd.result?.should be_true
     req_out.payload.should eq(%(11))
 
     # execute a task with a default value
@@ -316,7 +316,7 @@ describe PlaceOS::Driver::ProcessManager do
     # Check response was returned
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
-    req_out.cmd.should eq("result")
+    req_out.cmd.result?.should be_true
     req_out.payload.should eq(%(205))
 
     # execute an erroring task response
@@ -339,7 +339,7 @@ describe PlaceOS::Driver::ProcessManager do
     # Check response was returned
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
-    req_out.cmd.should eq("result")
+    req_out.cmd.result?.should be_true
     req_out.payload.should eq("oops")
     req_out.error.should eq("ArgumentError")
     (req_out.backtrace.not_nil!.size > 0).should eq(true)
@@ -364,7 +364,7 @@ describe PlaceOS::Driver::ProcessManager do
     # Check response was returned
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
-    req_out.cmd.should eq("result")
+    req_out.cmd.result?.should be_true
     req_out.payload.should eq("nooooo")
     req_out.error.should eq("ArgumentError")
     (req_out.backtrace.not_nil!.size > 0).should eq(true)

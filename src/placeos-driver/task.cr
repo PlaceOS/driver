@@ -22,7 +22,7 @@ class PlaceOS::Driver::Task
     # Was the process retried?
     @complete = Channel(Bool).new(1)
 
-    @state = @wait ? :unknown : :success
+    @state = @wait ? State::Unknown : State::Success
     @payload = DEFAULT_RESULT
     @backtrace = DEFAULT_BACKTR
     @error_class = nil
@@ -31,7 +31,16 @@ class PlaceOS::Driver::Task
   @timer : Tasker::Task?
   @processing : Proc(Bytes, Task, Nil)?
   @error_class : String?
-  getter last_executed, state, payload, backtrace, error_class
+
+  enum State
+    Success
+    Abort
+    Exception
+    Unknown
+  end
+
+  getter state : State
+  getter last_executed, payload, backtrace, error_class
   getter name, delay, wait
   property processing, retries, priority, clear_queue
   property apparent_priority : Int32 = 0

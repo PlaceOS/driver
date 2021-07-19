@@ -98,7 +98,7 @@ class PlaceOS::Driver::Proxy::Driver
       @system.logger.debug { "executing request on #{@module_name}_#{@index}: #{request} as #{user_id || "internal"}" }
 
       # Parse the execute response
-      channel = PlaceOS::Driver::Protocol.instance.expect_response(@module_id, @reply_id, "exec", request, raw: true, user_id: user_id)
+      channel = PlaceOS::Driver::Protocol.instance.expect_response(@module_id, @reply_id, :exec, request, raw: true, user_id: user_id)
 
       # Grab the result if required
       lazy do

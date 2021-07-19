@@ -68,7 +68,7 @@ class PlaceOS::Driver::Protocol::Management
   end
 
   def terminate : Nil
-    @events.send(Request.new("t", "terminate"))
+    @events.send(Request.new("t", :terminate))
   end
 
   def start(module_id : String, payload : String) : Nil
@@ -87,17 +87,17 @@ class PlaceOS::Driver::Protocol::Management
     if update
       update(module_id, payload)
     else
-      @events.send(Request.new(module_id, "start", payload))
+      @events.send(Request.new(module_id, :start, payload))
     end
     promise.get
   end
 
   def update(module_id : String, payload : String) : Nil
-    @events.send(Request.new(module_id, "update", payload))
+    @events.send(Request.new(module_id, :update, payload))
   end
 
   def stop(module_id : String)
-    @events.send(Request.new(module_id, "stop"))
+    @events.send(Request.new(module_id, :stop))
   end
 
   def info
@@ -111,7 +111,7 @@ class PlaceOS::Driver::Protocol::Management
       seq
     end
 
-    @events.send(Request.new("", "info", seq: sequence))
+    @events.send(Request.new("", :info, seq: sequence))
     Array(String).from_json promise.get
   end
 
@@ -126,7 +126,7 @@ class PlaceOS::Driver::Protocol::Management
       seq
     end
 
-    @events.send(Request.new(module_id, "exec", payload, seq: sequence, user_id: user_id))
+    @events.send(Request.new(module_id, :exec, payload, seq: sequence, user_id: user_id))
     promise.get
   end
 
@@ -139,7 +139,7 @@ class PlaceOS::Driver::Protocol::Management
 
     return unless count == 1
 
-    @events.send(Request.new(module_id, "debug"))
+    @events.send(Request.new(module_id, :debug))
   end
 
   def ignore(module_id : String, &callback : DebugCallback) : Nil
@@ -158,7 +158,7 @@ class PlaceOS::Driver::Protocol::Management
 
     return unless signal
 
-    @events.send(Request.new(module_id, "ignore"))
+    @events.send(Request.new(module_id, :ignore))
   end
 
   # Remove all debug listeners on a module, returning the debug callback array
@@ -177,34 +177,24 @@ class PlaceOS::Driver::Protocol::Management
   private def process_events
     until terminated?
       begin
-        case request.cmd
-        when "start"
-          start(request)
-        when "stop"
-          stop(request)
-        when "exec"
-          exec(request.id, request.payload.not_nil!, request.seq.not_nil!)
-        when "result"
-          io = @io
-          next unless io
+        case (request = @events.receive).cmd
+        when .start?     then start(request)
+        when .stop?      then stop(request)
+        when .exec?      then exec(request.id, request.payload.not_nil!, request.seq.not_nil!)
+        when .update?    then update(request)
+        when .debug?     then debug(request.id)
+        when .exited?    then relaunch(request.id)
+        when .ignore?    then ignore(request.id)
+        when .info?      then running_modules(request.seq.not_nil!)
+        when .terminate? then shutdown
+        when .result?
+          next unless io = @io
           json = request.to_json
           io.write_bytes json.bytesize
           io.write json.to_slice
           io.flush
-        when "debug"
-          debug(request.id)
-        when "ignore"
-          ignore(request.id)
-        when "info"
-          running_modules(request.seq.not_nil!)
-        when "update"
-          update(request)
-        when "exited"
-          relaunch(request.id)
-        when "terminate"
-          shutdown
         else
-          raise "unexpected command: #{request.cmd}"
+          Log.error { "unexpected command #{request.cmd}" }
         end
       rescue error
         Log.error { {error: error.inspect_with_backtrace, driver_path: @driver_path} }
@@ -371,7 +361,7 @@ class PlaceOS::Driver::Protocol::Management
     status = $?
     last_exit_code = status.exit_code.to_s
     Log.warn { {message: "driver process exited with #{last_exit_code}", driver_path: @driver_path} } unless status.success?
-    @events.send(Request.new(last_exit_code, "exited"))
+    @events.send(Request.new(last_exit_code, :exited))
   end
 
   private def relaunch(last_exit_code : String) : Nil
@@ -437,11 +427,11 @@ class PlaceOS::Driver::Protocol::Management
   # ameba:disable Metrics/CyclomaticComplexity
   private def process(request)
     case request.cmd
-    when "start"
+    when .start?
       if starting = request_lock.synchronize { @starting.delete(request.id) }
         starting.resolve(nil)
       end
-    when "result"
+    when .result?
       seq = request.seq.not_nil!
       if promise = request_lock.synchronize { @requests.delete(seq) }
         # determine if the result was a success or an error
@@ -455,7 +445,7 @@ class PlaceOS::Driver::Protocol::Management
       else
         Log.warn { "sequence number #{request.seq} not found for result from #{request.id}" }
       end
-    when "debug"
+    when .debug?
       # pass the unparsed message down the pipe
       payload = request.payload.not_nil!
       watchers = debug_lock.synchronize { @debugging[request.id].dup }
@@ -464,40 +454,40 @@ class PlaceOS::Driver::Protocol::Management
       rescue error
         Log.warn(exception: error) { "error forwarding debug payload #{request.inspect}" }
       end
-    when "exec"
+    when .exec?
       # need to route this internally to the correct module
       on_exec.call(request, ->(response : Request) {
         # The event queue is for sending data to the driver
-        response.cmd = "result"
+        response.cmd = :result
         @events.send(response)
         nil
       })
-    when "sys"
+    when .sys?
       # the response payload should return the requested systems database model
       on_system_model.call(request, ->(response : Request) {
-        response.cmd = "result"
+        response.cmd = :result
         @events.send(response)
         nil
       })
-    when "setting"
+    when .setting?
       mod_id = request.id
       setting_name, setting_value = Tuple(String, YAML::Any).from_yaml(request.payload.not_nil!)
       settings_update_lock.synchronize { on_setting.call(mod_id, setting_name, setting_value) }
-    when "hset"
+    when .hset?
       # Redis proxy driver state (hash)
       hash_id = request.id
       key, value = request.payload.not_nil!.split("\x03", 2)
       on_redis.call(RedisAction::HSET, hash_id, key, value.empty? ? "null" : value)
-    when "set"
+    when .set?
       # Redis proxy key / value
       key = request.id
       value = request.payload.not_nil!
       on_redis.call(RedisAction::SET, key, value, nil)
-    when "clear"
+    when .clear?
       hash_id = request.id
       on_redis.call(RedisAction::CLEAR, hash_id, "clear", nil)
     else
-      Log.warn { "received unknown request #{request.cmd} - #{request.inspect}" }
+      Log.warn { "unexpected command in process events #{request.cmd}" }
     end
   rescue error
     Log.warn(exception: error) { "error processing driver request #{request.inspect}" }
