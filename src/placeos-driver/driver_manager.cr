@@ -140,45 +140,35 @@ class PlaceOS::Driver::DriverManager
     end
   end
 
+  private def run_execute(request)
+    case result = execute(request.payload.not_nil!)
+    when Task
+      outcome = result.get(:response_required)
+      request.payload = outcome.payload
+      case outcome.state
+      in .exception?
+        request.error = outcome.error_class
+        request.backtrace = outcome.backtrace
+      in .unknown?
+        logger.fatal { "unexpected result: #{outcome.state} - #{outcome.payload}, #{outcome.error_class}, #{outcome.backtrace.join("\n")}" }
+      in .abort? then request.error = "Abort"
+      in .success?
+      end
+    else
+      request.payload = result
+    end
+  rescue error
+    logger.error(exception: error) { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})" }
+    request.set_error(error)
+  end
+
   private def process(request)
     case request.cmd
-    when "exec"
-      exec_request = request.payload.not_nil!
-
-      begin
-        result = execute exec_request
-
-        case result
-        when Task
-          outcome = result.get(:response_required)
-          request.payload = outcome.payload
-
-          case outcome.state
-          when :success
-          when :abort
-            request.error = "Abort"
-          when :exception
-            request.payload = outcome.payload
-            request.error = outcome.error_class
-            request.backtrace = outcome.backtrace
-          when :unknown
-            logger.fatal { "unexpected result: #{outcome.state} - #{outcome.payload}, #{outcome.error_class}, #{outcome.backtrace.join("\n")}" }
-          else
-            logger.fatal { "unexpected result: #{outcome.state}" }
-          end
-        else
-          request.payload = result
-        end
-      rescue error
-        logger.error(exception: error) { "executing #{exec_request} on #{DriverManager.driver_class} (#{request.id})" }
-        request.set_error(error)
-      end
-    when "update"
-      update(request.driver_model.not_nil!)
-    when "stop"
-      terminate
+    when .exec?   then run_execute(request)
+    when .update? then update(request.driver_model.not_nil!)
+    when .stop?   then terminate
     else
-      raise "unexpected request"
+      raise "unexpected request: #{request.cmd}"
     end
   rescue error
     logger.fatal(exception: error) { "issue processing requests on #{DriverManager.driver_class} (#{request.id})" }

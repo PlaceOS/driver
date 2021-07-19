@@ -1,21 +1,13 @@
 abstract class PlaceOS::Driver
   module Utilities
     class Discovery
-      @@settings = {} of Symbol => String | Int32 | Bool
-      @@requirements = {} of String => Array(String)
+      class_getter settings = {} of Symbol => String | Int32 | Bool
+      class_getter requirements = {} of String => Array(String)
 
-      def self.settings
-        @@settings
-      end
-
-      def self.requirements
-        @@requirements
-      end
-
-      def self.defaults : String
+      class_getter defaults : String do
         json_schema = PlaceOS::Driver::Settings.get { generate_json_schema }
-        @@settings[:default_settings] ||= "{}"
-        %(#{@@settings.to_json.rchop},"json_schema":#{json_schema}})
+        settings[:default_settings] ||= "{}"
+        %(#{settings.to_json.rchop},"json_schema":#{json_schema}})
       end
     end
   end

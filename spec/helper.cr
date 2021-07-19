@@ -51,7 +51,7 @@ class Helper
     # Check start responded
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq(driver_id)
-    req_out.cmd.should eq("start")
+    req_out.cmd.start?.should be_true
 
     {process, input, output, logs, driver_id}
   end

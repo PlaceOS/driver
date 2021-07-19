@@ -287,14 +287,13 @@ class DriverSpecs
               exec_payload = request.payload.not_nil!
               mod = @mock_drivers[module_id]
 
-              # return the result
+              # Return the result
               begin
-                result = mod.__executor(exec_payload).execute(mod)
-                request.payload = result
+                request.payload = mod.__executor(exec_payload).execute(mod)
+                request.cmd = :result
               rescue error
                 request.set_error(error)
               end
-              request.cmd = "result"
               json = request.to_json
 
               # Send the result

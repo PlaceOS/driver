@@ -35,7 +35,7 @@ class PlaceOS::Driver::Proxy::System
 
   getter config : DriverModel::ControlSystem do
     # Request the remote systems model
-    response = PlaceOS::Driver::Protocol.instance.expect_response(@system_id, @reply_id, "sys").receive
+    response = PlaceOS::Driver::Protocol.instance.expect_response(@system_id, @reply_id, :sys).receive
     raise response.build_error if response.error
     DriverModel::ControlSystem.from_json response.payload.not_nil!
   end
