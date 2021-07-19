@@ -171,7 +171,7 @@ module PlaceOS::Driver::Interface::Sensor
     include JSON::Serializable::Unmapped
 
     def initialize(
-      @type, @value, @unix_ms, @mac, @id,
+      @type, @value, @last_seen, @mac, @id,
       @name, @raw, @loc, @status = Status::Normal
     )
     end
