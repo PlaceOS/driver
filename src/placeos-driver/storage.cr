@@ -42,7 +42,7 @@ abstract class PlaceOS::Driver::Storage
     delete(key) { nil }
   end
 
-  abstract def to_h
+  abstract def to_h : Hash(String, String)
 
   abstract def keys
 
@@ -54,12 +54,7 @@ abstract class PlaceOS::Driver::Storage
 
   abstract def clear
 
-  # To conform to the `Enumerable` interface.
-  def each(&block : {String, String} -> _)
-    each.each do |k, v|
-      yield({k, v})
-    end
-  end
+  delegate each, to: to_h
 end
 
 # Fix for a Hash dup issues on crystal 0.36.0

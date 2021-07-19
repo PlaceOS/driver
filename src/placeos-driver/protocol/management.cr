@@ -175,10 +175,7 @@ class PlaceOS::Driver::Protocol::Management
 
   # ameba:disable Metrics/CyclomaticComplexity
   private def process_events
-    loop do
-      return if terminated?
-      request = @events.receive
-
+    until terminated?
       begin
         case request.cmd
         when "start"

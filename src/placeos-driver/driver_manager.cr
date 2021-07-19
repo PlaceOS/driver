@@ -130,10 +130,7 @@ class PlaceOS::Driver::DriverManager
   end
 
   private def process_requests!
-    loop do
-      req_data = @requests.receive?
-      break unless req_data
-
+    while req_data = @requests.receive?
       promise, request = req_data
       spawn(same_thread: true, name: request.user_id) do
         Log.context.set user_id: (request.user_id || "internal"), request_id: request.id
