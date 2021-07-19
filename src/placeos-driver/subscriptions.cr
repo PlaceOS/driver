@@ -140,16 +140,12 @@ class PlaceOS::Driver
             # disconnect might have been a network partition and an update may
             # have occurred during this time gap
 
-            loop do
-              if details = subscription_channel.receive?
-                break if details.nil?
-
-                sub, chan = details
-                if sub
-                  redis.subscribe [chan]
-                else
-                  redis.unsubscribe [chan]
-                end
+            while details = subscription_channel.receive?
+              sub, chan = details
+              if sub
+                redis.subscribe [chan]
+              else
+                redis.unsubscribe [chan]
               end
             end
           }

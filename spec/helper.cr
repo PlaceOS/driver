@@ -63,9 +63,7 @@ class Helper
       client = server.accept?.not_nil!
       server.close
 
-      loop do
-        message = client.gets
-        break unless message
+      while message = client.gets
         client.write message.to_slice
       end
     end

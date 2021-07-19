@@ -94,10 +94,7 @@ class PlaceOS::Driver::Protocol
   end
 
   private def process!
-    loop do
-      message = @processor.receive?
-      break unless message
-
+    while message = @processor.receive?
       # Requests should run in async so they don't block the processing loop
       spawn(same_thread: true) { process(message.not_nil!) }
     end
@@ -214,11 +211,8 @@ class PlaceOS::Driver::Protocol
     end
 
     # Process outgoing requests
-    loop do
-      begin
-        req_data = @producer.receive?
-        break unless req_data
-
+    begin
+      while req_data = @producer.receive?
         request, channel = req_data
 
         # Expects a response
@@ -241,10 +235,10 @@ class PlaceOS::Driver::Protocol
           msg << DELIMITER
         })
         @io.flush
-      rescue e
-        Log.fatal { "Fatal error #{e.inspect_with_backtrace}" }
-        exit(2)
       end
+    rescue e
+      Log.fatal { "Fatal error #{e.inspect_with_backtrace}" }
+      exit(2)
     end
   end
 
@@ -256,10 +250,7 @@ class PlaceOS::Driver::Protocol
     @io.write_utf8("r".to_slice)
     @io.flush
 
-    while !@io.closed?
-      bytes_read = @io.read(raw_data)
-      break if bytes_read == 0 # IO was closed
-
+    until @io.closed? || (bytes_read = @io.read(raw_data)).nil? || bytes_read.zero?
       Log.debug { "protocol received #{bytes_read}" }
 
       @tokenizer.extract(raw_data[0, bytes_read]).each do |message|

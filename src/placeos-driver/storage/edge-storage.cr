@@ -3,7 +3,11 @@ require "../protocol"
 
 class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
   private getter hash : Hash(String, String) = {} of String => String
-  delegate fetch, each, keys, values, size, to_h, to: hash
+  delegate fetch, keys, values, size, to: hash
+
+  def to_h : Hash(String, String)
+    hash.dup
+  end
 
   # This is the same as setting a value as this is often used when
   # a hash value is updated and we want to notify of this change.
