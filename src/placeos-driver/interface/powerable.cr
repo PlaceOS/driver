@@ -14,13 +14,11 @@ abstract class PlaceOS::Driver
       FullOff
     end
 
-    # override this to implement FullOff if it is available for the device
+    # override this to implement `PowerState::FullOff` if it is available for the device
     def power_state(state : PowerState)
-      case state
-      when PowerState::On
-        power true
-      when PowerState::Off, PowerState::FullOff
-        power false
+      power case state
+      in .on?              then true
+      in .off?, .full_off? then false
       end
     end
   end
