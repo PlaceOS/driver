@@ -269,11 +269,11 @@ class DriverSpecs
           request = PlaceOS::Driver::Protocol::Request.from_json(string)
           spawn(same_thread: true) do
             case request.cmd
-            when "result"
+            when .result?
               seq = request.seq
               responder = @requests.delete(seq)
               responder.send(request) if responder
-            when "debug"
+            when .debug?
               debug = JSON.parse(request.payload.not_nil!)
               severity = debug[0].as_i
               # Warnings and above will already be written to STDOUT
@@ -282,7 +282,7 @@ class DriverSpecs
                 level = Log::Severity.from_value(severity).to_s.upcase
                 puts "level=#{level} message=#{text}"
               end
-            when "exec"
+            when .exec?
               module_id = request.id
               exec_payload = request.payload.not_nil!
               mod = @mock_drivers[module_id]
