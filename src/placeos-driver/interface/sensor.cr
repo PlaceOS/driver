@@ -134,7 +134,7 @@ module PlaceOS::Driver::Interface::Sensor
   # mac_address can be used to grab data from a single device (basic grouping)
   abstract def sensors(type : String? = nil, mac : String? = nil, zone_id : String? = nil) : Array(Detail)
 
-  abstract class Location
+  abstract struct Location
     include JSON::Serializable
 
     use_json_discriminator "type", {
@@ -143,7 +143,7 @@ module PlaceOS::Driver::Interface::Sensor
     }
   end
 
-  class GeoLocation < Location
+  struct GeoLocation < Location
     getter type : String = "geo"
 
     def initialize(@lat, @lon)
@@ -157,7 +157,7 @@ module PlaceOS::Driver::Interface::Sensor
     end
   end
 
-  class MapLocation < Location
+  struct MapLocation < Location
     getter type : String = "map"
 
     def initialize(@x, @y)
