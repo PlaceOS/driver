@@ -12,7 +12,7 @@ describe PlaceOS::Driver::Queue do
     result = t.get
     queue.terminate
 
-    result.state.should eq :success
+    result.state.success?.should be_true
     result.payload.should eq "1234"
     result.backtrace.should eq([] of String)
     result.error_class.should eq nil
@@ -27,7 +27,7 @@ describe PlaceOS::Driver::Queue do
     result = t.get :response_required
     queue.terminate
 
-    result.state.should eq :success
+    result.state.success?.should be_true
     result.payload.should eq "1234"
     result.backtrace.should eq([] of String)
     result.error_class.should eq nil
@@ -44,7 +44,7 @@ describe PlaceOS::Driver::Queue do
     result = t.get
     queue.terminate
 
-    result.state.should eq :success
+    result.state.success?.should be_true
     result.payload.should eq "null"
     result.backtrace.should eq([] of String)
     result.error_class.should eq nil
@@ -61,7 +61,7 @@ describe PlaceOS::Driver::Queue do
     result = t.get
     queue.terminate
 
-    result.state.should eq :success
+    result.state.success?.should be_true
     result.payload.should eq "null"
     result.backtrace.should eq([] of String)
     result.error_class.should eq nil
@@ -80,13 +80,13 @@ describe PlaceOS::Driver::Queue do
     }.response_required!
 
     result = t2.get
-    result.state.should eq :success
+    result.state.success?.should be_true
     result.payload.should eq "100"
     result.backtrace.should eq([] of String)
     result.error_class.should eq nil
 
     result = t1.get
-    result.state.should eq :success
+    result.state.success?.should be_true
     result.payload.should eq "50"
     result.backtrace.should eq([] of String)
     result.error_class.should eq nil
@@ -110,7 +110,7 @@ describe PlaceOS::Driver::Queue do
 
     count.should eq(3)
 
-    result.state.should eq :success
+    result.state.success?.should be_true
     result.payload.should eq "1234"
     result.backtrace.should eq([] of String)
     result.error_class.should eq nil
@@ -131,7 +131,7 @@ describe PlaceOS::Driver::Queue do
 
     count.should eq(4)
 
-    result.state.should eq :abort
+    result.state.abort?.should be_true
     result.payload.should eq "retry limit reached (due to timeout)"
     result.backtrace.should eq([] of String)
     result.error_class.should eq nil
@@ -148,7 +148,7 @@ describe PlaceOS::Driver::Queue do
     result = t.get
     queue.terminate
 
-    result.state.should eq :exception
+    result.state.exception?.should be_true
     result.payload.should eq "error"
     (result.backtrace.size > 0).should eq(true)
   end
