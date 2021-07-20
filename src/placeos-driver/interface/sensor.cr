@@ -115,6 +115,8 @@ module PlaceOS::Driver::Interface::Sensor
     Second
     Litre
     PH
+    Siemens # Conductance
+    Tesla # MagneticFluxDensity
   end
 
   enum Status
@@ -166,7 +168,7 @@ module PlaceOS::Driver::Interface::Sensor
     property y : Float64
   end
 
-  abstract class Detail
+  class Detail
     include JSON::Serializable
     include JSON::Serializable::Unmapped
 
@@ -214,17 +216,6 @@ module PlaceOS::Driver::Interface::Sensor
     property s2_cell_id : String? = nil
     property building : String? = nil
     property level : String? = nil
-
-    def value
-      case unit
-      when .integer?
-        @value.to_i64
-      when .boolean?
-        !@value.zero?
-      else
-        @value
-      end
-    end
 
     def seen_at : Time
       Time.unix(last_seen)
