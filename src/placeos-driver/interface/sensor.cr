@@ -116,7 +116,7 @@ module PlaceOS::Driver::Interface::Sensor
     Litre
     PH
     Siemens # Conductance
-    Tesla # MagneticFluxDensity
+    Tesla   # MagneticFluxDensity
   end
 
   enum Status
