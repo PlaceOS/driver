@@ -115,6 +115,8 @@ module PlaceOS::Driver::Interface::Sensor
     Second
     Litre
     PH
+    Siemens # Conductance
+    Tesla   # MagneticFluxDensity
   end
 
   enum Status
@@ -132,7 +134,7 @@ module PlaceOS::Driver::Interface::Sensor
   # mac_address can be used to grab data from a single device (basic grouping)
   abstract def sensors(type : String? = nil, mac : String? = nil, zone_id : String? = nil) : Array(Detail)
 
-  abstract class Location
+  abstract struct Location
     include JSON::Serializable
 
     use_json_discriminator "type", {
@@ -141,7 +143,7 @@ module PlaceOS::Driver::Interface::Sensor
     }
   end
 
-  class GeoLocation < Location
+  struct GeoLocation < Location
     getter type : String = "geo"
 
     def initialize(@lat, @lon)
@@ -155,7 +157,7 @@ module PlaceOS::Driver::Interface::Sensor
     end
   end
 
-  class MapLocation < Location
+  struct MapLocation < Location
     getter type : String = "map"
 
     def initialize(@x, @y)
@@ -166,7 +168,7 @@ module PlaceOS::Driver::Interface::Sensor
     property y : Float64
   end
 
-  abstract class Detail
+  class Detail
     include JSON::Serializable
     include JSON::Serializable::Unmapped
 
@@ -214,17 +216,6 @@ module PlaceOS::Driver::Interface::Sensor
     property s2_cell_id : String? = nil
     property building : String? = nil
     property level : String? = nil
-
-    def value
-      case unit
-      when .integer?
-        @value.to_i64
-      when .boolean?
-        !@value.zero?
-      else
-        @value
-      end
-    end
 
     def seen_at : Time
       Time.unix(last_seen)
