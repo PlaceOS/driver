@@ -182,7 +182,7 @@ module PlaceOS::Driver::Proxy
 
       exec_args = args || named_args
 
-      client = Core::Client.new(which_core)
+      client = Core::Client.client(which_core, request_id)
       client.execute(module_id, function, exec_args)
     end
 
@@ -212,7 +212,7 @@ module PlaceOS::Driver::Proxy
     def debug
       module_id = module_id?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
-      client = Core::Client.new(which_core)
+      client = Core::Client.client(which_core, request_id)
       client.debug(module_id)
     end
 
