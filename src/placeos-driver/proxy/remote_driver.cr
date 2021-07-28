@@ -182,7 +182,7 @@ module PlaceOS::Driver::Proxy
 
       exec_args = args || named_args
 
-      result = Core::Client.client(which_core, request_id) do |client|
+      Core::Client.client(which_core, request_id) do |client|
         client.execute(module_id, function, exec_args)
       end
     end
