@@ -185,7 +185,6 @@ module PlaceOS::Driver::Proxy
       result = Core::Client.client(which_core, request_id) do |client|
         client.execute(module_id, function, exec_args)
       end
-      result
     end
 
     def [](status)
@@ -215,7 +214,9 @@ module PlaceOS::Driver::Proxy
       module_id = module_id?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
       Core::Client.client(which_core, request_id) do |client|
-        client.debug(module_id)
+        client.debug(module_id) do |message|
+          yield message
+        end
       end
     end
 
