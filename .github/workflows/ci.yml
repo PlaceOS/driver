@@ -27,7 +27,6 @@ jobs:
           crystal:
             - latest
             - 1.0.0
-            - 0.36.1
           include:
             - experimental: true
               os: ubuntu-latest
