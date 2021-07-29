@@ -185,7 +185,7 @@ module PlaceOS::Driver::Interface::Sensor
     def initialize(
       @type, @value, @last_seen, @mac, @id, @name, @raw = nil, @loc = nil,
       @status = Status::Normal, @limit_high = nil, @limit_low = nil,
-      @resolution = nil, @module_id = nil, @binding = nil,
+      @resolution = nil, @module_id = nil, @binding = nil
     )
     end
 
