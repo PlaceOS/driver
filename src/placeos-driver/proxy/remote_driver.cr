@@ -214,9 +214,7 @@ module PlaceOS::Driver::Proxy
       module_id = module_id?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
       Core::Client.client(which_core, request_id) do |client|
-        client.debug(module_id) do |message|
-          yield message
-        end
+        client.debug(module_id)
       end
     end
 
