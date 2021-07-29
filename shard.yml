@@ -9,6 +9,10 @@ dependencies:
   connect-proxy:
     github: spider-gazelle/connect-proxy
     version: ~> 1.2
+  
+  placeos-core:
+    github: placeos/core
+    version: ~> 3.11
 
   debug:
     github: Sija/debug.cr
