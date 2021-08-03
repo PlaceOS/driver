@@ -17,6 +17,7 @@ struct PlaceOS::Driver::DriverModel
     property capacity : Int32
     property map_id : String?
     property timezone : String?
+    property support_url : String?
     property zones : Array(String)
   end
 
