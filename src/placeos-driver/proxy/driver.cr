@@ -12,7 +12,7 @@ class PlaceOS::Driver::Proxy::Driver
     @status = PlaceOS::Driver::RedisStorage.new(@module_id)
   end
 
-  getter :module_name, :index
+  getter :module_name, :index, :module_id
 
   def [](status)
     value = @status[status]
