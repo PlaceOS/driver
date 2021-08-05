@@ -41,7 +41,7 @@ class PlaceOS::Driver::Proxy::System
   end
 
   delegate bookable, capacity, email, features, name, display_name, to: config
-  delegate code, type, map_id, timezone, zones, to: config
+  delegate code, type, map_id, timezone, support_url, zones, to: config
 
   def [](module_name)
     get_driver(*get_parts(module_name))
