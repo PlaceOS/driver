@@ -69,7 +69,8 @@ module PlaceOS::Driver::Proxy
       @sys_id : String,
       @module_name : String,
       @index : Int32,
-      @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE)
+      @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE),
+      @user_id : String? = nil
     )
       @error_details = {@sys_id, @module_name, @index}
     end
@@ -79,7 +80,8 @@ module PlaceOS::Driver::Proxy
       @sys_id : String,
       @module_name : String,
       @index : Int32 = 1,
-      @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE)
+      @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE),
+      @user_id : String? = nil
     )
       @error_details = {@sys_id, @module_name, 1}
     end
@@ -169,7 +171,8 @@ module PlaceOS::Driver::Proxy
       function : String,
       args = nil,
       named_args = nil,
-      request_id : String? = nil
+      request_id : String? = nil,
+      user_id : String? = @user_id
     ) : String
       metadata = metadata?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module", *@error_details) unless metadata
@@ -181,6 +184,7 @@ module PlaceOS::Driver::Proxy
 
       exec_args = args || named_args
 
+      # TODO:: this needs to support being provided an optional user_id
       Core::Client.client(which_core, request_id) do |client|
         client.execute(module_id, function, exec_args)
       end

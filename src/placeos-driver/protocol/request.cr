@@ -9,11 +9,17 @@ require "../driver_model"
 class PlaceOS::Driver::Protocol::Request
   include JSON::Serializable
 
-  def initialize(@id, @cmd, @payload = nil, @error = nil, @backtrace = nil, @seq = nil, @reply = nil)
+  def initialize(
+    @id, @cmd, @payload = nil, @error = nil, @backtrace = nil,
+    @seq = nil, @reply = nil, @user_id = nil
+  )
   end
 
   property id : String
   property cmd : String
+
+  # Security context
+  property user_id : String?
 
   # Used to track request and responses
   property seq : UInt64?
