@@ -136,14 +136,11 @@ class PlaceOS::Driver::DriverManager
 
       promise, request = req_data
       spawn(same_thread: true, name: request.user_id) do
+        Log.context.set user_id: (request.user_id || "internal"), request_id: request.id
         process request
         promise.resolve(nil)
       end
     end
-  end
-
-  protected def current_user_id
-    Fiber.current.name || "internal"
   end
 
   private def process(request)
@@ -176,7 +173,7 @@ class PlaceOS::Driver::DriverManager
           request.payload = result
         end
       rescue error
-        logger.error(exception: error) { "executing #{exec_request} on #{DriverManager.driver_class} (#{request.id}) [#{current_user_id}]" }
+        logger.error(exception: error) { "executing #{exec_request} on #{DriverManager.driver_class} (#{request.id})" }
         request.set_error(error)
       end
     when "update"
@@ -187,7 +184,7 @@ class PlaceOS::Driver::DriverManager
       raise "unexpected request"
     end
   rescue error
-    logger.fatal(exception: error) { "issue processing requests on #{DriverManager.driver_class} (#{request.id}) [#{current_user_id}]" }
+    logger.fatal(exception: error) { "issue processing requests on #{DriverManager.driver_class} (#{request.id})" }
     request.set_error(error)
   end
 
