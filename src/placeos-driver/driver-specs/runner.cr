@@ -279,11 +279,16 @@ class DriverSpecs
               module_id = request.id
               exec_payload = request.payload.not_nil!
               mod = @mock_drivers[module_id]
-              result = mod.__executor(exec_payload).execute(mod)
 
-              # return the result
-              request.payload = result
-              request.cmd = "result"
+              begin
+                result = mod.__executor(exec_payload).execute(mod)
+
+                # return the result
+                request.payload = result
+                request.cmd = "result"
+              rescue error
+                request.set_error(error)
+              end
               json = request.to_json
               # Send the result
               @write_mutex.synchronize do
