@@ -115,7 +115,7 @@ class PlaceOS::Driver::Protocol::Management
     Array(String).from_json promise.get
   end
 
-  def execute(module_id : String, payload : String?) : String
+  def execute(module_id : String, payload : String?, user_id : String? = nil) : String
     raise "module #{module_id} not running, terminated" if terminated?
     promise = Promise.new(String)
 
@@ -126,7 +126,7 @@ class PlaceOS::Driver::Protocol::Management
       seq
     end
 
-    @events.send(Request.new(module_id, "exec", payload, seq: sequence))
+    @events.send(Request.new(module_id, "exec", payload, seq: sequence, user_id: user_id))
     promise.get
   end
 

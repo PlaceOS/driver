@@ -162,8 +162,8 @@ class PlaceOS::Driver::Protocol
     @producer.send({message, nil})
   end
 
-  def request(id, command, payload = nil, raw = false)
-    req = Request.new(id.to_s, command.to_s)
+  def request(id, command, payload = nil, raw = false, user_id = nil)
+    req = Request.new(id.to_s, command.to_s, user_id: user_id)
     if payload
       req.payload = raw ? payload.to_s : payload.to_json
     end
@@ -178,8 +178,8 @@ class PlaceOS::Driver::Protocol
     req
   end
 
-  def expect_response(id, reply_id, command, payload = nil, raw = false) : Channel(Request)
-    req = Request.new(id, command.to_s, reply: reply_id)
+  def expect_response(id, reply_id, command, payload = nil, raw = false, user_id = nil) : Channel(Request)
+    req = Request.new(id, command.to_s, reply: reply_id, user_id: user_id)
     if payload
       req.payload = raw ? payload.to_s : payload.to_json
     end

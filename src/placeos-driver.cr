@@ -114,6 +114,10 @@ abstract class PlaceOS::Driver
     @__module_id__
   end
 
+  def invoked_by_user_id
+    Fiber.current.name
+  end
+
   # Status helpers #}
   def []=(key, value)
     key = key.to_s

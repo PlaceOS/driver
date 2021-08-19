@@ -135,7 +135,8 @@ class PlaceOS::Driver::DriverManager
       break unless req_data
 
       promise, request = req_data
-      spawn(same_thread: true) do
+      spawn(same_thread: true, name: request.user_id) do
+        Log.context.set user_id: (request.user_id || "internal"), request_id: request.id
         process request
         promise.resolve(nil)
       end
