@@ -183,10 +183,8 @@ module PlaceOS::Driver::Proxy
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
 
       exec_args = args || named_args
-
-      # TODO:: this needs to support being provided an optional user_id
       Core::Client.client(which_core, request_id) do |client|
-        client.execute(module_id, function, exec_args)
+        client.execute(module_id, function, exec_args, user_id: user_id)
       end
     end
 
