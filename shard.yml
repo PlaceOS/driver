@@ -1,6 +1,6 @@
 name: placeos-driver
-version: 5.4.14
-crystal: ">= 0.36.1"
+version: 5.4.15
+crystal: ">= 1.0.0"
 
 dependencies:
   action-controller:
@@ -10,9 +10,9 @@ dependencies:
     github: spider-gazelle/connect-proxy
     version: ~> 1.2
 
-  placeos-core:
-    github: placeos/core
-    version: ~> 3.11
+  placeos-core-client:
+    github: placeos/core-client
+    version: ~> 0.2
 
   debug:
     github: Sija/debug.cr

@@ -1,5 +1,6 @@
 require "hound-dog"
 require "json"
+require "placeos-core-client"
 require "uuid"
 
 require "../driver_model"
@@ -7,8 +8,6 @@ require "../storage"
 require "../subscriptions"
 require "./subscriptions"
 require "./system"
-
-require "placeos-core/client"
 
 # This is a helper class for integrating internal components that communicate
 # directly to core but are external to core, such as the API or Triggers
