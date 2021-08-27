@@ -1,3 +1,5 @@
+abstract class PlaceOS::Driver; end
+
 # Common Email interface
 module PlaceOS::Driver::Interface; end
 

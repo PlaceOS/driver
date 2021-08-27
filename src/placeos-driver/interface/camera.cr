@@ -2,6 +2,8 @@ require "./zoomable"
 require "./moveable"
 require "./stoppable"
 
+abstract class PlaceOS::Driver; end
+
 module PlaceOS::Driver::Interface; end
 
 module PlaceOS::Driver::Interface::Camera

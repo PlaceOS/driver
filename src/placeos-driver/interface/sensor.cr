@@ -1,6 +1,8 @@
 require "json"
 require "s2_cells"
 
+abstract class PlaceOS::Driver; end
+
 module PlaceOS::Driver::Interface::Sensor
   enum SensorType
     Temperature # https://en.wikipedia.org/wiki/Celsius
