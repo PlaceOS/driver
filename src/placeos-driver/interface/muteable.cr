@@ -1,3 +1,5 @@
+abstract class PlaceOS::Driver; end
+
 module PlaceOS::Driver::Interface; end
 
 # Splitting up the interfaces allows logic modules to check if the device

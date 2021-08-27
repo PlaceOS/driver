@@ -1,3 +1,5 @@
+abstract class PlaceOS::Driver; end
+
 # Common SMS Gateway Interface
 module PlaceOS::Driver::Interface; end
 

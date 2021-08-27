@@ -1,3 +1,5 @@
+abstract class PlaceOS::Driver; end
+
 module PlaceOS::Driver::Interface; end
 
 module PlaceOS::Driver::Interface::InputSelection(Input)
