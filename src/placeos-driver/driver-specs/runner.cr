@@ -111,7 +111,7 @@ class DriverSpecs
       spawn(same_thread: true) { spec.__process_responses__ }
       Fiber.yield
 
-      tcp_port, http_port = __get_ports__
+      tcp_port, http_port = spec.__get_ports__
 
       # request a module instance be created by the driver
       puts "... starting module"
