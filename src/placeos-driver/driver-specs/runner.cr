@@ -111,6 +111,8 @@ class DriverSpecs
       spawn(same_thread: true) { spec.__process_responses__ }
       Fiber.yield
 
+      tcp_port, http_port = __get_ports__
+
       # request a module instance be created by the driver
       puts "... starting module"
       json = {
@@ -127,10 +129,10 @@ class DriverSpecs
             zones:    ["zone-1234"],
           },
           ip:        "127.0.0.1",
-          uri:       "http://127.0.0.1:#{HTTP_PORT}",
+          uri:       "http://127.0.0.1:#{http_port}",
           udp:       false,
           tls:       false,
-          port:      SPEC_PORT,
+          port:      tcp_port,
           makebreak: makebreak,
           role:      1,
           # use defaults as defined in the driver
@@ -218,7 +220,8 @@ class DriverSpecs
 
     # setup structures for handling IO
     @new_connection = Channel(TCPSocket).new
-    @server = TCPServer.new("127.0.0.1", SPEC_PORT)
+    @server = TCPServer.new("127.0.0.1", 0)
+    @http_port = @http_server.bind_unused_port.port
 
     # Redis status
     @status = StatusHelper.new(DRIVER_ID)
@@ -232,11 +235,11 @@ class DriverSpecs
     @expected_transmissions = [] of Channel(Bytes)
   end
 
+  @http_port : Int32
   @comms : TCPSocket?
   getter :status
 
   def __start_http_server__
-    @http_server.bind_tcp "127.0.0.1", HTTP_PORT
     @http_server.listen
   end
 
@@ -244,6 +247,10 @@ class DriverSpecs
     while client = @server.accept?
       spawn(same_thread: true) { @new_connection.send(client.as(TCPSocket)) }
     end
+  end
+
+  def __get_ports__
+    {@server.local_address.port, @http_port}
   end
 
   def __process_responses__
