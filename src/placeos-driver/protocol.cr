@@ -16,7 +16,24 @@ STDOUT.sync = true
 class PlaceOS::Driver::Protocol
   Log = ::Log.for("driver.protocol")
 
-  getter callbacks
+  getter callbacks : Hash(Request::Command, Array(Request -> Request?)) do
+    Hash(Request::Command, Array(Request -> Request?)).new(Request::Command.values.size) do |h, k|
+      h[k] = [] of Request -> Request?
+    end
+  end
+
+  private getter tracking : Hash(UInt64, Channel(Request))
+
+  # Send outgoing data
+  private getter producer : Channel(Tuple(Request, Channel(Request)?)?)
+
+  # Processes the incomming data
+  private getter processor : Channel(Request)
+
+  # Timout handler
+  # Batched timeouts to reduce load. Any responses in these sets
+  private getter current_requests : Hash(UInt64, Request)
+  private getter next_requests : Hash(UInt64, Request)
 
   # NOTE:: potentially move to using https://github.com/jeromegn/protobuf.cr
   # 10_000 decodes
@@ -35,10 +52,6 @@ class PlaceOS::Driver::Protocol
       rescue
         0
       end
-    end
-
-    @callbacks = Hash(Request::Command, Array(Request -> Request?)).new(Request::Command.values.size) do |h, k|
-      h[k] = [] of Request -> Request?
     end
 
     # Tracks request IDs that expect responses
@@ -84,9 +97,13 @@ class PlaceOS::Driver::Protocol
   end
 
   private def process!
-    while message = @processor.receive?
+    loop do
+      message = @processor.receive?
+      break if message.nil?
       # Requests should run in async so they don't block the processing loop
-      spawn(same_thread: true) { process(message.not_nil!) }
+      spawn(same_thread: true) do
+        process(message)
+      end
     end
     Log.debug { "protocol processor terminated" }
   end

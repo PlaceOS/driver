@@ -55,6 +55,7 @@ describe PlaceOS::Driver::Protocol do
     while results.size < 2
       sleep 0.001
     end
+
     input.close
     results.should eq(["mod_1234", "mod_5678"])
   end
