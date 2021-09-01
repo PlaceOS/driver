@@ -6,52 +6,52 @@ on:
     - cron: "0 6 * * 1"
 jobs:
   style:
-      runs-on: ubuntu-latest
-      container: crystallang/crystal
-      steps:
-        - name: Check out repository code
-          uses: actions/checkout@v2
-        - name: Format
-          run: crystal tool format --check
-        - name: Lint
-          uses: crystal-ameba/github-action@v0.2.12
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+    container: crystallang/crystal
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Format
+        run: crystal tool format --check
+      - name: Lint
+        uses: crystal-ameba/github-action@v0.2.12
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   test:
-      name: "test - crystal: ${{ matrix.crystal }}, stable: ${{ matrix.stable }}"
-      container: crystallang/crystal:${{ matrix.crystal }}-alpine
-      runs-on: ubuntu-latest
-      strategy:
-        fail-fast: false
-        matrix:
-          stable: [true]
-          crystal:
-            - 1.0.0
-            - 1.1.1
-          include:
-            - stble: false
-              crystal: nightly
-      # Service containers to run with `container-job`
-      services:
-        # Label used to access the service container
-        redis:
-          # Docker Hub image
-          image: redis
-          # Set health checks to wait until redis has started
-          options: >-
-            --health-cmd "redis-cli ping"
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 5
-      continue-on-error: ${{ !matrix.stable }}
-      steps:
-        - name: Install LibSSH2
-          run: apk add --no-cache libssh2 libssh2-dev libssh2-static iputils
-        - uses: actions/checkout@v2
-        - name: Install dependencies
-          run: shards install --ignore-crystal-version
-        - name: Run tests
-          run: crystal spec -v --error-trace
-          env:
-            REDIS_URL: redis://redis:6379
+    name: "crystal: ${{ matrix.crystal }}, stable: ${{ matrix.stable }}"
+    container: crystallang/crystal:${{ matrix.crystal }}-alpine
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stable: [true]
+        crystal:
+          - 1.0.0
+          - 1.1.1
+        include:
+          - stble: false
+            crystal: nightly
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      redis:
+        # Docker Hub image
+        image: redis
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    continue-on-error: ${{ !matrix.stable }}
+    steps:
+      - name: Install LibSSH2
+        run: apk add --no-cache libssh2-static iputils
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: shards install --ignore-crystal-version
+      - name: Run tests
+        run: crystal spec -v --error-trace
+        env:
+          REDIS_URL: redis://redis:6379
