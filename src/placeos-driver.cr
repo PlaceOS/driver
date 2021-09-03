@@ -178,7 +178,7 @@ abstract class PlaceOS::Driver
   end
 
   def define_setting(name, value)
-    PlaceOS::Driver::Protocol.instance.request(@__module_id__, "setting", {name, value})
+    PlaceOS::Driver::Protocol.instance.request(@__module_id__, :setting, {name, value})
   end
 
   # Queuing
@@ -209,7 +209,7 @@ abstract class PlaceOS::Driver
 
   def publish(channel, message)
     if @__edge_driver__
-      PlaceOS::Driver::Protocol.instance.request(channel, "publish", message, raw: true)
+      PlaceOS::Driver::Protocol.instance.request(channel, :publish, message, raw: true)
     else
       RedisStorage.with_redis &.publish("placeos/#{channel}", message.to_s)
     end
