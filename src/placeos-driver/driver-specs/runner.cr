@@ -211,10 +211,12 @@ class DriverSpecs
     @expected_http = [] of Channel(MockHTTP)
     @http_server = HTTP::Server.new do |context|
       request = MockHTTP.new(context)
-      if @expected_http.empty?
-        @received_http << request
-      else
-        @expected_http.shift.send(request)
+      @event_mutex.synchronize do
+        if @expected_http.empty?
+          @received_http << request
+        else
+          @expected_http.shift.send(request)
+        end
       end
       request.wait_for_data
     end
@@ -543,20 +545,26 @@ class DriverSpecs
   end
 
   def expect_http_request(timeout = 1.seconds)
-    mock_http = if @received_http.empty?
-                  channel = Channel(MockHTTP).new(1)
+    channel = nil
 
-                  @expected_http << channel
+    @event_mutex.synchronize do
+      if @received_http.empty?
+        channel = Channel(MockHTTP).new(1)
+        @expected_http << channel
+      end
+    end
+
+    mock_http = if channel
                   select
                   when temp_http = channel.receive
                     temp_http
                   when timeout(timeout)
                     puts "level=ERROR : timeout waiting for expected HTTP request".colorize(:red)
-                    @expected_http.delete(channel)
+                    @event_mutex.synchronize { @expected_http.delete(channel) }
                     raise "timeout waiting for expected HTTP request"
                   end
                 else
-                  @received_http.shift
+                  @event_mutex.synchronize { @received_http.shift }
                 end
 
     puts "-> expected HTTP request received"
