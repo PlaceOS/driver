@@ -211,7 +211,7 @@ module PlaceOS::Driver::Proxy
     # Each message consists of an array `[0, "message"]`
     # Easiest way to parse is: `Tuple(Logger::Severity, String).from_json(%([0, "test"]))`
     #
-    def debug
+    def debug(request_id : String? = nil)
       module_id = module_id?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
       Core::Client.client(which_core, request_id) do |client|
