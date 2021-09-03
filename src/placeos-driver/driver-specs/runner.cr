@@ -448,7 +448,7 @@ class DriverSpecs
     @event_mutex.synchronize do
       if @transmissions.empty?
         channel = Channel(Bytes).new(1)
-        @expected_transmissions << channel
+        @expected_transmissions << channel.not_nil!
       end
     end
 
@@ -458,13 +458,13 @@ class DriverSpecs
       spawn(same_thread: true) do
         sleep timeout
         if sent.empty?
-          channel.close
+          channel.not_nil!.close
           puts "level=ERROR : timeout waiting for expected data\n-> expecting: #{tdata.inspect}".colorize(:red)
         end
       end
 
       begin
-        sent = channel.receive
+        sent = channel.not_nil!.receive
       ensure
         @event_mutex.synchronize { @expected_transmissions.delete(channel) }
       end
