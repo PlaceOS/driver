@@ -205,6 +205,7 @@ class DriverSpecs
     # setup structures for handling HTTP request emulation
     @mock_drivers = {} of String => MockDriver
     @write_mutex = Mutex.new
+    @event_mutex = Mutex.new
 
     @received_http = [] of MockHTTP
     @expected_http = [] of Channel(MockHTTP)
@@ -324,10 +325,12 @@ class DriverSpecs
       break if bytes_read == 0 # IO was closed
 
       data = raw_data[0, bytes_read]
-      if @expected_transmissions.empty?
-        @transmissions << data
-      else
-        @expected_transmissions.shift.send(data)
+      @event_mutex.synchronize do
+        if @expected_transmissions.empty?
+          @transmissions << data
+        else
+          @expected_transmissions.shift.send(data)
+        end
       end
     end
   rescue IO::Error
@@ -377,9 +380,6 @@ class DriverSpecs
   end
 
   def __exec__(function, args)
-    # We want to clear any previous transmissions
-    @transmissions.clear
-
     puts "-> spec calling: #{function.colorize(:green)} #{args.to_s.colorize(:green)}"
 
     # Build the request
@@ -401,6 +401,9 @@ class DriverSpecs
     @requests[@request_sequence] = response.channel
     @request_sequence += 1_u64
 
+    # We want to clear any previous transmissions
+    @event_mutex.synchronize { @transmissions.clear }
+
     # Send the request
     @write_mutex.synchronize do
       @io.write_bytes json.bytesize
@@ -412,9 +415,16 @@ class DriverSpecs
   end
 
   def expect_send(timeout = 500.milliseconds) : Bytes
-    if @transmissions.empty?
-      channel = Channel(Bytes).new(1)
-      @expected_transmissions << channel
+    channel = nil
+
+    @event_mutex.synchronize do
+      if @transmissions.empty?
+        channel = Channel(Bytes).new(1)
+        @expected_transmissions << channel
+      end
+    end
+
+    if channel
       begin
         select
         when received = channel.receive
@@ -424,19 +434,25 @@ class DriverSpecs
           raise "timeout waiting for data"
         end
       ensure
-        @expected_transmissions.delete(channel)
+        @event_mutex.synchronize { @expected_transmissions.delete(channel) }
       end
     else
-      @transmissions.shift
+      @event_mutex.synchronize { @transmissions.shift }
     end
   end
 
   def should_send(data, timeout = 500.milliseconds)
     sent = Bytes.new(0)
+    channel = nil
 
-    if @transmissions.empty?
-      channel = Channel(Bytes).new(1)
+    @event_mutex.synchronize do
+      if @transmissions.empty?
+        channel = Channel(Bytes).new(1)
+        @expected_transmissions << channel
+      end
+    end
 
+    if channel
       # Timeout
       tdata = data
       spawn(same_thread: true) do
@@ -447,14 +463,13 @@ class DriverSpecs
         end
       end
 
-      @expected_transmissions << channel
       begin
         sent = channel.receive
       ensure
-        @expected_transmissions.delete(channel)
+        @event_mutex.synchronize { @expected_transmissions.delete(channel) }
       end
     else
-      sent = @transmissions.shift
+      sent = @event_mutex.synchronize { @transmissions.shift }
     end
 
     # coerce expected send into a byte array
@@ -472,10 +487,12 @@ class DriverSpecs
     begin
       if sent.size > raw_data.size
         sent[0...raw_data.size].should eq(raw_data)
-        if @expected_transmissions.empty?
-          @transmissions << raw_data
-        else
-          @expected_transmissions.shift.send(sent[raw_data.size..-1])
+        @event_mutex.synchronize do
+          if @expected_transmissions.empty?
+            @transmissions << raw_data
+          else
+            @expected_transmissions.shift.send(sent[raw_data.size..-1])
+          end
         end
       else
         sent.should eq(raw_data)
