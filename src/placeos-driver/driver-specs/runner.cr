@@ -319,14 +319,14 @@ class DriverSpecs
   end
 
   def __process_transmissions__(connection : TCPSocket)
-    # 128kb buffer should be enough for anyone
-    raw_data = Bytes.new(1024 * 128)
+    # 1MB buffer should be enough for anyone
+    raw_data = Bytes.new(1024 * 1024)
 
     while !connection.closed?
       bytes_read = connection.read(raw_data)
       break if bytes_read == 0 # IO was closed
 
-      data = raw_data[0, bytes_read]
+      data = raw_data[0, bytes_read].dup
       @event_mutex.synchronize do
         if @expected_transmissions.empty?
           @transmissions << data
