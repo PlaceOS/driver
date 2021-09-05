@@ -206,7 +206,7 @@ abstract class PlaceOS::Driver::Transport
         Fiber.yield
       end
     else
-      spawn(same_thread: true) { process_message(message) }
+      spawn(same_thread: true) { process_message(data) }
       Fiber.yield
     end
   rescue error
