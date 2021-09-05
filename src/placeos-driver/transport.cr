@@ -201,13 +201,13 @@ abstract class PlaceOS::Driver::Transport
 
     if tokenize = @tokenizer
       messages = tokenize.extract(data)
-      if messages.size == 1
-        process_message(messages[0])
-      else
-        messages.each { |message| process_message(message) }
+      messages.each do |message|
+        spawn(same_thread: true) { process_message(message) }
+        Fiber.yield
       end
     else
-      process_message(data)
+      spawn(same_thread: true) { process_message(data) }
+      Fiber.yield
     end
   rescue error
     Log.error(exception: error) { "error processing data" }
