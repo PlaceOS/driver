@@ -47,87 +47,8 @@ abstract class PlaceOS::Driver
       Volume
       Acidity
 
-      # ameba:disable Metrics/CyclomaticComplexity
-      def unit
-        case self
-        in Temperature          then Unit::Celsius
-        in AmbientTemp          then Unit::Celsius
-        in DeviceTemp           then Unit::Celsius
-        in Humidity             then Unit::Percentage
-        in Illuminance          then Unit::Lux
-        in Pressure             then Unit::Pascal
-        in Trigger              then Unit::Boolean
-        in Presence             then Unit::Boolean
-        in Switch               then Unit::Boolean
-        in Level                then Unit::Percentage
-        in Flow                 then Unit::LitrePerSecond
-        in Counter              then Unit::Number
-        in PeopleCount          then Unit::Number
-        in QueueSize            then Unit::Number
-        in Acceleration         then Unit::MetrePerSecondSquared
-        in Speed                then Unit::MetrePerSecond
-        in Roll                 then Unit::Angle
-        in Pitch                then Unit::Angle
-        in Yaw                  then Unit::Angle
-        in Compass              then Unit::Angle
-        in Current              then Unit::Ampere
-        in Voltage              then Unit::Volt
-        in ElectricalResistance then Unit::Ohm
-        in Power                then Unit::Watt
-        in Radiation            then Unit::Sievert
-        in Distance             then Unit::Metre
-        in Area                 then Unit::SquareMeter
-        in SoundPressure        then Unit::Decibel
-        in Capacitance          then Unit::Farad
-        in Inductance           then Unit::Henry
-        in Conductance          then Unit::Siemens
-        in MagneticFlux         then Unit::Weber
-        in MagneticFluxDensity  then Unit::Tesla
-        in Energy               then Unit::WattSecond
-        in Force                then Unit::Newton
-        in Frequency            then Unit::Hertz
-        in Mass                 then Unit::Kilogram
-        in Momentum             then Unit::NewtonSecond
-        in TimePeriod           then Unit::Second
-        in Volume               then Unit::Litre
-        in Acidity              then Unit::PH
-        end
-      end
-    end
-
-    # Using SI units and SI derived units
-    enum Unit
-      Celsius               # Temperature - celsius over Kelvin to avoid some conversions
-      Percentage            # Humidity, Level
-      Lux                   # Illuminance
-      Pascal                # Pressure
-      Boolean               # Trigger, Switch
-      Number                # Counter
-      LitrePerSecond        # Liquid or gas flow rate
-      MetrePerSecondSquared # Acceleration
-      MetrePerSecond        # Speed
-      Angle                 # Compass, Accel, Gyro
-      Ampere                # Current
-      Volt                  # Voltage
-      Ohm                   # ElectricalResistance
-      Watt                  # Power
-      WattSecond
-      Sievert # Radiation
-      Metre   # Distance
-      SquareMeter
-      Decibel
-      Farad
-      Henry
-      Weber
-      Newton
-      Hertz
-      Kilogram
-      NewtonSecond
-      Second
-      Litre
-      PH
-      Siemens # Conductance
-      Tesla   # MagneticFluxDensity
+      # this could be UBA or AQI values, not sure if there is good way to convert between these
+      AirQuality
     end
 
     enum Status
@@ -192,8 +113,6 @@ abstract class PlaceOS::Driver
 
       property status : Status
       property type : SensorType
-
-      delegate unit, to: type
 
       property value : Float64
       property last_seen : Int64
