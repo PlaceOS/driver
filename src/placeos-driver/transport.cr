@@ -122,13 +122,13 @@ abstract class PlaceOS::Driver::Transport
           # this check is here so we can disable proxies as required
           if proxy_config[:host].presence
             proxy = ConnectProxy.new(**proxy_config)
-            client.before_request { client.set_proxy(proxy) }
+            client.before_request { client.set_proxy(proxy.not_nil!) }
           end
         elsif ConnectProxy.behind_proxy?
           # Apply environment defined proxy
           begin
             proxy = ConnectProxy.new(*ConnectProxy.parse_proxy_url)
-            client.before_request { client.set_proxy(proxy) }
+            client.before_request { client.set_proxy(proxy.not_nil!) }
           rescue error
             logger.warn(exception: error) { "failed to apply environment proxy URI" }
           end
