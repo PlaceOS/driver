@@ -218,6 +218,6 @@ class PlaceOS::Driver::DriverManager
   end
 
   private def check_proxy_usage(driver)
-    driver[:using_proxy] = @transport.using_proxy ? true : nil
+    driver[:using_proxy] = @transport.using_proxy? ? true : nil
   end
 end

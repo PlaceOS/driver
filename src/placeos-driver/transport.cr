@@ -11,7 +11,7 @@ abstract class PlaceOS::Driver::Transport
 
   property tokenizer : ::Tokenizer? = nil
   property pre_processor : ((Bytes) -> Bytes?) | Nil = nil
-  getter using_proxy : Bool? = nil
+  getter? using_proxy : Bool? = nil
 
   def pre_processor(&@pre_processor : (Bytes) -> Bytes?)
   end
