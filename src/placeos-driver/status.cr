@@ -4,11 +4,11 @@ class PlaceOS::Driver::Status
 
   def set_json(key, value)
     key = key.to_s
-    current_value = self[key]? || "null"
+    current_value = self[key]?
     new_value = value.is_a?(::Enum) ? value.to_s.to_json : value.to_json
     if current_value == new_value
       {current_value, false}
-    elsif current_value == "null"
+    elsif new_value == "null"
       self.delete key
       {new_value, true}
     else
