@@ -8,6 +8,9 @@ class PlaceOS::Driver::Status
     new_value = value.is_a?(::Enum) ? value.to_s.to_json : value.to_json
     if current_value == new_value
       {current_value, false}
+    elsif new_value == "null"
+      self.delete key
+      {new_value, true}
     else
       self[key] = new_value
       {new_value, true}

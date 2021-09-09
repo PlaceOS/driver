@@ -11,6 +11,7 @@ abstract class PlaceOS::Driver::Transport
 
   property tokenizer : ::Tokenizer? = nil
   property pre_processor : ((Bytes) -> Bytes?) | Nil = nil
+  getter proxy_in_use : String? = nil
 
   def pre_processor(&@pre_processor : (Bytes) -> Bytes?)
   end
@@ -121,17 +122,19 @@ abstract class PlaceOS::Driver::Transport
           # this check is here so we can disable proxies as required
           if proxy_config[:host].presence
             proxy = ConnectProxy.new(**proxy_config)
-            client.before_request { client.set_proxy(proxy) }
+            client.before_request { client.set_proxy(proxy.not_nil!) }
           end
         elsif ConnectProxy.behind_proxy?
           # Apply environment defined proxy
           begin
             proxy = ConnectProxy.new(*ConnectProxy.parse_proxy_url)
-            client.before_request { client.set_proxy(proxy) }
+            client.before_request { client.set_proxy(proxy.not_nil!) }
           rescue error
             logger.warn(exception: error) { "failed to apply environment proxy URI" }
           end
         end
+
+        @proxy_in_use = proxy.try &.proxy_host
 
         # Check if we need to override the Host header
         if host_header = @settings.get { setting?(String, :host_header) }

@@ -5,15 +5,19 @@ describe PlaceOS::Driver::RedisStorage do
     store = PlaceOS::Driver::RedisStorage.new("test-123")
     store.size.should eq(0)
     store[:test] = "null"
-    store.size.should eq(1)
-    store[:test].should eq("null")
-    store.delete(:test).should eq("null")
     store.size.should eq(0)
 
-    store[:test] = "null"
+    store[:test] = "true"
     store.size.should eq(1)
 
-    store[:test] = nil
+    store[:test].should eq("true")
+    store.delete(:test).should eq("true")
+    store.size.should eq(0)
+
+    store[:test] = "true"
+    store.size.should eq(1)
+
+    store[:test] = "null"
     store.size.should eq(0)
 
     store[:what]?.should eq(nil)
@@ -21,14 +25,14 @@ describe PlaceOS::Driver::RedisStorage do
 
   it "should return keys and values" do
     store = PlaceOS::Driver::RedisStorage.new("test-123")
-    store[:test] = "null"
+    store[:test] = "true"
     store[:other] = "1234"
     store.size.should eq(2)
 
     store.keys.should eq(["test", "other"])
-    store.values.should eq(["null", "1234"])
+    store.values.should eq(["true", "1234"])
 
-    vals = ["test", "null", "other", "1234"]
+    vals = ["test", "true", "other", "1234"]
     store.each do |key, value|
       keyc = vals.shift
       valuec = vals.shift
@@ -47,11 +51,11 @@ describe PlaceOS::Driver::RedisStorage do
 
   it "should generate a crystal hash" do
     store = PlaceOS::Driver::RedisStorage.new("test-123")
-    store[:test] = "null"
+    store[:test] = "true"
     store[:other] = "1234"
     store.size.should eq(2)
     store.to_h.should eq({
-      "test"  => "null",
+      "test"  => "true",
       "other" => "1234",
     })
     store.clear
