@@ -26,9 +26,9 @@ module PlaceOS
 
     def []=(status_name, json_value)
       status_name = status_name.to_s
-      adjusted_value = json_value.to_s.presence
+      adjusted_value = json_value.to_s.presence || "null"
 
-      if adjusted_value
+      if adjusted_value != "null"
         @@redis_lock.synchronize do
           redis.pipelined(hash_key, reconnect: true) do |pipeline|
             pipeline.hset(hash_key, status_name, adjusted_value)
