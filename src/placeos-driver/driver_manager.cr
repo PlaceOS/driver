@@ -119,6 +119,7 @@ class PlaceOS::Driver::DriverManager
   def update(driver_model)
     @settings.json = driver_model.settings
     driver = @driver
+    driver[:using_proxy] = nil
     driver.on_update if driver.responds_to?(:on_update)
   rescue error
     logger.error(exception: error) { "during settings update of #{@driver.class} (#{@module_id})" }
@@ -181,9 +182,11 @@ class PlaceOS::Driver::DriverManager
     driver = @driver
     begin
       if state
+        check_proxy_usage(driver)
         driver[:connected] = true
         driver.connected if driver.responds_to?(:connected)
       else
+        check_proxy_usage(driver)
         driver[:connected] = false
         driver.disconnected if driver.responds_to?(:disconnected)
       end
@@ -212,5 +215,9 @@ class PlaceOS::Driver::DriverManager
       logger.warn { "no received function provided for #{driver.class} (#{@module_id})" }
       task.try &.abort("no received function provided")
     end
+  end
+
+  private def check_proxy_usage(driver)
+    driver[:using_proxy] = @transport.using_proxy.nil? ? nil : @transport.using_proxy
   end
 end

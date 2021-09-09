@@ -76,6 +76,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
                 nil
               end
             end
+    @using_proxy = !!proxy
 
     # Configure websocket to auto pong
     websocket = @websocket = ConnectProxy::WebSocket.new(@ip, @path, @port, @tls, headers, proxy)

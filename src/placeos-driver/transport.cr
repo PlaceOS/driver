@@ -11,6 +11,7 @@ abstract class PlaceOS::Driver::Transport
 
   property tokenizer : ::Tokenizer? = nil
   property pre_processor : ((Bytes) -> Bytes?) | Nil = nil
+  getter using_proxy : Bool? = nil
 
   def pre_processor(&@pre_processor : (Bytes) -> Bytes?)
   end
@@ -132,6 +133,7 @@ abstract class PlaceOS::Driver::Transport
             logger.warn(exception: error) { "failed to apply environment proxy URI" }
           end
         end
+        @using_proxy = !!proxy
 
         # Check if we need to override the Host header
         if host_header = @settings.get { setting?(String, :host_header) }
