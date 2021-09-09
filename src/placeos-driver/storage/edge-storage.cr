@@ -24,9 +24,9 @@ class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
 
   def []=(status_name, json_value)
     status_name = status_name.to_s
-    adjusted_value = json_value.to_s.presence
+    adjusted_value = json_value.to_s.presence || "null"
 
-    if adjusted_value
+    if adjusted_value != "null"
       hash[status_name] = adjusted_value
       PlaceOS::Driver::Protocol.instance.request(hash_key, :hset, "#{status_name}\x03#{adjusted_value}", raw: true)
     else
