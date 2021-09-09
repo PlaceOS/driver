@@ -79,7 +79,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     @proxy_in_use = proxy.try &.proxy_host
 
     # Configure websocket to auto pong
-    websocket = @websocket = ConnectProxy::WebSocket.new(@ip, @path, @port, @tls, headers, proxy)
+    websocket = @websocket = ConnectProxy::WebSocket.new(@ip, @path, @port, @tls, headers, proxy, ignore_env: true)
     websocket.on_ping { |message| websocket.pong(message) }
 
     # Enable queuing
