@@ -110,7 +110,7 @@ abstract class PlaceOS::Driver::Transport
 
     {% if @type.name.stringify != "PlaceOS::Driver::TransportLogic" %}
       protected def new_http_client(uri, context)
-        client = ConnectProxy::HTTPClient.new(uri, context, ignore_env = true)
+        client = ConnectProxy::HTTPClient.new(uri, context, ignore_env: true)
 
         # Apply basic auth settings
         if auth = @settings.get { setting?(NamedTuple(username: String, password: String), :basic_auth) }
