@@ -72,6 +72,13 @@ class PlaceOS::Driver::Proxy::Driver
     __exec_request__(function_name, function, arguments, named_args)
   end
 
+  # provide a programatic way of calling a remote function similar to Ruby
+  def __send__(function_name : String | Symbol, *arguments, **named_args)
+    function_name = function_name.to_s
+    function = @metadata.interface[function_name]?
+    __exec_request__(function_name, function, arguments, named_args)
+  end
+
   private def __exec_request__(function_name, function, arguments, named_args)
     if function
       # Check if there is an argument mismatch }
