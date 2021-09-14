@@ -32,6 +32,7 @@ module PlaceOS
       Hset
       Set
       Clear
+      Publish
     end
 
     def initialize(
