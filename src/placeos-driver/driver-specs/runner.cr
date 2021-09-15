@@ -27,8 +27,6 @@ Debug.enabled = true
 # 3. An optional HTTP client
 # 4. Redis for state storage and subscriptions
 class DriverSpecs
-  SPEC_PORT = 0x45ae
-  HTTP_PORT = SPEC_PORT + 1
   DRIVER_ID = "spec_runner"
   SYSTEM_ID = "spec_runner_system"
 
@@ -105,7 +103,7 @@ class DriverSpecs
 
       # Start comms
       puts "... starting driver IO services"
-      spec = DriverSpecs.new(driver_name, io, makebreak)
+      spec = DriverSpecs.new(driver_name, io, makebreak, default_settings)
       spawn(same_thread: true) { spec.__start_server__ }
       spawn(same_thread: true) { spec.__start_http_server__ }
       spawn(same_thread: true) { spec.__process_responses__ }
@@ -168,6 +166,19 @@ class DriverSpecs
       puts "... starting spec"
       begin
         with spec yield
+        # Stopping the module
+        puts "... stopping the module"
+        json = {
+          id:  DRIVER_ID,
+          cmd: "stop",
+        }.to_json
+        io.write_bytes json.bytesize
+        io.write json.to_slice
+        io.flush
+
+        # give it a moment to shutdown
+        sleep 1
+
         puts "... spec passed".colorize(:green)
       rescue e
         puts "level=ERROR : unhandled exception in spec".colorize(:red)
@@ -201,7 +212,7 @@ class DriverSpecs
     end
   end
 
-  def initialize(@driver_name : String, @io : IO::Stapled, @makebreak : Bool)
+  def initialize(@driver_name : String, @io : IO::Stapled, @makebreak : Bool, @current_settings : JSON::Any)
     # setup structures for handling HTTP request emulation
     @mock_drivers = {} of String => MockDriver
     @write_mutex = Mutex.new
@@ -515,7 +526,7 @@ class DriverSpecs
     self
   end
 
-  def transmit(data, pause = 10.milliseconds)
+  def transmit(data, pause = 100.milliseconds)
     comms = @comms
     if comms && !comms.closed?
     else
@@ -536,6 +547,7 @@ class DriverSpecs
              data
            end
     comms.write data
+    comms.flush
     sleep pause
     self
   end
@@ -623,6 +635,7 @@ class DriverSpecs
     PlaceOS::Driver::RedisStorage.with_redis do |redis|
       redis.publish "lookup-change", SYSTEM_ID
     end
+    settings(@current_settings)
     sleep 5.milliseconds
     self
   end
@@ -639,6 +652,9 @@ class DriverSpecs
   end
 
   def settings(new_settings)
+    @current_settings = JSON.parse(new_settings.to_json)
+    tcp_port, http_port = __get_ports__
+
     json = {
       id:      DRIVER_ID,
       cmd:     "update",
@@ -653,14 +669,14 @@ class DriverSpecs
           zones:    ["zone-1234"],
         },
         ip:        "127.0.0.1",
-        uri:       "http://127.0.0.1:#{HTTP_PORT}",
+        uri:       "http://127.0.0.1:#{http_port}",
         udp:       false,
         tls:       false,
-        port:      SPEC_PORT,
+        port:      tcp_port,
         makebreak: @makebreak,
         role:      1,
         # use defaults as defined in the driver
-        settings: new_settings,
+        settings: @current_settings,
       }.to_json,
     }.to_json
 
