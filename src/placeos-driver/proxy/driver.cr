@@ -33,6 +33,10 @@ class PlaceOS::Driver::Proxy::Driver
     klass.from_json(value) if value
   end
 
+  def __metadata__
+    @metadata
+  end
+
   # This deliberately prevents compilation if called from driver code
   def []=(status, value)
     {{ raise "Remote drivers are read only. Please use the public interface to modify state" }}
@@ -73,7 +77,7 @@ class PlaceOS::Driver::Proxy::Driver
   end
 
   # provide a programatic way of calling a remote function similar to Ruby
-  def __send__(function_name : String | Symbol, *arguments, **named_args)
+  def __send__(function_name : String | Symbol, arguments : Array | Tuple = [] of String, named_args : NamedTuple | Hash = {} of String => String)
     function_name = function_name.to_s
     function = @metadata.interface[function_name]?
     __exec_request__(function_name, function, arguments, named_args)
@@ -141,7 +145,9 @@ class PlaceOS::Driver::Proxy::Driver
 
       # Apply the arguments
       index = 0
-      named_keys = named_args.keys.map &.to_s
+      named_args = named_args.to_h.transform_keys(&.to_s)
+      named_keys = named_args.keys
+
       function.each do |arg_name, details|
         value = if named_keys.includes?(arg_name)
                   named_args[arg_name]?

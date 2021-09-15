@@ -60,6 +60,10 @@ struct PlaceOS::Driver::DriverModel
     # JSON Schema derived from the settings used in the driver
     property settings : NamedTuple(type: String, properties: Hash(String, JSON::Any)?, required: Array(String)?)?
 
+    def arity(function_name : String | Symbol)
+      interface[function_name.to_s].size
+    end
+
     # Note:: the use of both these functions is temporary
     @[Deprecated("Use `#interface` instead")]
     def functions : Hash(String, Hash(String, Array(JSON::Any)))
