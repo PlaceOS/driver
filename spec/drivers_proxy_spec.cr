@@ -58,6 +58,8 @@ module PlaceOS::Driver::Proxy
       system.implementing(:function2).size.should eq(2)
       system.implementing(:Functoids).size.should eq(2)
 
+      system.implementing(:function2)[0].__metadata__.arity(:function2).should eq(1)
+
       # Check if enumeration works
       count = 0
       system.all(:Display).each { |driver| driver.module_name; count += 1 }
