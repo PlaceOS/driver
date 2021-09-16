@@ -27,7 +27,7 @@ abstract class PlaceOS::Driver
       change = @zoom_range.begin <= @zoom_range.end ? @zoom_speed : -@zoom_speed
       change = direction == ZoomDirection::In ? change : -change
 
-      @zoom_timer = scheduler.every(250.milliseconds, immediate: true) do
+      @zoom_timer = schedule.every(250.milliseconds, immediate: true) do
         zoom_to(@zoom + change, auto_focus: false)
       end
     end
