@@ -47,8 +47,8 @@ abstract class PlaceOS::Driver
 
       def move : MoveablePosition?
         case self
-        in .up?   then :up
-        in .down? then :down
+        in .up?   then MoveablePosition::Up
+        in .down? then MoveablePosition::Down
         in .stop? then nil
         end
       end
@@ -65,8 +65,8 @@ abstract class PlaceOS::Driver
 
       def move : MoveablePosition?
         case self
-        in .left?  then :left
-        in .right? then :right
+        in .left?  then MoveablePosition::Left
+        in .right? then MoveablePosition::Right
         in .stop?  then nil
         end
       end
