@@ -2,11 +2,11 @@ require "./helper"
 
 describe PlaceOS::Driver::TransportSSH do
   it "should work with a received function" do
-    pending!("spec is hanging in CI") if ENV["CI"]?
+    pending!("spec only available in CI") unless ENV["CI"]?
 
     queue = Helper.queue
     count = 0
-    transport = PlaceOS::Driver::TransportSSH.new(queue, "localhost", 2222, ::PlaceOS::Driver::Settings.new(%({
+    transport = PlaceOS::Driver::TransportSSH.new(queue, "sshtest", 2222, ::PlaceOS::Driver::Settings.new(%({
       "ssh": {
         "username": "root",
         "password": "somepassword"

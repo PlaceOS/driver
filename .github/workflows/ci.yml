@@ -44,6 +44,12 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      sshtest:
+        image: tutum/ubuntu:trusty
+        ports:
+          - 2222:22
+        env:
+          ROOT_PASS: somepassword
     continue-on-error: ${{ !matrix.stable }}
     steps:
       - name: Install LibSSH2
