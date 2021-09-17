@@ -21,8 +21,8 @@ describe PlaceOS::Driver::TransportSSH do
     transport.connect
     queue.online.should eq(true)
 
-    task = queue.add { transport.send("ls /\n") }.response_required!
-    task.get.payload.includes?("bin").should eq(true)
+    task = queue.add { transport.send("ps aux\n") }.response_required!
+    task.get.payload.includes?("USER").should eq(true)
 
     # Close the connection
     transport.terminate
