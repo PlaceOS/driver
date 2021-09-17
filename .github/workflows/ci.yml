@@ -34,6 +34,10 @@ jobs:
             crystal: nightly
     # Service containers to run with `container-job`
     services:
+      sshtest:
+        image: tutum/ubuntu:trusty
+        env:
+          ROOT_PASS: somepassword
       # Label used to access the service container
       redis:
         # Docker Hub image
