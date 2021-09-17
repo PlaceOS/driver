@@ -6,7 +6,7 @@ describe PlaceOS::Driver::TransportSSH do
 
     queue = Helper.queue
     count = 0
-    transport = PlaceOS::Driver::TransportSSH.new(queue, "sshtest", 2222, ::PlaceOS::Driver::Settings.new(%({
+    transport = PlaceOS::Driver::TransportSSH.new(queue, "sshtest", 22, ::PlaceOS::Driver::Settings.new(%({
       "ssh": {
         "username": "root",
         "password": "somepassword"
