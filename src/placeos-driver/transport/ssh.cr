@@ -21,6 +21,7 @@ class PlaceOS::Driver
     @session : SSH2::Session?
     @shell : SSH2::Channel?
     @keepalive : Tasker::Task?
+    @ssh_settings : Settings?
 
     property :received
 
@@ -68,7 +69,7 @@ class PlaceOS::Driver
 
         begin
           # Grab the authentication settings (using not_nil for schema generation)
-          settings = @settings.get { setting?(Settings, :ssh) }.not_nil!
+          @ssh_settings = settings = @settings.get { setting?(Settings, :ssh) }.not_nil!
 
           # Open a connection
           socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
@@ -108,9 +109,9 @@ class PlaceOS::Driver
                     logger.debug { "ignoring password authentication as no password provided" }
                   end
                 when "keyboard-interactive"
-                  if password = settings.password
+                  if settings.password
                     begin
-                      session.interactive_login(settings.username) { password.not_nil! }
+                      session.interactive_login(settings.username) { @ssh_settings.not_nil!.password.not_nil! }
                     rescue SSH2::SessionError
                       logger.warn { "password auth failed, incorrect password" }
                     end
@@ -129,7 +130,7 @@ class PlaceOS::Driver
                   session.login(settings.username, password)
                 rescue error : SSH2::SessionError
                   begin
-                    session.interactive_login(settings.username) { password.not_nil! }
+                    session.interactive_login(settings.username) { @ssh_settings.not_nil!.password.not_nil! }
                   rescue SSH2::SessionError
                     logger.warn { "password auth failed, either not supported or incorrect password" }
                   end
