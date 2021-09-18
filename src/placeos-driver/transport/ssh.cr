@@ -109,7 +109,7 @@ class PlaceOS::Driver
                     logger.debug { "ignoring password authentication as no password provided" }
                   end
                 when "keyboard-interactive"
-                  if password = settings.password
+                  if settings.password
                     begin
                       session.interactive_login(settings.username) { @ssh_settings.not_nil!.password.not_nil! }
                     rescue SSH2::SessionError
