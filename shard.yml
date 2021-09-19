@@ -1,5 +1,5 @@
 name: placeos-driver
-version: 5.5.14
+version: 5.6.0
 crystal: ">= 1.0.0"
 
 dependencies:
@@ -48,6 +48,9 @@ dependencies:
   dtls:
     github: spider-gazelle/crystal-dtls
     version: ~> 0.9
+
+  crunits:
+    github: spider-gazelle/crunits
 
 development_dependencies:
   ameba:
