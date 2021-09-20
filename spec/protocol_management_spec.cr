@@ -82,13 +82,15 @@ describe PlaceOS::Driver::Protocol::Management do
     redis_set = 0
     redis_hset = 0
     redis_clear = 0
+    redis_publish = 0
     manager.on_redis = ->(action : PlaceOS::Driver::Protocol::Management::RedisAction, hash : String, key : String, value : String?) {
       puts "\n#{hash} -> #{key} -> #{value}\n"
 
       case action
-      in .set?   then redis_set += 1
-      in .hset?  then redis_hset += 1
-      in .clear? then redis_clear += 1
+      in .set?     then redis_set += 1
+      in .hset?    then redis_hset += 1
+      in .clear?   then redis_clear += 1
+      in .publish? then redis_publish += 1
       end
     }
 
@@ -121,6 +123,9 @@ describe PlaceOS::Driver::Protocol::Management do
     redis_set.should eq 1
     # Connected status
     redis_hset.should eq 1
+
+    # Nothing should be published
+    redis_publish.should eq 0
 
     # Named params
     manager.execute("mod-management-test", %({
