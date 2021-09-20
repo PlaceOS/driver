@@ -26,7 +26,9 @@ class PlaceOS::Driver::Protocol::Management
     HSET
     SET
     CLEAR
+    PUBLISH
   end
+
   property on_redis : Proc(RedisAction, String, String, String?, Nil) = ->(action : RedisAction, hash_id : String, key_name : String, status_value : String?) {}
 
   getter? terminated = false
@@ -486,6 +488,10 @@ class PlaceOS::Driver::Protocol::Management
     when .clear?
       hash_id = request.id
       on_redis.call(RedisAction::CLEAR, hash_id, "clear", nil)
+    when .publish?
+      channel = request.id
+      value = request.payload.not_nil!
+      on_redis.call(RedisAction::PUBLISH, channel, value, nil)
     else
       Log.warn { "unexpected command in process events #{request.cmd}" }
     end
