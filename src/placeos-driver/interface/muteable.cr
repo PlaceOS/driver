@@ -13,7 +13,7 @@ abstract class PlaceOS::Driver
     end
   end
 
-  module PlaceOS::Driver::Interface::VideoMuteable
+  module Interface::VideoMuteable
     abstract def mute_video(state : Bool = true, index : Int32 | String = 0)
 
     def unmute_video(index : Int32 | String = 0)
@@ -21,9 +21,9 @@ abstract class PlaceOS::Driver
     end
   end
 
-  module PlaceOS::Driver::Interface::Muteable
-    include PlaceOS::Driver::Interface::AudioMuteable
-    include PlaceOS::Driver::Interface::VideoMuteable
+  module Interface::Muteable
+    include ::PlaceOS::Driver::Interface::AudioMuteable
+    include ::PlaceOS::Driver::Interface::VideoMuteable
 
     enum MuteLayer
       Audio
