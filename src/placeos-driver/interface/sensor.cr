@@ -1,5 +1,5 @@
 require "json"
-require "units"
+require "crunits"
 require "s2_cells"
 
 abstract class PlaceOS::Driver
