@@ -8,7 +8,7 @@ require "./constants"
 class PlaceOS::Driver
   class Subscriptions
     SYSTEM_ORDER_UPDATE = "lookup-change"
-    Log                 = ::Log.for("driver.subscriptions", ::Log::Severity::Info)
+    Log                 = ::Log.for(self, ::Log::Severity::Info)
 
     # Mutex for indirect subscriptions as it involves two hashes, a redis lookup
     # and the possibility of an index change. The redis lookup pauses the

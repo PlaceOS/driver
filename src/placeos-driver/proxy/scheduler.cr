@@ -29,7 +29,7 @@ class PlaceOS::Driver::Proxy::Scheduler
 
   getter logger : ::Log
 
-  def initialize(@logger = ::Log.for("driver.scheduler"))
+  def initialize(@logger = ::Log.for(PlaceOS::Driver::Proxy::Scheduler))
     @schedules = Set(TaskWrapper).new
     @terminated = false
     @callback = TaskWrapper::Callback.new do |wrapped, action|
