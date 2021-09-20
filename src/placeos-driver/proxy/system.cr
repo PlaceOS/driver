@@ -8,7 +8,7 @@ class PlaceOS::Driver::Proxy::System
   def initialize(
     model : DriverModel::ControlSystem,
     @reply_id : String,
-    @logger : ::Log = ::Log.for("driver.proxy.system"),
+    @logger : ::Log = ::Log.for(PlaceOS::Driver::Proxy::System),
     @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new
   )
     @config = model
@@ -20,7 +20,7 @@ class PlaceOS::Driver::Proxy::System
   def initialize(
     @system_id : String,
     @reply_id : String,
-    @logger : ::Log = ::Log.for("driver.proxy.system"),
+    @logger : ::Log = ::Log.for(PlaceOS::Driver::Proxy::System),
     @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new
   )
     @system = PlaceOS::Driver::RedisStorage.new(@system_id, "system")

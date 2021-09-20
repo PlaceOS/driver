@@ -3,7 +3,10 @@ require "log"
 require "tasker"
 
 class PlaceOS::Driver::Queue
-  def initialize(@logger : ::Log = ::Log.for("driver.queue"), &@connected_callback : Bool -> Nil)
+  def initialize(
+    @logger : ::Log = ::Log.for(PlaceOS::Driver::Queue),
+    &@connected_callback : Bool -> Nil
+  )
     @queue = Array(Task).new
 
     # Queue controls

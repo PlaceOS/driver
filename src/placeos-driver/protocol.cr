@@ -14,7 +14,7 @@ STDOUT.blocking = false
 STDOUT.sync = true
 
 class PlaceOS::Driver::Protocol
-  Log = ::Log.for("driver.protocol")
+  Log = ::Log.for(self)
 
   getter callbacks : Hash(Request::Command, Array(Request -> Request?)) do
     Hash(Request::Command, Array(Request -> Request?)).new(Request::Command.values.size) do |h, k|

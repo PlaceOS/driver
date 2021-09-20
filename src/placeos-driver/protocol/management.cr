@@ -10,7 +10,7 @@ require "./request"
 # Launch driver when first instance is requested
 # Shutdown driver when no more instances required
 class PlaceOS::Driver::Protocol::Management
-  Log = ::Log.for("driver.protocol.management")
+  Log = ::Log.for(self)
 
   alias DebugCallback = String -> Nil
 

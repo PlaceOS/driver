@@ -2,7 +2,7 @@ require "json"
 require "./logger"
 
 class PlaceOS::Driver::ProcessManager
-  Log = ::Log.for("driver.process_manager", ::Log::Severity::Info)
+  Log = ::Log.for(self, ::Log::Severity::Info)
 
   def initialize(@logger_io = ::PlaceOS::Driver.logger_io, @input = STDIN, output = STDERR, @edge_driver = false)
     @subscriptions = @edge_driver ? nil : Subscriptions.new
