@@ -81,11 +81,25 @@ class PlaceOS::Driver::DriverManager
   def start
     driver = @driver
 
+    # we don't want to block driver init processing too long
+    # a driver might be making a HTTP request in on_load for exampe which
+    # could block for a long time, resulting in poor feedback
+    if driver.responds_to?(:on_load)
+      begin
+        loaded = Promise.defer(same_thread: true, timeout: 6.second) do
+          driver.on_load
+          nil
+        end
+        loaded.get
+      rescue error
+        logger.error(exception: error) { "in the on_load function of #{driver.class} (#{@module_id})" }
+      end
+    end
+
     begin
-      driver.on_load if driver.responds_to?(:on_load)
       driver.__apply_bindings__
     rescue error
-      logger.error(exception: error) { "in the on_load function of #{driver.class} (#{@module_id})" }
+      logger.error(exception: error) { "error applying bindings of #{driver.class} (#{@module_id})" }
     end
 
     if @model.makebreak
@@ -103,7 +117,12 @@ class PlaceOS::Driver::DriverManager
     driver = @driver
     if driver.responds_to?(:on_unload)
       begin
-        driver.on_unload
+        # we don't want a driver blocking here and hence never shutting down
+        unloaded = Promise.defer(same_thread: true, timeout: 6.second) do
+          driver.on_unload
+          nil
+        end
+        unloaded.get
       rescue error
         logger.error(exception: error) { "in the on_unload function of #{driver.class} (#{@module_id})" }
       end
