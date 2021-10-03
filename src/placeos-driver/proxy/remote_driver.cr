@@ -232,6 +232,8 @@ module PlaceOS::Driver::Proxy
 
     # Extract module name and module id from string
     # e.g. "Display_3" => {"Display", 3}
+    # "Display" => {"Display", 1}
+    # "My_Display" => {"My_Display", 1}
     #
     def self.get_parts(module_id : String | Symbol) : {String, Int32}
       module_id = module_id.to_s if module_id.is_a?(Symbol)
@@ -239,7 +241,8 @@ module PlaceOS::Driver::Proxy
       if match.empty?
         {module_id, 1}
       else
-        {mod_name, index.to_i}
+        idx = index.to_i?
+        idx ? {mod_name, idx} : {module_id, 1}
       end
     end
   end
