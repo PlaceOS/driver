@@ -3,7 +3,7 @@ require "../protocol"
 
 class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
   private getter hash : Hash(String, String) = {} of String => String
-  delegate fetch, keys, values, size, to: hash
+  delegate fetch, keys, values, size, empty?, to: hash
 
   def to_h : Hash(String, String)
     hash.dup
