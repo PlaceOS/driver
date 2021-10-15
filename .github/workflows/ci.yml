@@ -1,22 +1,14 @@
 name: CI
+
 on:
   push:
   workflow_dispatch:
   schedule:
     - cron: "0 6 * * 1"
+
 jobs:
   style:
-    runs-on: ubuntu-latest
-    container: crystallang/crystal
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v2
-      - name: Format
-        run: crystal tool format --check
-      - name: Lint
-        uses: crystal-ameba/github-action@v0.2.12
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    uses: PlaceOS/.github/.github/workflows/crystal-style.yml@main
 
   test:
     name: "crystal: ${{ matrix.crystal }}, stable: ${{ matrix.stable }}"
