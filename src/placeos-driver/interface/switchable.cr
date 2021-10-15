@@ -9,6 +9,7 @@ abstract class PlaceOS::Driver
     include PlaceOS::Driver::Interface::InputSelection(Input)
 
     enum SwitchLayer
+      All
       Audio
       Video
       Data
@@ -16,12 +17,12 @@ abstract class PlaceOS::Driver
     end
 
     macro included
-    # { layer => { input => [output1, output2] } }
-    alias SelectiveSwitch = Hash(String, Hash(Input, Array(Output)))
+      # { layer => { input => [output1, output2] } }
+      alias SelectiveSwitch = Hash(String, Hash(Input, Array(Output)))
 
-    # {input => [output1, output2]}
-    alias FullSwitch = Hash(Input, Array(Output))
-  end
+      # {input => [output1, output2]}
+      alias FullSwitch = Hash(Input, Array(Output))
+    end
 
     abstract def switch(map : Hash(Input, Array(Output)) | Hash(String, Hash(Input, Array(Output))))
   end
