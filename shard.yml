@@ -25,6 +25,7 @@ dependencies:
 
   promise:
     github: spider-gazelle/promise
+    version: ~> 3.0
 
   redis-cluster:
     github: caspiano/redis-cluster.cr
