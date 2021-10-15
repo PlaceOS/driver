@@ -10,7 +10,7 @@ class PlaceOS::Driver::DriverManager
     @subscriptions = edge_driver ? nil : Proxy::Subscriptions.new(subscriptions || Subscriptions.new(module_id: @module_id))
 
     # Ensures execution all occurs on a single thread
-    @requests = ::Channel(Tuple(Promise::DeferredPromise(Nil), Protocol::Request)).new(4)
+    @requests = ::Channel(Tuple(Promise(Nil), Protocol::Request)).new(4)
 
     @transport = case @model.role
                  when DriverModel::Role::SSH
@@ -85,15 +85,17 @@ class PlaceOS::Driver::DriverManager
     # a driver might be making a HTTP request in on_load for exampe which
     # could block for a long time, resulting in poor feedback
     if driver.responds_to?(:on_load)
-      begin
-        loaded = Promise.defer(same_thread: true, timeout: 6.second) do
-          driver.on_load
-          nil
-        end
-        loaded.get
-      rescue error
-        logger.error(exception: error) { "in the on_load function of #{driver.class} (#{@module_id})" }
+      promise = Promise(Nil).defer(same_thread: true, timeout: 6.second) do
+        driver.on_load
+        nil
       end
+
+      promise.catch do |error|
+        logger.error(exception: error) { "in the on_load function of #{driver.class} (#{@module_id})" }
+        nil
+      end
+
+      promise.get
     end
 
     begin
@@ -116,17 +118,20 @@ class PlaceOS::Driver::DriverManager
     @transport.terminate
     driver = @driver
     if driver.responds_to?(:on_unload)
-      begin
-        # we don't want a driver blocking here and hence never shutting down
-        unloaded = Promise.defer(same_thread: true, timeout: 6.second) do
-          driver.on_unload
-          nil
-        end
-        unloaded.get
-      rescue error
-        logger.error(exception: error) { "in the on_unload function of #{driver.class} (#{@module_id})" }
+      # Ensure driver does not block here, otherwise it will never terminate
+      promise = Promise(Nil).defer(same_thread: true, timeout: 6.second) do
+        driver.on_unload
+        nil
       end
+
+      promise.catch do |error|
+        logger.error(exception: error) { "in the on_unload function of #{driver.class} (#{@module_id})" }
+        nil
+      end
+
+      promise.get
     end
+
     @requests.close
     @queue.terminate
     @schedule.terminate
