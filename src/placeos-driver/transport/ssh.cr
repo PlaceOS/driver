@@ -22,6 +22,7 @@ class PlaceOS::Driver
     @shell : SSH2::Channel?
     @keepalive : Tasker::Task?
     @ssh_settings : Settings?
+    @messages : Channel(Bytes)?
 
     property :received
 
@@ -52,8 +53,8 @@ class PlaceOS::Driver
     def connect(connect_timeout : Int32 = 10) : Nil
       return if @terminated
 
-      if socket = @socket
-        return unless socket.closed?
+      if messages = @messages
+        return unless messages.closed?
       end
 
       # Clear any buffered data before we re-connect
@@ -68,6 +69,9 @@ class PlaceOS::Driver
         supported_methods = nil
 
         begin
+          @messages.try &.close
+          @messages = Channel(Bytes).new
+
           # Grab the authentication settings (using not_nil for schema generation)
           @ssh_settings = settings = @settings.get { setting?(Settings, :ssh) }.not_nil!
 
@@ -77,7 +81,7 @@ class PlaceOS::Driver
           socket.sync = true
 
           # Negotiate the SSH session
-          @session = session = SSH2::Session.new(socket)
+          session = SSH2::Session.new(socket)
 
           # Attempt to authenticate
           supported_methods = session.login_with_noauth(settings.username)
@@ -158,7 +162,7 @@ class PlaceOS::Driver
             shell.shell
 
             # Start consuming data from the shell
-            spawn(same_thread: true) { consume_io }
+            spawn(same_thread: true) { consume_messages }
           rescue error
             # It may not be fatal if a shell is unable to be negotiated
             # however this would be a rare device so we log the issue.
@@ -168,6 +172,7 @@ class PlaceOS::Driver
             end
             logger.warn(exception: error) { "unable to negotiage a shell on SSH connection" }
           end
+          @session = session
 
           # This will track the socket state when there is no shell
           keepalive(settings.keepalive || 30)
@@ -204,22 +209,24 @@ class PlaceOS::Driver
 
     def disconnect : Nil
       # Create local copies as reconnect could be called while we are still disconnecting
+      messages = @messages
+      socket = @socket
       shell = @shell
       session = @session
-      socket = @socket
-
+      @messages = nil
+      @socket = nil
       @shell = nil
       @session = nil
-      @socket = nil
       @keepalive.try &.cancel
       @keepalive = nil
 
       begin
         shell.try &.close
         session.try &.disconnect
+        socket.try &.close
       rescue
       ensure
-        socket.try &.close
+        messages.try &.close
       end
     rescue error
       logger.info(exception: error) { "calling disconnect" }
@@ -227,7 +234,13 @@ class PlaceOS::Driver
 
     def send(message) : TransportSSH
       socket = @shell
-      return self if socket.nil? || socket.closed?
+      if socket.nil? || socket.closed?
+        if @session
+          logger.warn { "disconnecting as no shell negotiated for sending message" }
+          disconnect
+        end
+        return self
+      end
 
       case message
       when .responds_to? :to_io    then socket.write_bytes(message)
@@ -243,23 +256,44 @@ class PlaceOS::Driver
       send(message)
     end
 
-    private def consume_io
-      raw_data = Bytes.new(2048)
-      if socket = @shell
-        while !socket.closed?
-          bytes_read = socket.read(raw_data)
-          break if bytes_read == 0 # IO was closed
+    private def consume_messages
+      if messages = @messages
+        spawn(same_thread: true) { consume_io }
 
-          process raw_data[0, bytes_read].dup
+        while !messages.closed?
+          raw_data = messages.receive?
+          break unless raw_data # IO was closed
+          process raw_data
         end
       end
-    rescue IO::Error | SSH2::SessionError
+    rescue Channel::ClosedError
     rescue error
       logger.error(exception: error) { "error consuming IO" }
     ensure
       disconnect
       @queue.online = false
       connect
+    end
+
+    private def consume_io
+      messages = @messages
+
+      begin
+        raw_data = Bytes.new(2048)
+        if (socket = @shell) && (messages = @messages)
+          while !socket.closed? && !messages.closed?
+            bytes_read = socket.read(raw_data)
+            break if bytes_read == 0 # IO was closed
+
+            messages.send raw_data[0, bytes_read].dup
+          end
+        end
+      rescue IO::Error | SSH2::SessionError | Channel::ClosedError
+      rescue error
+        logger.error(exception: error) { "error consuming IO" }
+      ensure
+        messages.try &.close
+      end
     end
 
     def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = nil) : Nil
