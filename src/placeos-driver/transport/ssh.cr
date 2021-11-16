@@ -260,13 +260,10 @@ class PlaceOS::Driver
       if messages = @messages
         spawn(same_thread: true) { consume_io }
 
-        while !messages.closed?
-          raw_data = messages.receive?
-          break unless raw_data # IO was closed
+        while raw_data = messages.receive?
           process raw_data
         end
       end
-    rescue Channel::ClosedError
     rescue error
       logger.error(exception: error) { "error consuming IO" }
     ensure
