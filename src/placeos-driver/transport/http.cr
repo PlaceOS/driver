@@ -171,6 +171,12 @@ class PlaceOS::Driver
     protected def __new_http_client
       @tls = new_tls_context
       context = __is_https? ? @tls : nil
+
+      begin
+        @client.try &.close
+      rescue
+      end
+
       # NOTE:: modify in initializer if editing here
       @client = new_http_client(@uri_base, context)
       @client_requests = 0
