@@ -277,10 +277,10 @@ class PlaceOS::Driver
 
       begin
         raw_data = Bytes.new(2048)
-        if (socket = @shell) && (messages = @messages)
+        if (socket = @shell) && messages
           while !socket.closed? && !messages.closed?
             bytes_read = socket.read(raw_data)
-            break if bytes_read == 0 # IO was closed
+            break if bytes_read == 0 || messages != @messages # IO was closed
 
             messages.send raw_data[0, bytes_read].dup
           end
