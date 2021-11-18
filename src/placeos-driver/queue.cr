@@ -39,6 +39,8 @@ class PlaceOS::Driver::Queue
       @waiting = false
       @channel.send(nil)
     end
+  rescue error
+    @logger.warn(exception: error) { "changing queue state" }
   end
 
   def online : Bool

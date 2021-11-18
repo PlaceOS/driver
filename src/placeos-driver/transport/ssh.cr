@@ -23,6 +23,7 @@ class PlaceOS::Driver
     @keepalive : Tasker::Task?
     @ssh_settings : Settings?
     @messages : Channel(Bytes)?
+    @connecting : Bool = false
 
     property :received
 
@@ -51,11 +52,8 @@ class PlaceOS::Driver
 
     # ameba:disable Metrics/CyclomaticComplexity
     def connect(connect_timeout : Int32 = 10) : Nil
-      return if @terminated
-
-      if messages = @messages
-        return unless messages.closed?
-      end
+      return if @terminated || @connecting || @messages
+      @connecting = true
 
       # Clear any buffered data before we re-connect
       tokenizer = @tokenizer
@@ -69,14 +67,15 @@ class PlaceOS::Driver
         supported_methods = nil
 
         begin
-          @messages.try &.close
+          messages = @messages
           @messages = Channel(Bytes).new
+          messages.try &.close
 
           # Grab the authentication settings (using not_nil for schema generation)
           @ssh_settings = settings = @settings.get { setting?(Settings, :ssh) }.not_nil!
 
           # Open a connection
-          socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
+          @socket = socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
           socket.tcp_nodelay = true
           socket.sync = true
 
@@ -156,13 +155,12 @@ class PlaceOS::Driver
 
           # Attempt to open a shell - more often then not shell is the only supported method
           begin
-            @shell = shell = session.open_session
-            # Set mode https://tools.ietf.org/html/rfc4254#section-8
-            shell.request_pty(settings.term || "vt100", [{SSH2::TerminalMode::ECHO, 0u32}])
-            shell.shell
-
-            # Start consuming data from the shell
-            spawn(same_thread: true) { consume_messages }
+            Promise(Nil).defer(same_thread: true, timeout: 5.seconds) {
+              @shell = shell = session.open_session
+              # Set mode https://tools.ietf.org/html/rfc4254#section-8
+              shell.request_pty(settings.term || "vt100", [{SSH2::TerminalMode::ECHO, 0u32}])
+              shell.shell
+            }.get
           rescue error
             # It may not be fatal if a shell is unable to be negotiated
             # however this would be a rare device so we log the issue.
@@ -177,6 +175,9 @@ class PlaceOS::Driver
           # This will track the socket state when there is no shell
           keepalive(settings.keepalive || 30)
 
+          # Start consuming data from the shell
+          spawn(same_thread: true) { consume_messages } if @shell
+
           # Enable queuing
           @queue.online = true
         rescue error
@@ -185,9 +186,17 @@ class PlaceOS::Driver
             "connecting to device#{supported_methods}"
           }
           @queue.online = false
+          begin
+            @socket.try &.close
+            @socket = nil
+            @shell = nil
+            @session = nil
+          rescue
+          end
           raise error
         end
       end
+      @connecting = false
     end
 
     def keepalive(period)
@@ -208,6 +217,8 @@ class PlaceOS::Driver
     end
 
     def disconnect : Nil
+      return unless @messages
+
       # Create local copies as reconnect could be called while we are still disconnecting
       messages = @messages
       socket = @socket
@@ -221,8 +232,14 @@ class PlaceOS::Driver
       @keepalive = nil
 
       begin
-        shell.try &.close
-        session.try &.disconnect
+        Promise(Nil).defer(same_thread: true, timeout: 3.seconds) {
+          shell.try &.close
+          session.try &.disconnect
+        }.get
+      rescue
+      end
+
+      begin
         socket.try &.close
       rescue
       ensure
