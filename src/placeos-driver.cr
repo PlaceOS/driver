@@ -208,11 +208,13 @@ abstract class PlaceOS::Driver
   end
 
   def publish(channel, message)
+    message = message.to_s
     if @__edge_driver__
       PlaceOS::Driver::Protocol.instance.request(channel, :publish, message, raw: true)
     else
-      RedisStorage.with_redis &.publish("placeos/#{channel}", message.to_s)
+      RedisStorage.with_redis &.publish("placeos/#{channel}", message)
     end
+    @__logger__.debug { "published: #{channel} -> #{message}" }
     message
   end
 

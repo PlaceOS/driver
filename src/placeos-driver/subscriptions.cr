@@ -102,7 +102,7 @@ class PlaceOS::Driver
         remap_indirect(message)
       elsif channel_subscriptions = subscriptions[channel]?
         channel_subscriptions.each do |subscription|
-          subscription.callback Log, message
+          spawn { subscription.callback Log, message }
         end
       else
         # subscribed to channel but no subscriptions
