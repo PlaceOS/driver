@@ -182,9 +182,7 @@ class PlaceOS::Driver
             else
               # if we are not running in shell mode we want to connect on messages close
               @messages.try &.receive?
-              disconnect
-              @queue.online = false
-              connect
+              perform_reconnect
             end
           end
 
@@ -207,6 +205,12 @@ class PlaceOS::Driver
         end
       end
       @connecting = false
+    end
+
+    protected def perform_reconnect
+      disconnect
+      @queue.online = false
+      connect
     end
 
     def keepalive(period)
@@ -293,9 +297,7 @@ class PlaceOS::Driver
     rescue error
       logger.error(exception: error) { "error consuming IO" }
     ensure
-      disconnect
-      @queue.online = false
-      connect
+      perform_reconnect
     end
 
     private def consume_io
