@@ -176,7 +176,17 @@ class PlaceOS::Driver
           keepalive(settings.keepalive || 30)
 
           # Start consuming data from the shell
-          spawn(same_thread: true) { consume_messages } if @shell
+          spawn(same_thread: true) do
+            if @shell
+              consume_messages
+            else
+              # if we are not running in shell mode we want to connect on messages close
+              @messages.try &.receive?
+              disconnect
+              @queue.online = false
+              connect
+            end
+          end
 
           # Enable queuing
           @queue.online = true
@@ -203,10 +213,9 @@ class PlaceOS::Driver
       @keepalive = Tasker.every(period.seconds) do
         begin
           @session.try &.send_keepalive
-        rescue
-          no_shell = @shell.nil?
+        rescue error
+          logger.warn(exception: error) { "keepalive send failed..." }
           disconnect
-          connect if no_shell
         end
       end
     end
@@ -252,7 +261,7 @@ class PlaceOS::Driver
     def send(message) : TransportSSH
       socket = @shell
       if socket.nil? || socket.closed?
-        if @session
+        if @session || @socket
           logger.warn { "disconnecting as no shell negotiated for sending message" }
           disconnect
         end
