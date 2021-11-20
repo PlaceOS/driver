@@ -130,6 +130,11 @@ class PlaceOS::Driver::Queue
         queue_task(priority, task)
       end
     end
+  rescue error
+    logger.error(exception: error) { "unexpected exception processing queue" }
+  ensure
+    # The queue should always be running so we need to restart it
+    spawn(same_thread: true) { process! } unless @terminated
   end
 
   protected def queue_task(priority, task)
