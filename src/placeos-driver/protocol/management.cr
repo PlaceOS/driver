@@ -368,6 +368,7 @@ class PlaceOS::Driver::Protocol::Management
       @io.try &.close
     rescue
     ensure
+      @io = nil
       @events.send(Request.new(last_exit_code, :exited))
     end
   end
