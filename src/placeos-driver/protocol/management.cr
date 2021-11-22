@@ -363,7 +363,13 @@ class PlaceOS::Driver::Protocol::Management
     status = $?
     last_exit_code = status.exit_code.to_s
     Log.warn { {message: "driver process exited with #{last_exit_code}", driver_path: @driver_path} } unless status.success?
-    @events.send(Request.new(last_exit_code, :exited))
+
+    begin
+      @io.try &.close
+    rescue
+    ensure
+      @events.send(Request.new(last_exit_code, :exited))
+    end
   end
 
   private def relaunch(last_exit_code : String) : Nil
