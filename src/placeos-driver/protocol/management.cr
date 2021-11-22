@@ -362,6 +362,7 @@ class PlaceOS::Driver::Protocol::Management
 
     status = $?
     last_exit_code = status.exit_code.to_s
+
     Log.warn { {message: "driver process exited with #{last_exit_code}", driver_path: @driver_path} } unless status.success?
 
     begin
@@ -389,7 +390,7 @@ class PlaceOS::Driver::Protocol::Management
     io.read_string(1)
     loaded.resolve(nil)
 
-    while !io.closed?
+    until io.closed?
       bytes_read = io.read(raw_data)
       break if bytes_read == 0 # IO was closed
 

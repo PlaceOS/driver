@@ -31,7 +31,9 @@ class PlaceOS::Driver::ProcessManager
     return if loaded[module_id]?
 
     model = driver_model || PlaceOS::Driver::DriverModel.from_json(request.payload.not_nil!)
-    driver = DriverManager.new module_id, model, logger_io, @subscriptions, edge_driver?
+
+    driver = DriverManager.new(module_id, model, logger_io, @subscriptions, edge_driver?)
+
     loaded[module_id] = driver
 
     # Drivers can all run on a different thread
