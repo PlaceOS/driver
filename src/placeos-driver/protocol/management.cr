@@ -233,8 +233,8 @@ class PlaceOS::Driver::Protocol::Management
 
     payload = request.payload.not_nil!
     modules[module_id] = payload
-    io = @io
-    return unless io
+
+    return unless (io = @io)
 
     json = %({"id":"#{module_id}","cmd":"update","payload":#{payload.to_json}})
     io.write_bytes json.bytesize
@@ -245,8 +245,7 @@ class PlaceOS::Driver::Protocol::Management
   private def stop(request : Request) : Nil
     module_id = request.id
     instance = modules.delete module_id
-    io = @io
-    return unless io && instance
+    return unless (io = @io) && instance
     return shutdown(false) if modules.empty?
 
     json = %({"id":"#{module_id}","cmd":"stop"})
@@ -257,8 +256,7 @@ class PlaceOS::Driver::Protocol::Management
 
   private def shutdown(terminated = true) : Nil
     @terminated = terminated
-    io = @io
-    return unless io
+    return unless (io = @io)
 
     modules.clear
 
@@ -270,8 +268,7 @@ class PlaceOS::Driver::Protocol::Management
   end
 
   private def exec(module_id : String, payload : String, seq : UInt64) : Nil
-    io = @io
-    if io && modules[module_id]?
+    if (io = @io) && modules[module_id]?
       json = %({"id":"#{module_id}","cmd":"exec","seq":#{seq},"payload":#{payload.to_json}})
       io.write_bytes json.bytesize
       io.write json.to_slice
@@ -292,8 +289,7 @@ class PlaceOS::Driver::Protocol::Management
   end
 
   private def ignore(module_id : String) : Nil
-    io = @io
-    return unless io && modules[module_id]?
+    return unless (io = @io) && modules[module_id]?
 
     json = %({"id":"#{module_id}","cmd":"ignore"})
     io.write_bytes json.bytesize
@@ -302,8 +298,7 @@ class PlaceOS::Driver::Protocol::Management
   end
 
   private def running_modules(seq : UInt64)
-    io = @io
-    if io
+    if (io = @io)
       json = %({"id":"","cmd":"info","seq":#{seq}})
       io.write_bytes json.bytesize
       io.write json.to_slice
@@ -313,7 +308,7 @@ class PlaceOS::Driver::Protocol::Management
     end
   end
 
-  # This function
+  # Create the host driver process, then load modules that have been assigned.
   private def start_process : Nil
     return if @io || terminated?
 
@@ -362,6 +357,7 @@ class PlaceOS::Driver::Protocol::Management
 
     status = $?
     last_exit_code = status.exit_code.to_s
+
     Log.warn { {message: "driver process exited with #{last_exit_code}", driver_path: @driver_path} } unless status.success?
 
     begin
@@ -389,7 +385,7 @@ class PlaceOS::Driver::Protocol::Management
     io.read_string(1)
     loaded.resolve(nil)
 
-    while !io.closed?
+    until io.closed?
       bytes_read = io.read(raw_data)
       break if bytes_read == 0 # IO was closed
 

@@ -13,13 +13,13 @@ class PlaceOS::Driver::DriverManager
     @requests = ::Channel(Tuple(Promise(Nil), Protocol::Request)).new(4)
 
     @transport = case @model.role
-                 when DriverModel::Role::SSH
+                 in .ssh?
                    ip = @model.ip.not_nil!
                    port = @model.port.not_nil!
                    PlaceOS::Driver::TransportSSH.new(@queue, ip, port, @settings, @model.uri) do |data, task|
                      received(data, task)
                    end
-                 when DriverModel::Role::RAW
+                 in .raw?
                    ip = @model.ip.not_nil!
                    udp = @model.udp
                    tls = @model.tls
@@ -35,18 +35,16 @@ class PlaceOS::Driver::DriverManager
                        received(data, task)
                      end
                    end
-                 when DriverModel::Role::HTTP
+                 in .http?
                    PlaceOS::Driver::TransportHTTP.new(@queue, @model.uri.not_nil!, @settings)
-                 when DriverModel::Role::LOGIC
+                 in .logic?
                    # nothing required to be done here
                    PlaceOS::Driver::TransportLogic.new(@queue)
-                 when DriverModel::Role::WEBSOCKET
+                 in .websocket?
                    headers_callback = Proc(HTTP::Headers).new { websocket_headers }
                    PlaceOS::Driver::TransportWebsocket.new(@queue, @model.uri.not_nil!, @settings, headers_callback) do |data, task|
                      received(data, task)
                    end
-                 else
-                   raise "unknown role for driver #{@module_id}"
                  end
     @driver = new_driver
   end
