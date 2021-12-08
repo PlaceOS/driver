@@ -368,32 +368,32 @@ class DriverSpecs
     raise "timeout waiting for module to connect"
   end
 
-  def exec(function, *args)
-    resp = __exec__(function, args)
+  def exec(function, *args, user_id = nil)
+    resp = __exec__(function, args, user_id)
     sleep 2.milliseconds
     resp
   end
 
-  def exec(function, **args)
-    resp = __exec__(function, args)
+  def exec(function, user_id = nil, **args)
+    resp = __exec__(function, args, user_id)
     sleep 2.milliseconds
     resp
   end
 
-  def exec(function, *args)
-    resp = __exec__(function, args)
+  def exec(function, *args, user_id = nil)
+    resp = __exec__(function, args, user_id)
     yield resp
     resp
   end
 
-  def exec(function, **args)
-    resp = __exec__(function, args)
+  def exec(function, user_id = nil, **args)
+    resp = __exec__(function, args, user_id)
     yield resp
     resp
   end
 
-  def __exec__(function, args)
-    puts "-> spec calling: #{function.colorize(:green)} #{args.to_s.colorize(:green)}"
+  def __exec__(function, args, user_id)
+    puts "-> spec calling: #{function.colorize(:green)} #{args.to_s.colorize(:green)} (user: #{user_id})"
 
     # Build the request
     json = {
@@ -403,6 +403,7 @@ class DriverSpecs
       # This would typically be routing information
       # like the module requesting this exec or the HTTP request ID etc
       reply:   "to_me",
+      user_id: user_id,
       payload: {
         "__exec__" => function,
         function   => args,
