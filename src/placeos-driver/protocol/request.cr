@@ -57,10 +57,16 @@ module PlaceOS
     property seq : UInt64?
 
     # For driver to driver comms to route the request back to the originating module
+    @[JSON::Field(emit_null: false)]
     property reply : String?
 
+    @[JSON::Field(converter: String::RawConverter)]
     property payload : String?
+
+    @[JSON::Field(emit_null: false)]
     property error : String?
+
+    @[JSON::Field(emit_null: false)]
     property backtrace : Array(String)?
 
     def set_error(error)

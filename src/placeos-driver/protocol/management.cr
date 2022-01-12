@@ -267,14 +267,12 @@ class PlaceOS::Driver::Protocol::Management
     io.flush
   end
 
-  private def exec(module_id : String, payload : String, seq : UInt64) : Nil
-    if (io = @io) && modules[module_id]?
-      json = %({"id":"#{module_id}","cmd":"exec","seq":#{seq},"payload":#{payload.to_json}})
-      io.write_bytes json.bytesize
-      io.write json.to_slice
+  private def exec(request : Request) : Nil
+    if (io = @io) && modules[request.id]?
+      request.to_json(io)
       io.flush
-    elsif promise = request_lock.synchronize { @requests.delete(seq) }
-      promise.reject Exception.new("module #{module_id} not running on this host")
+    elsif promise = request_lock.synchronize { @requests.delete(request.seq) }
+      promise.reject Exception.new("module #{request.id} not running on this host")
     end
   end
 
