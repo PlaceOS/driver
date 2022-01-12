@@ -182,7 +182,7 @@ class PlaceOS::Driver::Protocol::Management
         case (request = @events.receive).cmd
         when .start?     then start(request)
         when .stop?      then stop(request)
-        when .exec?      then exec(request.id, request.payload.not_nil!, request.seq.not_nil!)
+        when .exec?      then exec(request.id, request.payload.not_nil!, request.seq.not_nil!, request.user_id)
         when .update?    then update(request)
         when .debug?     then debug(request.id)
         when .exited?    then relaunch(request.id)
@@ -267,9 +267,10 @@ class PlaceOS::Driver::Protocol::Management
     io.flush
   end
 
-  private def exec(module_id : String, payload : String, seq : UInt64) : Nil
+  private def exec(module_id : String, payload : String, seq : UInt64, user_id : String?) : Nil
     if (io = @io) && modules[module_id]?
-      json = %({"id":"#{module_id}","cmd":"exec","seq":#{seq},"payload":#{payload.to_json}})
+      user_id = user_id ? %("#{user_id}") : "null"
+      json = %({"id":"#{module_id}","user_id":#{user_id},"cmd":"exec","seq":#{seq},"payload":#{payload.to_json}})
       io.write_bytes json.bytesize
       io.write json.to_slice
       io.flush

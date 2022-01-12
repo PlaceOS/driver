@@ -1,5 +1,5 @@
 name: placeos-driver
-version: 5.9.9
+version: 5.9.10
 crystal: ">= 1.0.0"
 
 dependencies:
