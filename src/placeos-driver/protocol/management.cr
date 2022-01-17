@@ -50,7 +50,7 @@ class PlaceOS::Driver::Protocol::Management
   @io : IO::Stapled? = nil
 
   def initialize(@driver_path : String, @on_edge : Bool = false)
-    @requests = {} of UInt64 => Promise::DeferredPromise(String)
+    @requests = {} of UInt64 => Promise::DeferredPromise(Tuple(String, Int32))
     @starting = {} of String => Promise::DeferredPromise(Nil)
 
     @debugging = Hash(String, Array(DebugCallback)).new do |hash, key|
@@ -104,7 +104,7 @@ class PlaceOS::Driver::Protocol::Management
 
   def info
     return [] of String if terminated?
-    promise = Promise.new(String)
+    promise = Promise.new(Tuple(String, Int32))
 
     sequence = request_lock.synchronize do
       seq = @sequence
@@ -114,12 +114,12 @@ class PlaceOS::Driver::Protocol::Management
     end
 
     @events.send(Request.new("", :info, seq: sequence))
-    Array(String).from_json promise.get
+    Array(String).from_json promise.get[0]
   end
 
-  def execute(module_id : String, payload : String?, user_id : String? = nil) : String
+  def execute(module_id : String, payload : String?, user_id : String? = nil) : Tuple(String, Int32)
     raise "module #{module_id} not running, terminated" if terminated?
-    promise = Promise.new(String)
+    promise = Promise.new(Tuple(String, Int32))
 
     sequence = request_lock.synchronize do
       seq = @sequence
@@ -305,7 +305,7 @@ class PlaceOS::Driver::Protocol::Management
       io.write json.to_slice
       io.flush
     elsif promise = request_lock.synchronize { @requests.delete(seq) }
-      promise.resolve "[]"
+      promise.resolve({"[]", 0})
     end
   end
 
@@ -422,7 +422,7 @@ class PlaceOS::Driver::Protocol::Management
     # Reject any pending request
     temp_reqs = request_lock.synchronize do
       reqs = @requests
-      @requests = {} of UInt64 => Promise::DeferredPromise(String)
+      @requests = {} of UInt64 => Promise::DeferredPromise(Tuple(String, Int32))
       reqs
     end
     temp_reqs.each { |request| request.reject(Exception.new("process terminated")) }
@@ -444,9 +444,9 @@ class PlaceOS::Driver::Protocol::Management
         if request.error
           promise.reject request.build_error
         elsif payload = request.payload
-          promise.resolve payload
+          promise.resolve({payload, request.code || 200})
         else
-          promise.resolve "null"
+          promise.resolve({"null", request.code || 200})
         end
       else
         Log.warn { "sequence number #{request.seq} not found for result from #{request.id}" }

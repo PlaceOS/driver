@@ -44,13 +44,13 @@ describe PlaceOS::Driver::Protocol::Management do
         "a": 1,
         "b": 2
       }
-    })).should eq("3")
+    })).should eq({"3", 200})
 
     # Regular arguments
     manager.execute("mod-management-test", %({
       "__exec__": "add",
       "add": [1, 2]
-    })).should eq("3")
+    })).should eq({"3", 200})
 
     logged = nil
     manager.debug("mod-management-test") do |debug_json|
@@ -134,7 +134,7 @@ describe PlaceOS::Driver::Protocol::Management do
         "a": 1,
         "b": 2
       }
-    })).should eq("3")
+    })).should eq({"3", 200})
 
     redis_hset.should eq 2
 
@@ -142,7 +142,7 @@ describe PlaceOS::Driver::Protocol::Management do
     manager.execute("mod-management-test", %({
       "__exec__": "add",
       "add": [1, 2]
-    })).should eq("3")
+    })).should eq({"3", 200})
 
     # Status shouldn't have changed, so we only expect this to be 1
     redis_hset.should eq 2

@@ -31,6 +31,7 @@ class PlaceOS::Driver::Task
   @timer : Tasker::Task?
   @processing : Proc(Bytes, Task, Nil)?
   @error_class : String?
+  property code : Int32? = nil
 
   enum State
     Success
@@ -108,7 +109,7 @@ class PlaceOS::Driver::Task
   end
 
   # result should support conversion to JSON
-  def success(result = nil)
+  def success(result = nil, @code = 200)
     @state = :success
     @wait = false
 
@@ -154,7 +155,7 @@ class PlaceOS::Driver::Task
   end
 
   # Failed except we don't want to retry
-  def abort(reason = nil)
+  def abort(reason = nil, @code = 500)
     stop_timers
     @wait = false
     @state = :abort

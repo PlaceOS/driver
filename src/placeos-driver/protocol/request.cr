@@ -59,11 +59,13 @@ module PlaceOS
     # For driver to driver comms to route the request back to the originating module
     property reply : String?
 
+    property code : Int32? = nil
     property payload : String?
     property error : String?
     property backtrace : Array(String)?
 
     def set_error(error)
+      self.code ||= 500
       self.payload = error.message
       self.error = error.class.to_s
       self.backtrace = error.backtrace?
@@ -71,7 +73,7 @@ module PlaceOS
     end
 
     def build_error
-      Driver::RemoteException.new(self.payload, self.error, self.backtrace || [] of String)
+      Driver::RemoteException.new(self.payload, self.error, self.backtrace || [] of String, self.code || 500)
     end
 
     # Not part of the JSON payload, so we don't need to re-parse a request
