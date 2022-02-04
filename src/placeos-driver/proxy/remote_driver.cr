@@ -185,6 +185,8 @@ module PlaceOS::Driver::Proxy
       exec_args = args || named_args
       Core::Client.client(which_core, request_id) do |client|
         client.execute(module_id, function, exec_args, user_id: user_id)
+        # TODO:: return the code, requires core to return the module code
+        # this simplest way to do this is probably via a header
       end
     end
 

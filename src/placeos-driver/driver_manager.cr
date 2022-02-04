@@ -168,18 +168,26 @@ class PlaceOS::Driver::DriverManager
   private def run_execute(request)
     case result = execute(request.payload.not_nil!)
     when Task
+      # get returns self so outcome is of type Task
       outcome = result.get(:response_required)
       request.payload = outcome.payload
+      request.code = outcome.code
       case outcome.state
       in .exception?
+        request.code ||= 500
         request.error = outcome.error_class
         request.backtrace = outcome.backtrace
       in .unknown?
+        request.code ||= 500
         logger.fatal { "unexpected result: #{outcome.state} - #{outcome.payload}, #{outcome.error_class}, #{outcome.backtrace.join("\n")}" }
-      in .abort? then request.error = "Abort"
+      in .abort?
+        request.code ||= 500
+        request.error = "Abort"
       in .success?
+        request.code ||= 200
       end
     else
+      request.code ||= 200
       request.payload = result
     end
   rescue error
