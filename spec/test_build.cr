@@ -75,7 +75,7 @@ class Helper
     end
 
     # Test error handling
-    rescue_from DivisionByZeroError do |error|
+    rescue_from DivisionByZeroError do |_error|
       -1
     end
 
@@ -86,7 +86,7 @@ class Helper
     # Test alternative error handling
     rescue_from IndexError, :handle_index
 
-    protected def handle_index(error)
+    protected def handle_index(_error)
       -2
     end
 

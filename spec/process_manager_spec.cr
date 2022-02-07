@@ -388,7 +388,7 @@ describe PlaceOS::Driver::ProcessManager do
   end
 
   it "should recover from errors using global error handlers" do
-    process, input, output, logs, driver_id = Helper.process
+    process, input, output, _logs, driver_id = Helper.process
     process.loaded.size.should eq 1
 
     # execute a task response
