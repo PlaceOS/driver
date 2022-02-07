@@ -165,8 +165,36 @@ class PlaceOS::Driver::DriverManager
     end
   end
 
-  private def run_execute(request)
-    case result = execute(request.payload.not_nil!)
+  def self.process_result(klass, method_name, ret_val)
+    case ret_val
+    when Array(::Log::Entry)
+      ret_val.map(&.message).to_json
+    when ::Log::Entry
+      ret_val.message.to_json
+    when Task
+      ret_val
+    when Enum
+      ret_val.to_s.to_json
+    when JSON::Serializable
+      ret_val.to_json
+    else
+      ret_val = if ret_val.is_a?(::Future::Compute) || ret_val.is_a?(::Promise) || ret_val.is_a?(::PlaceOS::Driver::Task)
+                  ret_val.responds_to?(:get) ? ret_val.get : ret_val
+                else
+                  ret_val
+                end
+
+      begin
+        ret_val.try_to_json("null")
+      rescue error
+        klass.logger.info(exception: error) { "unable to convert result to json executing #{method_name} on #{klass.class}\n#{ret_val.inspect}" }
+        "null"
+      end
+    end
+  end
+
+  protected def process_execute_result(request, result)
+    case result
     when Task
       # get returns self so outcome is of type Task
       outcome = result.get(:response_required)
@@ -190,9 +218,25 @@ class PlaceOS::Driver::DriverManager
       request.code ||= 200
       request.payload = result
     end
-  rescue error
-    logger.error(exception: error) { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})" }
-    request.set_error(error)
+  end
+
+  macro define_run_execute
+    private def run_execute(request)
+      {% if !::PlaceOS::Driver::RESCUE_FROM.empty? %}
+        begin
+      {% end %}
+        process_execute_result request, execute(request.payload.not_nil!)
+      {% if !::PlaceOS::Driver::RESCUE_FROM.empty? %}
+        {% for exception, details in ::PlaceOS::Driver::RESCUE_FROM %}
+          rescue error : {{exception.id}}
+            process_execute_result request, @driver.__handle_rescue_from__(@driver, {{details[0].stringify}}, error)
+        {% end %}
+        end
+      {% end %}
+    rescue error
+      logger.error(exception: error) { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})" }
+      request.set_error(error)
+    end
   end
 
   private def process(request)

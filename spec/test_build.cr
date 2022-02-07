@@ -74,6 +74,26 @@ class Helper
       puts io
     end
 
+    # Test error handling
+    rescue_from DivisionByZeroError do |_error|
+      -1
+    end
+
+    def divide_by(num : Int32)
+      12 // num
+    end
+
+    # Test alternative error handling
+    rescue_from IndexError, :handle_index
+
+    protected def handle_index(_error)
+      -2
+    end
+
+    def get_index(num : Int32)
+      [1, 2, 3][num]
+    end
+
     # Any method that requires a block is not included in the public API
     def add(a)
       a + yield

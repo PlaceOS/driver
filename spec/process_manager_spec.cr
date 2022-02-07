@@ -386,4 +386,58 @@ describe PlaceOS::Driver::ProcessManager do
     process.terminated.receive?
     process.loaded.size.should eq 0
   end
+
+  it "should recover from errors using global error handlers" do
+    process, input, output, _logs, driver_id = Helper.process
+    process.loaded.size.should eq 1
+
+    # execute a task response
+    json = {
+      id:      driver_id,
+      cmd:     "exec",
+      payload: %({
+        "__exec__": "divide_by",
+        "divide_by": {
+          "num": 0
+        }
+      }),
+    }.to_json
+    input.write_bytes json.bytesize
+    input.write json.to_slice
+
+    process.loaded[driver_id].queue.online = true
+
+    raw_data = Bytes.new(4096)
+    bytes_read = output.read(raw_data)
+
+    # Check response was returned
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
+    req_out.id.should eq(driver_id)
+    req_out.cmd.result?.should be_true
+    req_out.payload.should eq("-1")
+
+    json = {
+      id:      driver_id,
+      cmd:     "exec",
+      payload: %({
+        "__exec__": "get_index",
+        "get_index": {
+          "num": 5
+        }
+      }),
+    }.to_json
+    input.write_bytes json.bytesize
+    input.write json.to_slice
+
+    process.loaded[driver_id].queue.online = true
+
+    raw_data = Bytes.new(4096)
+    bytes_read = output.read(raw_data)
+
+    # Check response was returned
+    req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
+    req_out.id.should eq(driver_id)
+    req_out.cmd.result?.should be_true
+    req_out.payload.should eq("-2")
+  end
 end
