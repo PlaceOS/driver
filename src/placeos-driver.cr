@@ -251,6 +251,7 @@ abstract class PlaceOS::Driver
         __build_helpers__
         {% CONCRETE_DRIVERS[@type] = [@type.methods, (@type.name.id.stringify + "::KlassExecutor").id] %}
         __build_apply_bindings__
+        ::PlaceOS::Driver._rescue_from_inject_functions_
       {% end %}
     end
   end
@@ -270,6 +271,7 @@ abstract class PlaceOS::Driver
   {% RESERVED_METHODS["[]"] = true %}
   {% RESERVED_METHODS["[]="] = true %}
   {% RESERVED_METHODS["send"] = true %}
+  {% RESERVED_METHODS["__handle_rescue_from__"] = true %}
   {% for name in HELPERS %}
     {% RESERVED_METHODS[name.id.stringify] = true %}
   {% end %}
@@ -358,31 +360,7 @@ abstract class PlaceOS::Driver
               ret_val = klass.{{method.name}}
             {% end %}
 
-            case ret_val
-            when Array(::Log::Entry)
-              ret_val.map(&.message).to_json
-            when ::Log::Entry
-              ret_val.message.to_json
-            when Task
-              ret_val
-            when Enum
-              ret_val.to_s.to_json
-            when JSON::Serializable
-              ret_val.to_json
-            else
-              ret_val = if ret_val.is_a?(::Future::Compute) || ret_val.is_a?(::Promise) || ret_val.is_a?(::PlaceOS::Driver::Task)
-                ret_val.responds_to?(:get) ? ret_val.get : ret_val
-              else
-                ret_val
-              end
-
-              begin
-                ret_val.try_to_json("null")
-              rescue error
-                klass.logger.info(exception: error) { "unable to convert result to json executing #{{{method.name.stringify}}} on #{klass.class}\n#{ret_val.inspect}" }
-                "null"
-              end
-            end
+            ::PlaceOS::Driver::DriverManager.process_result(klass, {{method.name.stringify}}, ret_val || nil)
           end,
         {% end %}
       } {% if methods.empty? %} of String => Nil {% end %}
@@ -552,5 +530,24 @@ macro finished
     puts PlaceOS::Startup.print_meta ? %(#{defaults.rchop},#{ {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata.lchop }) : defaults
   elsif PlaceOS::Startup.print_meta
     puts {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata_with_schema
+  end
+
+  # inject the rescue_from handlers
+  abstract class PlaceOS::Driver
+    def __handle_rescue_from__(instance, method_name, error)
+      ret_val = case error
+      {% for exception, details in ::PlaceOS::Driver::RESCUE_FROM %}
+      when {{exception.id}} then {{details[0]}}(error)
+      {% end %}
+      else
+        raise error
+      end
+
+      ::PlaceOS::Driver::DriverManager.process_result(instance, method_name, ret_val)
+    end
+  end
+
+  class PlaceOS::Driver::DriverManager
+    define_run_execute
   end
 end

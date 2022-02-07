@@ -52,6 +52,8 @@ describe PlaceOS::Driver::DriverManager do
       "switch_input":{
         "input":{"type":"string","enum":["hdmi","display_port","hd_base_t"],"title":"Helper::TestDriver::Input"}
       },
+      "divide_by":{"num": {"type": "integer", "title": "Int32"}},
+      "get_index":{"num": {"type": "integer", "title": "Int32"}},
       "add":{
         "a":{"type":"integer","title":"Int32"},
         "b":{"type":"integer","title":"Int32"}
@@ -77,6 +79,8 @@ describe PlaceOS::Driver::DriverManager do
       "switch_input":{
           "input":["Input"]
       },
+      "divide_by":{"num": ["Int32"]},
+      "get_index":{"num": ["Int32"]},
       "add":{
         "a":["Int32"],
         "b":["Int32"]
@@ -97,6 +101,32 @@ describe PlaceOS::Driver::DriverManager do
       "test_exec":{},
       "implemented_in_base_class":{}
     }).gsub(/\s/, "").gsub(/\|/, " | "))
+  end
+
+  it "should execute functions with global error handlers, without issue" do
+    driver = Helper.new_driver({{PlaceOS::Driver::CONCRETE_DRIVERS.keys.first}}, "mod-988", Helper.protocol[0])
+    driver.is_a?(PlaceOS::Driver).should eq(true)
+
+    # Test no error cases
+    executor = {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
+        {
+          "__exec__": "divide_by",
+          "divide_by": {
+            "num": 8
+          }
+        }
+    ))
+    executor.execute(driver).should eq("1")
+
+    executor = {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.new(%(
+        {
+          "__exec__": "get_index",
+          "get_index": {
+            "num": 1
+          }
+        }
+    ))
+    executor.execute(driver).should eq("2")
   end
 
   it "should initialize an instance of driver manager" do
