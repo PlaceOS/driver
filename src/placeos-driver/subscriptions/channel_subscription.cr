@@ -1,4 +1,5 @@
 require "./subscription"
+require "path"
 
 class PlaceOS::Driver::Subscriptions::ChannelSubscription < PlaceOS::Driver::Subscriptions::Subscription
   def initialize(@channel : String, &@callback : (ChannelSubscription, String) ->)
@@ -15,7 +16,7 @@ class PlaceOS::Driver::Subscriptions::ChannelSubscription < PlaceOS::Driver::Sub
   getter :channel
 
   def subscribe_to : String?
-    "placeos/#{@channel}"
+    Path["placeos/"].join(@channel).to_s
   end
 
   def current_value : String?
