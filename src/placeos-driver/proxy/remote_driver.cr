@@ -173,7 +173,7 @@ module PlaceOS::Driver::Proxy
       named_args = nil,
       request_id : String? = nil,
       user_id : String? = @user_id
-    ) : String
+    ) : {String, Int32}
       metadata = metadata?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module", *@error_details) unless metadata
       raise Error.new(ErrorCode::BadRequest, "could not find function #{function}", *@error_details) unless function_present?(function)

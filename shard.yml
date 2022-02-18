@@ -1,5 +1,5 @@
 name: placeos-driver
-version: 6.1.1
+version: 6.1.2
 crystal: ">= 1.0.0"
 
 dependencies:
@@ -12,7 +12,7 @@ dependencies:
 
   placeos-core-client:
     github: placeos/core-client
-    version: ~> 0.2
+    version: ~> 0.4
 
   debug:
     github: Sija/debug.cr
