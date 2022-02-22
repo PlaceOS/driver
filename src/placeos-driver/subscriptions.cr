@@ -157,7 +157,7 @@ class PlaceOS::Driver
                   end
                 end
               rescue error
-                logger.fatal(exception: error) { "redis subscription failed... some components may not function correctly" }
+                Log.fatal(exception: error) { "redis subscription failed... some components may not function correctly" }
               end
             end
           }
