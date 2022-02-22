@@ -242,6 +242,7 @@ class PlaceOS::Driver
 
       # Apply headers
       headers = headers.is_a?(Hash) ? HTTP::Headers.new.tap { |head| headers.map { |key, value| head[key] = value } } : headers
+      cookies.add_request_headers(headers) unless @settings.get { setting?(Bool, :disable_cookies) } || false
 
       # Make the request
       response = if concurrent

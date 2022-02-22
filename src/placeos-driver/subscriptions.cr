@@ -142,10 +142,22 @@ class PlaceOS::Driver
 
             while details = subscription_channel.receive?
               sub, chan = details
-              if sub
-                redis.subscribe [chan]
-              else
-                redis.unsubscribe [chan]
+
+              begin
+                SimpleRetry.try_to(
+                  max_attempts: 4,
+                  base_interval: 20.milliseconds,
+                  max_interval: 1.seconds,
+                  randomise: 80.milliseconds
+                ) do
+                  if sub
+                    redis.subscribe [chan]
+                  else
+                    redis.unsubscribe [chan]
+                  end
+                end
+              rescue error
+                Log.fatal(exception: error) { "redis subscription failed... some components may not function correctly" }
               end
             end
           }
