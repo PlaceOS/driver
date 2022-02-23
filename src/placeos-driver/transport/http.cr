@@ -196,6 +196,14 @@ class PlaceOS::Driver
         rescue IO::Error
           # socket may have been terminated silently so we'll try again
           yield __new_http_client
+        ensure
+          if @client_requests >= @max_requests
+            begin
+              @client.close
+              @client_requests = Int32::MAX
+            rescue
+            end
+          end
         end
       end
     end
@@ -249,18 +257,21 @@ class PlaceOS::Driver
                    # Does this request require a TLS context?
                    context = __is_https? ? new_tls_context : nil
                    client = new_http_client(uri, context)
-                   client.exec(method.to_s.upcase, uri.request_target, headers, body)
+                   client.exec(method.to_s.upcase, uri.request_target, headers, body).tap { client.close }
                  else
                    # Only a single request can occur at a time
                    # crystal does not provide any queuing mechanism so this mutex does the trick
-                   with_shared_client &.exec(method.to_s.upcase, uri.request_target, headers, body)
+                   with_shared_client do |shared_client|
+                     resp = shared_client.exec(method.to_s.upcase, uri.request_target, headers, body)
+                     if keep_alive = resp.headers["Keep-Alive"]?
+                       parse_keep_alive(keep_alive)
+                     end
+                     resp
+                   end
                  end
 
       # assuming we're typically online, this check before assignment is more performant
       @queue.online = true unless @queue.online
-      if keep_alive = response.headers["Keep-Alive"]?
-        parse_keep_alive(keep_alive)
-      end
 
       # fallback in case the HTTP client lib doesn't decompress the response
       check_http_response_encoding response

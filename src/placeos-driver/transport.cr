@@ -81,7 +81,7 @@ abstract class PlaceOS::Driver::Transport
         # Make the request
         client = new_http_client(uri, context)
         cookies.add_request_headers(headers) unless @settings.get { setting?(Bool, :disable_cookies) } || false
-        check_http_response_encoding client.exec(method.to_s.upcase, uri.request_target, headers, body)
+        check_http_response_encoding client.exec(method.to_s.upcase, uri.request_target, headers, body).tap { client.close }
       {% end %}
     end
 
