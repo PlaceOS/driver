@@ -55,7 +55,7 @@ module PlaceOS::Driver::Proxy
 
       def initialize(
         @error_code : ErrorCode,
-        message : String = "",
+        message : String? = nil,
         @system_id : String = "",
         @module_name : String = "",
         @index : Int32 = 1,
