@@ -50,7 +50,7 @@ module PlaceOS::Driver::Proxy
     end
 
     class Error < ::Exception
-      getter error_code, system_id, module_name, index
+      getter error_code, system_id, module_name, index, response_code
       property remote_backtrace : Array(String)?
 
       def initialize(
@@ -59,7 +59,8 @@ module PlaceOS::Driver::Proxy
         @system_id : String = "",
         @module_name : String = "",
         @index : Int32 = 1,
-        @remote_backtrace : Array(String)? = nil
+        @remote_backtrace : Array(String)? = nil,
+        @response_code : Int32 = 500
       )
         super(message)
       end
@@ -184,9 +185,13 @@ module PlaceOS::Driver::Proxy
 
       exec_args = args || named_args
       Core::Client.client(which_core, request_id) do |client|
-        client.execute(module_id, function, exec_args, user_id: user_id)
-        # TODO:: return the code, requires core to return the module code
-        # this simplest way to do this is probably via a header
+        begin
+          client.execute(module_id, function, exec_args, user_id: user_id)
+        rescue error : Core::DriverRaisedError
+          raise Error.new(ErrorCode::RequestFailed, error.message, *@error_details, error.remote_backtrace, error.response_code)
+        rescue error : Core::UnexpectedFailureError | Core::APIResponseError | IO::Error
+          raise Error.new(ErrorCode::UnexpectedFailure, error.message, *@error_details)
+        end
       end
     end
 

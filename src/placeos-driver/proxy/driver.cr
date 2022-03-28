@@ -117,7 +117,7 @@ class PlaceOS::Driver::Proxy::Driver
 
         if error = result.error
           backtrace = result.backtrace || [] of String
-          remote_error = PlaceOS::Driver::RemoteException.new "remote exception: #{result.payload}", error, backtrace
+          remote_error = PlaceOS::Driver::RemoteException.new("remote exception: #{result.payload}", error, backtrace, result.code || 500)
           @system.logger.warn(exception: remote_error) { remote_error.message }
           raise remote_error
         else
