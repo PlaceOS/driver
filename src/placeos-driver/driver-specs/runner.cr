@@ -605,6 +605,13 @@ class DriverSpecs
     self
   end
 
+  def publish(channel, message)
+    message = message.to_s
+    PlaceOS::Driver::RedisStorage.with_redis &.publish("placeos/#{channel}", message)
+    puts "-> spec published: #{channel} -> #{message}"
+    message
+  end
+
   # =============
   # Logic Helpers
   # =============
