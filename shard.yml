@@ -1,5 +1,5 @@
 name: placeos-driver
-version: 6.3.3
+version: 6.3.4
 crystal: ">= 1.0.0"
 
 dependencies:
@@ -8,7 +8,7 @@ dependencies:
 
   connect-proxy:
     github: spider-gazelle/connect-proxy
-    version: ~> 1.2
+    version: ~> 2.0
 
   placeos-core-client:
     github: placeos/core-client
