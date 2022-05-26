@@ -471,7 +471,10 @@ abstract class PlaceOS::Driver
           # ensure the data here is correct, raise error if not
           iface_data = ""
           begin
-            iface_data = `#{current_process} -m`.strip
+            stdout = IO::Memory.new
+            success = Process.new(current_process, {"-m"}, output: stdout).wait.success?
+            raise "process execution failed" unless success
+            iface_data = stdout.to_s.strip
             JSON.parse(iface_data).to_json
           rescue error
             Log.error(exception: error) { "failed to extract JSON schema for interface\n#{iface_data.inspect}" }

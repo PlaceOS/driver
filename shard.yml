@@ -1,5 +1,5 @@
 name: placeos-driver
-version: 6.3.4
+version: 6.3.5
 crystal: ">= 1.0.0"
 
 dependencies:
@@ -56,4 +56,3 @@ dependencies:
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba
-    version: ~> 0.14
