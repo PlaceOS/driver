@@ -19,10 +19,7 @@ jobs:
       matrix:
         stable: [true]
         crystal:
-          - 1.0.0
-          - 1.1.1
-          - 1.2.2
-          - 1.3.0
+          - latest
         include:
           - stable: false
             crystal: nightly
