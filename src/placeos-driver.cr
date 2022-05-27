@@ -531,8 +531,10 @@ macro finished
   if PlaceOS::Startup.print_defaults
     defaults = PlaceOS::Driver::Utilities::Discovery.defaults
     puts PlaceOS::Startup.print_meta ? %(#{defaults.rchop},#{ {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata.lchop }) : defaults
+    exit 0
   elsif PlaceOS::Startup.print_meta
     puts {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata_with_schema
+    exit 0
   end
 
   # inject the rescue_from handlers
