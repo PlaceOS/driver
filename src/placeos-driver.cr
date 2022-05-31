@@ -36,15 +36,6 @@ OptionParser.parse(ARGV.dup) do |parser|
   end
 end
 
-# If we are launching for the purposes of printing messages then we want to
-# disable outputting of log messages
-if PlaceOS::Startup.print_meta || PlaceOS::Startup.print_defaults
-  Log.setup do |c|
-    backend = Log::IOBackend.new
-    c.bind "*", :fatal, backend
-  end
-end
-
 abstract class PlaceOS::Driver
   class_property include_json_schema_in_interface : Bool = true
 
@@ -524,6 +515,13 @@ macro finished
     end
 
     process.terminated.receive?
+  end
+
+  # If we are launching for the purposes of printing messages then we want to
+  # disable outputting of log messages
+  if PlaceOS::Startup.print_meta || PlaceOS::Startup.print_defaults
+    ::Log.setup(:fatal)
+    ::Log.builder.clear
   end
 
   # This is here so we can be certain that settings macros have expanded
