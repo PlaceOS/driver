@@ -101,6 +101,10 @@ abstract class PlaceOS::Driver
     @__driver_model__
   end
 
+  def config=(data : ::PlaceOS::Driver::DriverModel)
+    @__driver_model__ = data
+  end
+
   def module_id
     @__module_id__
   end

@@ -136,11 +136,11 @@ class PlaceOS::Driver::DriverManager
     @subscriptions.try &.terminate
   end
 
-  # TODO:: Core is sending the whole model object - so we should determine if
-  # we should stop and start
+  # update the modules view of the world
   def update(driver_model)
     @settings.json = driver_model.settings
     driver = @driver
+    driver.config = driver_model
     driver[:proxy_in_use] = nil
     driver.on_update if driver.responds_to?(:on_update)
   rescue error
