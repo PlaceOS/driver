@@ -1,5 +1,6 @@
 require "option_parser"
 require "./placeos-driver/logger"
+require "./placeos-driver/stats"
 
 class PlaceOS::Startup
   class_property exec_process_manager : Bool = false
