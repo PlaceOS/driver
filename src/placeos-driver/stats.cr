@@ -17,3 +17,5 @@ module PlaceOS::Driver::Stats
     end
   end
 end
+
+PlaceOS::Driver::Stats.setup_signal
