@@ -2,7 +2,6 @@ require "log"
 require "../core_ext"
 require "../storage"
 require "../task"
-require "../status"
 require "./status_helper"
 require "../settings"
 

@@ -65,8 +65,6 @@ abstract class PlaceOS::Driver
     @__driver_model__ = DriverModel.from_json(%({"udp":false,"tls":false,"makebreak":false,"settings":{},"role":1})),
     @__edge_driver__ : Bool = false
   )
-    @__status__ = Status.new
-
     metadata = {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.driver_interface
     if @__edge_driver__
       @__storage__ = EdgeStorage.new(@__module_id__)
@@ -117,12 +115,10 @@ abstract class PlaceOS::Driver
   # Status helpers #}
   def []=(key, value)
     key = key.to_s
-    json_data, did_change = @__status__.set_json(key, value)
-    if did_change
-      # using spawn so execution flow isn't interrupted.
-      # ensures that setting a key and then reading it back as the next
-      # operation will always result in the expected value
-      spawn(same_thread: true) { @__storage__[key] = json_data }
+    current_value = self[key]?
+    json_data = value.is_a?(::Enum) ? value.to_s.to_json : value.to_json
+    if json_data != current_value
+      @__storage__[key] = json_data
       @__logger__.debug { "status updated: #{key} = #{json_data}" }
     else
       @__logger__.debug { "no change for: #{key} = #{json_data}" }
@@ -131,19 +127,21 @@ abstract class PlaceOS::Driver
   end
 
   def [](key)
-    @__status__.fetch_json(key)
+    JSON.parse @__storage__[key]
   end
 
   def []?(key)
-    @__status__.fetch_json?(key)
+    if json_data = @__storage__[key]?
+      JSON.parse json_data
+    end
   end
 
   macro status(klass, key)
-    {{klass}}.from_json(@__status__[{{key}}.to_s])
+    {{klass}}.from_json(@__storage__[{{key}}.to_s])
   end
 
   macro status?(klass, key)
-    %value = @__status__[{{key}}.to_s]?
+    %value = @__storage__[{{key}}.to_s]?
     {{klass}}.from_json(%value) if %value
   end
 
@@ -495,7 +493,6 @@ require "./placeos-driver/process_manager"
 require "./placeos-driver/protocol"
 require "./placeos-driver/queue"
 require "./placeos-driver/settings"
-require "./placeos-driver/status"
 require "./placeos-driver/storage"
 require "./placeos-driver/subscriptions"
 require "./placeos-driver/task"
