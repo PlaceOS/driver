@@ -180,7 +180,6 @@ class PlaceOS::Driver::Protocol
       if !current_requests.empty?
         error = IO::TimeoutError.new("request timed out")
         current_requests.each { |request| timeout(error, request) }
-        end
       end
     end
 

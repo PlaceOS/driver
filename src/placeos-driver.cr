@@ -7,6 +7,7 @@ class PlaceOS::Startup
   class_property is_edge_driver : Bool = false
   class_property print_meta : Bool = false
   class_property print_defaults : Bool = false
+  class_property socket : String? = nil
 end
 
 # Command line options
@@ -19,6 +20,10 @@ OptionParser.parse(ARGV.dup) do |parser|
 
   parser.on("-d", "--defaults", "output driver defaults") do
     PlaceOS::Startup.print_defaults = true
+  end
+
+  parser.on("-s SOCKET", "--socket=SOCKET", "protocol server socket") do |socket|
+    PlaceOS::Startup.socket = socket.strip
   end
 
   parser.on("-p", "--process", "starts the process manager (expects to have been launched by PlaceOS core)") do
@@ -504,10 +509,17 @@ require "./placeos-driver/subscriptions/*"
 require "./placeos-driver/transport/*"
 require "./placeos-driver/utilities/*"
 
+require "socket"
+
 macro finished
   # Launch the process manager by default, this can be overriten for testing
   if PlaceOS::Startup.exec_process_manager
-    process = PlaceOS::Driver::ProcessManager.new(edge_driver: PlaceOS::Startup.is_edge_driver)
+    if socket = PlaceOS::Startup.socket
+      sock = UNIXSocket.new(socket)
+      process = PlaceOS::Driver::ProcessManager.new(input: sock, output: sock, edge_driver: PlaceOS::Startup.is_edge_driver)
+    else
+      process = PlaceOS::Driver::ProcessManager.new(edge_driver: PlaceOS::Startup.is_edge_driver)
+    end
 
     # Detect ctr-c to shutdown gracefully
     Signal::INT.trap do |signal|
