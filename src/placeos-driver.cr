@@ -120,7 +120,7 @@ abstract class PlaceOS::Driver
   # Status helpers #}
   def []=(key, value)
     key = key.to_s
-    current_value = self[key]?
+    current_value = @__storage__[key]?
     json_data = value.is_a?(::Enum) ? value.to_s.to_json : value.to_json
     if json_data != current_value
       @__storage__[key] = json_data
