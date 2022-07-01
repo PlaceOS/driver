@@ -468,7 +468,7 @@ abstract class PlaceOS::Driver
       # at this point in compilation and the JSON schema is useful for logic drivers
       class_getter driver_interface : String do
         if PlaceOS::Driver.include_json_schema_in_interface
-          current_process = Process.executable_path.not_nil!
+          current_process = ENV["CURRENT_DRIVER_PATH"]? || Process.executable_path.not_nil!
 
           # ensure the data here is correct, raise error if not
           iface_data = ""
@@ -479,7 +479,7 @@ abstract class PlaceOS::Driver
             iface_data = stdout.to_s.strip
             JSON.parse(iface_data).to_json
           rescue error
-            Log.error(exception: error) { "failed to extract JSON schema for interface\n#{iface_data.inspect}" }
+            Log.error(exception: error) { "failed to extract JSON schema from #{current_process} for interface\n#{iface_data.inspect}" }
             # fallback to interface without schema
             {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
           end
