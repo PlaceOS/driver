@@ -101,9 +101,7 @@ class PlaceOS::Driver::Protocol
       message = @processor.receive?
       break if message.nil?
       # Requests should run in async so they don't block the processing loop
-      spawn(same_thread: true) do
-        process(message)
-      end
+      spawn(same_thread: true) { process(message) }
     end
     Log.debug { "protocol processor terminated" }
   end
@@ -174,17 +172,14 @@ class PlaceOS::Driver::Protocol
     spawn(same_thread: true) { self.process! }
 
     # Ensures all outgoing event processing is done on the same thread
-    spawn(same_thread: true) do
-      @timeouts = Tasker.every(timeout_period) do
-        current_requests = @current_requests.values
-        @current_requests = @next_requests
-        @next_requests = {} of UInt64 => Request
+    @timeouts = Tasker.every(timeout_period) do
+      current_requests = @current_requests.values
+      @current_requests = @next_requests
+      @next_requests = {} of UInt64 => Request
 
-        if !current_requests.empty?
-          error = IO::TimeoutError.new("request timed out")
-          current_requests.each do |request|
-            timeout(error, request)
-          end
+      if !current_requests.empty?
+        error = IO::TimeoutError.new("request timed out")
+        current_requests.each { |request| timeout(error, request) }
         end
       end
     end
