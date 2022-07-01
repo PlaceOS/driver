@@ -120,6 +120,9 @@ abstract class PlaceOS::Driver
   # Status helpers #}
   def []=(key, value)
     key = key.to_s
+    # TODO:: we should add a cache if values are longer than a certain value and
+    # store a SHA265 of the JSON value to avoid the transfer of larger values
+    # (without storing them locally)
     current_value = @__storage__[key]?
     json_data = value.is_a?(::Enum) ? value.to_s.to_json : value.to_json
     if json_data != current_value
