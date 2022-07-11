@@ -24,7 +24,6 @@ abstract class DriverSpecs::MockDriver
 
   def initialize(@module_id : String)
     @__storage__ = PlaceOS::Driver::RedisStorage.new(module_id)
-    @__status__ = PlaceOS::Driver::Status.new
 
     __init__
   end
@@ -51,35 +50,37 @@ abstract class DriverSpecs::MockDriver
 
   def []=(key, value)
     key = key.to_s
-    json_data, did_change = @__status__.set_json(key, value)
-    if did_change
-      # using spawn so execution flow isn't interrupted.
-      # ensures that setting a key and then reading it back as the next
-      # operation will always result in the expected value
+    current_value = @__storage__[key]?
+    json_data = value.is_a?(::Enum) ? value.to_s.to_json : value.to_json
+    if json_data != current_value
       @__storage__[key] = json_data
-      logger.debug { "status updated: #{key} = #{value}" }
+      @__logger__.debug { "status updated: #{key} = #{json_data}" }
     else
-      # We still update the state in mocks as this could have been modified outside
-      @__storage__[key] = json_data
-      logger.debug { "no change for: #{key} = #{value}" }
+      @__logger__.debug { "no change for: #{key} = #{json_data}" }
     end
     value
   end
 
   def [](key)
-    @__status__.fetch_json(key)
+    JSON.parse @__storage__[key]
   end
 
   def []?(key)
-    @__status__.fetch_json?(key)
+    if json_data = @__storage__[key]?
+      JSON.parse json_data
+    end
+  end
+
+  def signal_status(key)
+    spawn(same_thread: true) { @__storage__.signal_status(key) }
   end
 
   macro status(klass, key)
-    {{klass}}.from_json(@__status__[{{key}}.to_s])
+    {{klass}}.from_json(@__storage__[{{key}}.to_s])
   end
 
   macro status?(klass, key)
-    %value = @__status__[{{key}}.to_s]?
+    %value = @__storage__[{{key}}.to_s]?
     {{klass}}.from_json(%value) if %value
   end
 

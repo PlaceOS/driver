@@ -83,7 +83,7 @@ class DriverSpecs
 
     select
     when conn = wait_driver_open.receive
-    when timeout(5.seconds)
+    when timeout(30.seconds)
       raise "timeout waiting for driver comms to be established"
     end
     io = conn.not_nil!
@@ -217,7 +217,7 @@ class DriverSpecs
 
         select
         when wait_driver_close.receive?
-        when timeout(5.seconds)
+        when timeout(30.seconds)
           puts "level=ERROR : driver process failed to terminate gracefully".colorize(:red)
           Process.run("kill", {"-9", pid.to_s})
           wait_driver_close.close
