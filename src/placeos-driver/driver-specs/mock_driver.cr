@@ -54,9 +54,9 @@ abstract class DriverSpecs::MockDriver
     json_data = value.is_a?(::Enum) ? value.to_s.to_json : value.to_json
     if json_data != current_value
       @__storage__[key] = json_data
-      @__logger__.debug { "status updated: #{key} = #{json_data}" }
+      logger.debug { "status updated: #{key} = #{json_data}" }
     else
-      @__logger__.debug { "no change for: #{key} = #{json_data}" }
+      logger.debug { "no change for: #{key} = #{json_data}" }
     end
     value
   end
