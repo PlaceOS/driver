@@ -144,7 +144,7 @@ describe PlaceOS::Driver::Protocol::Management do
       "add": [1, 2]
     })).should eq({"3", 200})
 
-    # Status shouldn't have changed, so we only expect this to be 1
+    # Status shouldn't have changed, so we only expect this to be 2
     redis_hset.should eq 2
 
     logged = nil

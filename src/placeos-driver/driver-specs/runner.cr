@@ -32,13 +32,19 @@ class DriverSpecs
 
   def self.mock_driver(driver_name : String, driver_exec = ENV["SPEC_RUN_DRIVER"])
     # Prepare driver IO
-    stdin_reader, input = IO.pipe
-    output, stderr_writer = IO.pipe
-    io = IO::Stapled.new(output, input, true)
+    unix_socket = File.tempname("pos", ".driver")
+    unix_server = UNIXServer.new(unix_socket)
+    wait_driver_open = Channel(UNIXSocket).new
+
+    spawn do
+      while client = unix_server.accept?
+        wait_driver_open.send client
+      end
+    end
+
     wait_driver_close = Channel(Nil).new
     exited = false
     exit_code = -1
-    pid = -1
 
     # Configure logging
     ::Log.builder.bind "*", :debug, ::Log::IOBackend.new
@@ -47,37 +53,45 @@ class DriverSpecs
     storage = PlaceOS::Driver::RedisStorage.new(SYSTEM_ID, "system")
     storage.clear
 
-    begin
-      fetch_pid = Promise.new(Int64)
+    fetch_pid = Promise.new(Int64)
 
-      # Load the driver (inherit STDOUT for logging)
-      # -p is for protocol / process mode - expecting placeos core
-      spawn(same_thread: true) do
-        begin
-          puts "Launching driver: #{driver_exec.colorize(:green)}"
-          Process.run(
-            driver_exec,
-            {"-p"},
-            {"DEBUG" => "1"},
-            input: stdin_reader,
-            output: STDOUT,
-            error: stderr_writer
-          ) do |process|
-            fetch_pid.resolve process.pid
-          end
-
-          exit_code = $?.exit_code
-          puts "Driver terminated with: #{exit_code}"
-        ensure
-          exited = true
-          wait_driver_close.send(nil)
+    # Load the driver (inherit STDOUT for logging)
+    # -p is for protocol / process mode - expecting placeos core
+    spawn(same_thread: true) do
+      begin
+        puts "Launching driver: #{driver_exec.colorize(:green)}"
+        Process.run(
+          driver_exec,
+          {"-p", "-s", unix_socket},
+          {"DEBUG" => "1", "CURRENT_DRIVER_PATH" => driver_exec},
+          output: STDOUT,
+          error: STDOUT
+        ) do |process|
+          fetch_pid.resolve process.pid
         end
+
+        exit_code = $?.exit_code
+        puts "Driver terminated with: #{exit_code}"
+      ensure
+        exited = true
+        wait_driver_open.close
+        wait_driver_close.send(nil)
       end
+    end
 
-      pid = fetch_pid.get
+    pid = fetch_pid.get
 
+    select
+    when conn = wait_driver_open.receive
+    when timeout(5.seconds)
+      raise "timeout waiting for driver comms to be established"
+    end
+    io = conn.not_nil!
+
+    begin
       # Wait for the driver to be ready
       io.read_string(1)
+      io.sync = false
 
       puts "... requesting default settings"
       defaults_io = IO::Memory.new
@@ -201,18 +215,18 @@ class DriverSpecs
         io.write json.to_slice
         io.flush
 
-        spawn(same_thread: true) do
-          sleep 1.seconds
+        select
+        when wait_driver_close.receive?
+        when timeout(5.seconds)
           puts "level=ERROR : driver process failed to terminate gracefully".colorize(:red)
           Process.run("kill", {"-9", pid.to_s})
           wait_driver_close.close
         end
-        wait_driver_close.receive?
       end
     end
   end
 
-  def initialize(@driver_name : String, @io : IO::Stapled, @makebreak : Bool, @current_settings : JSON::Any)
+  def initialize(@driver_name : String, @io : UNIXSocket, @makebreak : Bool, @current_settings : JSON::Any)
     # setup structures for handling HTTP request emulation
     @mock_drivers = {} of String => MockDriver
     @write_mutex = Mutex.new

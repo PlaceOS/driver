@@ -10,7 +10,7 @@ class PlaceOS::Driver::DriverManager
     @subscriptions = edge_driver ? nil : Proxy::Subscriptions.new(subscriptions || Subscriptions.new(module_id: @module_id))
 
     # Ensures execution all occurs on a single thread
-    @requests = ::Channel(Tuple(Promise(Nil), Protocol::Request)).new(4)
+    @requests = ::Channel(Tuple(::Channel(Nil), Protocol::Request)).new(1)
 
     @transport = case @model.role
                  in .ssh?
@@ -83,17 +83,23 @@ class PlaceOS::Driver::DriverManager
     # a driver might be making a HTTP request in on_load for exampe which
     # could block for a long time, resulting in poor feedback
     if driver.responds_to?(:on_load)
-      promise = Promise(Nil).defer(same_thread: true, timeout: 6.second) do
-        driver.on_load
-        nil
+      wait_on_load = Channel(Nil).new
+      spawn(same_thread: true) do
+        begin
+          driver.on_load
+        rescue error
+          logger.error(exception: error) { "in the on_load function of #{driver.class} (#{@module_id})" }
+        end
+        wait_on_load.send nil
       end
 
-      promise.catch do |error|
-        logger.error(exception: error) { "in the on_load function of #{driver.class} (#{@module_id})" }
-        nil
+      select
+      when wait_on_load.receive
+      when timeout(6.seconds)
+        logger.error { "timeout waiting for the on_load function of #{driver.class} (#{@module_id})" }
       end
 
-      promise.get
+      wait_on_load.close
     end
 
     begin
@@ -115,19 +121,25 @@ class PlaceOS::Driver::DriverManager
   def terminate : Nil
     @transport.terminate
     driver = @driver
+
     if driver.responds_to?(:on_unload)
-      # Ensure driver does not block here, otherwise it will never terminate
-      promise = Promise(Nil).defer(same_thread: true, timeout: 6.second) do
-        driver.on_unload
-        nil
+      wait_on_unload = Channel(Nil).new
+      spawn(same_thread: true) do
+        begin
+          driver.on_unload
+        rescue error
+          logger.error(exception: error) { "in the wait_on_unload function of #{driver.class} (#{@module_id})" }
+        end
+        wait_on_unload.send nil
       end
 
-      promise.catch do |error|
-        logger.error(exception: error) { "in the on_unload function of #{driver.class} (#{@module_id})" }
-        nil
+      select
+      when wait_on_unload.receive
+      when timeout(6.seconds)
+        logger.error { "timeout waiting for the wait_on_unload function of #{driver.class} (#{@module_id})" }
       end
 
-      promise.get
+      wait_on_unload.close
     end
 
     @requests.close
@@ -156,11 +168,11 @@ class PlaceOS::Driver::DriverManager
     loop do
       req_data = @requests.receive?
       break if req_data.nil?
-      promise, request = req_data
+      channel, request = req_data
       spawn(same_thread: true, name: request.user_id) do
         Log.context.set user_id: (request.user_id || "internal"), request_id: request.id
         process request
-        promise.resolve(nil)
+        channel.send(nil)
       end
     end
   end

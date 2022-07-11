@@ -43,15 +43,16 @@ class PlaceOS::Driver::ProcessManager
   rescue error
     # Driver was unable to be loaded.
     Log.error(exception: error) { "starting driver #{DriverManager.driver_class} (#{request.id})" }
+    loaded.delete(module_id)
     request.set_error(error)
   end
 
   def stop(request : Protocol::Request) : Nil
     driver = loaded.delete request.id
     if driver
-      promise = Promise.new(Nil)
-      driver.requests.send({promise, request})
-      promise.get
+      channel = Channel(Nil).new.tap { |chan| driver.requests.send({chan, request}) }
+      channel.receive
+      channel.close
     end
   end
 
@@ -75,27 +76,24 @@ class PlaceOS::Driver::ProcessManager
     else
       # No change required
       request.driver_model = updated
-      promise = Promise.new(Nil)
-      driver.requests.send({promise, request})
-      promise.get
+      channel = Channel(Nil).new.tap { |chan| driver.requests.send({chan, request}) }
+      channel.receive
+      channel.close
     end
   end
 
   def exec(request : Protocol::Request) : Protocol::Request
     driver = loaded[request.id]?
+    raise "driver not available" unless driver
 
-    begin
-      raise "driver not available" unless driver
-
-      promise = Promise.new(Nil)
-      driver.requests.send({promise, request})
-      promise.get
-    rescue error
-      Log.error(exception: error) { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})" }
-      request.set_error(error)
-    end
-
+    channel = Channel(Nil).new.tap { |chan| driver.requests.send({chan, request}) }
+    channel.receive
+    channel.close
     request.cmd = :result
+    request
+  rescue error
+    Log.error(exception: error) { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})" }
+    request.set_error(error)
     request
   end
 
@@ -121,12 +119,12 @@ class PlaceOS::Driver::ProcessManager
 
     # Shutdown all the connections gracefully
     req = Protocol::Request.new("", :stop)
-    loaded.each_value do |driver|
-      promise = Promise.new(Nil)
-      driver.requests.send({promise, req})
-      promise.get
+    loaded.map { |_key, driver|
+      Channel(Nil).new.tap { |chan| driver.requests.send({chan, req}) }
+    }.each do |channel|
+      channel.receive
+      channel.close
     end
-
     loaded.clear
 
     # We now want to stop the subscription loop

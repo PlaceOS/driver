@@ -7,6 +7,7 @@ class PlaceOS::Startup
   class_property is_edge_driver : Bool = false
   class_property print_meta : Bool = false
   class_property print_defaults : Bool = false
+  class_property socket : String? = nil
 end
 
 # Command line options
@@ -19,6 +20,10 @@ OptionParser.parse(ARGV.dup) do |parser|
 
   parser.on("-d", "--defaults", "output driver defaults") do
     PlaceOS::Startup.print_defaults = true
+  end
+
+  parser.on("-s SOCKET", "--socket=SOCKET", "protocol server socket") do |socket|
+    PlaceOS::Startup.socket = socket.strip
   end
 
   parser.on("-p", "--process", "starts the process manager (expects to have been launched by PlaceOS core)") do
@@ -65,8 +70,6 @@ abstract class PlaceOS::Driver
     @__driver_model__ = DriverModel.from_json(%({"udp":false,"tls":false,"makebreak":false,"settings":{},"role":1})),
     @__edge_driver__ : Bool = false
   )
-    @__status__ = Status.new
-
     metadata = {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.driver_interface
     if @__edge_driver__
       @__storage__ = EdgeStorage.new(@__module_id__)
@@ -117,12 +120,13 @@ abstract class PlaceOS::Driver
   # Status helpers #}
   def []=(key, value)
     key = key.to_s
-    json_data, did_change = @__status__.set_json(key, value)
-    if did_change
-      # using spawn so execution flow isn't interrupted.
-      # ensures that setting a key and then reading it back as the next
-      # operation will always result in the expected value
-      spawn(same_thread: true) { @__storage__[key] = json_data }
+    # TODO:: we should add a cache if values are longer than a certain value and
+    # store a SHA265 of the JSON value to avoid the transfer of larger values
+    # (without storing them locally)
+    current_value = @__storage__[key]?
+    json_data = value.is_a?(::Enum) ? value.to_s.to_json : value.to_json
+    if json_data != current_value
+      @__storage__[key] = json_data
       @__logger__.debug { "status updated: #{key} = #{json_data}" }
     else
       @__logger__.debug { "no change for: #{key} = #{json_data}" }
@@ -131,19 +135,21 @@ abstract class PlaceOS::Driver
   end
 
   def [](key)
-    @__status__.fetch_json(key)
+    JSON.parse @__storage__[key]
   end
 
   def []?(key)
-    @__status__.fetch_json?(key)
+    if json_data = @__storage__[key]?
+      JSON.parse json_data
+    end
   end
 
   macro status(klass, key)
-    {{klass}}.from_json(@__status__[{{key}}.to_s])
+    {{klass}}.from_json(@__storage__[{{key}}.to_s])
   end
 
   macro status?(klass, key)
-    %value = @__status__[{{key}}.to_s]?
+    %value = @__storage__[{{key}}.to_s]?
     {{klass}}.from_json(%value) if %value
   end
 
@@ -462,7 +468,7 @@ abstract class PlaceOS::Driver
       # at this point in compilation and the JSON schema is useful for logic drivers
       class_getter driver_interface : String do
         if PlaceOS::Driver.include_json_schema_in_interface
-          current_process = Process.executable_path.not_nil!
+          current_process = ENV["CURRENT_DRIVER_PATH"]? || Process.executable_path.not_nil!
 
           # ensure the data here is correct, raise error if not
           iface_data = ""
@@ -473,7 +479,7 @@ abstract class PlaceOS::Driver
             iface_data = stdout.to_s.strip
             JSON.parse(iface_data).to_json
           rescue error
-            Log.error(exception: error) { "failed to extract JSON schema for interface\n#{iface_data.inspect}" }
+            Log.error(exception: error) { "failed to extract JSON schema from #{current_process} for interface\n#{iface_data.inspect}" }
             # fallback to interface without schema
             {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
           end
@@ -495,7 +501,6 @@ require "./placeos-driver/process_manager"
 require "./placeos-driver/protocol"
 require "./placeos-driver/queue"
 require "./placeos-driver/settings"
-require "./placeos-driver/status"
 require "./placeos-driver/storage"
 require "./placeos-driver/subscriptions"
 require "./placeos-driver/task"
@@ -507,10 +512,17 @@ require "./placeos-driver/subscriptions/*"
 require "./placeos-driver/transport/*"
 require "./placeos-driver/utilities/*"
 
+require "socket"
+
 macro finished
   # Launch the process manager by default, this can be overriten for testing
   if PlaceOS::Startup.exec_process_manager
-    process = PlaceOS::Driver::ProcessManager.new(edge_driver: PlaceOS::Startup.is_edge_driver)
+    if socket = PlaceOS::Startup.socket
+      sock = UNIXSocket.new(socket)
+      process = PlaceOS::Driver::ProcessManager.new(input: sock, output: sock, edge_driver: PlaceOS::Startup.is_edge_driver)
+    else
+      process = PlaceOS::Driver::ProcessManager.new(edge_driver: PlaceOS::Startup.is_edge_driver)
+    end
 
     # Detect ctr-c to shutdown gracefully
     Signal::INT.trap do |signal|
