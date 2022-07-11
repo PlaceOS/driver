@@ -63,7 +63,7 @@ class DriverSpecs
         Process.run(
           driver_exec,
           {"-p", "-s", unix_socket},
-          {"DEBUG" => "1"},
+          {"DEBUG" => "1", "CURRENT_DRIVER_PATH" => driver_exec},
           output: STDOUT,
           error: STDOUT
         ) do |process|
@@ -83,7 +83,7 @@ class DriverSpecs
 
     select
     when conn = wait_driver_open.receive
-    when timeout(30.seconds)
+    when timeout(5.seconds)
       raise "timeout waiting for driver comms to be established"
     end
     io = conn.not_nil!
@@ -217,7 +217,7 @@ class DriverSpecs
 
         select
         when wait_driver_close.receive?
-        when timeout(30.seconds)
+        when timeout(5.seconds)
           puts "level=ERROR : driver process failed to terminate gracefully".colorize(:red)
           Process.run("kill", {"-9", pid.to_s})
           wait_driver_close.close
