@@ -50,7 +50,9 @@ class PlaceOS::Driver::ProcessManager
   def stop(request : Protocol::Request) : Nil
     driver = loaded.delete request.id
     if driver
-      Promise.new(Nil).tap { |promise| driver.requests.send({promise, request}) }.get
+      channel = Channel(Nil).new.tap { |channel| driver.requests.send({channel, request}) }
+      channel.receive
+      channel.close
     end
   end
 
@@ -74,9 +76,9 @@ class PlaceOS::Driver::ProcessManager
     else
       # No change required
       request.driver_model = updated
-      promise = Promise.new(Nil)
-      driver.requests.send({promise, request})
-      promise.get
+      channel = Channel(Nil).new.tap { |channel| driver.requests.send({channel, request}) }
+      channel.receive
+      channel.close
     end
   end
 
@@ -84,10 +86,9 @@ class PlaceOS::Driver::ProcessManager
     driver = loaded[request.id]?
     raise "driver not available" unless driver
 
-    promise = Promise.new(Nil)
-    driver.requests.send({promise, request})
-    promise.get
-
+    channel = Channel(Nil).new.tap { |channel| driver.requests.send({channel, request}) }
+    channel.receive
+    channel.close
     request.cmd = :result
     request
   rescue error
@@ -119,8 +120,11 @@ class PlaceOS::Driver::ProcessManager
     # Shutdown all the connections gracefully
     req = Protocol::Request.new("", :stop)
     loaded.map { |_key, driver|
-      Promise.new(Nil).tap { |promise| driver.requests.send({promise, req}) }
-    }.each(&.get)
+      Channel(Nil).new.tap { |channel| driver.requests.send({channel, req}) }
+    }.each do |channel|
+      channel.receive
+      channel.close
+    end
     loaded.clear
 
     # We now want to stop the subscription loop
