@@ -105,6 +105,7 @@ abstract class DriverSpecs::MockDriver
   {% RESERVED_METHODS["[]"] = true %}
   {% RESERVED_METHODS["[]="] = true %}
   {% RESERVED_METHODS["send"] = true %}
+  {% RESERVED_METHODS["signal_status"] = true %}
 
   macro __build_helpers__
     {% methods = @type.methods %}
