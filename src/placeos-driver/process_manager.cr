@@ -50,7 +50,7 @@ class PlaceOS::Driver::ProcessManager
   def stop(request : Protocol::Request) : Nil
     driver = loaded.delete request.id
     if driver
-      channel = Channel(Nil).new.tap { |channel| driver.requests.send({channel, request}) }
+      channel = Channel(Nil).new.tap { |chan| driver.requests.send({chan, request}) }
       channel.receive
       channel.close
     end
@@ -76,7 +76,7 @@ class PlaceOS::Driver::ProcessManager
     else
       # No change required
       request.driver_model = updated
-      channel = Channel(Nil).new.tap { |channel| driver.requests.send({channel, request}) }
+      channel = Channel(Nil).new.tap { |chan| driver.requests.send({chan, request}) }
       channel.receive
       channel.close
     end
@@ -86,7 +86,7 @@ class PlaceOS::Driver::ProcessManager
     driver = loaded[request.id]?
     raise "driver not available" unless driver
 
-    channel = Channel(Nil).new.tap { |channel| driver.requests.send({channel, request}) }
+    channel = Channel(Nil).new.tap { |chan| driver.requests.send({chan, request}) }
     channel.receive
     channel.close
     request.cmd = :result
@@ -120,7 +120,7 @@ class PlaceOS::Driver::ProcessManager
     # Shutdown all the connections gracefully
     req = Protocol::Request.new("", :stop)
     loaded.map { |_key, driver|
-      Channel(Nil).new.tap { |channel| driver.requests.send({channel, req}) }
+      Channel(Nil).new.tap { |chan| driver.requests.send({chan, req}) }
     }.each do |channel|
       channel.receive
       channel.close
