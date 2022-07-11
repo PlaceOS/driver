@@ -43,15 +43,14 @@ class PlaceOS::Driver::ProcessManager
   rescue error
     # Driver was unable to be loaded.
     Log.error(exception: error) { "starting driver #{DriverManager.driver_class} (#{request.id})" }
+    loaded.delete(module_id)
     request.set_error(error)
   end
 
   def stop(request : Protocol::Request) : Nil
     driver = loaded.delete request.id
     if driver
-      promise = Promise.new(Nil)
-      driver.requests.send({promise, request})
-      promise.get
+      Promise.new(Nil).tap { |promise| driver.requests.send({promise, request}) }.get
     end
   end
 
@@ -83,19 +82,17 @@ class PlaceOS::Driver::ProcessManager
 
   def exec(request : Protocol::Request) : Protocol::Request
     driver = loaded[request.id]?
+    raise "driver not available" unless driver
 
-    begin
-      raise "driver not available" unless driver
-
-      promise = Promise.new(Nil)
-      driver.requests.send({promise, request})
-      promise.get
-    rescue error
-      Log.error(exception: error) { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})" }
-      request.set_error(error)
-    end
+    promise = Promise.new(Nil)
+    driver.requests.send({promise, request})
+    promise.get
 
     request.cmd = :result
+    request
+  rescue error
+    Log.error(exception: error) { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})" }
+    request.set_error(error)
     request
   end
 
@@ -121,12 +118,9 @@ class PlaceOS::Driver::ProcessManager
 
     # Shutdown all the connections gracefully
     req = Protocol::Request.new("", :stop)
-    loaded.each_value do |driver|
-      promise = Promise.new(Nil)
-      driver.requests.send({promise, req})
-      promise.get
-    end
-
+    loaded.map { |_key, driver|
+      Promise.new(Nil).tap { |promise| driver.requests.send({promise, req}) }
+    }.each(&.get)
     loaded.clear
 
     # We now want to stop the subscription loop
