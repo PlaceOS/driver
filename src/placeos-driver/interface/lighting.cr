@@ -8,12 +8,13 @@ abstract class PlaceOS::Driver
       # Newer fields can be added if these don't meet requirements for newer lighting systems
       getter id : UInt32?
       getter join : UInt32?
+      getter channel : UInt32?
       getter component : String?
 
       @[JSON::Field(ignore: true)]
       property append : String? = nil
 
-      def initialize(@id = nil, @component = nil, @join = nil)
+      def initialize(@id = nil, @channel = nil, @component = nil, @join = nil)
       end
 
       def join_with(area : Area) : Area
@@ -32,7 +33,7 @@ abstract class PlaceOS::Driver
       end
 
       def to_s
-        ["area#{id}", component, join, append].compact.join("_")
+        ["area#{id}", channel, component, join, append].compact.join("_")
       end
     end
 
