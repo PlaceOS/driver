@@ -8,8 +8,11 @@ require "./protocol/request"
 
 STDIN.blocking = false
 STDIN.sync = false
+
+STDERR.flush_on_newline = false
 STDERR.blocking = false
-STDERR.sync = true
+STDERR.sync = true # we mark this as false if in use for protocol comms
+
 STDOUT.blocking = false
 STDOUT.sync = true
 
