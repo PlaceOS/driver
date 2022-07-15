@@ -113,6 +113,10 @@ abstract class PlaceOS::Driver
     @__module_id__
   end
 
+  protected def terminated?
+    @__queue__.terminated
+  end
+
   def invoked_by_user_id
     Fiber.current.name
   end

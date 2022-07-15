@@ -21,6 +21,7 @@ class PlaceOS::Driver::Queue
   getter logger : ::Log
   getter current : Task? = nil
   getter previous : Task? = nil
+  getter terminated : Bool
   @online : Bool? = nil
 
   # for modifying defaults
