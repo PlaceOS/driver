@@ -122,6 +122,11 @@ class PlaceOS::Driver::DriverManager
     @transport.terminate
     driver = @driver
 
+    @requests.close
+    @queue.terminate
+    @schedule.terminate
+    @subscriptions.try &.terminate
+  ensure
     if driver.responds_to?(:on_unload)
       wait_on_unload = Channel(Nil).new
       spawn(same_thread: true) do
@@ -141,11 +146,6 @@ class PlaceOS::Driver::DriverManager
 
       wait_on_unload.close
     end
-
-    @requests.close
-    @queue.terminate
-    @schedule.terminate
-    @subscriptions.try &.terminate
   end
 
   # update the modules view of the world
