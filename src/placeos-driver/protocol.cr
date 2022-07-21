@@ -100,10 +100,15 @@ class PlaceOS::Driver::Protocol
 
   private def process!
     while message = @processor.receive?
-      # Requests should run in async so they don't block the processing loop
-      spawn(same_thread: true) { process(message) }
+      # we don't inline this function so message is not overwritten with a new value
+      schedule_process(message)
     end
     Log.debug { "protocol processor terminated" }
+  end
+
+  protected def schedule_process(message : Request)
+    # Requests should run in async so they don't block the processing loop
+    spawn(same_thread: true) { process(message) }
   end
 
   def process(message : Request)

@@ -4,6 +4,10 @@ require "./test_build"
 
 PlaceOS::Driver.include_json_schema_in_interface = false
 
+Spec.before_suite do
+  ::Log.setup "*", :debug
+end
+
 class Helper
   # Creates the input / output IO required to test protocol functions
   def self.protocol
