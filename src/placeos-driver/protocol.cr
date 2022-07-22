@@ -100,18 +100,12 @@ class PlaceOS::Driver::Protocol
 
   private def process!
     while message = @processor.receive?
-      # we don't inline this function so message is not overwritten with a new value
-      schedule_process(message)
+      process(message)
     end
     Log.debug { "protocol processor terminated" }
   end
 
-  protected def schedule_process(message : Request)
-    # Requests should run in async so they don't block the processing loop
-    spawn(same_thread: true) { process(message) }
-  end
-
-  def process(message : Request)
+  def process(message : Request) : Nil
     Log.debug { "protocol processing: #{message.inspect}" }
     if message.cmd.result?
       # result of an executed request
@@ -120,14 +114,20 @@ class PlaceOS::Driver::Protocol
       seq = message.seq
       @current_requests.delete(seq)
       @next_requests.delete(seq)
-      channel = @tracking.delete(seq)
-      channel.try &.send(message)
+      if channel = @tracking.delete(seq)
+        # non-blocking, channel is of size 1
+        channel.send(message) unless channel.closed?
+      end
       return
     end
 
-    callbacks[message.cmd].each do |callback|
-      response = callback.call(message)
-      if response
+    watching = callbacks[message.cmd]
+    spawn(same_thread: true) { call_watchers(watching, message) }
+  end
+
+  protected def call_watchers(watching, message)
+    watching.each do |callback|
+      if response = callback.call(message)
         Log.debug { "protocol queuing response: #{response.inspect}" }
         @producer.send({response, nil})
         break
