@@ -116,13 +116,19 @@ class PlaceOS::Driver::Protocol
       @next_requests.delete(seq)
       if channel = @tracking.delete(seq)
         # non-blocking, channel is of size 1
-        channel.send(message) unless channel.closed?
+        begin
+          channel.send(message) unless channel.closed?
+        rescue
+          # ignore any error here as possible for the channel to timeout
+          # this rescue is overzealous unless running in multi-threaded mode
+        end
       end
       return
     end
 
-    watching = callbacks[message.cmd]
-    spawn(same_thread: true) { call_watchers(watching, message) }
+    if watching = callbacks[message.cmd]?
+      spawn(same_thread: true) { call_watchers(watching, message) }
+    end
   end
 
   protected def call_watchers(watching, message)
