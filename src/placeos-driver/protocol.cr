@@ -48,7 +48,6 @@ class PlaceOS::Driver::Protocol
   def initialize(input = STDIN, output = STDERR, timeout = 2.minutes)
     output.sync = false if output.responds_to?(:sync)
     @io = IO::Stapled.new(input, output, true)
-    @write_lock = Mutex.new
     @tokenizer = ::Tokenizer.new do |io|
       begin
         io.read_bytes(Int32) + 4
@@ -61,10 +60,10 @@ class PlaceOS::Driver::Protocol
     @tracking = {} of UInt64 => Channel(Request)
 
     # Send outgoing data
-    @producer = ::Channel(Tuple(Request, Channel(Request)?)?).new(32)
+    @producer = ::Channel(Tuple(Request, Channel(Request)?)?).new
 
     # Processes the incomming data
-    @processor = ::Channel(Request).new(32)
+    @processor = ::Channel(Request).new(1)
 
     # Timout handler
     # Batched timeouts to reduce load. Any responses in these sets
@@ -100,16 +99,13 @@ class PlaceOS::Driver::Protocol
   end
 
   private def process!
-    loop do
-      message = @processor.receive?
-      break if message.nil?
-      # Requests should run in async so they don't block the processing loop
-      spawn(same_thread: true) { process(message) }
+    while message = @processor.receive?
+      process(message)
     end
     Log.debug { "protocol processor terminated" }
   end
 
-  def process(message : Request)
+  def process(message : Request) : Nil
     Log.debug { "protocol processing: #{message.inspect}" }
     if message.cmd.result?
       # result of an executed request
@@ -118,14 +114,26 @@ class PlaceOS::Driver::Protocol
       seq = message.seq
       @current_requests.delete(seq)
       @next_requests.delete(seq)
-      channel = @tracking.delete(seq)
-      channel.try &.send(message)
+      if channel = @tracking.delete(seq)
+        # non-blocking, channel is of size 1
+        begin
+          channel.send(message) unless channel.closed?
+        rescue
+          # ignore any error here as possible for the channel to timeout
+          # this rescue is overzealous unless running in multi-threaded mode
+        end
+      end
       return
     end
 
-    callbacks[message.cmd].each do |callback|
-      response = callback.call(message)
-      if response
+    if watching = callbacks[message.cmd]?
+      spawn(same_thread: true) { call_watchers(watching, message) }
+    end
+  end
+
+  protected def call_watchers(watching, message)
+    watching.each do |callback|
+      if response = callback.call(message)
         Log.debug { "protocol queuing response: #{response.inspect}" }
         @producer.send({response, nil})
         break
@@ -188,29 +196,10 @@ class PlaceOS::Driver::Protocol
 
     # Process outgoing requests
     begin
+      io = @io
       while req_data = @producer.receive?
         request, channel = req_data
-
-        # Expects a response
-        if channel
-          seq = @@seq
-          @@seq += 1
-          request.seq = seq
-
-          @tracking[seq] = channel
-          @next_requests[seq] = request
-        end
-
-        Log.debug { "protocol sending (expects reply #{!!channel}): #{request.inspect}" }
-
-        # Single call to write ensure there is no interlacing
-        # in-case a 3rd party library writes something to STDERR
-        @io.print(String.build { |msg|
-          msg << INDICATOR
-          request.to_json(msg)
-          msg << DELIMITER
-        })
-        @io.flush
+        write_request(io, request, channel)
       end
     rescue e
       Log.fatal { "Fatal error #{e.inspect_with_backtrace}" }
@@ -218,25 +207,44 @@ class PlaceOS::Driver::Protocol
     end
   end
 
+  protected def write_request(io, request, channel)
+    # Expects a response
+    if channel
+      seq = @@seq
+      @@seq += 1
+      request.seq = seq
+
+      @tracking[seq] = channel
+      @next_requests[seq] = request
+    end
+
+    Log.debug { "protocol sending (expects reply #{!!channel}): #{request.inspect}" }
+
+    io << INDICATOR
+    request.to_json(io)
+    io << DELIMITER
+    io.flush
+  end
+
   # Reads IO off STDIN and extracts the request messages
   private def consume_io
     raw_data = Bytes.new(4096)
+    io = @io
 
     # provide a ready signal
     {% if compare_versions(Crystal::VERSION, "1.1.1") <= 0 %}
-      @io.write_utf8("r".to_slice)
+      io.write_utf8("r".to_slice)
     {% else %}
-      @io.write_string("r".to_slice)
+      io.write_string("r".to_slice)
     {% end %}
-    @io.flush
+    io.flush
 
-    until @io.closed? || (bytes_read = @io.read(raw_data)).nil? || bytes_read.zero?
+    until io.closed? || (bytes_read = io.read(raw_data)).nil? || bytes_read.zero?
       Log.debug { "protocol received #{bytes_read}" }
 
       @tokenizer.extract(raw_data[0, bytes_read]).each do |message|
-        string = nil
+        string = String.new(message[4, message.bytesize - 4])
         begin
-          string = String.new(message[4, message.bytesize - 4])
           Log.debug { "protocol queuing #{string}" }
           @processor.send Request.from_json(string)
         rescue error
