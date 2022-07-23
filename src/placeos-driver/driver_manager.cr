@@ -167,14 +167,20 @@ class PlaceOS::Driver::DriverManager
   private def process_requests!
     loop do
       req_data = @requests.receive?
-      break if req_data.nil?
+      break unless req_data
       channel, request = req_data
-      spawn(same_thread: true, name: request.user_id) do
-        Log.context.set user_id: (request.user_id || "internal"), request_id: request.id
-        process request
-        channel.send(nil)
-      end
+      spawn_request_fiber(channel, request)
     end
+  end
+
+  private def spawn_request_fiber(channel, request)
+    spawn(same_thread: true, name: request.user_id) do
+      Log.context.set user_id: (request.user_id || "internal"), request_id: request.id
+      process request
+      channel.send(nil)
+    end
+  rescue error
+    Log.error(exception: error) { "error spawning request fiber" }
   end
 
   def self.process_result(klass, method_name, ret_val)
