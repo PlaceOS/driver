@@ -20,7 +20,8 @@ class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
   end
 
   def fetch(key, &block : String ->)
-    hash.fetch(key.to_s, &block)
+    key = key.to_s
+    @hash.fetch(key) { yield key }
   end
 
   # Hash methods
