@@ -3,7 +3,7 @@ require "../protocol"
 
 class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
   private getter hash : Hash(String, String) = {} of String => String
-  delegate fetch, keys, values, size, empty?, to: hash
+  delegate keys, values, size, empty?, to: hash
 
   def to_h : Hash(String, String)
     hash.dup
@@ -17,6 +17,10 @@ class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
     adjusted_value = json_value || "null"
     PlaceOS::Driver::Protocol.instance.request(hash_key, :hset, "#{status_name}\x03#{adjusted_value}", raw: true)
     json_value
+  end
+
+  def fetch(key, &block : String ->)
+    hash.fetch(key.to_s, &block)
   end
 
   # Hash methods
