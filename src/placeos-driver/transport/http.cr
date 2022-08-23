@@ -115,12 +115,12 @@ class PlaceOS::Driver
     # timeouts in seconds
     def initialize(
       @queue : PlaceOS::Driver::Queue,
-      uri_base : String,
+      @uri : String,
       @settings : ::PlaceOS::Driver::Settings
     )
       @terminated = false
       @tls = new_tls_context
-      @uri_base = URI.parse(uri_base)
+      @uri_base = URI.parse(@uri)
       @http_client_mutex = Mutex.new
       @params_base = @uri_base.query_params
 
