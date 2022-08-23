@@ -1,5 +1,5 @@
 name: placeos-driver
-version: 6.4.6
+version: 6.4.7
 crystal: ">= 1.0.0"
 
 dependencies:
@@ -52,6 +52,9 @@ dependencies:
 
   crunits:
     github: spider-gazelle/crunits
+
+  json-schema:
+    github: spider-gazelle/json-schema
 
 development_dependencies:
   ameba:

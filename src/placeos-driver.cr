@@ -1,3 +1,4 @@
+require "json-schema"
 require "option_parser"
 require "./placeos-driver/logger"
 require "./placeos-driver/stats"
@@ -399,7 +400,7 @@ abstract class PlaceOS::Driver
 
             {{method.name.stringify}} => {
               {% for arg in args %}
-                {{arg.name.stringify}} => PlaceOS::Driver::Settings.introspect({{arg.restriction.resolve}}).
+                {{arg.name.stringify}} => JSON::Schema.introspect({{arg.restriction.resolve}}).
                   {% if arg.default_value.is_a?(Nop) %}
                     merge({ title: {{arg.restriction.resolve.stringify}} }),
                   {% else %}

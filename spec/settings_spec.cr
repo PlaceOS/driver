@@ -102,34 +102,34 @@ describe PlaceOS::Driver::Settings do
   end
 
   it "should generate JSON schema from objects" do
-    PlaceOS::Driver::Settings.introspect(Array(String)).should eq({type: "array", items: {type: "string"}})
-    PlaceOS::Driver::Settings.introspect(SuperArray).should eq({type: "array"})
-    PlaceOS::Driver::Settings.introspect(AliasTest::Array).should eq({type: "array", items: {type: "string"}})
-    PlaceOS::Driver::Settings.introspect(Array(Int32)).should eq({type: "array", items: {type: "integer"}})
-    PlaceOS::Driver::Settings.introspect(Array(Float32)).should eq({type: "array", items: {type: "number"}})
-    PlaceOS::Driver::Settings.introspect(Array(Bool)).should eq({type: "array", items: {type: "boolean"}})
-    PlaceOS::Driver::Settings.introspect(Array(JSON::Any)).should eq({type: "array"})
-    PlaceOS::Driver::Settings.introspect(NamedTuple(steve: String)).should eq({type: "object", properties: {steve: {type: "string"}}, required: ["steve"]})
-    PlaceOS::Driver::Settings.introspect(TestEnum).should eq({type: "string", enum: ["bob", "jane"]})
-    PlaceOS::Driver::Settings.introspect(Tuple(String, Bool)).should eq({type: "array", items: [{type: "string"}, {type: "boolean"}]})
-    PlaceOS::Driver::Settings.introspect(SomeType).should eq({anyOf: [
+    JSON::Schema.introspect(Array(String)).should eq({type: "array", items: {type: "string"}})
+    JSON::Schema.introspect(SuperArray).should eq({type: "array", items: {type: "integer"}})
+    JSON::Schema.introspect(AliasTest::Array).should eq({type: "array", items: {type: "string"}})
+    JSON::Schema.introspect(Array(Int32)).should eq({type: "array", items: {type: "integer"}})
+    JSON::Schema.introspect(Array(Float32)).should eq({type: "array", items: {type: "number"}})
+    JSON::Schema.introspect(Array(Bool)).should eq({type: "array", items: {type: "boolean"}})
+    JSON::Schema.introspect(Array(JSON::Any)).should eq({type: "array", items: {type: "object"}})
+    JSON::Schema.introspect(NamedTuple(steve: String)).should eq({type: "object", properties: {steve: {type: "string"}}, required: ["steve"]})
+    JSON::Schema.introspect(TestEnum).should eq({type: "string", enum: ["bob", "jane"]})
+    JSON::Schema.introspect(Tuple(String, Bool)).should eq({type: "array", items: [{type: "string"}, {type: "boolean"}]})
+    JSON::Schema.introspect(SomeType).should eq({anyOf: [
       {type: "string"},
       {type: "array", items: [{type: "string"}, {type: "boolean"}]},
     ]})
-    PlaceOS::Driver::Settings.introspect(Hash(String, Int32)).should eq({type: "object", additionalProperties: {type: "integer"}})
-    PlaceOS::Driver::Settings.introspect(SuperHash).should eq({type: "object"})
-    PlaceOS::Driver::Settings.introspect(Bool | String).should eq({anyOf: [{type: "boolean"}, {type: "string"}]})
+    JSON::Schema.introspect(Hash(String, Int32)).should eq({type: "object", additionalProperties: {type: "integer"}})
+    JSON::Schema.introspect(SuperHash).should eq({type: "object", additionalProperties: {type: "integer"}})
+    JSON::Schema.introspect(Bool | String).should eq({anyOf: [{type: "boolean"}, {type: "string"}]})
 
     {% unless compare_versions(Crystal::VERSION, "1.0.0") < 0 %}
-      PlaceOS::Driver::Settings.introspect(SchemaKlass).should eq({type: "object", properties: {cmd: {type: "string"}, other: {anyOf: [{type: "integer"}, {type: "null"}]}, foo: {enum: [0, 1]}}, required: ["cmd", "foo"]})
+      JSON::Schema.introspect(SchemaKlass).should eq({type: "object", properties: {cmd: {type: "string"}, other: {anyOf: [{type: "integer"}, {type: "null"}]}, foo: {enum: [0, 1]}}, required: ["cmd", "foo"]})
     {% end %}
 
     # test where no fields are required
-    PlaceOS::Driver::Settings.introspect(NamedTuple(steve: String?)).should eq({type: "object", properties: {steve: {anyOf: [{type: "null"}, {type: "string"}]}}})
-    PlaceOS::Driver::Settings.introspect(SchemaKlassNoRequired).should eq({type: "object", properties: {cmd: {anyOf: [{type: "null"}, {type: "string"}]}, other: {anyOf: [{type: "integer"}, {type: "null"}]}}})
+    JSON::Schema.introspect(NamedTuple(steve: String?)).should eq({type: "object", properties: {steve: {anyOf: [{type: "null"}, {type: "string"}]}}})
+    JSON::Schema.introspect(SchemaKlassNoRequired).should eq({type: "object", properties: {cmd: {anyOf: [{type: "null"}, {type: "string"}]}, other: {anyOf: [{type: "integer"}, {type: "null"}]}}})
 
     # allow totally custom classes to define their own schema
-    PlaceOS::Driver::Settings.introspect(RandomCustomKlass).should eq({type: "object", required: ["something"]})
+    JSON::Schema.introspect(RandomCustomKlass).should eq({type: "object", required: ["something"]})
   end
 
   it "should generate JSON schema from settings access" do

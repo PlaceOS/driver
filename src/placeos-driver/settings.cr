@@ -1,4 +1,7 @@
 class PlaceOS::Driver::Settings
+  # key => {class, required}
+  SETTINGS_REQ = {} of Nil => Nil
+
   def initialize(settings : String)
     @json = JSON.parse(settings).as_h
   end
@@ -145,7 +148,7 @@ class PlaceOS::Driver::Settings
         properties: {
           {% for key, details in ::PlaceOS::Driver::Settings::SETTINGS_REQ %}
             {% klass = details[0] %}
-            {{key.id}}: PlaceOS::Driver::Settings.introspect({{klass}}),
+            {{key.id}}: JSON::Schema.introspect({{klass}}),
           {% end %}
         },
         required: [
@@ -160,5 +163,3 @@ class PlaceOS::Driver::Settings
     }.to_json
   end
 end
-
-require "./settings/introspect"
