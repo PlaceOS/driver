@@ -255,7 +255,7 @@ class PlaceOS::Driver
       cookies.add_request_headers(headers) unless @settings.get { setting?(Bool, :disable_cookies) } || false
 
       # Make the request
-      response = if concurrent
+      response = if concurrent || @max_requests.zero?
                    # Does this request require a TLS context?
                    context = __is_https? ? new_tls_context : nil
                    client = new_http_client(uri, context)

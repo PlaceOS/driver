@@ -114,6 +114,12 @@ abstract class PlaceOS::Driver::Transport
     {% if @type.name.stringify != "PlaceOS::Driver::TransportLogic" %}
       protected def new_http_client(uri, context)
         client = ConnectProxy::HTTPClient.new(uri, context, ignore_env: true)
+        connect_timeout = (@settings.get { setting?(Int32, :http_connect_timeout) } || 10).seconds
+        comms_timeout = (@settings.get { setting?(Int32, :http_comms_timeout) } || 120).seconds
+        client.dns_timeout = connect_timeout
+        client.connect_timeout = connect_timeout
+        client.read_timeout = comms_timeout
+        client.write_timeout = comms_timeout
 
         # Apply basic auth settings
         if auth = @settings.get { setting?(NamedTuple(username: String, password: String), :basic_auth) }
