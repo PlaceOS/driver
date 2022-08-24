@@ -52,20 +52,20 @@ describe PlaceOS::Driver::DriverManager do
       "switch_input":{
         "input":{"type":"string","enum":["hdmi","display_port","hd_base_t"],"title":"Helper::TestDriver::Input"}
       },
-      "divide_by":{"num": {"type": "integer", "title": "Int32"}},
-      "get_index":{"num": {"type": "integer", "title": "Int32"}},
+      "divide_by":{"num": {"type": "integer", "format": "Int32", "title": "Int32"}},
+      "get_index":{"num": {"type": "integer", "format": "Int32", "title": "Int32"}},
       "add":{
-        "a":{"type":"integer","title":"Int32"},
-        "b":{"type":"integer","title":"Int32"}
+        "a":{"type":"integer", "format": "Int32", "title":"Int32"},
+        "b":{"type":"integer", "format": "Int32", "title":"Int32"}
       },
       "splat_add":{},
       "perform_task":{
-        "name":{"anyOf":[{"type":"integer"},{"type":"string"}],"title":"(Int32 | String)"}
+        "name":{"anyOf":[{"type":"integer", "format": "Int32"},{"type":"string"}],"title":"(Int32 | String)"}
       },
       "error_task":{},
       "future_add":{
-        "a":{"type":"integer","title":"Int32"},
-        "b":{"type":"integer","title":"Int32","default":200}
+        "a":{"type":"integer", "format": "Int32","title":"Int32"},
+        "b":{"type":"integer", "format": "Int32","title":"Int32","default":200}
       },
       "future_error":{},
       "raise_error":{},
