@@ -658,7 +658,6 @@ class DriverSpecs
       redis.publish "lookup-change", SYSTEM_ID
     end
     settings(@current_settings)
-    sleep 5.milliseconds
     self
   end
 
@@ -709,6 +708,9 @@ class DriverSpecs
       @io.write json.to_slice
       @io.flush
     end
+
+    # needs a moment to allow the settings to propagate
+    sleep 500.milliseconds
 
     self
   end
