@@ -1,3 +1,4 @@
+require "json-schema"
 require "log"
 require "../core_ext"
 require "../storage"
