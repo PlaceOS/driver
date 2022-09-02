@@ -167,7 +167,8 @@ abstract class PlaceOS::Driver::Transport
   end
 
   protected def new_tls_context(verify_mode : OpenSSL::SSL::VerifyMode? = nil) : OpenSSL::SSL::Context::Client
-    tls = OpenSSL::SSL::Context::Client.new
+    use_insecure_cipher = @settings.get { setting?(Bool, :https_insecure) }
+    tls = use_insecure_cipher ? OpenSSL::SSL::Context::Client.insecure : OpenSSL::SSL::Context::Client.new
     if verify_mode
       tls.verify_mode = verify_mode
     else
