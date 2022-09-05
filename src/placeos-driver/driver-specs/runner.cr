@@ -669,7 +669,7 @@ class DriverSpecs
                       else
                         {mod_name, index.to_i}
                       end
-    DriverSpecs::StatusHelper.new("mod-#{mod_name}/#{index}")
+    @mock_drivers["mod-#{mod_name}/#{index}"]
   end
 
   def settings(new_settings)
