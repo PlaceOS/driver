@@ -29,7 +29,7 @@ class SchemaKlassNoRequired
 end
 
 class RandomCustomKlass
-  def self.json_schema
+  def self.json_schema(openapi : Bool? = nil)
     {type: "object", required: ["something"]}
   end
 end
