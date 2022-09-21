@@ -22,7 +22,8 @@ end
 
 # NOTE:: fixes issues with Crystal 1.5.0
 # TODO:: remove once this is mainline: https://github.com/crystal-lang/crystal/pull/12497
-
+{% if compare_versions(Crystal::VERSION, "1.5.2") < 0 %}
+{% if compare_versions(Crystal::VERSION, "1.5.0") >= 0 %}
 require "crystal/dwarf/info"
 
 # debugging dwarf file issues
@@ -110,3 +111,5 @@ struct Crystal::DWARF::Info
     end
   end
 end
+{% end %}
+{% end %}
