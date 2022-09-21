@@ -111,22 +111,22 @@ describe PlaceOS::Driver::Settings do
     JSON::Schema.introspect(Array(JSON::Any)).should eq({type: "array", items: {type: "object"}})
     JSON::Schema.introspect(NamedTuple(steve: String)).should eq({type: "object", properties: {steve: {type: "string"}}, required: ["steve"]})
     JSON::Schema.introspect(TestEnum).should eq({type: "string", enum: ["bob", "jane"]})
-    JSON::Schema.introspect(Tuple(String, Bool)).should eq({type: "array", items: [{type: "string"}, {type: "boolean"}]})
-    JSON::Schema.introspect(SomeType).should eq({anyOf: [
+    JSON::Schema.introspect(Tuple(String, Bool)).should eq({type: "array", items: { {type: "string"}, {type: "boolean"} }})
+    JSON::Schema.introspect(SomeType).should eq({anyOf: {
       {type: "string"},
-      {type: "array", items: [{type: "string"}, {type: "boolean"}]},
-    ]})
+      {type: "array", items: { {type: "string"}, {type: "boolean"} }},
+    }})
     JSON::Schema.introspect(Hash(String, Int32)).should eq({type: "object", additionalProperties: {type: "integer", format: "Int32"}})
     JSON::Schema.introspect(SuperHash).should eq({type: "object", additionalProperties: {type: "integer", format: "Int32"}})
-    JSON::Schema.introspect(Bool | String).should eq({anyOf: [{type: "boolean"}, {type: "string"}]})
+    JSON::Schema.introspect(Bool | String).should eq({anyOf: { {type: "boolean"}, {type: "string"} }})
 
     {% unless compare_versions(Crystal::VERSION, "1.0.0") < 0 %}
-      JSON::Schema.introspect(SchemaKlass).should eq({type: "object", properties: {cmd: {type: "string"}, other: {anyOf: [{type: "integer", format: "Int32"}, {type: "null"}]}, foo: {enum: [0, 1]}}, required: ["cmd", "foo"]})
+      JSON::Schema.introspect(SchemaKlass).should eq({type: "object", properties: {cmd: {type: "string"}, other: {anyOf: { {type: "integer", format: "Int32"}, {type: "null"} }}, foo: {enum: [0, 1]}}, required: ["cmd", "foo"]})
     {% end %}
 
     # test where no fields are required
-    JSON::Schema.introspect(NamedTuple(steve: String?)).should eq({type: "object", properties: {steve: {anyOf: [{type: "null"}, {type: "string"}]}}})
-    JSON::Schema.introspect(SchemaKlassNoRequired).should eq({type: "object", properties: {cmd: {anyOf: [{type: "null"}, {type: "string"}]}, other: {anyOf: [{type: "integer", format: "Int32"}, {type: "null"}]}}})
+    JSON::Schema.introspect(NamedTuple(steve: String?)).should eq({type: "object", properties: {steve: {anyOf: { {type: "null"}, {type: "string"} }}}})
+    JSON::Schema.introspect(SchemaKlassNoRequired).should eq({type: "object", properties: {cmd: {anyOf: { {type: "null"}, {type: "string"} }}, other: {anyOf: { {type: "integer", format: "Int32"}, {type: "null"} }}}})
 
     # allow totally custom classes to define their own schema
     JSON::Schema.introspect(RandomCustomKlass).should eq({type: "object", required: ["something"]})
