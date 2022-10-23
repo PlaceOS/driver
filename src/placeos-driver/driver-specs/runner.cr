@@ -332,8 +332,9 @@ class DriverSpecs
               end
             when .setting?
               setting_name, setting_value = Tuple(String, YAML::Any).from_yaml(request.payload.not_nil!)
-              @current_settings[setting_name] = JSON.parse(setting_value.to_json)
-              settings(@current_settings)
+              curr_settings = @current_settings.as_h
+              curr_settings[setting_name] = JSON.parse(setting_value.to_json)
+              settings(curr_settings)
             else
               puts "ignoring command #{request.cmd} in driver-runner server #{request.error}"
             end
