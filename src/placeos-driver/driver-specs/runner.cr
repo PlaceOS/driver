@@ -330,6 +330,11 @@ class DriverSpecs
                 @io.write json.to_slice
                 @io.flush
               end
+            when .setting?
+              setting_name, setting_value = Tuple(String, YAML::Any).from_yaml(request.payload.not_nil!)
+              curr_settings = @current_settings.as_h
+              curr_settings[setting_name] = JSON.parse(setting_value.to_json)
+              settings(curr_settings)
             else
               puts "ignoring command #{request.cmd} in driver-runner server #{request.error}"
             end
