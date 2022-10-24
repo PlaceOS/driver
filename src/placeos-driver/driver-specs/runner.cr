@@ -1,4 +1,5 @@
 require "log"
+require "yaml"
 require "debug"
 require "socket"
 require "promise"
