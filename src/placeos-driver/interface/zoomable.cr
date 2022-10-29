@@ -1,10 +1,9 @@
 abstract class PlaceOS::Driver
   module Interface::Zoomable
-    @zoom = 0
-    @zoom_range = 0..1
+    @zoom : Float64 = 0.0
 
     # This a discrete level on most cameras
-    abstract def zoom_to(position : Int32, auto_focus : Bool = true, index : Int32 | String = 0)
+    abstract def zoom_to(position : Float64, auto_focus : Bool = true, index : Int32 | String = 0)
 
     enum ZoomDirection
       In
@@ -13,7 +12,7 @@ abstract class PlaceOS::Driver
     end
 
     @zoom_timer : PlaceOS::Driver::Proxy::Scheduler::TaskWrapper? = nil
-    @zoom_speed : Int32 = 10
+    @zoom_step : Float64 = 5.0
 
     # As zoom is typically discreet we manually implement the analogue version
     # Simple enough to overwrite this as required
@@ -24,8 +23,7 @@ abstract class PlaceOS::Driver
       end
 
       return if direction == ZoomDirection::Stop
-      change = @zoom_range.begin <= @zoom_range.end ? @zoom_speed : -@zoom_speed
-      change = direction == ZoomDirection::In ? change : -change
+      change = direction == ZoomDirection::In ? @zoom_step : -@zoom_step
 
       @zoom_timer = schedule.every(250.milliseconds, immediate: true) do
         zoom_to(@zoom + change, auto_focus: false)

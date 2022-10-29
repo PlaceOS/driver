@@ -20,21 +20,8 @@ abstract class PlaceOS::Driver
     # focus_out, focus_in, has_discrete_focus
     # iris_open, iris_close, has_discrete_iris
 
-    # Adjust these to appropriate values in on_load or on_connect
-    @pan = 0
-    @tilt = 0
-
-    @pan_range = 0..1
-    @tilt_range = 0..1
-
-    # Most cameras support sending a move speed
-    abstract def joystick(pan_speed : Int32, tilt_speed : Int32, index : Int32 | String = 0)
-
-    # Natively supported on the device
-    alias NativePreset = String
-
-    # manual recall of a position
-    alias DiscretePreset = NamedTuple(pan: Int32, tilt: Int32, zoom: Int32, focus: Int32?, iris: Int32?)
+    # Most cameras support sending a move speed, the interface should expect a percentage
+    abstract def joystick(pan_speed : Float64, tilt_speed : Float64, index : Int32 | String = 0)
 
     # Most cameras support presets (either as a feature or via manual positioning)
     abstract def recall(position : String, index : Int32 | String = 0)
