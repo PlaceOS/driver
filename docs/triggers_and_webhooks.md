@@ -64,7 +64,7 @@ Once you've
 the webhook URL looks like:
 
 ```
-/api/engine/v2/webhook/trig-id/notify/[secret-key/[Module-name]/[Module-index]/[function-name]
+/api/engine/v2/webhook/trig-id/notify/[secret-key]/[Module-name]/[Module-index]/[function-name]
 ```
 OR
 ```
