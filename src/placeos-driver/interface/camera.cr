@@ -26,6 +26,7 @@ abstract class PlaceOS::Driver
     # Most cameras support presets (either as a feature or via manual positioning)
     abstract def recall(position : String, index : Int32 | String = 0)
     abstract def save_position(name : String, index : Int32 | String = 0)
+    abstract def remove_position(name : String, index : Int32 | String = 0)
 
     enum TiltDirection
       Down
