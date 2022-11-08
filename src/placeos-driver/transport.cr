@@ -14,6 +14,9 @@ abstract class PlaceOS::Driver::Transport
   getter proxy_in_use : String? = nil
   getter cookies : ::HTTP::Cookies { ::HTTP::Cookies.new }
 
+  # for non-http drivers to define a non-default http endpoint
+  property http_uri_override : URI? = nil
+
   def pre_processor(&@pre_processor : (Bytes) -> Bytes?)
   end
 
@@ -38,9 +41,14 @@ abstract class PlaceOS::Driver::Transport
       {% if @type.name.stringify == "PlaceOS::Driver::TransportLogic" %}
         raise "HTTP requests are not available in logic drivers"
       {% else %}
-        uri_config = @uri.try(&.strip)
-        if uri_config && !uri_config.empty?
+
+        if uri_override = http_uri_override
+          uri = uri_override
+        elsif (uri_config = @uri.try(&.strip)) && !uri_config.empty?
           uri = URI.parse uri_config
+        end
+
+        if uri
           context = case uri.scheme
                     when "https", "wss"
                       uri.scheme = "https"
