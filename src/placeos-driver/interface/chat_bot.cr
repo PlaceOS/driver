@@ -19,7 +19,7 @@ abstract class PlaceOS::Driver
       # The user who sent the message
       property user_id : String?
 
-      # The room ID of the message.
+      # The org sending the message.
       property org_id : String?
     end
 
@@ -47,8 +47,10 @@ abstract class PlaceOS::Driver
       property payload : String
     end
 
+    # allows a bot responder to indicate it is replying to a message
     abstract def notify_typing(id : Id)
 
+    # interface used to reply to a message
     abstract def reply(id : Id, response : String, url : String? = nil, attachment : Attachment? = nil)
   end
 end
