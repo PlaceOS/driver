@@ -7,6 +7,9 @@ abstract class PlaceOS::Driver
     struct Id
       include JSON::Serializable
 
+      def initialize(@message_id, @room_id = nil, @user_id = nil, @org_id = nil)
+      end
+
       # something used to identify the message
       property message_id : String
 
@@ -15,10 +18,16 @@ abstract class PlaceOS::Driver
 
       # The user who sent the message
       property user_id : String?
+
+      # The room ID of the message.
+      property org_id : String?
     end
 
     struct Message
       include JSON::Serializable
+
+      def initialize(@id, @text)
+      end
 
       property id : Id
 
@@ -28,6 +37,9 @@ abstract class PlaceOS::Driver
 
     struct Attachment
       include JSON::Serializable
+
+      def initialize(@name, @payload)
+      end
 
       property name : String
 
