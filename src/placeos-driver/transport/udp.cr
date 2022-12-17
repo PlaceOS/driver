@@ -45,17 +45,19 @@ class PlaceOS::Driver::TransportUDP < PlaceOS::Driver::Transport
   private def start_socket(connect_timeout)
     @mutex.synchronize do
       @socket = socket = UDPSocket.new
-      socket.connect(@ip, @port)
 
       # Join multicast group if the in the correct range
       begin
         ipaddr = IPAddress.new(@ip)
         if ipaddr.is_a?(IPAddress::IPv4) ? MULTICASTRANGEV4.includes?(ipaddr) : MULTICASTRANGEV6.includes?(ipaddr)
+          socket.bind "0.0.0.0", @port
           socket.join_group(Socket::IPAddress.new(@ip, @port))
 
           if hops = @settings.get { setting?(UInt8, :multicast_hops) }
             socket.multicast_hops = hops
           end
+        else
+          socket.connect(@ip, @port)
         end
       rescue ArgumentError
         # @ip is a hostname
@@ -141,7 +143,7 @@ class PlaceOS::Driver::TransportUDP < PlaceOS::Driver::Transport
     raw_data = Bytes.new(2048)
 
     while (socket = @socket) && !socket.closed?
-      bytes_read = socket.read(raw_data)
+      bytes_read, _client_addr = socket.receive(raw_data)
       break if bytes_read.zero? # IO was closed
 
       process raw_data[0, bytes_read].dup
