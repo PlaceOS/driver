@@ -71,7 +71,8 @@ module PlaceOS::Driver::Proxy
       @module_name : String,
       @index : Int32,
       @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE),
-      @user_id : String? = nil
+      @user_id : String? = nil,
+      &@edge_id : String -> String
     )
       @error_details = {@sys_id, @module_name, @index}
     end
@@ -82,7 +83,8 @@ module PlaceOS::Driver::Proxy
       @module_name : String,
       @index : Int32 = 1,
       @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE),
-      @user_id : String? = nil
+      @user_id : String? = nil,
+      &@edge_id : String -> String
     )
       @error_details = {@sys_id, @module_name, 1}
     end
@@ -92,6 +94,10 @@ module PlaceOS::Driver::Proxy
     getter :module_name, :index, :sys_id
 
     @status : RedisStorage? = nil
+
+    # a callback for looking up the edge id so we can route requests correctly
+    # passes the module id and expects the edge id to be returned
+    @edge_id : String -> String
 
     def status : RedisStorage
       redis_store = @status
@@ -157,10 +163,16 @@ module PlaceOS::Driver::Proxy
       which_core(module_id)
     end
 
+    private EDGE_HINT = "-edge"
+
     # Use consistent hashing to determine location of a resource
     #
     def which_core(hash_id : String) : URI
-      node = @discovery[hash_id]?
+      node = if hash_id.ends_with? EDGE_HINT
+               @discovery[@edge_id.call(hash_id)]?
+             else
+               @discovery[hash_id]?
+             end
       raise Error.new(ErrorCode::UnexpectedFailure, "No registered core instances", *@error_details) unless node
       node[:uri]
     end

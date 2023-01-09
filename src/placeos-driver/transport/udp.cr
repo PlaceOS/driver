@@ -50,6 +50,7 @@ class PlaceOS::Driver::TransportUDP < PlaceOS::Driver::Transport
       begin
         ipaddr = IPAddress.new(@ip)
         if ipaddr.is_a?(IPAddress::IPv4) ? MULTICASTRANGEV4.includes?(ipaddr) : MULTICASTRANGEV6.includes?(ipaddr)
+          socket.reuse_address = true
           socket.bind "0.0.0.0", @port
           socket.join_group(Socket::IPAddress.new(@ip, @port))
 
