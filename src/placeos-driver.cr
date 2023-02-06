@@ -1,13 +1,12 @@
 require "json-schema"
 require "option_parser"
-require "./placeos-driver/logger"
-require "./placeos-driver/stats"
 
 class PlaceOS::Startup
   class_property exec_process_manager : Bool = false
   class_property is_edge_driver : Bool = false
   class_property print_meta : Bool = false
   class_property print_defaults : Bool = false
+  class_property suppress_logs : Bool = false
   class_property socket : String? = nil
 end
 
@@ -17,10 +16,12 @@ OptionParser.parse(ARGV.dup) do |parser|
 
   parser.on("-m", "--metadata", "output driver metadata") do
     PlaceOS::Startup.print_meta = true
+    PlaceOS::Startup.suppress_logs = true
   end
 
   parser.on("-d", "--defaults", "output driver defaults") do
     PlaceOS::Startup.print_defaults = true
+    PlaceOS::Startup.suppress_logs = true
   end
 
   parser.on("-s SOCKET", "--socket=SOCKET", "protocol server socket") do |socket|
@@ -42,6 +43,9 @@ OptionParser.parse(ARGV.dup) do |parser|
     exit 0
   end
 end
+
+require "./placeos-driver/logger"
+require "./placeos-driver/stats"
 
 abstract class PlaceOS::Driver
   class_property include_json_schema_in_interface : Bool = true

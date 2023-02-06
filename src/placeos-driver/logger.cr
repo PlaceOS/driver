@@ -5,7 +5,9 @@ require "./logger_io"
 
 class PlaceOS::Driver
   # Set up logging
-  backend = ::Log::IOBackend.new(STDOUT)
+  log_io = PlaceOS::Startup.suppress_logs ? IO::Memory.new : STDOUT
+  PlaceOS::Driver.logger_io = log_io
+  backend = ::Log::IOBackend.new(log_io)
   backend.formatter = LOG_FORMATTER
   ::Log.setup("*", ::Log::Severity::Info, backend)
 
