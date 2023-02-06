@@ -94,7 +94,6 @@ class PlaceOS::Driver::ProcessManager
   rescue error
     Log.error(exception: error) { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})" }
     request.set_error(error)
-    request
   end
 
   def debug(request : Protocol::Request) : Nil

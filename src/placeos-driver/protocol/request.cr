@@ -69,6 +69,7 @@ module PlaceOS
       self.payload = error.message
       self.error = error.class.to_s
       self.backtrace = error.backtrace?
+      self.cmd = :result
       self
     end
 
