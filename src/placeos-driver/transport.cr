@@ -3,7 +3,7 @@ require "./transport/http_proxy"
 
 abstract class PlaceOS::Driver::Transport
   abstract def send(message) : PlaceOS::Driver::Transport
-  abstract def send(message, task : PlaceOS::Driver::Task, &block : (Bytes, PlaceOS::Driver::Task) -> Nil) : PlaceOS::Driver::Transport
+  abstract def send(message, task : PlaceOS::Driver::Task, &_block : (Bytes, PlaceOS::Driver::Task) -> Nil) : PlaceOS::Driver::Transport
   abstract def terminate : Nil
   abstract def disconnect : Nil
   abstract def start_tls(verify_mode : OpenSSL::SSL::VerifyMode, context : OpenSSL::SSL::Context) : Nil

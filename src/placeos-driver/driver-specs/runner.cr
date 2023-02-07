@@ -31,7 +31,7 @@ class DriverSpecs
   DRIVER_ID = "spec_runner"
   SYSTEM_ID = "spec_runner_system"
 
-  def self.mock_driver(driver_name : String, driver_exec = ENV["SPEC_RUN_DRIVER"])
+  def self.mock_driver(driver_name : String, driver_exec = ENV["SPEC_RUN_DRIVER"], &)
     # Prepare driver IO
     unix_socket = File.tempname("pos", ".driver")
     unix_server = UNIXServer.new(unix_socket)
@@ -400,13 +400,13 @@ class DriverSpecs
     resp
   end
 
-  def exec(function, *args, user_id = nil)
+  def exec(function, *args, user_id = nil, &)
     resp = __exec__(function, args, user_id)
     yield resp
     resp
   end
 
-  def exec(function, user_id = nil, **args)
+  def exec(function, user_id = nil, **args, &)
     resp = __exec__(function, args, user_id)
     yield resp
     resp
@@ -577,7 +577,7 @@ class DriverSpecs
     transmit(data)
   end
 
-  def expect_http_request(timeout = 1.seconds)
+  def expect_http_request(timeout = 1.seconds, &)
     channel = nil
 
     @event_mutex.synchronize do

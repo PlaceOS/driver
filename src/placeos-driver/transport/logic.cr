@@ -22,7 +22,7 @@ class PlaceOS::Driver::TransportLogic < PlaceOS::Driver::Transport
     self
   end
 
-  def send(message, task : PlaceOS::Driver::Task, &block : (Bytes, PlaceOS::Driver::Task) -> Nil) : PlaceOS::Driver::TransportLogic
+  def send(message, task : PlaceOS::Driver::Task, &_block : (Bytes, PlaceOS::Driver::Task) -> Nil) : PlaceOS::Driver::TransportLogic
     self
   end
 end

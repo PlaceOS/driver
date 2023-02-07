@@ -24,6 +24,7 @@ class PlaceOS::Driver
     @ssh_settings : Settings?
     @messages : Channel(Bytes)?
     @connecting : Bool = false
+    @connect_lock : Mutex = Mutex.new
 
     property :received
 
@@ -52,8 +53,10 @@ class PlaceOS::Driver
 
     # ameba:disable Metrics/CyclomaticComplexity
     def connect(connect_timeout : Int32 = 10) : Nil
-      return if @terminated || @connecting || @messages
-      @connecting = true
+      @connect_lock.synchronize do
+        return if @terminated || @connecting || @messages
+        @connecting = true
+      end
 
       # Clear any buffered data before we re-connect
       tokenizer = @tokenizer
@@ -155,12 +158,12 @@ class PlaceOS::Driver
 
           # Attempt to open a shell - more often then not shell is the only supported method
           begin
-            Promise(Nil).defer(same_thread: true, timeout: 5.seconds) {
+            Tasker.timeout(5.seconds) {
               @shell = shell = session.open_session
               # Set mode https://tools.ietf.org/html/rfc4254#section-8
               shell.request_pty(settings.term || "vt100", [{SSH2::TerminalMode::ECHO, 0u32}])
               shell.shell
-            }.get
+            }
           rescue error
             # It may not be fatal if a shell is unable to be negotiated
             # however this would be a rare device so we log the issue.
@@ -204,7 +207,8 @@ class PlaceOS::Driver
           raise error
         end
       end
-      @connecting = false
+
+      @connect_lock.synchronize { @connecting = false }
     end
 
     protected def perform_reconnect
@@ -230,33 +234,38 @@ class PlaceOS::Driver
     end
 
     def disconnect : Nil
-      return unless @messages
+      @connect_lock.synchronize do
+        return if @connecting
 
-      # Create local copies as reconnect could be called while we are still disconnecting
-      messages = @messages
-      socket = @socket
-      shell = @shell
-      session = @session
-      @messages = nil
-      @socket = nil
-      @shell = nil
-      @session = nil
-      @keepalive.try &.cancel
-      @keepalive = nil
+        # Create local copies as reconnect could be called while we are still disconnecting
+        messages = @messages
+        socket = @socket
+        shell = @shell
+        session = @session
 
-      begin
-        Promise(Nil).defer(same_thread: true, timeout: 3.seconds) {
-          shell.try &.close
-          session.try &.disconnect
-        }.get
-      rescue
-      end
+        return unless messages || socket || shell || session
 
-      begin
-        socket.try &.close
-      rescue
-      ensure
-        messages.try &.close
+        @messages = nil
+        @socket = nil
+        @shell = nil
+        @session = nil
+        @keepalive.try &.cancel
+        @keepalive = nil
+
+        begin
+          Tasker.timeout(3.seconds) {
+            shell.try &.close
+            session.try &.disconnect
+          }
+        rescue
+        end
+
+        begin
+          socket.try &.close
+        rescue
+        ensure
+          messages.try &.close
+        end
       end
     rescue error
       logger.info(exception: error) { "calling disconnect" }

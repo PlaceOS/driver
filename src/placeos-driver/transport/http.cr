@@ -185,7 +185,7 @@ class PlaceOS::Driver
       @client
     end
 
-    protected def with_shared_client
+    protected def with_shared_client(&)
       @http_client_mutex.synchronize do
         now = Time.monotonic
         idle_for = now - @client_idle
@@ -305,7 +305,7 @@ class PlaceOS::Driver
       raise "not available to HTTP drivers"
     end
 
-    def send(message, task : PlaceOS::Driver::Task, &block : (Bytes, PlaceOS::Driver::Task) -> Nil) : TransportHTTP
+    def send(message, task : PlaceOS::Driver::Task, &_block : (Bytes, PlaceOS::Driver::Task) -> Nil) : TransportHTTP
       raise "not available to HTTP drivers"
     end
   end

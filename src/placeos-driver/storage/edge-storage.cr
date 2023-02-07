@@ -19,7 +19,7 @@ class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
     json_value
   end
 
-  def fetch(key, &block : String ->)
+  def fetch(key, & : String ->)
     key = key.to_s
     @hash.fetch(key) { yield key }
   end
@@ -40,7 +40,7 @@ class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
     json_value
   end
 
-  def delete(key, &block : String ->)
+  def delete(key, & : String ->)
     key = key.to_s
     value = hash.delete(key)
     if value

@@ -95,7 +95,7 @@ class Helper
     end
 
     # Any method that requires a block is not included in the public API
-    def add(a)
+    def add(a, &)
       a + yield
     end
 

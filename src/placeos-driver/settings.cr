@@ -12,11 +12,11 @@ class PlaceOS::Driver::Settings
   @json : Hash(String, JSON::Any)
   property :json
 
-  def get
+  def get(&)
     with self yield
   end
 
-  def self.get
+  def self.get(&)
     with self yield
   end
 

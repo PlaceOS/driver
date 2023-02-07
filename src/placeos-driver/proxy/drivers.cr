@@ -20,7 +20,7 @@ class PlaceOS::Driver::Proxy::Drivers
     @drivers.size
   end
 
-  def each
+  def each(&)
     @drivers.each do |driver|
       yield driver
     end
@@ -47,7 +47,7 @@ class PlaceOS::Driver::Proxy::Drivers
   end
 
   # This deliberately prevents compilation if called from driver code
-  def subscribe(status, &callback : (PlaceOS::Driver::Subscriptions::IndirectSubscription, String) -> Nil) : PlaceOS::Driver::Subscriptions::IndirectSubscription
+  def subscribe(status, &_callback : (PlaceOS::Driver::Subscriptions::IndirectSubscription, String) -> Nil) : PlaceOS::Driver::Subscriptions::IndirectSubscription
     {{ raise "Can't subscribe to state on a collection of drivers" }}
   end
 

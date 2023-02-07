@@ -42,13 +42,13 @@ module PlaceOS
       json_value
     end
 
-    def fetch(key, &block : String ->)
+    def fetch(key, & : String ->)
       key = key.to_s
       entry = @@redis_lock.synchronize { redis.hget(hash_key, key) }
       entry ? entry.to_s : yield key
     end
 
-    def delete(key, &block : String ->)
+    def delete(key, & : String ->)
       key = key.to_s
       value = self[key]?
       if value
@@ -103,7 +103,7 @@ module PlaceOS
       @@redis_lock.synchronize { shared_redis_client.get(key.to_s) }
     end
 
-    def self.with_redis
+    def self.with_redis(&)
       @@redis_lock.synchronize { yield shared_redis_client }
     end
 

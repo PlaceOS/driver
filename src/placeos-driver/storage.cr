@@ -18,7 +18,7 @@ abstract class PlaceOS::Driver::Storage
 
   abstract def []=(status_name, json_value)
 
-  abstract def fetch(key, &block : String ->)
+  abstract def fetch(key, &_block : String ->)
 
   def fetch(key, default)
     fetch(key) { default }
@@ -36,7 +36,7 @@ abstract class PlaceOS::Driver::Storage
     fetch(key, nil)
   end
 
-  abstract def delete(key, &block : String ->)
+  abstract def delete(key, &_block : String ->)
 
   def delete(key)
     delete(key) { nil }

@@ -234,7 +234,7 @@ class PlaceOS::Driver::Protocol::Management
     payload = request.payload.not_nil!
     modules[module_id] = payload
 
-    return unless (io = @io)
+    return unless io = @io
 
     json = %({"id":"#{module_id}","cmd":"update","payload":#{payload.to_json}})
     io.write_bytes json.bytesize
@@ -256,7 +256,7 @@ class PlaceOS::Driver::Protocol::Management
 
   private def shutdown(terminated = true) : Nil
     @terminated = terminated
-    return unless (io = @io)
+    return unless io = @io
 
     modules.clear
 
@@ -299,7 +299,7 @@ class PlaceOS::Driver::Protocol::Management
   end
 
   private def running_modules(seq : UInt64)
-    if (io = @io)
+    if io = @io
       json = %({"id":"","cmd":"info","seq":#{seq}})
       io.write_bytes json.bytesize
       io.write json.to_slice

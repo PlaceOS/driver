@@ -3,3 +3,9 @@ Metrics/CyclomaticComplexity:
   MaxComplexity: 12
   Enabled: true
   Severity: Convention
+
+Lint/NotNil:
+  Enabled: false
+
+Style/QueryBoolMethods:
+  Enabled: false

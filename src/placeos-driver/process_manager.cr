@@ -64,12 +64,10 @@ class PlaceOS::Driver::ProcessManager
     updated = PlaceOS::Driver::DriverModel.from_json(request.payload.not_nil!)
 
     # Check if there are changes that require module restart
-    if (
-         updated.ip != existing.ip || updated.udp != existing.udp ||
-         updated.tls != existing.tls || updated.port != existing.port ||
-         updated.makebreak != existing.makebreak || updated.uri != existing.uri ||
-         updated.role != existing.role
-       )
+    if updated.ip != existing.ip || updated.udp != existing.udp ||
+       updated.tls != existing.tls || updated.port != existing.port ||
+       updated.makebreak != existing.makebreak || updated.uri != existing.uri ||
+       updated.role != existing.role
       # Change required
       stop request
       start request, updated
