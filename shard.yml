@@ -59,3 +59,7 @@ dependencies:
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba
+
+  # used in the interface/sensor
+  s2_cells:
+    github: spider-gazelle/s2_cells
