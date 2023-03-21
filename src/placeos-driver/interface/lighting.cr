@@ -22,7 +22,7 @@ abstract class PlaceOS::Driver
         remote_join = area.join || local_join
 
         if local_join && remote_join
-          Area.new(id, channel, component, local_join & remote_join)
+          Area.new(id, channel, component, local_join | remote_join)
         else
           self
         end
