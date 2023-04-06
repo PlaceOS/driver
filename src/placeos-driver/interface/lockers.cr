@@ -1,7 +1,10 @@
 require "json"
+require "./locatable"
 
 abstract class PlaceOS::Driver
   module Interface::Lockers
+    include Interface::Locatable
+
     # inherit this to extend with additional locker information
     class PlaceLocker
       include JSON::Serializable
