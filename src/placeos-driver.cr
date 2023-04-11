@@ -76,6 +76,7 @@ abstract class PlaceOS::Driver
     @__edge_driver__ : Bool = false
   )
     metadata = {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.driver_interface
+    metadata = %(#{metadata[0..-2]},"notes":#{@__driver_model__.notes}})
     if @__edge_driver__
       @__storage__ = EdgeStorage.new(@__module_id__)
       @__storage__.clear
