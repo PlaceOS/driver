@@ -123,7 +123,7 @@ module PlaceOS::Driver::Proxy
 
     def function_present?(function : String) : Bool
       if metadata = metadata?
-        metadata.functions.keys.includes?(function)
+        metadata.interface.keys.includes?(function)
       else
         false
       end

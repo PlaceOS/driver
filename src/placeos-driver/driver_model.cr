@@ -8,6 +8,7 @@ struct PlaceOS::Driver::DriverModel
 
     property id : String
     property name : String
+    property description : String?
     property email : String?
     property features : Array(String)?
     property bookable : Bool
@@ -29,7 +30,8 @@ struct PlaceOS::Driver::DriverModel
       @implements = [] of String,
       @requirements = {} of String => Array(String),
       @security = {} of String => Array(String),
-      @settings = {type: "object", properties: {} of String => JSON::Any, required: [] of String}
+      @settings = {type: "object", properties: {} of String => JSON::Any, required: [] of String},
+      @notes = nil
     )
       @interface ||= {} of String => Hash(String, JSON::Any)
       @functions = nil
@@ -52,13 +54,19 @@ struct PlaceOS::Driver::DriverModel
     property functions : Hash(String, Hash(String, Array(JSON::Any)))?
 
     # Interfaces implemented by module
-    property implements : Array(String)
+    property! implements : Array(String)
+
     # Module requirements, map of module name to required interfaces
-    property requirements : Hash(String, Array(String))
+    property! requirements : Hash(String, Array(String))
+
     # Function access control, map of access level to function names
-    property security : Hash(String, Array(String))
+    property! security : Hash(String, Array(String))
+
     # JSON Schema derived from the settings used in the driver
     property settings : NamedTuple(type: String, properties: Hash(String, JSON::Any)?, required: Array(String)?)?
+
+    # Notes that might be relevant to a LLM
+    property notes : String? = nil
 
     def arity(function_name : String | Symbol)
       interface[function_name.to_s].size
@@ -126,6 +134,7 @@ struct PlaceOS::Driver::DriverModel
   property makebreak : Bool
   property uri : String?
   property settings : Hash(String, JSON::Any)
+  property notes : String?
 
   {% if compare_versions(Crystal::VERSION, "1.0.0") >= 0 %}
     @[JSON::Field(converter: Enum::ValueConverter(PlaceOS::Driver::DriverModel::Role))]
