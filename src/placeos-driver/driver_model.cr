@@ -27,9 +27,9 @@ struct PlaceOS::Driver::DriverModel
 
     def initialize(
       @interface : Hash(String, Hash(String, JSON::Any))? = nil,
-      @implements = [] of String,
-      @requirements = {} of String => Array(String),
-      @security = {} of String => Array(String),
+      @implements : Array(String) = [] of String,
+      @requirements : Hash(String, Array(String)) = {} of String => Array(String),
+      @security : Hash(String, Array(String)) = {} of String => Array(String),
       @settings = {type: "object", properties: {} of String => JSON::Any, required: [] of String},
       @notes = nil
     )
@@ -67,6 +67,24 @@ struct PlaceOS::Driver::DriverModel
 
     # Notes that might be relevant to a LLM
     property notes : String? = nil
+
+    # a minimal interface for informing Large Language Models
+    def llm_interface
+      @settings = nil
+      @implements = nil
+      @requirements = nil
+      iface = interface
+      @security.try &.each do |_level, functions|
+        # remove support and administrator level functions from the descriptions
+        # as we don't want LLMs accessing these
+        functions.each do |function|
+          iface.delete(function)
+        end
+      end
+      @security = nil
+      @functions = nil
+      self
+    end
 
     def arity(function_name : String | Symbol)
       interface[function_name.to_s].size
