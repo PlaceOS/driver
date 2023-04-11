@@ -37,6 +37,14 @@ class PlaceOS::Driver::Proxy::Driver
     @metadata
   end
 
+  def __status__
+    @status.to_h
+  end
+
+  def __status_keys__
+    @status.keys
+  end
+
   # This deliberately prevents compilation if called from driver code
   def []=(status, value)
     {{ raise "Remote drivers are read only. Please use the public interface to modify state" }}
