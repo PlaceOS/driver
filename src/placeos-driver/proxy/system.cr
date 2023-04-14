@@ -109,14 +109,14 @@ class PlaceOS::Driver::Proxy::System
   end
 
   private def get_metadata(module_id : String?) : DriverModel::Metadata
-    metadata_json = RedisStorage.get("interface/#{module_id}") if module_id.presence
-    if metadata_json && !metadata_json.empty?
-      DriverModel::Metadata.from_json metadata_json
-    else
-      # return a hollow proxy - we don't want to error
-      # code can execute against a non-existance driver
-      DriverModel::Metadata.new
-    end
+    metadata = self.class.driver_metadata?(module_id) if module_id.presence
+
+    # return a hollow proxy in case a driver isn't running
+    # or still loading etc. we don't want to error
+    metadata || DriverModel::Metadata.new
+  rescue error
+    logger.error(exception: error) { "failed to parse metadata for module: #{module_id}" }
+    DriverModel::Metadata.new
   end
 
   # grabs all modules implementing(Powerable) for example
@@ -130,12 +130,9 @@ class PlaceOS::Driver::Proxy::System
       index = parts[1]
 
       module_id = @system[key]
-      metadata = RedisStorage.get("interface/#{module_id}")
-      if module_id && metadata
-        data = DriverModel::Metadata.from_json metadata
-        next unless data.implements.includes?(interface) || data.interface[interface]?
-        drivers << Proxy::Driver.new(@reply_id, mod_name, index.to_i, module_id, self, data)
-      end
+      metadata = get_metadata(module_id)
+      next unless metadata.implements.includes?(interface) || metadata.interface[interface]?
+      drivers << Proxy::Driver.new(@reply_id, mod_name, index.to_i, module_id, self, metadata)
     end
 
     PlaceOS::Driver::Proxy::Drivers.new(drivers)
