@@ -51,7 +51,6 @@ class PlaceOS::Driver
       channel
     end
 
-    # ameba:disable Metrics/CyclomaticComplexity
     def connect(connect_timeout : Int32 = 10) : Nil
       @connect_lock.synchronize do
         return if @terminated || @connecting || @messages
@@ -67,148 +66,154 @@ class PlaceOS::Driver
         max_interval: 10.seconds,
         randomise: 500.milliseconds
       ) do
-        supported_methods = nil
-
-        begin
-          messages = @messages
-          @messages = Channel(Bytes).new
-          messages.try &.close
-
-          # Grab the authentication settings (using not_nil for schema generation)
-          @ssh_settings = settings = @settings.get { setting?(Settings, :ssh) }.not_nil!
-
-          # Open a connection
-          @socket = socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
-          socket.tcp_nodelay = true
-          socket.sync = true
-
-          # Negotiate the SSH session
-          session = SSH2::Session.new(socket)
-
-          # Attempt to authenticate
-          supported_methods = session.login_with_noauth(settings.username)
-          if supported_methods
-            if supported_methods.is_a?(Array(String))
-              logger.debug { "supported auhentication methods: #{supported_methods}" }
-
-              supported_methods.each do |auth_method|
-                case auth_method
-                when "publickey"
-                  if prikey = settings.private_key
-                    begin
-                      pubkey = settings.public_key.not_nil!
-                      session.login_with_data(settings.username, prikey, pubkey, settings.passphrase)
-                    rescue SSH2::SessionError
-                      logger.warn { "publickey auth failed, incorrect key" }
-                    end
-                  else
-                    logger.debug { "ignoring publickey authentication as no key provided" }
-                  end
-                when "password"
-                  if password = settings.password
-                    begin
-                      session.login(settings.username, password)
-                    rescue SSH2::SessionError
-                      logger.warn { "password auth failed, incorrect password" }
-                    end
-                  else
-                    logger.debug { "ignoring password authentication as no password provided" }
-                  end
-                when "keyboard-interactive"
-                  if settings.password
-                    begin
-                      session.interactive_login(settings.username) { @ssh_settings.not_nil!.password.not_nil! }
-                    rescue SSH2::SessionError
-                      logger.warn { "password auth failed, incorrect password" }
-                    end
-                  else
-                    logger.debug { "ignoring keyboard-interactive authentication as no password provided" }
-                  end
-                else
-                  logger.debug { "ignoring unsupported authentication method: #{auth_method}" }
-                end
-
-                break if session.authenticated?
-              end
-            else
-              if password = settings.password
-                begin
-                  session.login(settings.username, password)
-                rescue error : SSH2::SessionError
-                  begin
-                    session.interactive_login(settings.username) { @ssh_settings.not_nil!.password.not_nil! }
-                  rescue SSH2::SessionError
-                    logger.warn { "password auth failed, either not supported or incorrect password" }
-                  end
-                end
-              end
-
-              if !session.authenticated? && (prikey = settings.private_key)
-                begin
-                  pubkey = settings.public_key.not_nil!
-                  session.login_with_data(settings.username, prikey, pubkey, settings.passphrase)
-                rescue SSH2::SessionError
-                  logger.warn { "publickey auth failed, either not supported or incorrect key" }
-                end
-              end
-            end
-          end
-
-          raise "all available authentication methods failed" unless session.authenticated?
-
-          # Attempt to open a shell - more often then not shell is the only supported method
-          begin
-            Tasker.timeout(5.seconds) {
-              @shell = shell = session.open_session
-              # Set mode https://tools.ietf.org/html/rfc4254#section-8
-              shell.request_pty(settings.term || "vt100", [{SSH2::TerminalMode::ECHO, 0u32}])
-              shell.shell
-            }
-          rescue error
-            # It may not be fatal if a shell is unable to be negotiated
-            # however this would be a rare device so we log the issue.
-            if shell = @shell
-              shell.close
-              @shell = nil
-            end
-            logger.warn(exception: error) { "unable to negotiage a shell on SSH connection" }
-          end
-          @session = session
-
-          # This will track the socket state when there is no shell
-          keepalive(settings.keepalive || 30)
-
-          # Start consuming data from the shell
-          spawn(same_thread: true) do
-            if @shell
-              consume_messages
-            else
-              # if we are not running in shell mode we want to connect on messages close
-              @messages.try &.receive?
-              perform_reconnect
-            end
-          end
-
-          # Enable queuing
-          @queue.online = true
-        rescue error
-          logger.info(exception: error) {
-            supported_methods = ", supported authentication methods: #{supported_methods}" if supported_methods
-            "connecting to device#{supported_methods}"
-          }
-          @queue.online = false
-          begin
-            @socket.try &.close
-            @socket = nil
-            @shell = nil
-            @session = nil
-          rescue
-          end
-          raise error
-        end
+        start_socket(connect_timeout) unless @terminated
       end
 
       @connect_lock.synchronize { @connecting = false }
+      disconnect if @terminated
+    end
+
+    # ameba:disable Metrics/CyclomaticComplexity
+    private def start_socket(connect_timeout)
+      supported_methods = nil
+
+      begin
+        messages = @messages
+        @messages = Channel(Bytes).new
+        messages.try &.close
+
+        # Grab the authentication settings (using not_nil for schema generation)
+        @ssh_settings = settings = @settings.get { setting?(Settings, :ssh) }.not_nil!
+
+        # Open a connection
+        @socket = socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
+        socket.tcp_nodelay = true
+        socket.sync = true
+
+        # Negotiate the SSH session
+        session = SSH2::Session.new(socket)
+
+        # Attempt to authenticate
+        supported_methods = session.login_with_noauth(settings.username)
+        if supported_methods
+          if supported_methods.is_a?(Array(String))
+            logger.debug { "supported auhentication methods: #{supported_methods}" }
+
+            supported_methods.each do |auth_method|
+              case auth_method
+              when "publickey"
+                if prikey = settings.private_key
+                  begin
+                    pubkey = settings.public_key.not_nil!
+                    session.login_with_data(settings.username, prikey, pubkey, settings.passphrase)
+                  rescue SSH2::SessionError
+                    logger.warn { "publickey auth failed, incorrect key" }
+                  end
+                else
+                  logger.debug { "ignoring publickey authentication as no key provided" }
+                end
+              when "password"
+                if password = settings.password
+                  begin
+                    session.login(settings.username, password)
+                  rescue SSH2::SessionError
+                    logger.warn { "password auth failed, incorrect password" }
+                  end
+                else
+                  logger.debug { "ignoring password authentication as no password provided" }
+                end
+              when "keyboard-interactive"
+                if settings.password
+                  begin
+                    session.interactive_login(settings.username) { @ssh_settings.not_nil!.password.not_nil! }
+                  rescue SSH2::SessionError
+                    logger.warn { "password auth failed, incorrect password" }
+                  end
+                else
+                  logger.debug { "ignoring keyboard-interactive authentication as no password provided" }
+                end
+              else
+                logger.debug { "ignoring unsupported authentication method: #{auth_method}" }
+              end
+
+              break if session.authenticated?
+            end
+          else
+            if password = settings.password
+              begin
+                session.login(settings.username, password)
+              rescue error : SSH2::SessionError
+                begin
+                  session.interactive_login(settings.username) { @ssh_settings.not_nil!.password.not_nil! }
+                rescue SSH2::SessionError
+                  logger.warn { "password auth failed, either not supported or incorrect password" }
+                end
+              end
+            end
+
+            if !session.authenticated? && (prikey = settings.private_key)
+              begin
+                pubkey = settings.public_key.not_nil!
+                session.login_with_data(settings.username, prikey, pubkey, settings.passphrase)
+              rescue SSH2::SessionError
+                logger.warn { "publickey auth failed, either not supported or incorrect key" }
+              end
+            end
+          end
+        end
+
+        raise "all available authentication methods failed" unless session.authenticated?
+
+        # Attempt to open a shell - more often then not shell is the only supported method
+        begin
+          Tasker.timeout(5.seconds) {
+            @shell = shell = session.open_session
+            # Set mode https://tools.ietf.org/html/rfc4254#section-8
+            shell.request_pty(settings.term || "vt100", [{SSH2::TerminalMode::ECHO, 0u32}])
+            shell.shell
+          }
+        rescue error
+          # It may not be fatal if a shell is unable to be negotiated
+          # however this would be a rare device so we log the issue.
+          if shell = @shell
+            shell.close
+            @shell = nil
+          end
+          logger.warn(exception: error) { "unable to negotiage a shell on SSH connection" }
+        end
+        @session = session
+
+        # This will track the socket state when there is no shell
+        keepalive(settings.keepalive || 30)
+
+        # Start consuming data from the shell
+        spawn(same_thread: true) do
+          if @shell
+            consume_messages
+          else
+            # if we are not running in shell mode we want to connect on messages close
+            @messages.try &.receive?
+            perform_reconnect
+          end
+        end
+
+        # Enable queuing
+        @queue.online = true
+      rescue error
+        logger.info(exception: error) {
+          supported_methods = ", supported authentication methods: #{supported_methods}" if supported_methods
+          "connecting to device#{supported_methods}"
+        }
+        @queue.online = false
+        begin
+          @socket.try &.close
+          @socket = nil
+          @shell = nil
+          @session = nil
+        rescue
+        end
+        raise error
+      end
     end
 
     protected def perform_reconnect

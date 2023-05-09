@@ -38,8 +38,9 @@ class PlaceOS::Driver::TransportUDP < PlaceOS::Driver::Transport
       max_interval: 10.seconds,
       randomise: 500.milliseconds
     ) do
-      start_socket(connect_timeout)
+      start_socket(connect_timeout) unless @terminated
     end
+    disconnect if @terminated
   end
 
   private def start_socket(connect_timeout)
