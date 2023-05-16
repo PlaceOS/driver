@@ -1,0 +1,2203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Crystal Docs 1.7.3">
+<meta name="crystal_docs.project_version" content="master">
+<meta name="crystal_docs.project_name" content="placeos-driver">
+
+
+
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/doc.js"></script>
+
+  <meta name="repository-name" content="placeos-driver">
+  <title>PlaceOS::Driver - placeos-driver master</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "../";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="../index.html">
+          placeos-driver
+        </a>
+      </h1>
+
+      <span class="project-version">
+        master
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class="parent " data-id="placeos-driver/DriverSpecs" data-name="driverspecs">
+      <a href="../DriverSpecs.html">DriverSpecs</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/DriverSpecs/MockDriver" data-name="driverspecs::mockdriver">
+      <a href="../DriverSpecs/MockDriver.html">MockDriver</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/DriverSpecs/StatusHelper" data-name="driverspecs::statushelper">
+      <a href="../DriverSpecs/StatusHelper.html">StatusHelper</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/Object" data-name="object">
+      <a href="../Object.html">Object</a>
+      
+    </li>
+  
+  <li class="parent open current" data-id="placeos-driver/PlaceOS" data-name="placeos">
+      <a href="../PlaceOS.html">PlaceOS</a>
+      
+        <ul>
+  
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver" data-name="placeos::driver">
+      <a href="../PlaceOS/Driver.html">Driver</a>
+      
+        <ul>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/DriverModel" data-name="placeos::driver::drivermodel">
+      <a href="../PlaceOS/Driver/DriverModel.html">DriverModel</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/DriverModel/ControlSystem" data-name="placeos::driver::drivermodel::controlsystem">
+      <a href="../PlaceOS/Driver/DriverModel/ControlSystem.html">ControlSystem</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/DriverModel/Metadata" data-name="placeos::driver::drivermodel::metadata">
+      <a href="../PlaceOS/Driver/DriverModel/Metadata.html">Metadata</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/DriverModel/Role" data-name="placeos::driver::drivermodel::role">
+      <a href="../PlaceOS/Driver/DriverModel/Role.html">Role</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface" data-name="placeos::driver::interface">
+      <a href="../PlaceOS/Driver/Interface.html">Interface</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/AudioMuteable" data-name="placeos::driver::interface::audiomuteable">
+      <a href="../PlaceOS/Driver/Interface/AudioMuteable.html">AudioMuteable</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Camera" data-name="placeos::driver::interface::camera">
+      <a href="../PlaceOS/Driver/Interface/Camera.html">Camera</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Camera/PanDirection" data-name="placeos::driver::interface::camera::pandirection">
+      <a href="../PlaceOS/Driver/Interface/Camera/PanDirection.html">PanDirection</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Camera/TiltDirection" data-name="placeos::driver::interface::camera::tiltdirection">
+      <a href="../PlaceOS/Driver/Interface/Camera/TiltDirection.html">TiltDirection</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/ChatBot" data-name="placeos::driver::interface::chatbot">
+      <a href="../PlaceOS/Driver/Interface/ChatBot.html">ChatBot</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/ChatBot/Attachment" data-name="placeos::driver::interface::chatbot::attachment">
+      <a href="../PlaceOS/Driver/Interface/ChatBot/Attachment.html">Attachment</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/ChatBot/Id" data-name="placeos::driver::interface::chatbot::id">
+      <a href="../PlaceOS/Driver/Interface/ChatBot/Id.html">Id</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/ChatBot/Message" data-name="placeos::driver::interface::chatbot::message">
+      <a href="../PlaceOS/Driver/Interface/ChatBot/Message.html">Message</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/DoorSecurity" data-name="placeos::driver::interface::doorsecurity">
+      <a href="../PlaceOS/Driver/Interface/DoorSecurity.html">DoorSecurity</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/DoorSecurity/Action" data-name="placeos::driver::interface::doorsecurity::action">
+      <a href="../PlaceOS/Driver/Interface/DoorSecurity/Action.html">Action</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/DoorSecurity/Door" data-name="placeos::driver::interface::doorsecurity::door">
+      <a href="../PlaceOS/Driver/Interface/DoorSecurity/Door.html">Door</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/DoorSecurity/DoorEvent" data-name="placeos::driver::interface::doorsecurity::doorevent">
+      <a href="../PlaceOS/Driver/Interface/DoorSecurity/DoorEvent.html">DoorEvent</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/ElectricalRelay" data-name="placeos::driver::interface::electricalrelay">
+      <a href="../PlaceOS/Driver/Interface/ElectricalRelay.html">ElectricalRelay</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/InputSelection" data-name="placeos::driver::interface::inputselection(input)">
+      <a href="../PlaceOS/Driver/Interface/InputSelection.html">InputSelection</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Lighting" data-name="placeos::driver::interface::lighting">
+      <a href="../PlaceOS/Driver/Interface/Lighting.html">Lighting</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Lighting/Area" data-name="placeos::driver::interface::lighting::area">
+      <a href="../PlaceOS/Driver/Interface/Lighting/Area.html">Area</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Lighting/Level" data-name="placeos::driver::interface::lighting::level">
+      <a href="../PlaceOS/Driver/Interface/Lighting/Level.html">Level</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Lighting/Scene" data-name="placeos::driver::interface::lighting::scene">
+      <a href="../PlaceOS/Driver/Interface/Lighting/Scene.html">Scene</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Locatable" data-name="placeos::driver::interface::locatable">
+      <a href="../PlaceOS/Driver/Interface/Locatable.html">Locatable</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Locatable/OwnershipMAC" data-name="placeos::driver::interface::locatable::ownershipmac">
+      <a href="../PlaceOS/Driver/Interface/Locatable/OwnershipMAC.html">OwnershipMAC</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Lockers" data-name="placeos::driver::interface::lockers">
+      <a href="../PlaceOS/Driver/Interface/Lockers.html">Lockers</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Lockers/PlaceLocker" data-name="placeos::driver::interface::lockers::placelocker">
+      <a href="../PlaceOS/Driver/Interface/Lockers/PlaceLocker.html">PlaceLocker</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Mailer" data-name="placeos::driver::interface::mailer">
+      <a href="../PlaceOS/Driver/Interface/Mailer.html">Mailer</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Mailer/Attachment" data-name="placeos::driver::interface::mailer::attachment">
+      <a href="../PlaceOS/Driver/Interface/Mailer/Attachment.html">Attachment</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Mailer/ResourceAttachment" data-name="placeos::driver::interface::mailer::resourceattachment">
+      <a href="../PlaceOS/Driver/Interface/Mailer/ResourceAttachment.html">ResourceAttachment</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Mailer/TemplateItems" data-name="placeos::driver::interface::mailer::templateitems">
+      <a href="../PlaceOS/Driver/Interface/Mailer/TemplateItems.html">TemplateItems</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Mailer/Templates" data-name="placeos::driver::interface::mailer::templates">
+      <a href="../PlaceOS/Driver/Interface/Mailer/Templates.html">Templates</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Moveable" data-name="placeos::driver::interface::moveable">
+      <a href="../PlaceOS/Driver/Interface/Moveable.html">Moveable</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Moveable/MoveablePosition" data-name="placeos::driver::interface::moveable::moveableposition">
+      <a href="../PlaceOS/Driver/Interface/Moveable/MoveablePosition.html">MoveablePosition</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Muteable" data-name="placeos::driver::interface::muteable">
+      <a href="../PlaceOS/Driver/Interface/Muteable.html">Muteable</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Muteable/MuteLayer" data-name="placeos::driver::interface::muteable::mutelayer">
+      <a href="../PlaceOS/Driver/Interface/Muteable/MuteLayer.html">MuteLayer</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Powerable" data-name="placeos::driver::interface::powerable">
+      <a href="../PlaceOS/Driver/Interface/Powerable.html">Powerable</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Powerable/PowerState" data-name="placeos::driver::interface::powerable::powerstate">
+      <a href="../PlaceOS/Driver/Interface/Powerable/PowerState.html">PowerState</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor" data-name="placeos::driver::interface::sensor">
+      <a href="../PlaceOS/Driver/Interface/Sensor.html">Sensor</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/Detail" data-name="placeos::driver::interface::sensor::detail">
+      <a href="../PlaceOS/Driver/Interface/Sensor/Detail.html">Detail</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/GeoLocation" data-name="placeos::driver::interface::sensor::geolocation">
+      <a href="../PlaceOS/Driver/Interface/Sensor/GeoLocation.html">GeoLocation</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/Location" data-name="placeos::driver::interface::sensor::location">
+      <a href="../PlaceOS/Driver/Interface/Sensor/Location.html">Location</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/MapLocation" data-name="placeos::driver::interface::sensor::maplocation">
+      <a href="../PlaceOS/Driver/Interface/Sensor/MapLocation.html">MapLocation</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/SensorType" data-name="placeos::driver::interface::sensor::sensortype">
+      <a href="../PlaceOS/Driver/Interface/Sensor/SensorType.html">SensorType</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/Status" data-name="placeos::driver::interface::sensor::status">
+      <a href="../PlaceOS/Driver/Interface/Sensor/Status.html">Status</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/SMS" data-name="placeos::driver::interface::sms">
+      <a href="../PlaceOS/Driver/Interface/SMS.html">SMS</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Stoppable" data-name="placeos::driver::interface::stoppable">
+      <a href="../PlaceOS/Driver/Interface/Stoppable.html">Stoppable</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Switchable" data-name="placeos::driver::interface::switchable(input, output)">
+      <a href="../PlaceOS/Driver/Interface/Switchable.html">Switchable</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Switchable/SwitchLayer" data-name="placeos::driver::interface::switchable::switchlayer">
+      <a href="../PlaceOS/Driver/Interface/Switchable/SwitchLayer.html">SwitchLayer</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/VideoMuteable" data-name="placeos::driver::interface::videomuteable">
+      <a href="../PlaceOS/Driver/Interface/VideoMuteable.html">VideoMuteable</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Zoomable" data-name="placeos::driver::interface::zoomable">
+      <a href="../PlaceOS/Driver/Interface/Zoomable.html">Zoomable</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Zoomable/ZoomDirection" data-name="placeos::driver::interface::zoomable::zoomdirection">
+      <a href="../PlaceOS/Driver/Interface/Zoomable/ZoomDirection.html">ZoomDirection</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Level" data-name="placeos::driver::level">
+      <a href="../PlaceOS/Driver/Level.html">Level</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Proxy" data-name="placeos::driver::proxy">
+      <a href="../PlaceOS/Driver/Proxy.html">Proxy</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/Driver" data-name="placeos::driver::proxy::driver">
+      <a href="../PlaceOS/Driver/Proxy/Driver.html">Driver</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Proxy/Drivers" data-name="placeos::driver::proxy::drivers">
+      <a href="../PlaceOS/Driver/Proxy/Drivers.html">Drivers</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/Drivers/Responses" data-name="placeos::driver::proxy::drivers::responses">
+      <a href="../PlaceOS/Driver/Proxy/Drivers/Responses.html">Responses</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Proxy/RemoteDriver" data-name="placeos::driver::proxy::remotedriver">
+      <a href="../PlaceOS/Driver/Proxy/RemoteDriver.html">RemoteDriver</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/RemoteDriver/Clearance" data-name="placeos::driver::proxy::remotedriver::clearance">
+      <a href="../PlaceOS/Driver/Proxy/RemoteDriver/Clearance.html">Clearance</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/RemoteDriver/Error" data-name="placeos::driver::proxy::remotedriver::error">
+      <a href="../PlaceOS/Driver/Proxy/RemoteDriver/Error.html">Error</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/RemoteDriver/ErrorCode" data-name="placeos::driver::proxy::remotedriver::errorcode">
+      <a href="../PlaceOS/Driver/Proxy/RemoteDriver/ErrorCode.html">ErrorCode</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Proxy/Scheduler" data-name="placeos::driver::proxy::scheduler">
+      <a href="../PlaceOS/Driver/Proxy/Scheduler.html">Scheduler</a>
+      
+        <ul>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Proxy/Scheduler/TaskWrapper" data-name="placeos::driver::proxy::scheduler::taskwrapper">
+      <a href="../PlaceOS/Driver/Proxy/Scheduler/TaskWrapper.html">TaskWrapper</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/Scheduler/TaskWrapper/Action" data-name="placeos::driver::proxy::scheduler::taskwrapper::action">
+      <a href="../PlaceOS/Driver/Proxy/Scheduler/TaskWrapper/Action.html">Action</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/Scheduler/TaskWrapper/Callback" data-name="placeos::driver::proxy::scheduler::taskwrapper::callback">
+      <a href="../PlaceOS/Driver/Proxy/Scheduler/TaskWrapper/Callback.html">Callback</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/Subscriptions" data-name="placeos::driver::proxy::subscriptions">
+      <a href="../PlaceOS/Driver/Proxy/Subscriptions.html">Subscriptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/System" data-name="placeos::driver::proxy::system">
+      <a href="../PlaceOS/Driver/Proxy/System.html">System</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Queue" data-name="placeos::driver::queue">
+      <a href="../PlaceOS/Driver/Queue.html">Queue</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/RemoteException" data-name="placeos::driver::remoteexception">
+      <a href="../PlaceOS/Driver/RemoteException.html">RemoteException</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Security" data-name="placeos::driver::security">
+      <a href="../PlaceOS/Driver/Security.html">Security</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Stats" data-name="placeos::driver::stats">
+      <a href="../PlaceOS/Driver/Stats.html">Stats</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Task" data-name="placeos::driver::task">
+      <a href="../PlaceOS/Driver/Task.html">Task</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Task/State" data-name="placeos::driver::task::state">
+      <a href="../PlaceOS/Driver/Task/State.html">State</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Transport" data-name="placeos::driver::transport">
+      <a href="../PlaceOS/Driver/Transport.html">Transport</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/TransportHTTP" data-name="placeos::driver::transporthttp">
+      <a href="../PlaceOS/Driver/TransportHTTP.html">TransportHTTP</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/TransportLogic" data-name="placeos::driver::transportlogic">
+      <a href="../PlaceOS/Driver/TransportLogic.html">TransportLogic</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/TransportSSH" data-name="placeos::driver::transportssh">
+      <a href="../PlaceOS/Driver/TransportSSH.html">TransportSSH</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/TransportSSH/Settings" data-name="placeos::driver::transportssh::settings">
+      <a href="../PlaceOS/Driver/TransportSSH/Settings.html">Settings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/TransportTCP" data-name="placeos::driver::transporttcp">
+      <a href="../PlaceOS/Driver/TransportTCP.html">TransportTCP</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/TransportUDP" data-name="placeos::driver::transportudp">
+      <a href="../PlaceOS/Driver/TransportUDP.html">TransportUDP</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/TransportWebsocket" data-name="placeos::driver::transportwebsocket">
+      <a href="../PlaceOS/Driver/TransportWebsocket.html">TransportWebsocket</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Utilities" data-name="placeos::driver::utilities">
+      <a href="../PlaceOS/Driver/Utilities.html">Utilities</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Utilities/WakeOnLAN" data-name="placeos::driver::utilities::wakeonlan">
+      <a href="../PlaceOS/Driver/Utilities/WakeOnLAN.html">WakeOnLAN</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">class</span> PlaceOS::Driver
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../PlaceOS/Driver.html">PlaceOS::Driver</a></li><li class="superclass">Reference</li><li class="superclass"><a href="../Object.html">Object</a></li></ul>
+
+
+
+
+  <h2>
+    <a id="overview" class="anchor" href="#overview">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Overview
+  </h2>
+
+  <p>This is base class for all PlaceOS drivers.
+It implements a standardised interface by introspecting the driver code you write.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L53" target="_blank">
+        placeos-driver.cr:53
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L622" target="_blank">
+        placeos-driver.cr:622
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/constants.cr#L3" target="_blank">
+        placeos-driver/constants.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/camera.cr#L5" target="_blank">
+        placeos-driver/interface/camera.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/chat_bot.cr#L3" target="_blank">
+        placeos-driver/interface/chat_bot.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/door_security.cr#L1" target="_blank">
+        placeos-driver/interface/door_security.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/electrical_relay.cr#L1" target="_blank">
+        placeos-driver/interface/electrical_relay.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/lighting.cr#L3" target="_blank">
+        placeos-driver/interface/lighting.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/locatable.cr#L1" target="_blank">
+        placeos-driver/interface/locatable.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/lockers.cr#L4" target="_blank">
+        placeos-driver/interface/lockers.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/mailer.cr#L1" target="_blank">
+        placeos-driver/interface/mailer.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/moveable.cr#L1" target="_blank">
+        placeos-driver/interface/moveable.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/muteable.cr#L1" target="_blank">
+        placeos-driver/interface/muteable.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/powerable.cr#L1" target="_blank">
+        placeos-driver/interface/powerable.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L5" target="_blank">
+        placeos-driver/interface/sensor.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sms.cr#L1" target="_blank">
+        placeos-driver/interface/sms.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/stoppable.cr#L1" target="_blank">
+        placeos-driver/interface/stoppable.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/switchable.cr#L1" target="_blank">
+        placeos-driver/interface/switchable.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/zoomable.cr#L1" target="_blank">
+        placeos-driver/interface/zoomable.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/logger.cr#L6" target="_blank">
+        placeos-driver/logger.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/logger_io.cr#L1" target="_blank">
+        placeos-driver/logger_io.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/protocol/request.cr#L3" target="_blank">
+        placeos-driver/protocol/request.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/storage.cr#L1" target="_blank">
+        placeos-driver/storage.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/subscriptions.cr#L7" target="_blank">
+        placeos-driver/subscriptions.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/transport/http.cr#L6" target="_blank">
+        placeos-driver/transport/http.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/transport/ssh.cr#L8" target="_blank">
+        placeos-driver/transport/ssh.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/utilities/binder.cr#L1" target="_blank">
+        placeos-driver/utilities/binder.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/utilities/discovery.cr#L1" target="_blank">
+        placeos-driver/utilities/discovery.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/utilities/rescue_from.cr#L1" target="_blank">
+        placeos-driver/utilities/rescue_from.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+  
+    <h2>
+      <a id="constant-summary" class="anchor" href="#constant-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+      Constant Summary
+    </h2>
+  
+  <dl>
+    
+      <dt class="entry-const" id="LOG_FORMATTER">
+        <strong>LOG_FORMATTER</strong> = <code><span class="t">ActionController</span>.default_formatter</code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="RESERVED_METHODS">
+        <strong>RESERVED_METHODS</strong> = <code>{<span class="s">&quot;initialize&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;received&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;connected&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;disconnected&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;on_load&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;on_update&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;on_unload&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;websocket_headers&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;before_request&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;[]?&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;[]&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;[]=&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;send&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;__handle_rescue_from__&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;transport&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;logger&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;queue&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;setting&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>, <span class="s">&quot;schedule&quot;</span> <span class="o">=&gt;</span> <span class="n">true</span>} <span class="k">of</span> <span class="t">Nil</span> <span class="o">=&gt;</span> <span class="t">Nil</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="VERSION">
+        <strong>VERSION</strong> = <code><span class="o">{{</span> (<span class="s">`shards version \&quot;/home/runner/work/driver/driver/src/placeos-driver\&quot;`</span>).chomp.stringify.downcase }}</code>
+      </dt>
+      
+    
+  </dl>
+
+
+
+
+
+  <h2>
+    <a id="class-method-summary" class="anchor" href="#class-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Class Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#default_settings%28hash%29-class-method" class="signature"><strong>.default_settings</strong>(hash)</a>
+        
+          <div class="summary"><p>provide example settings for your driver that can be customised in backoffice</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#description%28markdown%29-class-method" class="signature"><strong>.description</strong>(markdown)</a>
+        
+          <div class="summary"><p>provide a description for your driver that will be diplayed in backoffice.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#descriptive_name%28name%29-class-method" class="signature"><strong>.descriptive_name</strong>(name)</a>
+        
+          <div class="summary"><p>This is the name of the device you are writing a driver for.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#generic_name%28name%29-class-method" class="signature"><strong>.generic_name</strong>(name)</a>
+        
+          <div class="summary"><p>This is the name other drivers and frontends will use to access the driver functionality</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#makebreak%21-class-method" class="signature"><strong>.makebreak!</strong></a>
+        
+          <div class="summary"><p>when using a TCP protocol, we want to close the connection after every request / response</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#register_log_level_signal-class-method" class="signature"><strong>.register_log_level_signal</strong></a>
+        
+          <div class="summary"><p>Change the log level at run-time.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#tcp_port%28port%29-class-method" class="signature"><strong>.tcp_port</strong>(port)</a>
+        
+          <div class="summary"><p>define a TCP port default if your driver connects over a raw TCP socket</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#udp_port%28port%29-class-method" class="signature"><strong>.udp_port</strong>(port)</a>
+        
+          <div class="summary"><p>define a UDP port default if your driver connects over a raw UDP socket</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#uri_base%28url%29-class-method" class="signature"><strong>.uri_base</strong>(url)</a>
+        
+          <div class="summary"><p>the default base URI for a service driver, all HTTP requests will have this domain and path appended</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#%5B%5D%28key%29%3AJSON%3A%3AAny-instance-method" class="signature"><strong>#[]</strong>(key) : JSON::Any</a>
+        
+          <div class="summary"><p>returns the current value of a status value and raises if it does not exist</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#%5B%5D%3D%28key%2Cvalue%29-instance-method" class="signature"><strong>#[]=</strong>(key, value)</a>
+        
+          <div class="summary"><p>Expose a status key to other drivers and frontends #} allowing them to bind to value updates</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#%5B%5D%3F%28key%29%3AJSON%3A%3AAny%7CNil-instance-method" class="signature"><strong>#[]?</strong>(key) : JSON::Any | Nil</a>
+        
+          <div class="summary"><p>returns the current value of a status value and nil if it does not exist</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#config%3APlaceOS%3A%3ADriver%3A%3ADriverModel-instance-method" class="signature"><strong>#config</strong> : PlaceOS::Driver::DriverModel</a>
+        
+          <div class="summary"><p>the modules database configuration</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#define_setting%28name%2Cvalue%29-instance-method" class="signature"><strong>#define_setting</strong>(name, value)</a>
+        
+          <div class="summary"><p>if you would like to save an updated value to settings so it survives restarts</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#disconnect-instance-method" class="signature"><strong>#disconnect</strong></a>
+        
+          <div class="summary"><p>forces a disconnect of the network transport, which will promptly reconnect</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#invoked_by_user_id-instance-method" class="signature"><strong>#invoked_by_user_id</strong></a>
+        
+          <div class="summary"><p>was the current function executed directly by a user?</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#logger%3APlaceOS%3A%3ADriver%3A%3ALog-instance-method" class="signature"><strong>#logger</strong> : PlaceOS::Driver::Log</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#module_id%3AString-instance-method" class="signature"><strong>#module_id</strong> : String</a>
+        
+          <div class="summary"><p>the id of the currently running module</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#monitor%28channel%2C%26callback%3ASubscriptions%3A%3AChannelSubscription%2CString-%3ENil%29%3ASubscriptions%3A%3AChannelSubscription-instance-method" class="signature"><strong>#monitor</strong>(channel, &callback : Subscriptions::ChannelSubscription, String -> Nil) : Subscriptions::ChannelSubscription</a>
+        
+          <div class="summary"><p>monitor for messages being published on redis</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#publish%28channel%2Cmessage%29-instance-method" class="signature"><strong>#publish</strong>(channel, message)</a>
+        
+          <div class="summary"><p>publishes a message to a channel on redis, available to any drivers monitoring for these events</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#queue%3APlaceOS%3A%3ADriver%3A%3AQueue-instance-method" class="signature"><strong>#queue</strong> : PlaceOS::Driver::Queue</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#queue%28%2A%2Aopts%2C%26block%3ATask-%3ENil%29-instance-method" class="signature"><strong>#queue</strong>(**opts, &block : Task -> Nil)</a>
+        
+          <div class="summary"><p>Queue a task that intends to use the transport layer</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#schedule%3APlaceOS%3A%3ADriver%3A%3AProxy%3A%3AScheduler-instance-method" class="signature"><strong>#schedule</strong> : PlaceOS::Driver::Proxy::Scheduler</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#send%28message%2C%2A%2Aopts%29-instance-method" class="signature"><strong>#send</strong>(message, **opts)</a>
+        
+          <div class="summary"><p>queues a message to be sent to the transport layer.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#send%28message%2C%2A%2Aopts%2C%26block%3ABytes%2CPlaceOS%3A%3ADriver%3A%3ATask-%3ENil%29-instance-method" class="signature"><strong>#send</strong>(message, **opts, &block : Bytes, PlaceOS::Driver::Task -> Nil)</a>
+        
+          <div class="summary"><p>queues a message to be sent to the transport layer.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#set_connected_state%28online%2Cstatus_only%3Dtrue%29-instance-method" class="signature"><strong>#set_connected_state</strong>(online, status_only = <span class="n">true</span>)</a>
+        
+          <div class="summary"><p>used to provide feedback in backoffice about the state of a driver</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#setting%3APlaceOS%3A%3ADriver%3A%3ASettings-instance-method" class="signature"><strong>#setting</strong> : PlaceOS::Driver::Settings</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#signal_status%28key%29-instance-method" class="signature"><strong>#signal_status</strong>(key)</a>
+        
+          <div class="summary"><p>pushes a change notification for the key specified, even though it hasn't changed</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#subscribe%28status%2C%26callback%3ASubscriptions%3A%3ADirectSubscription%2CString-%3ENil%29%3ASubscriptions%3A%3ADirectSubscription-instance-method" class="signature"><strong>#subscribe</strong>(status, &callback : Subscriptions::DirectSubscription, String -> Nil) : Subscriptions::DirectSubscription</a>
+        
+          <div class="summary"><p>Subscribe to a local status value</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#subscriptions%3APlaceOS%3A%3ADriver%3A%3AProxy%3A%3ASubscriptions-instance-method" class="signature"><strong>#subscriptions</strong> : PlaceOS::Driver::Proxy::Subscriptions</a>
+        
+          <div class="summary"><p>provides access to the modules subscriptions tracker</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#system%28id%3AString%29%3AProxy%3A%3ASystem-instance-method" class="signature"><strong>#system</strong>(id : String) : Proxy::System</a>
+        
+          <div class="summary"><p>provides access to the details of a remote system, if you have the ID of the system.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#system%3AProxy%3A%3ASystem-instance-method" class="signature"><strong>#system</strong> : Proxy::System</a>
+        
+          <div class="summary"><p>provides access to the details of the system the logic driver is running in.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#transport%3APlaceOS%3A%3ADriver%3A%3ATransport-instance-method" class="signature"><strong>#transport</strong> : PlaceOS::Driver::Transport</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#wake_device%28mac_address%2Csubnet%3D%22255.255.255.255%22%2Cport%3D9%29-instance-method" class="signature"><strong>#wake_device</strong>(mac_address, subnet = <span class="s">&quot;255.255.255.255&quot;</span>, port = <span class="n">9</span>)</a>
+        
+          <div class="summary"><p>sends a wake-on-lan message the specified mac_address, specify a subnet for directed WOL</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+  <h2>
+    <a id="macro-summary" class="anchor" href="#macro-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Macro Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#accessor%28name%2Cimplementing%3Dnil%29-macro" class="signature"><strong>accessor</strong>(name, implementing = <span class="n">nil</span>)</a>
+        
+          <div class="summary"><p>Creates helper methods in <em>logic drivers</em> for accessing other drivers in a system</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#bind%28mod%2Cstatus%2Chandler%3Dnil%29-macro" class="signature"><strong>bind</strong>(mod, status, handler = <span class="n">nil</span>)</a>
+        
+          <div class="summary"><p>a helper for any driver to bind to changes in its own status values <em>logic drivers</em> can additionally bind to status values on remote drivers</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#rescue_from%28error_class%2Cmethod%3Dnil%2C%26block%29-macro" class="signature"><strong>rescue_from</strong>(error_class, method = <span class="n">nil</span>, &block)</a>
+        
+          <div class="summary"><p>provides a generic method for handling otherwise unhandled errors in your drivers functions i.e.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#setting%28klass%2C%2Atypes%29-macro" class="signature"><strong>setting</strong>(klass, *types)</a>
+        
+          <div class="summary"><p>reads the provided class type out of the settings provided at the provided key.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#setting%3F%28klass%2C%2Atypes%29-macro" class="signature"><strong>setting?</strong>(klass, *types)</a>
+        
+          <div class="summary"><p>reads the provided class type out of the settings provided at the provided key.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#status%28klass%2Ckey%29-macro" class="signature"><strong>status</strong>(klass, key)</a>
+        
+          <div class="summary"><p>reads a status key and deserialises the value into the class provided.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#status%3F%28klass%2Ckey%29-macro" class="signature"><strong>status?</strong>(klass, key)</a>
+        
+          <div class="summary"><p>reads a status key and deserialises the value into the class provided.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+
+
+  <h2>
+    <a id="class-method-detail" class="anchor" href="#class-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Class Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="default_settings(hash)-class-method">
+      <div class="signature">
+        
+        def self.<strong>default_settings</strong>(hash)
+
+        <a class="method-permalink" href="#default_settings%28hash%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>provide example settings for your driver that can be customised in backoffice</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/utilities/discovery.cr#L62" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="description(markdown)-class-method">
+      <div class="signature">
+        
+        def self.<strong>description</strong>(markdown)
+
+        <a class="method-permalink" href="#description%28markdown%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>provide a description for your driver that will be diplayed in backoffice.</p>
+<p>it supports rendering markdown, so you can provide links to manuals and photos etc</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/utilities/discovery.cr#L33" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="descriptive_name(name)-class-method">
+      <div class="signature">
+        
+        def self.<strong>descriptive_name</strong>(name)
+
+        <a class="method-permalink" href="#descriptive_name%28name%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>This is the name of the device you are writing a driver for.</p>
+<p>examples such as: Sony VISCA Camera, Samsung MDC Protocol</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/utilities/discovery.cr#L19" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="generic_name(name)-class-method">
+      <div class="signature">
+        
+        def self.<strong>generic_name</strong>(name)
+
+        <a class="method-permalink" href="#generic_name%28name%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>This is the name other drivers and frontends will use to access the driver functionality</p>
+<p>exmaples such as: Camera, Display</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/utilities/discovery.cr#L26" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="makebreak!-class-method">
+      <div class="signature">
+        
+        def self.<strong>makebreak!</strong>
+
+        <a class="method-permalink" href="#makebreak%21-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>when using a TCP protocol, we want to close the connection after every request / response</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/utilities/discovery.cr#L57" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="register_log_level_signal-class-method">
+      <div class="signature">
+        
+        def self.<strong>register_log_level_signal</strong>
+
+        <a class="method-permalink" href="#register_log_level_signal-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Change the log level at run-time.
+Toggle TRACE level logging using <code>kill -s USR1 %PID</code></p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/logger.cr#L19" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="tcp_port(port)-class-method">
+      <div class="signature">
+        
+        def self.<strong>tcp_port</strong>(port)
+
+        <a class="method-permalink" href="#tcp_port%28port%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>define a TCP port default if your driver connects over a raw TCP socket</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/utilities/discovery.cr#L38" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="udp_port(port)-class-method">
+      <div class="signature">
+        
+        def self.<strong>udp_port</strong>(port)
+
+        <a class="method-permalink" href="#udp_port%28port%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>define a UDP port default if your driver connects over a raw UDP socket</p>
+<p>also use this if you are using multicast for communications</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/utilities/discovery.cr#L45" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="uri_base(url)-class-method">
+      <div class="signature">
+        
+        def self.<strong>uri_base</strong>(url)
+
+        <a class="method-permalink" href="#uri_base%28url%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>the default base URI for a service driver, all HTTP requests will have this domain and path appended</p>
+<p>for example: https://api.google.com/</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/utilities/discovery.cr#L52" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="[](key):JSON::Any-instance-method">
+      <div class="signature">
+        
+        def <strong>[]</strong>(key) : JSON::Any
+
+        <a class="method-permalink" href="#%5B%5D%28key%29%3AJSON%3A%3AAny-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>returns the current value of a status value and raises if it does not exist</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L169" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="[]=(key,value)-instance-method">
+      <div class="signature">
+        
+        def <strong>[]=</strong>(key, value)
+
+        <a class="method-permalink" href="#%5B%5D%3D%28key%2Cvalue%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Expose a status key to other drivers and frontends #}
+allowing them to bind to value updates</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L152" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="[]?(key):JSON::Any|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>[]?</strong>(key) : JSON::Any | Nil
+
+        <a class="method-permalink" href="#%5B%5D%3F%28key%29%3AJSON%3A%3AAny%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>returns the current value of a status value and nil if it does not exist</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L174" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="config:PlaceOS::Driver::DriverModel-instance-method">
+      <div class="signature">
+        
+        def <strong>config</strong> : <a href="../PlaceOS/Driver/DriverModel.html">PlaceOS::Driver::DriverModel</a>
+
+        <a class="method-permalink" href="#config%3APlaceOS%3A%3ADriver%3A%3ADriverModel-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>the modules database configuration</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L126" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="define_setting(name,value)-instance-method">
+      <div class="signature">
+        
+        def <strong>define_setting</strong>(name, value)
+
+        <a class="method-permalink" href="#define_setting%28name%2Cvalue%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>if you would like to save an updated value to settings so it survives restarts</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L236" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="disconnect-instance-method">
+      <div class="signature">
+        
+        def <strong>disconnect</strong>
+
+        <a class="method-permalink" href="#disconnect-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>forces a disconnect of the network transport, which will promptly reconnect</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L343" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="invoked_by_user_id-instance-method">
+      <div class="signature">
+        
+        def <strong>invoked_by_user_id</strong>
+
+        <a class="method-permalink" href="#invoked_by_user_id-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>was the current function executed directly by a user?</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L146" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="logger:PlaceOS::Driver::Log-instance-method">
+      <div class="signature">
+        
+        def <strong>logger</strong> : PlaceOS::Driver::Log
+
+        <a class="method-permalink" href="#logger%3APlaceOS%3A%3ADriver%3A%3ALog-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L113" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="module_id:String-instance-method">
+      <div class="signature">
+        
+        def <strong>module_id</strong> : String
+
+        <a class="method-permalink" href="#module_id%3AString-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>the id of the currently running module</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L136" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="monitor(channel,&amp;callback:Subscriptions::ChannelSubscription,String-&gt;Nil):Subscriptions::ChannelSubscription-instance-method">
+      <div class="signature">
+        
+        def <strong>monitor</strong>(channel, &callback : Subscriptions::ChannelSubscription, String -> Nil) : Subscriptions::ChannelSubscription
+
+        <a class="method-permalink" href="#monitor%28channel%2C%26callback%3ASubscriptions%3A%3AChannelSubscription%2CString-%3ENil%29%3ASubscriptions%3A%3AChannelSubscription-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>monitor for messages being published on redis</p>
+<p><code>subscription = monitor(&quot;my_service/channel&quot;) { |subscription, string_value| ... }</code></p>
+<p>use <code>subscriptions.unsubscribe(subscription)</code> to unsubscribe</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L316" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="publish(channel,message)-instance-method">
+      <div class="signature">
+        
+        def <strong>publish</strong>(channel, message)
+
+        <a class="method-permalink" href="#publish%28channel%2Cmessage%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>publishes a message to a channel on redis, available to any drivers monitoring for these events</p>
+<p><code><a href="../PlaceOS/Driver.html#publish%28channel%2Cmessage%29-instance-method">#publish(&quot;my_service/channel&quot;, &quot;payload contents&quot;)</a></code></p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L300" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="queue:PlaceOS::Driver::Queue-instance-method">
+      <div class="signature">
+        
+        def <strong>queue</strong> : <a href="../PlaceOS/Driver/Queue.html">PlaceOS::Driver::Queue</a>
+
+        <a class="method-permalink" href="#queue%3APlaceOS%3A%3ADriver%3A%3AQueue-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L113" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="queue(**opts,&amp;block:Task-&gt;Nil)-instance-method">
+      <div class="signature">
+        
+        def <strong>queue</strong>(**opts, &block : <a href="../PlaceOS/Driver/Task.html">Task</a> -> Nil)
+
+        <a class="method-permalink" href="#queue%28%2A%2Aopts%2C%26block%3ATask-%3ENil%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Queue a task that intends to use the transport layer</p>
+<p>primarily useful where a device can only perform a single function at a time and ordering is important</p>
+<p>i.e power-on, switch-input, set-volume</p>
+<p>however you typically won't need to use this function directly. See #send</p>
+<p><code>opts</code> options include:</p>
+<ul>
+<li>
+<p>priority: an <code>Int</code> between 0 and 100 where 0 is highest priority and 100 is the lowest</p>
+</li>
+<li>
+<p>timeout: a <code>Time::Span</code> indicating the maximum time the task should wait for a response</p>
+</li>
+<li>
+<p>retries: how many attempts should be made to successfully complete a task</p>
+</li>
+<li>
+<p>wait: <code>Bool</code> should we wait for a response (defaults to true)</p>
+</li>
+<li>
+<p>name: <code>String</code> of the command, if there is already a command with the same name in the queue, it will be replaced with this.</p>
+</li>
+<li>
+<p>delay: <code>Time::Span</code> how long to wait after executing this command before executing the next</p>
+</li>
+<li>
+<p>clear_queue: <code>Bool</code> after executing task, clear all the remaining tasks in the queue</p>
+</li>
+</ul>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L263" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="schedule:PlaceOS::Driver::Proxy::Scheduler-instance-method">
+      <div class="signature">
+        
+        def <strong>schedule</strong> : <a href="../PlaceOS/Driver/Proxy/Scheduler.html">PlaceOS::Driver::Proxy::Scheduler</a>
+
+        <a class="method-permalink" href="#schedule%3APlaceOS%3A%3ADriver%3A%3AProxy%3A%3AScheduler-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L113" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="send(message,**opts)-instance-method">
+      <div class="signature">
+        
+        def <strong>send</strong>(message, **opts)
+
+        <a class="method-permalink" href="#send%28message%2C%2A%2Aopts%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>queues a message to be sent to the transport layer.</p>
+<p>see #queue for available options</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L270" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="send(message,**opts,&amp;block:Bytes,PlaceOS::Driver::Task-&gt;Nil)-instance-method">
+      <div class="signature">
+        
+        def <strong>send</strong>(message, **opts, &block : Bytes, <a href="../PlaceOS/Driver/Task.html">PlaceOS::Driver::Task</a> -> Nil)
+
+        <a class="method-permalink" href="#send%28message%2C%2A%2Aopts%2C%26block%3ABytes%2CPlaceOS%3A%3ADriver%3A%3ATask-%3ENil%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>queues a message to be sent to the transport layer.</p>
+<p>the provided block is used to process responses while this task is active</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L280" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="set_connected_state(online,status_only=true)-instance-method">
+      <div class="signature">
+        
+        def <strong>set_connected_state</strong>(online, status_only = <span class="n">true</span>)
+
+        <a class="method-permalink" href="#set_connected_state%28online%2Cstatus_only%3Dtrue%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>used to provide feedback in backoffice about the state of a driver</p>
+<p>online: true == Green, online: false == Red in backoffice</p>
+<p>setting <code>status_only: false</code> will set the queue online state.</p>
+<p>when offline, this means the queue will ignore all unnamed tasks to avoid memory leaks.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L333" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="setting:PlaceOS::Driver::Settings-instance-method">
+      <div class="signature">
+        
+        def <strong>setting</strong> : PlaceOS::Driver::Settings
+
+        <a class="method-permalink" href="#setting%3APlaceOS%3A%3ADriver%3A%3ASettings-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L113" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="signal_status(key)-instance-method">
+      <div class="signature">
+        
+        def <strong>signal_status</strong>(key)
+
+        <a class="method-permalink" href="#signal_status%28key%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>pushes a change notification for the key specified, even though it hasn't changed</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L196" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="subscribe(status,&amp;callback:Subscriptions::DirectSubscription,String-&gt;Nil):Subscriptions::DirectSubscription-instance-method">
+      <div class="signature">
+        
+        def <strong>subscribe</strong>(status, &callback : Subscriptions::DirectSubscription, String -> Nil) : Subscriptions::DirectSubscription
+
+        <a class="method-permalink" href="#subscribe%28status%2C%26callback%3ASubscriptions%3A%3ADirectSubscription%2CString-%3ENil%29%3ASubscriptions%3A%3ADirectSubscription-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Subscribe to a local status value</p>
+<p><code>subscription = subscribe(:my_status) { |subscription, string_value| ... }</code></p>
+<p>use <code>subscriptions.unsubscribe(subscription)</code> to unsubscribe</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L292" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="subscriptions:PlaceOS::Driver::Proxy::Subscriptions-instance-method">
+      <div class="signature">
+        
+        def <strong>subscriptions</strong> : <a href="../PlaceOS/Driver/Proxy/Subscriptions.html">PlaceOS::Driver::Proxy::Subscriptions</a>
+
+        <a class="method-permalink" href="#subscriptions%3APlaceOS%3A%3ADriver%3A%3AProxy%3A%3ASubscriptions-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>provides access to the modules subscriptions tracker</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L120" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="system(id:String):Proxy::System-instance-method">
+      <div class="signature">
+        
+        def <strong>system</strong>(id : String) : <a href="../PlaceOS/Driver/Proxy/System.html">Proxy::System</a>
+
+        <a class="method-permalink" href="#system%28id%3AString%29%3AProxy%3A%3ASystem-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>provides access to the details of a remote system, if you have the ID of the system.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L213" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="system:Proxy::System-instance-method">
+      <div class="signature">
+        
+        def <strong>system</strong> : <a href="../PlaceOS/Driver/Proxy/System.html">Proxy::System</a>
+
+        <a class="method-permalink" href="#system%3AProxy%3A%3ASystem-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>provides access to the details of the system the logic driver is running in.</p>
+<p><span class="flag purple">NOTE</span> : this only works for logic drivers as other drivers can be in multiple systems.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L203" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="transport:PlaceOS::Driver::Transport-instance-method">
+      <div class="signature">
+        
+        def <strong>transport</strong> : <a href="../PlaceOS/Driver/Transport.html">PlaceOS::Driver::Transport</a>
+
+        <a class="method-permalink" href="#transport%3APlaceOS%3A%3ADriver%3A%3ATransport-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L113" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="wake_device(mac_address,subnet=&quot;255.255.255.255&quot;,port=9)-instance-method">
+      <div class="signature">
+        
+        def <strong>wake_device</strong>(mac_address, subnet = <span class="s">&quot;255.255.255.255&quot;</span>, port = <span class="n">9</span>)
+
+        <a class="method-permalink" href="#wake_device%28mac_address%2Csubnet%3D%22255.255.255.255%22%2Cport%3D9%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>sends a wake-on-lan message the specified mac_address, specify a subnet for directed WOL</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L322" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+  <h2>
+    <a id="macro-detail" class="anchor" href="#macro-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Macro Detail
+  </h2>
+  
+    <div class="entry-detail" id="accessor(name,implementing=nil)-macro">
+      <div class="signature">
+        
+        macro <strong>accessor</strong>(name, implementing = <span class="n">nil</span>)
+
+        <a class="method-permalink" href="#accessor%28name%2Cimplementing%3Dnil%29-macro">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Creates helper methods in <em>logic drivers</em> for accessing other drivers in a system</p>
+<p>For example, if you want to access <code>system[:Display_1]</code> via <code>display</code> use <code>accessor display : Display_1</code></p>
+<p>for <code>system.all(Camera)</code> use <code>accessor cameras : Array(Camera)</code></p>
+<p>for <code>system.all(Display, implementing: <a href="../PlaceOS/Driver/Interface/Powerable.html">Interface::Powerable</a>)</code> use <code>accessor displays : Array(Display), implementing: <a href="../PlaceOS/Driver/Interface/Powerable.html">Interface::Powerable</a></code></p>
+<p>for <code>system.implementing(<a href="../PlaceOS/Driver/Interface/Powerable.html">Interface::Powerable</a>)</code> use <code>accessor powerable, implementing: <a href="../PlaceOS/Driver/Interface/Powerable.html">Interface::Powerable</a></code></p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/utilities/discovery.cr#L75" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="bind(mod,status,handler=nil)-macro">
+      <div class="signature">
+        
+        macro <strong>bind</strong>(mod, status, handler = <span class="n">nil</span>)
+
+        <a class="method-permalink" href="#bind%28mod%2Cstatus%2Chandler%3Dnil%29-macro">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>a helper for any driver to bind to changes in its own status values
+<em>logic drivers</em> can additionally bind to status values on remote drivers</p>
+<p>local bind: <code>bind :power, :power_changed</code></p>
+<p>remote bind: <code>bind Display_1, :power, :power_changed</code></p>
+<p>the <code>new_value</code> provided in the handler is a JSON string</p>
+<p>you would define your handler as <code>protected def power_changed(_subscription, new_value : String)</code></p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/utilities/binder.cr#L34" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="rescue_from(error_class,method=nil,&amp;block)-macro">
+      <div class="signature">
+        
+        macro <strong>rescue_from</strong>(error_class, method = <span class="n">nil</span>, &block)
+
+        <a class="method-permalink" href="#rescue_from%28error_class%2Cmethod%3Dnil%2C%26block%29-macro">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>provides a generic method for handling otherwise unhandled errors in your drivers functions
+i.e. <code><a href="../PlaceOS/Driver.html#rescue_from%28error_class%2Cmethod%3Dnil%2C%26block%29-macro">rescue_from(DivisionByZeroError, :return_zero)</a></code>
+or alternatively: <code>rescue_from(DivisionByZeroError) { 0 }</code></p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/utilities/rescue_from.cr#L8" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="setting(klass,*types)-macro">
+      <div class="signature">
+        
+        macro <strong>setting</strong>(klass, *types)
+
+        <a class="method-permalink" href="#setting%28klass%2C%2Atypes%29-macro">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>reads the provided class type out of the settings provided at the provided key.</p>
+<p>i.e. given a setting: <code>values: [1, 2, 3]</code></p>
+<p>you can extract index 2 number using: <code>setting(Int64, :values, 2)</code></p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L222" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="setting?(klass,*types)-macro">
+      <div class="signature">
+        
+        macro <strong>setting?</strong>(klass, *types)
+
+        <a class="method-permalink" href="#setting%3F%28klass%2C%2Atypes%29-macro">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>reads the provided class type out of the settings provided at the provided key.</p>
+<p>i.e. given a setting: <code>keys: {&quot;public&quot;: &quot;123456&quot;}</code></p>
+<p>you can extract the public key using: <code>setting?(String, :keys, :public)</code></p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L231" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="status(klass,key)-macro">
+      <div class="signature">
+        
+        macro <strong>status</strong>(klass, key)
+
+        <a class="method-permalink" href="#status%28klass%2Ckey%29-macro">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>reads a status key and deserialises the value into the class provided.</p>
+<p>It raises if the class does not exist.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L183" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="status?(klass,key)-macro">
+      <div class="signature">
+        
+        macro <strong>status?</strong>(klass, key)
+
+        <a class="method-permalink" href="#status%3F%28klass%2Ckey%29-macro">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>reads a status key and deserialises the value into the class provided.</p>
+<p>It returns <code>nil</code> if the key doesn't exist</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver.cr#L190" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+</div>
+
+</body>
+</html>

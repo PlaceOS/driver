@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Crystal Docs 1.7.3">
+<meta name="crystal_docs.project_version" content="master">
+<meta name="crystal_docs.project_name" content="placeos-driver">
+
+
+
+<link href="../../../../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../../../js/doc.js"></script>
+
+  <meta name="repository-name" content="placeos-driver">
+  <title>PlaceOS::Driver::Interface::Sensor::SensorType - placeos-driver master</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "../../../../";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="../../../../index.html">
+          placeos-driver
+        </a>
+      </h1>
+
+      <span class="project-version">
+        master
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class="parent " data-id="placeos-driver/DriverSpecs" data-name="driverspecs">
+      <a href="../../../../DriverSpecs.html">DriverSpecs</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/DriverSpecs/MockDriver" data-name="driverspecs::mockdriver">
+      <a href="../../../../DriverSpecs/MockDriver.html">MockDriver</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/DriverSpecs/StatusHelper" data-name="driverspecs::statushelper">
+      <a href="../../../../DriverSpecs/StatusHelper.html">StatusHelper</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/Object" data-name="object">
+      <a href="../../../../Object.html">Object</a>
+      
+    </li>
+  
+  <li class="parent open current" data-id="placeos-driver/PlaceOS" data-name="placeos">
+      <a href="../../../../PlaceOS.html">PlaceOS</a>
+      
+        <ul>
+  
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver" data-name="placeos::driver">
+      <a href="../../../../PlaceOS/Driver.html">Driver</a>
+      
+        <ul>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/DriverModel" data-name="placeos::driver::drivermodel">
+      <a href="../../../../PlaceOS/Driver/DriverModel.html">DriverModel</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/DriverModel/ControlSystem" data-name="placeos::driver::drivermodel::controlsystem">
+      <a href="../../../../PlaceOS/Driver/DriverModel/ControlSystem.html">ControlSystem</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/DriverModel/Metadata" data-name="placeos::driver::drivermodel::metadata">
+      <a href="../../../../PlaceOS/Driver/DriverModel/Metadata.html">Metadata</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/DriverModel/Role" data-name="placeos::driver::drivermodel::role">
+      <a href="../../../../PlaceOS/Driver/DriverModel/Role.html">Role</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface" data-name="placeos::driver::interface">
+      <a href="../../../../PlaceOS/Driver/Interface.html">Interface</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/AudioMuteable" data-name="placeos::driver::interface::audiomuteable">
+      <a href="../../../../PlaceOS/Driver/Interface/AudioMuteable.html">AudioMuteable</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Camera" data-name="placeos::driver::interface::camera">
+      <a href="../../../../PlaceOS/Driver/Interface/Camera.html">Camera</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Camera/PanDirection" data-name="placeos::driver::interface::camera::pandirection">
+      <a href="../../../../PlaceOS/Driver/Interface/Camera/PanDirection.html">PanDirection</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Camera/TiltDirection" data-name="placeos::driver::interface::camera::tiltdirection">
+      <a href="../../../../PlaceOS/Driver/Interface/Camera/TiltDirection.html">TiltDirection</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/ChatBot" data-name="placeos::driver::interface::chatbot">
+      <a href="../../../../PlaceOS/Driver/Interface/ChatBot.html">ChatBot</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/ChatBot/Attachment" data-name="placeos::driver::interface::chatbot::attachment">
+      <a href="../../../../PlaceOS/Driver/Interface/ChatBot/Attachment.html">Attachment</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/ChatBot/Id" data-name="placeos::driver::interface::chatbot::id">
+      <a href="../../../../PlaceOS/Driver/Interface/ChatBot/Id.html">Id</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/ChatBot/Message" data-name="placeos::driver::interface::chatbot::message">
+      <a href="../../../../PlaceOS/Driver/Interface/ChatBot/Message.html">Message</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/DoorSecurity" data-name="placeos::driver::interface::doorsecurity">
+      <a href="../../../../PlaceOS/Driver/Interface/DoorSecurity.html">DoorSecurity</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/DoorSecurity/Action" data-name="placeos::driver::interface::doorsecurity::action">
+      <a href="../../../../PlaceOS/Driver/Interface/DoorSecurity/Action.html">Action</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/DoorSecurity/Door" data-name="placeos::driver::interface::doorsecurity::door">
+      <a href="../../../../PlaceOS/Driver/Interface/DoorSecurity/Door.html">Door</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/DoorSecurity/DoorEvent" data-name="placeos::driver::interface::doorsecurity::doorevent">
+      <a href="../../../../PlaceOS/Driver/Interface/DoorSecurity/DoorEvent.html">DoorEvent</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/ElectricalRelay" data-name="placeos::driver::interface::electricalrelay">
+      <a href="../../../../PlaceOS/Driver/Interface/ElectricalRelay.html">ElectricalRelay</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/InputSelection" data-name="placeos::driver::interface::inputselection(input)">
+      <a href="../../../../PlaceOS/Driver/Interface/InputSelection.html">InputSelection</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Lighting" data-name="placeos::driver::interface::lighting">
+      <a href="../../../../PlaceOS/Driver/Interface/Lighting.html">Lighting</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Lighting/Area" data-name="placeos::driver::interface::lighting::area">
+      <a href="../../../../PlaceOS/Driver/Interface/Lighting/Area.html">Area</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Lighting/Level" data-name="placeos::driver::interface::lighting::level">
+      <a href="../../../../PlaceOS/Driver/Interface/Lighting/Level.html">Level</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Lighting/Scene" data-name="placeos::driver::interface::lighting::scene">
+      <a href="../../../../PlaceOS/Driver/Interface/Lighting/Scene.html">Scene</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Locatable" data-name="placeos::driver::interface::locatable">
+      <a href="../../../../PlaceOS/Driver/Interface/Locatable.html">Locatable</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Locatable/OwnershipMAC" data-name="placeos::driver::interface::locatable::ownershipmac">
+      <a href="../../../../PlaceOS/Driver/Interface/Locatable/OwnershipMAC.html">OwnershipMAC</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Lockers" data-name="placeos::driver::interface::lockers">
+      <a href="../../../../PlaceOS/Driver/Interface/Lockers.html">Lockers</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Lockers/PlaceLocker" data-name="placeos::driver::interface::lockers::placelocker">
+      <a href="../../../../PlaceOS/Driver/Interface/Lockers/PlaceLocker.html">PlaceLocker</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Mailer" data-name="placeos::driver::interface::mailer">
+      <a href="../../../../PlaceOS/Driver/Interface/Mailer.html">Mailer</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Mailer/Attachment" data-name="placeos::driver::interface::mailer::attachment">
+      <a href="../../../../PlaceOS/Driver/Interface/Mailer/Attachment.html">Attachment</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Mailer/ResourceAttachment" data-name="placeos::driver::interface::mailer::resourceattachment">
+      <a href="../../../../PlaceOS/Driver/Interface/Mailer/ResourceAttachment.html">ResourceAttachment</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Mailer/TemplateItems" data-name="placeos::driver::interface::mailer::templateitems">
+      <a href="../../../../PlaceOS/Driver/Interface/Mailer/TemplateItems.html">TemplateItems</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Mailer/Templates" data-name="placeos::driver::interface::mailer::templates">
+      <a href="../../../../PlaceOS/Driver/Interface/Mailer/Templates.html">Templates</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Moveable" data-name="placeos::driver::interface::moveable">
+      <a href="../../../../PlaceOS/Driver/Interface/Moveable.html">Moveable</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Moveable/MoveablePosition" data-name="placeos::driver::interface::moveable::moveableposition">
+      <a href="../../../../PlaceOS/Driver/Interface/Moveable/MoveablePosition.html">MoveablePosition</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Muteable" data-name="placeos::driver::interface::muteable">
+      <a href="../../../../PlaceOS/Driver/Interface/Muteable.html">Muteable</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Muteable/MuteLayer" data-name="placeos::driver::interface::muteable::mutelayer">
+      <a href="../../../../PlaceOS/Driver/Interface/Muteable/MuteLayer.html">MuteLayer</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Powerable" data-name="placeos::driver::interface::powerable">
+      <a href="../../../../PlaceOS/Driver/Interface/Powerable.html">Powerable</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Powerable/PowerState" data-name="placeos::driver::interface::powerable::powerstate">
+      <a href="../../../../PlaceOS/Driver/Interface/Powerable/PowerState.html">PowerState</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor" data-name="placeos::driver::interface::sensor">
+      <a href="../../../../PlaceOS/Driver/Interface/Sensor.html">Sensor</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/Detail" data-name="placeos::driver::interface::sensor::detail">
+      <a href="../../../../PlaceOS/Driver/Interface/Sensor/Detail.html">Detail</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/GeoLocation" data-name="placeos::driver::interface::sensor::geolocation">
+      <a href="../../../../PlaceOS/Driver/Interface/Sensor/GeoLocation.html">GeoLocation</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/Location" data-name="placeos::driver::interface::sensor::location">
+      <a href="../../../../PlaceOS/Driver/Interface/Sensor/Location.html">Location</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/MapLocation" data-name="placeos::driver::interface::sensor::maplocation">
+      <a href="../../../../PlaceOS/Driver/Interface/Sensor/MapLocation.html">MapLocation</a>
+      
+    </li>
+  
+  <li class=" current" data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/SensorType" data-name="placeos::driver::interface::sensor::sensortype">
+      <a href="../../../../PlaceOS/Driver/Interface/Sensor/SensorType.html">SensorType</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/Status" data-name="placeos::driver::interface::sensor::status">
+      <a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html">Status</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/SMS" data-name="placeos::driver::interface::sms">
+      <a href="../../../../PlaceOS/Driver/Interface/SMS.html">SMS</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Stoppable" data-name="placeos::driver::interface::stoppable">
+      <a href="../../../../PlaceOS/Driver/Interface/Stoppable.html">Stoppable</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Switchable" data-name="placeos::driver::interface::switchable(input, output)">
+      <a href="../../../../PlaceOS/Driver/Interface/Switchable.html">Switchable</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Switchable/SwitchLayer" data-name="placeos::driver::interface::switchable::switchlayer">
+      <a href="../../../../PlaceOS/Driver/Interface/Switchable/SwitchLayer.html">SwitchLayer</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/VideoMuteable" data-name="placeos::driver::interface::videomuteable">
+      <a href="../../../../PlaceOS/Driver/Interface/VideoMuteable.html">VideoMuteable</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Zoomable" data-name="placeos::driver::interface::zoomable">
+      <a href="../../../../PlaceOS/Driver/Interface/Zoomable.html">Zoomable</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Zoomable/ZoomDirection" data-name="placeos::driver::interface::zoomable::zoomdirection">
+      <a href="../../../../PlaceOS/Driver/Interface/Zoomable/ZoomDirection.html">ZoomDirection</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Level" data-name="placeos::driver::level">
+      <a href="../../../../PlaceOS/Driver/Level.html">Level</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Proxy" data-name="placeos::driver::proxy">
+      <a href="../../../../PlaceOS/Driver/Proxy.html">Proxy</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/Driver" data-name="placeos::driver::proxy::driver">
+      <a href="../../../../PlaceOS/Driver/Proxy/Driver.html">Driver</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Proxy/Drivers" data-name="placeos::driver::proxy::drivers">
+      <a href="../../../../PlaceOS/Driver/Proxy/Drivers.html">Drivers</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/Drivers/Responses" data-name="placeos::driver::proxy::drivers::responses">
+      <a href="../../../../PlaceOS/Driver/Proxy/Drivers/Responses.html">Responses</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Proxy/RemoteDriver" data-name="placeos::driver::proxy::remotedriver">
+      <a href="../../../../PlaceOS/Driver/Proxy/RemoteDriver.html">RemoteDriver</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/RemoteDriver/Clearance" data-name="placeos::driver::proxy::remotedriver::clearance">
+      <a href="../../../../PlaceOS/Driver/Proxy/RemoteDriver/Clearance.html">Clearance</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/RemoteDriver/Error" data-name="placeos::driver::proxy::remotedriver::error">
+      <a href="../../../../PlaceOS/Driver/Proxy/RemoteDriver/Error.html">Error</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/RemoteDriver/ErrorCode" data-name="placeos::driver::proxy::remotedriver::errorcode">
+      <a href="../../../../PlaceOS/Driver/Proxy/RemoteDriver/ErrorCode.html">ErrorCode</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Proxy/Scheduler" data-name="placeos::driver::proxy::scheduler">
+      <a href="../../../../PlaceOS/Driver/Proxy/Scheduler.html">Scheduler</a>
+      
+        <ul>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Proxy/Scheduler/TaskWrapper" data-name="placeos::driver::proxy::scheduler::taskwrapper">
+      <a href="../../../../PlaceOS/Driver/Proxy/Scheduler/TaskWrapper.html">TaskWrapper</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/Scheduler/TaskWrapper/Action" data-name="placeos::driver::proxy::scheduler::taskwrapper::action">
+      <a href="../../../../PlaceOS/Driver/Proxy/Scheduler/TaskWrapper/Action.html">Action</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/Scheduler/TaskWrapper/Callback" data-name="placeos::driver::proxy::scheduler::taskwrapper::callback">
+      <a href="../../../../PlaceOS/Driver/Proxy/Scheduler/TaskWrapper/Callback.html">Callback</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/Subscriptions" data-name="placeos::driver::proxy::subscriptions">
+      <a href="../../../../PlaceOS/Driver/Proxy/Subscriptions.html">Subscriptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/System" data-name="placeos::driver::proxy::system">
+      <a href="../../../../PlaceOS/Driver/Proxy/System.html">System</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Queue" data-name="placeos::driver::queue">
+      <a href="../../../../PlaceOS/Driver/Queue.html">Queue</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/RemoteException" data-name="placeos::driver::remoteexception">
+      <a href="../../../../PlaceOS/Driver/RemoteException.html">RemoteException</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Security" data-name="placeos::driver::security">
+      <a href="../../../../PlaceOS/Driver/Security.html">Security</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Stats" data-name="placeos::driver::stats">
+      <a href="../../../../PlaceOS/Driver/Stats.html">Stats</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Task" data-name="placeos::driver::task">
+      <a href="../../../../PlaceOS/Driver/Task.html">Task</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Task/State" data-name="placeos::driver::task::state">
+      <a href="../../../../PlaceOS/Driver/Task/State.html">State</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Transport" data-name="placeos::driver::transport">
+      <a href="../../../../PlaceOS/Driver/Transport.html">Transport</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/TransportHTTP" data-name="placeos::driver::transporthttp">
+      <a href="../../../../PlaceOS/Driver/TransportHTTP.html">TransportHTTP</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/TransportLogic" data-name="placeos::driver::transportlogic">
+      <a href="../../../../PlaceOS/Driver/TransportLogic.html">TransportLogic</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/TransportSSH" data-name="placeos::driver::transportssh">
+      <a href="../../../../PlaceOS/Driver/TransportSSH.html">TransportSSH</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/TransportSSH/Settings" data-name="placeos::driver::transportssh::settings">
+      <a href="../../../../PlaceOS/Driver/TransportSSH/Settings.html">Settings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/TransportTCP" data-name="placeos::driver::transporttcp">
+      <a href="../../../../PlaceOS/Driver/TransportTCP.html">TransportTCP</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/TransportUDP" data-name="placeos::driver::transportudp">
+      <a href="../../../../PlaceOS/Driver/TransportUDP.html">TransportUDP</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/TransportWebsocket" data-name="placeos::driver::transportwebsocket">
+      <a href="../../../../PlaceOS/Driver/TransportWebsocket.html">TransportWebsocket</a>
+      
+    </li>
+  
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Utilities" data-name="placeos::driver::utilities">
+      <a href="../../../../PlaceOS/Driver/Utilities.html">Utilities</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Utilities/WakeOnLAN" data-name="placeos::driver::utilities::wakeonlan">
+      <a href="../../../../PlaceOS/Driver/Utilities/WakeOnLAN.html">WakeOnLAN</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">enum</span> PlaceOS::Driver::Interface::Sensor::SensorType
+
+</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L8" target="_blank">
+        placeos-driver/interface/sensor.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+  
+    <h2>
+      <a id="enum-members" class="anchor" href="#enum-members">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+      Enum Members
+    </h2>
+  
+  <dl>
+    
+      <dt class="entry-const" id="Temperature">
+        <strong>Temperature</strong> = <code><span class="n">0</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="DeviceTemp">
+        <strong>DeviceTemp</strong> = <code><span class="n">1</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Humidity">
+        <strong>Humidity</strong> = <code><span class="n">2</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Illuminance">
+        <strong>Illuminance</strong> = <code><span class="n">3</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Pressure">
+        <strong>Pressure</strong> = <code><span class="n">4</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Trigger">
+        <strong>Trigger</strong> = <code><span class="n">5</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Presence">
+        <strong>Presence</strong> = <code><span class="n">6</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Switch">
+        <strong>Switch</strong> = <code><span class="n">7</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Level">
+        <strong>Level</strong> = <code><span class="n">8</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Flow">
+        <strong>Flow</strong> = <code><span class="n">9</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Counter">
+        <strong>Counter</strong> = <code><span class="n">10</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="PeopleCount">
+        <strong>PeopleCount</strong> = <code><span class="n">11</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="QueueSize">
+        <strong>QueueSize</strong> = <code><span class="n">12</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Acceleration">
+        <strong>Acceleration</strong> = <code><span class="n">13</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Speed">
+        <strong>Speed</strong> = <code><span class="n">14</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Roll">
+        <strong>Roll</strong> = <code><span class="n">15</span></code>
+      </dt>
+      
+      <dd class="entry-const-doc">
+        <p>Gyroscope: roll, pitch, yaw - Angle</p>
+      </dd>
+      
+    
+      <dt class="entry-const" id="Pitch">
+        <strong>Pitch</strong> = <code><span class="n">16</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Yaw">
+        <strong>Yaw</strong> = <code><span class="n">17</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Compass">
+        <strong>Compass</strong> = <code><span class="n">18</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Current">
+        <strong>Current</strong> = <code><span class="n">19</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Voltage">
+        <strong>Voltage</strong> = <code><span class="n">20</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="ElectricalResistance">
+        <strong>ElectricalResistance</strong> = <code><span class="n">21</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Power">
+        <strong>Power</strong> = <code><span class="n">22</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Energy">
+        <strong>Energy</strong> = <code><span class="n">23</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Capacitance">
+        <strong>Capacitance</strong> = <code><span class="n">24</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Inductance">
+        <strong>Inductance</strong> = <code><span class="n">25</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Conductance">
+        <strong>Conductance</strong> = <code><span class="n">26</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="MagneticFlux">
+        <strong>MagneticFlux</strong> = <code><span class="n">27</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="MagneticFluxDensity">
+        <strong>MagneticFluxDensity</strong> = <code><span class="n">28</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Radiation">
+        <strong>Radiation</strong> = <code><span class="n">29</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Distance">
+        <strong>Distance</strong> = <code><span class="n">30</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Area">
+        <strong>Area</strong> = <code><span class="n">31</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="SoundPressure">
+        <strong>SoundPressure</strong> = <code><span class="n">32</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Force">
+        <strong>Force</strong> = <code><span class="n">33</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Frequency">
+        <strong>Frequency</strong> = <code><span class="n">34</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Mass">
+        <strong>Mass</strong> = <code><span class="n">35</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Momentum">
+        <strong>Momentum</strong> = <code><span class="n">36</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="TimePeriod">
+        <strong>TimePeriod</strong> = <code><span class="n">37</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Volume">
+        <strong>Volume</strong> = <code><span class="n">38</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Acidity">
+        <strong>Acidity</strong> = <code><span class="n">39</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="AirQuality">
+        <strong>AirQuality</strong> = <code><span class="n">40</span></code>
+      </dt>
+      
+      <dd class="entry-const-doc">
+        <p>this could be UBA or AQI values, not sure if there is good way to convert between these</p>
+      </dd>
+      
+    
+  </dl>
+
+
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#acceleration%3F-instance-method" class="signature"><strong>#acceleration?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#acidity%3F-instance-method" class="signature"><strong>#acidity?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#air_quality%3F-instance-method" class="signature"><strong>#air_quality?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#area%3F-instance-method" class="signature"><strong>#area?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#capacitance%3F-instance-method" class="signature"><strong>#capacitance?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#compass%3F-instance-method" class="signature"><strong>#compass?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#conductance%3F-instance-method" class="signature"><strong>#conductance?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#counter%3F-instance-method" class="signature"><strong>#counter?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#current%3F-instance-method" class="signature"><strong>#current?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#device_temp%3F-instance-method" class="signature"><strong>#device_temp?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#distance%3F-instance-method" class="signature"><strong>#distance?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#electrical_resistance%3F-instance-method" class="signature"><strong>#electrical_resistance?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#energy%3F-instance-method" class="signature"><strong>#energy?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#flow%3F-instance-method" class="signature"><strong>#flow?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#force%3F-instance-method" class="signature"><strong>#force?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#frequency%3F-instance-method" class="signature"><strong>#frequency?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#humidity%3F-instance-method" class="signature"><strong>#humidity?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#illuminance%3F-instance-method" class="signature"><strong>#illuminance?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#inductance%3F-instance-method" class="signature"><strong>#inductance?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#level%3F-instance-method" class="signature"><strong>#level?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#magnetic_flux%3F-instance-method" class="signature"><strong>#magnetic_flux?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#magnetic_flux_density%3F-instance-method" class="signature"><strong>#magnetic_flux_density?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#mass%3F-instance-method" class="signature"><strong>#mass?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#momentum%3F-instance-method" class="signature"><strong>#momentum?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#people_count%3F-instance-method" class="signature"><strong>#people_count?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#pitch%3F-instance-method" class="signature"><strong>#pitch?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#power%3F-instance-method" class="signature"><strong>#power?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#presence%3F-instance-method" class="signature"><strong>#presence?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#pressure%3F-instance-method" class="signature"><strong>#pressure?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#queue_size%3F-instance-method" class="signature"><strong>#queue_size?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#radiation%3F-instance-method" class="signature"><strong>#radiation?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#roll%3F-instance-method" class="signature"><strong>#roll?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#sound_pressure%3F-instance-method" class="signature"><strong>#sound_pressure?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#speed%3F-instance-method" class="signature"><strong>#speed?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#switch%3F-instance-method" class="signature"><strong>#switch?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#temperature%3F-instance-method" class="signature"><strong>#temperature?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#time_period%3F-instance-method" class="signature"><strong>#time_period?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#trigger%3F-instance-method" class="signature"><strong>#trigger?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#voltage%3F-instance-method" class="signature"><strong>#voltage?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#volume%3F-instance-method" class="signature"><strong>#volume?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#yaw%3F-instance-method" class="signature"><strong>#yaw?</strong></a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="acceleration?-instance-method">
+      <div class="signature">
+        
+        def <strong>acceleration?</strong>
+
+        <a class="method-permalink" href="#acceleration%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L22" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="acidity?-instance-method">
+      <div class="signature">
+        
+        def <strong>acidity?</strong>
+
+        <a class="method-permalink" href="#acidity%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L49" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="air_quality?-instance-method">
+      <div class="signature">
+        
+        def <strong>air_quality?</strong>
+
+        <a class="method-permalink" href="#air_quality%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L52" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="area?-instance-method">
+      <div class="signature">
+        
+        def <strong>area?</strong>
+
+        <a class="method-permalink" href="#area%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L41" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="capacitance?-instance-method">
+      <div class="signature">
+        
+        def <strong>capacitance?</strong>
+
+        <a class="method-permalink" href="#capacitance%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L34" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="compass?-instance-method">
+      <div class="signature">
+        
+        def <strong>compass?</strong>
+
+        <a class="method-permalink" href="#compass%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L28" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="conductance?-instance-method">
+      <div class="signature">
+        
+        def <strong>conductance?</strong>
+
+        <a class="method-permalink" href="#conductance%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L36" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="counter?-instance-method">
+      <div class="signature">
+        
+        def <strong>counter?</strong>
+
+        <a class="method-permalink" href="#counter%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L19" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="current?-instance-method">
+      <div class="signature">
+        
+        def <strong>current?</strong>
+
+        <a class="method-permalink" href="#current%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L29" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="device_temp?-instance-method">
+      <div class="signature">
+        
+        def <strong>device_temp?</strong>
+
+        <a class="method-permalink" href="#device_temp%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L10" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="distance?-instance-method">
+      <div class="signature">
+        
+        def <strong>distance?</strong>
+
+        <a class="method-permalink" href="#distance%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L40" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="electrical_resistance?-instance-method">
+      <div class="signature">
+        
+        def <strong>electrical_resistance?</strong>
+
+        <a class="method-permalink" href="#electrical_resistance%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L31" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="energy?-instance-method">
+      <div class="signature">
+        
+        def <strong>energy?</strong>
+
+        <a class="method-permalink" href="#energy%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L33" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="flow?-instance-method">
+      <div class="signature">
+        
+        def <strong>flow?</strong>
+
+        <a class="method-permalink" href="#flow%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L18" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="force?-instance-method">
+      <div class="signature">
+        
+        def <strong>force?</strong>
+
+        <a class="method-permalink" href="#force%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L43" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="frequency?-instance-method">
+      <div class="signature">
+        
+        def <strong>frequency?</strong>
+
+        <a class="method-permalink" href="#frequency%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L44" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="humidity?-instance-method">
+      <div class="signature">
+        
+        def <strong>humidity?</strong>
+
+        <a class="method-permalink" href="#humidity%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L11" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="illuminance?-instance-method">
+      <div class="signature">
+        
+        def <strong>illuminance?</strong>
+
+        <a class="method-permalink" href="#illuminance%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L12" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="inductance?-instance-method">
+      <div class="signature">
+        
+        def <strong>inductance?</strong>
+
+        <a class="method-permalink" href="#inductance%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L35" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="level?-instance-method">
+      <div class="signature">
+        
+        def <strong>level?</strong>
+
+        <a class="method-permalink" href="#level%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L17" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="magnetic_flux?-instance-method">
+      <div class="signature">
+        
+        def <strong>magnetic_flux?</strong>
+
+        <a class="method-permalink" href="#magnetic_flux%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L37" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="magnetic_flux_density?-instance-method">
+      <div class="signature">
+        
+        def <strong>magnetic_flux_density?</strong>
+
+        <a class="method-permalink" href="#magnetic_flux_density%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L38" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="mass?-instance-method">
+      <div class="signature">
+        
+        def <strong>mass?</strong>
+
+        <a class="method-permalink" href="#mass%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L45" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="momentum?-instance-method">
+      <div class="signature">
+        
+        def <strong>momentum?</strong>
+
+        <a class="method-permalink" href="#momentum%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L46" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="people_count?-instance-method">
+      <div class="signature">
+        
+        def <strong>people_count?</strong>
+
+        <a class="method-permalink" href="#people_count%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L20" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pitch?-instance-method">
+      <div class="signature">
+        
+        def <strong>pitch?</strong>
+
+        <a class="method-permalink" href="#pitch%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L26" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="power?-instance-method">
+      <div class="signature">
+        
+        def <strong>power?</strong>
+
+        <a class="method-permalink" href="#power%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L32" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="presence?-instance-method">
+      <div class="signature">
+        
+        def <strong>presence?</strong>
+
+        <a class="method-permalink" href="#presence%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L15" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pressure?-instance-method">
+      <div class="signature">
+        
+        def <strong>pressure?</strong>
+
+        <a class="method-permalink" href="#pressure%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L13" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="queue_size?-instance-method">
+      <div class="signature">
+        
+        def <strong>queue_size?</strong>
+
+        <a class="method-permalink" href="#queue_size%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L21" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="radiation?-instance-method">
+      <div class="signature">
+        
+        def <strong>radiation?</strong>
+
+        <a class="method-permalink" href="#radiation%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L39" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="roll?-instance-method">
+      <div class="signature">
+        
+        def <strong>roll?</strong>
+
+        <a class="method-permalink" href="#roll%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L25" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="sound_pressure?-instance-method">
+      <div class="signature">
+        
+        def <strong>sound_pressure?</strong>
+
+        <a class="method-permalink" href="#sound_pressure%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L42" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="speed?-instance-method">
+      <div class="signature">
+        
+        def <strong>speed?</strong>
+
+        <a class="method-permalink" href="#speed%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L23" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="switch?-instance-method">
+      <div class="signature">
+        
+        def <strong>switch?</strong>
+
+        <a class="method-permalink" href="#switch%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L16" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="temperature?-instance-method">
+      <div class="signature">
+        
+        def <strong>temperature?</strong>
+
+        <a class="method-permalink" href="#temperature%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L9" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="time_period?-instance-method">
+      <div class="signature">
+        
+        def <strong>time_period?</strong>
+
+        <a class="method-permalink" href="#time_period%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L47" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="trigger?-instance-method">
+      <div class="signature">
+        
+        def <strong>trigger?</strong>
+
+        <a class="method-permalink" href="#trigger%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L14" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="voltage?-instance-method">
+      <div class="signature">
+        
+        def <strong>voltage?</strong>
+
+        <a class="method-permalink" href="#voltage%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L30" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="volume?-instance-method">
+      <div class="signature">
+        
+        def <strong>volume?</strong>
+
+        <a class="method-permalink" href="#volume%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L48" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="yaw?-instance-method">
+      <div class="signature">
+        
+        def <strong>yaw?</strong>
+
+        <a class="method-permalink" href="#yaw%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/9d4aaca0738ed33dad878d2efdc0e1ad07e9cded/src/placeos-driver/interface/sensor.cr#L27" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>
