@@ -1,9 +1,8 @@
 require "json"
 
 abstract class PlaceOS::Driver
+  # NOTE:: expects messages to broadcast to a channel, such as: chat/<bot_name>/<org_id>/message
   module Interface::ChatBot
-    # NOTE:: expects messages to broadcast to a channel, such as: chat/<bot_name>/<org_id>/message
-
     struct Id
       include JSON::Serializable
 

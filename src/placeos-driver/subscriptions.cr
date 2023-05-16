@@ -4,8 +4,9 @@ require "simple_retry"
 
 require "./constants"
 
-# TODO:: we need to be scheduling these onto the correct thread
 class PlaceOS::Driver
+  # :nodoc:
+  # TODO:: we need to be scheduling these onto the correct thread
   class Subscriptions
     SYSTEM_ORDER_UPDATE = "lookup-change"
     Log                 = ::Log.for(self, ::Log::Severity::Info)

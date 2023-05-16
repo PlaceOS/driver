@@ -1,6 +1,6 @@
 abstract class PlaceOS::Driver
   module Interface::ElectricalRelay
-    # `**options` here should be passed to the `task` to allow for different priorities
+    # `**options` here will be passed to the `task` to allow for different priorities
     abstract def relay(state : Bool, index : Int32 = 0, **options)
 
     def pulse(period : Int32 = 1000, index : Int32 = 0, times : Int32 = 1, initial_state : Bool = false)

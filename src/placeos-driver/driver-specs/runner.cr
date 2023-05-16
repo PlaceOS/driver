@@ -227,6 +227,7 @@ class DriverSpecs
     end
   end
 
+  # :nodoc:
   def initialize(@driver_name : String, @io : UNIXSocket, @makebreak : Bool, @current_settings : JSON::Any)
     # setup structures for handling HTTP request emulation
     @mock_drivers = {} of String => MockDriver
@@ -266,22 +267,30 @@ class DriverSpecs
 
   @http_port : Int32
   @comms : TCPSocket?
+
+  # provides access to the drivers status state.
+  #
+  # `status[:volume].should eq(50)`
   getter :status
 
+  # :nodoc:
   def __start_http_server__
     @http_server.listen
   end
 
+  # :nodoc:
   def __start_server__
     while client = @server.accept?
       spawn(same_thread: true) { @new_connection.send(client.as(TCPSocket)) }
     end
   end
 
+  # :nodoc:
   def __get_ports__
     {@server.local_address.port, @http_port}
   end
 
+  # :nodoc:
   def __process_responses__
     raw_data = Bytes.new(4096)
     tokenizer = Tokenizer.new(Bytes[0x00, 0x03])
@@ -349,6 +358,7 @@ class DriverSpecs
     # Input stream closed. This should only occur on termination
   end
 
+  # :nodoc:
   def __process_transmissions__(connection : TCPSocket)
     # 1MB buffer should be enough for anyone
     raw_data = Bytes.new(1024 * 1024)
@@ -388,30 +398,39 @@ class DriverSpecs
     raise "timeout waiting for module to connect"
   end
 
+  # executes a function on the driver being tested and returns response promise
+  #
+  # i.e. `response = exec(:method_on_driver, arg1, arg2)`
+  #
+  # then to process the response `response.get.should eq "method response"`
   def exec(function, *args, user_id = nil)
     resp = __exec__(function, args, user_id)
     sleep 2.milliseconds
     resp
   end
 
+  # :ditto:
   def exec(function, user_id = nil, **args)
     resp = __exec__(function, args, user_id)
     sleep 2.milliseconds
     resp
   end
 
+  # :ditto:
   def exec(function, *args, user_id = nil, &)
     resp = __exec__(function, args, user_id)
     yield resp
     resp
   end
 
+  # :ditto:
   def exec(function, user_id = nil, **args, &)
     resp = __exec__(function, args, user_id)
     yield resp
     resp
   end
 
+  # :nodoc:
   def __exec__(function, args, user_id)
     puts "-> spec calling: #{function.colorize(:green)} #{args.to_s.colorize(:green)} (user: #{user_id})"
 
@@ -448,6 +467,9 @@ class DriverSpecs
     response
   end
 
+  # obtain some data you were expecting to receive from the driver. Typically triggered by an exec you've made.
+  #
+  # `expect_send.should eq "some data"`
   def expect_send(timeout = 500.milliseconds) : Bytes
     channel = nil
 
@@ -475,6 +497,9 @@ class DriverSpecs
     end
   end
 
+  # expects the data provided to be sent
+  #
+  # `should_send "some data"`
   def should_send(data, timeout = 500.milliseconds)
     sent = Bytes.new(0)
     channel = nil
@@ -547,6 +572,9 @@ class DriverSpecs
     self
   end
 
+  # transmits some data to the driver, typically a response to something the driver has sent
+  #
+  # `transmit "\nsome response"`
   def transmit(data, pause = 100.milliseconds)
     comms = @comms
     if comms && !comms.closed?
@@ -573,10 +601,14 @@ class DriverSpecs
     self
   end
 
+  # :ditto:
   def responds(data)
     transmit(data)
   end
 
+  # provides a method for accepting and responding to HTTP requests being made by the driver
+  #
+  # for an example of how this works see [an existing driver](https://github.com/PlaceOS/drivers/blob/master/drivers/message_media/sms_spec.cr#L10-L25)
   def expect_http_request(timeout = 1.seconds, &)
     channel = nil
 
@@ -625,6 +657,7 @@ class DriverSpecs
     self
   end
 
+  # publish an event for the driver to process
   def publish(channel, message)
     message = message.to_s
     PlaceOS::Driver::RedisStorage.with_redis &.publish("placeos/#{channel}", message)
@@ -636,7 +669,11 @@ class DriverSpecs
   # Logic Helpers
   # =============
 
+  # provides a new system definition for testing Logic Modules
+  #
   # expects {ModuleName: {Klass, Klass}}
+  #
+  # see [an example](https://github.com/PlaceOS/drivers/blob/master/drivers/place/bookings_spec.cr#L5-L8) of it in use
   def system(details)
     system_index = PlaceOS::Driver::RedisStorage.new(SYSTEM_ID, "system")
     system_index.clear
@@ -667,7 +704,13 @@ class DriverSpecs
     self
   end
 
-  # Grab the storage for "Module_2"
+  # Grab a Mock driver instance that has been defined by updating the system
+  #
+  # For example a system may look like: `{Display: {MockDisplay, MockDisplay}}`
+  #
+  # We can obtain mock display 2 by calling `mock_display = system(:Display_2)`
+  #
+  # Then we can check status on it `mock_display[:power]?.should eq true`
   def system(module_id : String | Symbol)
     mod_name, match, index = module_id.to_s.rpartition('_')
     mod_name, index = if match.empty?
@@ -678,6 +721,9 @@ class DriverSpecs
     @mock_drivers["mod-#{mod_name}/#{index}"]
   end
 
+  # allows you to provide alternative settings to the driver being tested.
+  #
+  # by default the drivers `default_settings` are used
   def settings(new_settings)
     @current_settings = JSON.parse(new_settings.to_json)
     tcp_port, http_port = __get_ports__

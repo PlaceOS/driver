@@ -11,6 +11,7 @@ class DriverSpecs::StatusHelper
     @storage = PlaceOS::Driver::RedisStorage.new(module_id)
   end
 
+  # Expose a status key to other mock drivers and the driver we're testing
   def []=(key, value)
     key = key.to_s
     if value.nil?
@@ -21,11 +22,13 @@ class DriverSpecs::StatusHelper
     value
   end
 
+  # returns the current value of a status value and raises if it does not exist
   def [](key)
     value = @storage[key]
     JSON.parse(value)
   end
 
+  # returns the current value of a status value and nil if it does not exist
   def []?(key)
     value = @storage[key]?
     value ? JSON.parse(value) : nil

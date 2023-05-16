@@ -1,11 +1,13 @@
 require "../subscriptions"
 
 class PlaceOS::Driver::Proxy::Subscriptions
+  # :nodoc:
   def initialize(@subscriber : PlaceOS::Driver::Subscriptions = PlaceOS::Driver::Subscriptions.new)
     @subscriptions = [] of PlaceOS::Driver::Subscriptions::Subscription
     @terminated = false
   end
 
+  # :nodoc:
   def terminate
     @terminated = true
     clear

@@ -3,6 +3,7 @@ require "log"
 require "tasker"
 
 class PlaceOS::Driver::Queue
+  # :nodoc:
   def initialize(
     @logger : ::Log = ::Log.for(PlaceOS::Driver::Queue),
     &@connected_callback : Bool -> Nil
@@ -73,6 +74,7 @@ class PlaceOS::Driver::Queue
     @connected_callback.call(state)
   end
 
+  # adds a task callback to the queue
   def add(
     priority = @priority,
     timeout = @timeout,
@@ -88,11 +90,13 @@ class PlaceOS::Driver::Queue
     queue_task(priority, task)
   end
 
+  # :nodoc:
   def terminate
     @terminated = true
     @channel.close
   end
 
+  # :nodoc:
   private def process!
     loop do
       # Wait for a new task to be available
@@ -138,6 +142,7 @@ class PlaceOS::Driver::Queue
     spawn(same_thread: true) { process! } unless @terminated
   end
 
+  # :nodoc:
   protected def queue_task(priority, task)
     task.apparent_priority = priority
     name = task.name

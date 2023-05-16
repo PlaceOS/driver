@@ -1,5 +1,6 @@
 class DriverSpecs; end
 
+# :nodoc:
 class DriverSpecs::Responder
   def initialize
     @channel = Channel(PlaceOS::Driver::Protocol::Request).new(1)

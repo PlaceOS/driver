@@ -2,8 +2,12 @@ require "gc"
 require "./protocol"
 
 module PlaceOS::Driver::Stats
+  # :nodoc:
   Log = ::Log.for(self)
 
+  # Useful for debugging, it outputs memory usage and internal protocol queue values
+  #
+  # to obtain the stats you need to signal the process `kill -s USR2 %PID`
   def self.dump_stats
     total = GC.stats.total_bytes
     stats = GC.prof_stats
@@ -16,6 +20,7 @@ module PlaceOS::Driver::Stats
     Log.warn { "\n\n#{memory}\n#{protocol_stats}\n\n" }
   end
 
+  # :nodoc:
   def self.setup_signal
     Signal::USR2.trap do |signal|
       spawn { PlaceOS::Driver::Stats.dump_stats }

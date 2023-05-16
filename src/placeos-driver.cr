@@ -1,6 +1,7 @@
 require "json-schema"
 require "option_parser"
 
+# :nodoc:
 class PlaceOS::Startup
   class_property exec_process_manager : Bool = false
   class_property is_edge_driver : Bool = false
@@ -47,7 +48,10 @@ end
 require "./placeos-driver/logger"
 require "./placeos-driver/stats"
 
+# This is base class for all PlaceOS drivers.
+# It implements a standardised interface by introspecting the driver code you write.
 abstract class PlaceOS::Driver
+  # :nodoc:
   class_property include_json_schema_in_interface : Bool = true
 
   module Proxy
@@ -56,14 +60,23 @@ abstract class PlaceOS::Driver
   module Utilities
   end
 
+  # applies a security level to a driver function
+  #
+  # ```crystal
+  # @[Security(Level::Administrator)]
+  # def my_driver_function
+  # end
+  # ```
   annotation Security
   end
 
+  # the level of security a user must have to execute a function
   enum Level
     Support
     Administrator
   end
 
+  # :nodoc:
   def initialize(
     @__module_id__ : String,
     @__setting__ : Settings,
@@ -94,6 +107,7 @@ abstract class PlaceOS::Driver
   @__driver_model__ : DriverModel
   @__subscriptions__ : Proxy::Subscriptions?
 
+  # :nodoc:
   # Access to the various components
   HELPERS = %w(transport logger queue setting schedule)
   {% for name in HELPERS %}
@@ -102,32 +116,39 @@ abstract class PlaceOS::Driver
     end
   {% end %}
 
-  def subscriptions
+  # provides access to the modules subscriptions tracker
+  def subscriptions : ::PlaceOS::Driver::Proxy::Subscriptions
     raise "unsupported when running on the edge" if @__edge_driver__
     @__subscriptions__.not_nil!
   end
 
-  def config
+  # the modules database configuration
+  def config : ::PlaceOS::Driver::DriverModel
     @__driver_model__
   end
 
+  # :nodoc:
   def config=(data : ::PlaceOS::Driver::DriverModel)
     @__driver_model__ = data
   end
 
-  def module_id
+  # the id of the currently running module
+  def module_id : String
     @__module_id__
   end
 
+  # :nodoc:
   protected def terminated?
     @__queue__.terminated
   end
 
+  # was the current function executed directly by a user?
   def invoked_by_user_id
     Fiber.current.name
   end
 
-  # Status helpers #}
+  # Expose a status key to other drivers and frontends #}
+  # allowing them to bind to value updates
   def []=(key, value)
     key = key.to_s
     # TODO:: we should add a cache if values are longer than a certain value and
@@ -144,29 +165,41 @@ abstract class PlaceOS::Driver
     value
   end
 
-  def [](key)
+  # returns the current value of a status value and raises if it does not exist
+  def [](key) : JSON::Any
     JSON.parse @__storage__[key]
   end
 
-  def []?(key)
+  # returns the current value of a status value and nil if it does not exist
+  def []?(key) : JSON::Any?
     if json_data = @__storage__[key]?
       JSON.parse json_data
     end
   end
 
+  # reads a status key and deserialises the value into the class provided.
+  #
+  # It raises if the class does not exist.
   macro status(klass, key)
     {{klass}}.from_json(@__storage__[{{key}}.to_s])
   end
 
+  # reads a status key and deserialises the value into the class provided.
+  #
+  # It returns `nil` if the key doesn't exist
   macro status?(klass, key)
     %value = @__storage__[{{key}}.to_s]?
     {{klass}}.from_json(%value) if %value
   end
 
+  # pushes a change notification for the key specified, even though it hasn't changed
   def signal_status(key)
     spawn(same_thread: true) { @__storage__.signal_status(key) }
   end
 
+  # provides access to the details of the system the logic driver is running in.
+  #
+  # NOTE:: this only works for logic drivers as other drivers can be in multiple systems.
   def system : Proxy::System
     sys = @__system__
     return sys if sys
@@ -176,29 +209,64 @@ abstract class PlaceOS::Driver
     @__system__ = Proxy::System.new(system_model, @__module_id__, @__logger__, @__subscriptions__.not_nil!)
   end
 
+  # provides access to the details of a remote system, if you have the ID of the system.
   def system(id : String) : Proxy::System
     Proxy::System.new(id, @__module_id__, @__logger__, @__subscriptions__.not_nil!)
   end
 
-  # Settings helpers
+  # reads the provided class type out of the settings provided at the provided key.
+  #
+  # i.e. given a setting: `values: [1, 2, 3]`
+  #
+  # you can extract index 2 number using: `setting(Int64, :values, 2)`
   macro setting(klass, *types)
     @__setting__.get { setting({{klass}}, {{*types}}) }
   end
 
+  # reads the provided class type out of the settings provided at the provided key.
+  #
+  # i.e. given a setting: `keys: {"public": "123456"}`
+  #
+  # you can extract the public key using: `setting?(String, :keys, :public)`
   macro setting?(klass, *types)
     @__setting__.get { setting?({{klass}}, {{*types}}) }
   end
 
+  # if you would like to save an updated value to settings so it survives restarts
   def define_setting(name, value)
     PlaceOS::Driver::Protocol.instance.request(@__module_id__, :setting, {name, value})
   end
 
-  # Queuing
+  # Queue a task that intends to use the transport layer
+  #
+  # primarily useful where a device can only perform a single function at a time and ordering is important
+  #
+  # i.e power-on, switch-input, set-volume
+  #
+  # however you typically won't need to use this function directly. See #send
+  #
+  # `opts` options include:
+  #
+  # * priority: an `Int` between 0 and 100 where 0 is highest priority and 100 is the lowest
+  #
+  # * timeout: a `Time::Span` indicating the maximum time the task should wait for a response
+  #
+  # * retries: how many attempts should be made to successfully complete a task
+  #
+  # * wait: `Bool` should we wait for a response (defaults to true)
+  #
+  # * name: `String` of the command, if there is already a command with the same name in the queue, it will be replaced with this.
+  #
+  # * delay: `Time::Span` how long to wait after executing this command before executing the next
+  #
+  # * clear_queue: `Bool` after executing task, clear all the remaining tasks in the queue
   def queue(**opts, &block : Task -> Nil)
     @__queue__.add(**opts, &block)
   end
 
-  # Transport
+  # queues a message to be sent to the transport layer.
+  #
+  # see #queue for available options
   def send(message, **opts)
     queue(**opts) do |task|
       task.request_payload = message if task.responds_to?(:request_payload)
@@ -206,6 +274,9 @@ abstract class PlaceOS::Driver
     end
   end
 
+  # queues a message to be sent to the transport layer.
+  #
+  # the provided block is used to process responses while this task is active
   def send(message, **opts, &block : (Bytes, PlaceOS::Driver::Task) -> Nil)
     queue(**opts) do |task|
       task.request_payload = message if task.responds_to?(:request_payload)
@@ -213,12 +284,19 @@ abstract class PlaceOS::Driver
     end
   end
 
-  # Subscriptions and channels
+  # Subscribe to a local status value
+  #
+  # `subscription = subscribe(:my_status) { |subscription, string_value| ... }`
+  #
+  # use `subscriptions.unsubscribe(subscription)` to unsubscribe
   def subscribe(status, &callback : (Subscriptions::DirectSubscription, String) -> Nil) : Subscriptions::DirectSubscription
     raise "unsupported when running on the edge" if @__edge_driver__
     @__subscriptions__.not_nil!.subscribe(@__module_id__, status.to_s, &callback)
   end
 
+  # publishes a message to a channel on redis, available to any drivers monitoring for these events
+  #
+  # `publish("my_service/channel", "payload contents")`
   def publish(channel, message)
     message = message.to_s
     if @__edge_driver__
@@ -230,16 +308,28 @@ abstract class PlaceOS::Driver
     message
   end
 
+  # monitor for messages being published on redis
+  #
+  # `subscription = monitor("my_service/channel") { |subscription, string_value| ... }`
+  #
+  # use `subscriptions.unsubscribe(subscription)` to unsubscribe
   def monitor(channel, &callback : (Subscriptions::ChannelSubscription, String) -> Nil) : Subscriptions::ChannelSubscription
     raise "unsupported when running on the edge" if @__edge_driver__
     @__subscriptions__.not_nil!.channel(channel.to_s, &callback)
   end
 
-  # utilities
+  # sends a wake-on-lan message the specified mac_address, specify a subnet for directed WOL
   def wake_device(mac_address, subnet = "255.255.255.255", port = 9)
     PlaceOS::Driver::Utilities::WakeOnLAN.wake_device(mac_address, subnet, port)
   end
 
+  # used to provide feedback in backoffice about the state of a driver
+  #
+  # online: true == Green, online: false == Red in backoffice
+  #
+  # setting `status_only: false` will set the queue online state.
+  #
+  # when offline, this means the queue will ignore all unnamed tasks to avoid memory leaks.
   def set_connected_state(online, status_only = true)
     online = !!online
     if status_only
@@ -249,10 +339,12 @@ abstract class PlaceOS::Driver
     end
   end
 
+  # forces a disconnect of the network transport, which will promptly reconnect
   def disconnect
     @__transport__.disconnect
   end
 
+  # :nodoc:
   # Keep track of loaded driver classes. Should only be one.
   CONCRETE_DRIVERS = {} of Nil => Nil
 
@@ -268,7 +360,9 @@ abstract class PlaceOS::Driver
     end
   end
 
+  # :nodoc:
   IGNORE_KLASSES   = ["PlaceOS::Driver", "Reference", "Object", "Spec::ObjectExtensions", "Colorize::ObjectExtensions"]
+
   RESERVED_METHODS = {} of Nil => Nil
   {% RESERVED_METHODS["initialize"] = true %}
   {% RESERVED_METHODS["received"] = true %}
@@ -288,6 +382,7 @@ abstract class PlaceOS::Driver
     {% RESERVED_METHODS[name.id.stringify] = true %}
   {% end %}
 
+  # :nodoc:
   macro __build_helpers__
     {% methods = @type.methods %}
     {% klasses = @type.ancestors.reject { |a| IGNORE_KLASSES.includes?(a.stringify) } %}
@@ -562,8 +657,9 @@ macro finished
     exit 0
   end
 
-  # inject the rescue_from handlers
   abstract class PlaceOS::Driver
+    # :nodoc:
+    # inject the rescue_from handlers
     def __handle_rescue_from__(instance, method_name, error)
       ret_val = case error
       {% for exception, details in ::PlaceOS::Driver::RESCUE_FROM %}

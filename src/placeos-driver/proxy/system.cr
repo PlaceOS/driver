@@ -108,6 +108,26 @@ class PlaceOS::Driver::Proxy::System
     PlaceOS::Driver::Proxy::Drivers.new(drivers)
   end
 
+  def all(module_name, *, implementing) : PlaceOS::Driver::Proxy::Drivers
+    module_name = module_name.to_s
+    interface = implementing.to_s
+    drivers = [] of Proxy::Driver
+
+    @system.keys.each do |key|
+      parts = key.split("/")
+      mod_name = parts[0]
+      next unless mod_name == module_name
+      index = parts[1]
+
+      module_id = @system[key]
+      metadata = get_metadata(module_id)
+      next unless metadata.implements.includes?(interface) || metadata.interface[interface]?
+      drivers << Proxy::Driver.new(@reply_id, mod_name, index.to_i, module_id, self, metadata)
+    end
+
+    PlaceOS::Driver::Proxy::Drivers.new(drivers)
+  end
+
   private def get_metadata(module_id : String?) : DriverModel::Metadata
     metadata = self.class.driver_metadata?(module_id) if module_id.presence
 

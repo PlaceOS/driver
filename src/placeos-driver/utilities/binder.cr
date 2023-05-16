@@ -1,6 +1,8 @@
 abstract class PlaceOS::Driver
+  # :nodoc:
   BINDINGS = {} of Nil => Nil
 
+  # :nodoc:
   macro __build_apply_bindings__
     # :nodoc:
     def __apply_bindings__
@@ -19,6 +21,16 @@ abstract class PlaceOS::Driver
     end
   end
 
+  # a helper for any driver to bind to changes in its own status values
+  # *logic drivers* can additionally bind to status values on remote drivers
+  #
+  # local bind: `bind :power, :power_changed`
+  #
+  # remote bind: `bind Display_1, :power, :power_changed`
+  #
+  # the `new_value` provided in the handler is a JSON string
+  #
+  # you would define your handler as `protected def power_changed(_subscription, new_value : String)`
   macro bind(mod, status, handler = nil)
     {% mod = mod.id.stringify %}
     {% status = status.id.stringify %}

@@ -9,8 +9,10 @@ require "../settings"
 class DriverSpecs; end
 
 abstract class DriverSpecs::MockDriver
+  # :nodoc:
   Log = ::Log.for("mock")
 
+  # :nodoc:
   abstract class BaseExecutor
     def initialize(json : String)
       @lookup = Hash(String, JSON::Any).from_json(json)
@@ -23,18 +25,25 @@ abstract class DriverSpecs::MockDriver
     abstract def execute(klass : MockDriver) : String
   end
 
+  # :nodoc:
   def initialize(@module_id : String)
     @__storage__ = PlaceOS::Driver::RedisStorage.new(module_id)
 
     __init__
   end
 
+  # :nodoc:
   abstract def __init__ : Nil
+
+  # :nodoc:
   abstract def __executor(json : String) : BaseExecutor
 
+  # :nodoc:
   def on_load; end
 
-  # Grab the storage for "Module_2"
+  # Grab the status storage for a mock module
+  #
+  # i.e. `system("Module_2")`
   def system(module_id : String | Symbol) : DriverSpecs::StatusHelper
     mod_name, match, index = module_id.to_s.rpartition('_')
     mod_name, index = if match.empty?
@@ -45,10 +54,12 @@ abstract class DriverSpecs::MockDriver
     DriverSpecs::StatusHelper.new("mod-#{mod_name}/#{index}")
   end
 
+  # proxies `Log` so you can use the logger in the same way as drivers
   def logger
     ::DriverSpecs::MockDriver::Log
   end
 
+  # Expose a status key to other mock drivers and the driver we're testing
   def []=(key, value)
     key = key.to_s
     current_value = @__storage__[key]?
@@ -62,24 +73,33 @@ abstract class DriverSpecs::MockDriver
     value
   end
 
+  # returns the current value of a status value and raises if it does not exist
   def [](key)
     JSON.parse @__storage__[key]
   end
 
+  # returns the current value of a status value and nil if it does not exist
   def []?(key)
     if json_data = @__storage__[key]?
       JSON.parse json_data
     end
   end
 
+  # pushes a change notification for the key specified, even though it hasn't changed
   def signal_status(key)
     spawn(same_thread: true) { @__storage__.signal_status(key) }
   end
 
+  # reads a status key and deserialises the value into the class provided.
+  #
+  # It raises if the class does not exist.
   macro status(klass, key)
     {{klass}}.from_json(@__storage__[{{key}}.to_s])
   end
 
+  # reads a status key and deserialises the value into the class provided.
+  #
+  # It returns `nil` if the key doesn't exist
   macro status?(klass, key)
     %value = @__storage__[{{key}}.to_s]?
     {{klass}}.from_json(%value) if %value
@@ -94,7 +114,10 @@ abstract class DriverSpecs::MockDriver
     end
   end
 
+  # :nodoc:
   IGNORE_KLASSES   = ["DriverSpecs", "PlaceOS::Driver", "Reference", "Object", "Spec::ObjectExtensions", "Colorize::ObjectExtensions"]
+
+  # :nodoc:
   RESERVED_METHODS = {} of Nil => Nil
   {% RESERVED_METHODS["logger"] = true %}
   {% RESERVED_METHODS["system"] = true %}
@@ -108,6 +131,7 @@ abstract class DriverSpecs::MockDriver
   {% RESERVED_METHODS["send"] = true %}
   {% RESERVED_METHODS["signal_status"] = true %}
 
+  # :nodoc:
   macro __build_helpers__
     {% methods = @type.methods %}
     {% klasses = @type.ancestors.reject { |a| IGNORE_KLASSES.includes?(a.stringify) } %}

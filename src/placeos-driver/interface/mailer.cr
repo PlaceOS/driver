@@ -1,8 +1,9 @@
 abstract class PlaceOS::Driver; end
 
-# Common Email interface
+# The namespace for all PlaceOS standard interfaces
 module PlaceOS::Driver::Interface; end
 
+# Common Email interface
 module PlaceOS::Driver::Interface::Mailer
   # Where `content` is Base64 encoded.
   alias Attachment = NamedTuple(file_name: String, content: String)

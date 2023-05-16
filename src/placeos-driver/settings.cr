@@ -1,4 +1,6 @@
+# :nodoc:
 class PlaceOS::Driver::Settings
+  # :nodoc:
   # key => {class, required}
   SETTINGS_REQ = {} of Nil => Nil
 
@@ -87,6 +89,7 @@ class PlaceOS::Driver::Settings
     end
   end
 
+  # :nodoc:
   JSON_TYPES = {
     "Bool":    "bool",
     "Float64": "f",

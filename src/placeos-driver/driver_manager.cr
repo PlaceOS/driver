@@ -1,6 +1,7 @@
 require "ipaddress"
 require "promise"
 
+# :nodoc:
 class PlaceOS::Driver::DriverManager
   def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT, subscriptions = nil, edge_driver = false)
     @settings = Settings.new @model.settings
@@ -60,14 +61,12 @@ class PlaceOS::Driver::DriverManager
         {{PlaceOS::Driver::CONCRETE_DRIVERS.keys.first}}.new(@module_id, @settings, @queue, @transport, @logger, @schedule, @subscriptions, @model, edge_driver)
       end
 
+      # :nodoc:
       @driver : {{PlaceOS::Driver::CONCRETE_DRIVERS.keys.first}}
 
+      # :nodoc:
       def self.driver_class
         {{PlaceOS::Driver::CONCRETE_DRIVERS.keys.first}}
-      end
-
-      def self.driver_executor
-        {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}
       end
     end
 

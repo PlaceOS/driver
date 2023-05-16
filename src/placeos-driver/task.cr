@@ -31,6 +31,8 @@ class PlaceOS::Driver::Task
   @timer : Tasker::Task?
   @processing : Proc(Bytes, Task, Nil)?
   @error_class : String?
+
+  # the response code that the browser will receive when executing via HTTP
   property code : Int32? = nil
 
   enum State
@@ -46,6 +48,7 @@ class PlaceOS::Driver::Task
   property processing, retries, priority, clear_queue
   property apparent_priority : Int32 = 0
 
+  # :nodoc:
   # Use the Queue's custom logger
   delegate logger, to: @queue
 
@@ -53,12 +56,14 @@ class PlaceOS::Driver::Task
   # @request_payload : Bytes?
   # property :request_payload
 
+  # :nodoc:
   # Are we intending to provide this result to a third party?
   def response_required!
     @response_required = true
     self
   end
 
+  # :nodoc:
   def execute!
     return self if @channel.closed?
 
@@ -88,27 +93,33 @@ class PlaceOS::Driver::Task
     self
   end
 
+  # :nodoc:
   def complete?
     @complete.closed?
   end
 
+  # :nodoc:
   def get(response_required = false)
     response_required! if response_required
     @channel.receive?
     self
   end
 
+  # :nodoc:
   # This is used by the queue to manage the task
   def __get
     @complete.receive?
   end
 
+  # :nodoc:
   def delay_required?
     delay = @delay
     sleep delay if delay
   end
 
-  # result should support conversion to JSON
+  # call when result is a success.
+  #
+  # The result should support conversion to JSON otherwise the remote will only receive `nil`
   def success(result = nil, @code = 200)
     @state = :success
     @wait = false
@@ -127,13 +138,13 @@ class PlaceOS::Driver::Task
     self
   end
 
-  # A partial response was received
+  # a partial response was received and we don't want the timeout to trigger a retry
   def reset_timers
     # start if there should be a timer and we are still waiting for a response
     start_timers if @wait && !@channel.closed?
   end
 
-  # Possible failure or device busy.
+  # call when possible temporary failure or device busy
   def retry(reason = nil)
     return if @wait == false || @channel.closed?
 
@@ -154,7 +165,7 @@ class PlaceOS::Driver::Task
     end
   end
 
-  # Failed except we don't want to retry
+  # call when the task has failed and we don't want to retry
   def abort(reason = nil, @code = 500)
     stop_timers
     @wait = false
@@ -173,6 +184,7 @@ class PlaceOS::Driver::Task
     self
   end
 
+  # :nodoc:
   private def start_timers
     stop_timers if @timer
     @timer = Tasker.in(@timeout) do
@@ -181,6 +193,7 @@ class PlaceOS::Driver::Task
     end
   end
 
+  # :nodoc:
   private def stop_timers
     @timer.try &.cancel
     @timer = nil

@@ -1,6 +1,7 @@
 require "json"
 
 class Object
+  # :nodoc:
   def try_to_json(fallback = nil)
     {% begin %}
       {% if @type.ancestors.includes?(Number) %}

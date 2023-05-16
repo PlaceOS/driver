@@ -1,8 +1,9 @@
 require "redis-cluster"
 require "../storage"
 
-# Abstraction of a redis hset
 module PlaceOS
+  # :nodoc:
+  # Abstraction of a redis hset
   class Driver::RedisStorage < Driver::Storage
     REDIS_URL = ENV["REDIS_URL"]? || "redis://localhost:6379"
 

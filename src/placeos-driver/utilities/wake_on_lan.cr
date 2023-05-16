@@ -1,12 +1,15 @@
 module PlaceOS::Driver::Utilities::WakeOnLAN
+  # :nodoc:
   def self.udp_v4 : UDPSocket?
     udp_server_v4
   end
 
+  # :nodoc:
   def self.udp_v6 : UDPSocket?
     udp_server_v6
   end
 
+  # A shared UDP server for sending the WOL packet across all module instances
   protected class_getter udp_server_v4 : UDPSocket? do
     UDPSocket.new(Socket::Family::INET).tap do |udp|
       udp.broadcast = true
@@ -15,6 +18,7 @@ module PlaceOS::Driver::Utilities::WakeOnLAN
     end
   end
 
+  # :ditto:
   protected class_getter udp_server_v6 : UDPSocket? do
     UDPSocket.new(Socket::Family::INET6).tap do |udp|
       # iNet6 doesn't have broadcast - destination address should be FF02::1
@@ -24,6 +28,7 @@ module PlaceOS::Driver::Utilities::WakeOnLAN
     end
   end
 
+  # sends a wake-on-lan message the specified mac_address, specify a subnet for directed WOL
   def self.wake_device(mac_address, subnet = "255.255.255.255", port = 9, address : Socket::Address? = nil)
     address = address || Socket::Address.parse("ip://#{subnet}:#{port}/")
     udp = case address.family

@@ -1,4 +1,5 @@
 abstract class PlaceOS::Driver
+  # a driver or service that can provide location information for people
   module Interface::Locatable
     # array of devices and their x, y coordinates, that are associated with this user
     abstract def locate_user(email : String? = nil, username : String? = nil)

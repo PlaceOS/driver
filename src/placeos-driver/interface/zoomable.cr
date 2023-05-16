@@ -1,4 +1,7 @@
 abstract class PlaceOS::Driver
+  # Implements the direct `zoom_to` function
+  #
+  # if the device supports continuous zoom then you should overwrite the included `zoom` function
   module Interface::Zoomable
     @zoom : Float64 = 0.0
 

@@ -1,6 +1,7 @@
 require "../storage"
 require "../protocol"
 
+# :nodoc:
 class PlaceOS::Driver::EdgeStorage < PlaceOS::Driver::Storage
   private getter hash : Hash(String, String) = {} of String => String
   delegate keys, values, size, empty?, to: hash

@@ -25,6 +25,7 @@ struct PlaceOS::Driver::DriverModel
   struct Metadata
     include JSON::Serializable
 
+    # :nodoc:
     def initialize(
       @interface : Hash(String, Hash(String, JSON::Any))? = nil,
       @implements : Array(String) = [] of String,
@@ -37,6 +38,7 @@ struct PlaceOS::Driver::DriverModel
       @functions = nil
     end
 
+    # :nodoc:
     @[Deprecated("Use `#interface` instead of functions")]
     def initialize(
       @functions : Hash(String, Hash(String, Array(JSON::Any)))? = nil,

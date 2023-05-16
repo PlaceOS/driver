@@ -2,6 +2,7 @@ require "http/server"
 
 class DriverSpecs; end
 
+# :nodoc:
 class DriverSpecs::MockHTTP
   def initialize(@context : HTTP::Server::Context)
     @channel = Channel(Nil).new

@@ -16,6 +16,7 @@ STDERR.sync = true # we mark this as false if in use for protocol comms
 STDOUT.blocking = false
 STDOUT.sync = true
 
+# :nodoc:
 class PlaceOS::Driver::Protocol
   Log = ::Log.for(self)
 

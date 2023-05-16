@@ -1,6 +1,10 @@
 abstract class PlaceOS::Driver
+  # :nodoc:
   RESCUE_FROM = {} of Nil => Nil
 
+  # provides a generic method for handling otherwise unhandled errors in your drivers functions
+  # i.e. `rescue_from(DivisionByZeroError, :return_zero)`
+  # or alternatively: `rescue_from(DivisionByZeroError) { 0 }`
   macro rescue_from(error_class, method = nil, &block)
     {% if method %}
       {% RESCUE_FROM[error_class] = {method.id, nil} %}
@@ -10,6 +14,7 @@ abstract class PlaceOS::Driver
     {% end %}
   end
 
+  # :nodoc:
   macro _rescue_from_inject_functions_
     # Create functions as required for errors
     # Skip the generating methods for existing handlers

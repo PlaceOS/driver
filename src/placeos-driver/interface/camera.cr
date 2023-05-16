@@ -3,22 +3,21 @@ require "./moveable"
 require "./stoppable"
 
 abstract class PlaceOS::Driver
+  # All cameras should expose limits:
+  #
+  # * pan_range, pan_speed
+  # * tilt_range, tilt_speed
+  # * zoom_range,
+  # * has_discrete_zoom = true / false
+  #
+  # Optional:
+  #
+  # * focus_out, focus_in, has_discrete_focus
+  # * iris_open, iris_close, has_discrete_iris
   module Interface::Camera
     include Interface::Stoppable
     include Interface::Moveable
     include Interface::Zoomable
-
-    # All cameras should expose limits:
-    # ================================
-    # pan_range, pan_speed
-    # tilt_range, tilt_speed
-    # zoom_range,
-    # has_discrete_zoom = true / false
-    #
-    # Optional:
-    # ========
-    # focus_out, focus_in, has_discrete_focus
-    # iris_open, iris_close, has_discrete_iris
 
     # Most cameras support sending a move speed, the interface should expect a percentage
     abstract def joystick(pan_speed : Float64, tilt_speed : Float64, index : Int32 | String = 0)

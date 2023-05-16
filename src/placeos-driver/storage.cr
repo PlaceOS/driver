@@ -1,5 +1,6 @@
 abstract class PlaceOS::Driver; end
 
+# :nodoc:
 # Abstraction of a redis hset
 abstract class PlaceOS::Driver::Storage
   include Enumerable({String, String})

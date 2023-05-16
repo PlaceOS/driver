@@ -1,6 +1,7 @@
 require "json"
 require "./logger"
 
+# :nodoc:
 class PlaceOS::Driver::ProcessManager
   Log = ::Log.for(self, ::Log::Severity::Info)
 

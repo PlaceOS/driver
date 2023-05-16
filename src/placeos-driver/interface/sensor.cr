@@ -3,6 +3,7 @@ require "crunits"
 require "s2_cells"
 
 abstract class PlaceOS::Driver
+  # a device or service that provides sensor data, either singular or for multiple devices
   module Interface::Sensor
     enum SensorType
       Temperature # https://en.wikipedia.org/wiki/Celsius

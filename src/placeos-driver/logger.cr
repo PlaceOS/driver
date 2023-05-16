@@ -11,11 +11,11 @@ class PlaceOS::Driver
   backend.formatter = LOG_FORMATTER
   ::Log.setup("*", ::Log::Severity::Info, backend)
 
+  # :nodoc:
   class_getter trace : Bool = false
 
-  # Allow signals to change the log level at run-time
-  # Turn on TRACE level logging `kill -s USR1 %PID`
-  # Default production log levels (INFO and above) `kill -s USR2 %PID`
+  # Change the log level at run-time.
+  # Toggle TRACE level logging using `kill -s USR1 %PID`
   def self.register_log_level_signal
     Signal::USR1.trap do |signal|
       @@trace = !@@trace
@@ -32,6 +32,7 @@ class PlaceOS::Driver
 
   PlaceOS::Driver.register_log_level_signal
 
+  # :nodoc:
   # Custom backend that writes to a `PlaceOS::Driver::Protocol`
   class ProtocolBackend < ::Log::Backend
     getter protocol : Protocol
@@ -51,6 +52,7 @@ class PlaceOS::Driver
     end
   end
 
+  # :nodoc:
   # Custom Log that broadcasts to a `Log::IOBackend` and `PlaceOS::Driver::ProtocolBackend`
   class Log < ::Log
     getter broadcast_backend : ::Log::BroadcastBackend
