@@ -62,7 +62,7 @@ abstract class PlaceOS::Driver
 
   # applies a security level to a driver function
   #
-  # ```crystal
+  # ```
   # @[Security(Level::Administrator)]
   # def my_driver_function
   # end
@@ -361,7 +361,7 @@ abstract class PlaceOS::Driver
   end
 
   # :nodoc:
-  IGNORE_KLASSES   = ["PlaceOS::Driver", "Reference", "Object", "Spec::ObjectExtensions", "Colorize::ObjectExtensions"]
+  IGNORE_KLASSES = ["PlaceOS::Driver", "Reference", "Object", "Spec::ObjectExtensions", "Colorize::ObjectExtensions"]
 
   RESERVED_METHODS = {} of Nil => Nil
   {% RESERVED_METHODS["initialize"] = true %}

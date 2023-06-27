@@ -37,10 +37,11 @@ class DriverSpecs
     unix_server = UNIXServer.new(unix_socket)
     wait_driver_open = Channel(UNIXSocket).new
 
+    # no need to keep the server open once the process has checked in
     spawn do
-      while client = unix_server.accept?
-        wait_driver_open.send client
-      end
+      client = unix_server.accept?
+      wait_driver_open.send client.as(UNIXSocket)
+      unix_server.close
     end
 
     wait_driver_close = Channel(Nil).new

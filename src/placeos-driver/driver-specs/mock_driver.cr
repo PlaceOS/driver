@@ -115,7 +115,7 @@ abstract class DriverSpecs::MockDriver
   end
 
   # :nodoc:
-  IGNORE_KLASSES   = ["DriverSpecs", "PlaceOS::Driver", "Reference", "Object", "Spec::ObjectExtensions", "Colorize::ObjectExtensions"]
+  IGNORE_KLASSES = ["DriverSpecs", "PlaceOS::Driver", "Reference", "Object", "Spec::ObjectExtensions", "Colorize::ObjectExtensions"]
 
   # :nodoc:
   RESERVED_METHODS = {} of Nil => Nil
