@@ -412,6 +412,8 @@ class PlaceOS::Driver::Protocol::Management
     Log.warn { {message: "driver process exited with #{last_exit_code}", driver_path: @driver_path} } unless status.success?
 
     if io = @io
+      @pid = -1_i64
+      @proc = nil
       io.close rescue nil
       @shutting_down.send nil
       @events.send(Request.new(last_exit_code, :exited))
@@ -423,6 +425,8 @@ class PlaceOS::Driver::Protocol::Management
 
   private def relaunch(last_exit_code : String) : Nil
     @io = nil
+    @pid = -1_i64
+    @proc = nil
     return if terminated?
     @last_exit_code = last_exit_code.to_i? || -1
 
