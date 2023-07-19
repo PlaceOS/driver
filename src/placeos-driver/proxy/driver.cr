@@ -68,7 +68,11 @@ class PlaceOS::Driver::Proxy::Driver
     function = @metadata.interface[function_name]?
 
     # obtain the arguments provided
-    arguments = {{call.args}} {% if call.args.size == 0 %} of String {% end %}
+    {% if call.args.size == 0 %}
+      arguments = Tuple.new
+    {% else %}
+      arguments = {{call.args}}
+    {% end %}
     {% if !call.named_args.is_a?(Nop) && call.named_args.size > 0 %}
       named_args = {
         {% for arg, index in call.named_args %}
@@ -76,7 +80,7 @@ class PlaceOS::Driver::Proxy::Driver
         {% end %}
       }
     {% else %}
-      named_args = {} of String => String
+      named_args = NamedTuple.new
     {% end %}
 
     # Execute is deferred so execution flow isn't interruped. }
@@ -85,7 +89,7 @@ class PlaceOS::Driver::Proxy::Driver
   end
 
   # provide a programatic way of calling a remote function similar to Ruby
-  def __send__(function_name : String | Symbol, arguments : Array | Tuple = [] of String, named_args : NamedTuple | Hash = {} of String => String)
+  def __send__(function_name : String | Symbol, arguments : Tuple = Tuple.new, named_args : NamedTuple = NamedTuple.new)
     function_name = function_name.to_s
     function = @metadata.interface[function_name]?
     __exec_request__(function_name, function, arguments, named_args)

@@ -9,7 +9,7 @@ class PlaceOS::Driver
   PlaceOS::Driver.logger_io = log_io
   backend = ::Log::IOBackend.new(log_io)
   backend.formatter = LOG_FORMATTER
-  ::Log.setup("*", ::Log::Severity::Info, backend)
+  ::Log.setup("*", ::Log::Severity::Error, backend)
 
   # :nodoc:
   class_getter trace : Bool = false
@@ -19,7 +19,7 @@ class PlaceOS::Driver
   def self.register_log_level_signal
     Signal::USR1.trap do |signal|
       @@trace = !@@trace
-      level = @@trace ? ::Log::Severity::Trace : ::Log::Severity::Info
+      level = @@trace ? ::Log::Severity::Trace : ::Log::Severity::Error
       Log.info { "> Log level changed to #{level}" }
 
       backend = ::Log::IOBackend.new(PlaceOS::Driver.logger_io)
@@ -66,14 +66,14 @@ class PlaceOS::Driver
       # Don't worry it's not really an append, it's updating a hash with the
       # backend as the key, so this is a clean update
       @broadcast_backend.append(@protocol_backend, value ? ::Log::Severity::Debug : ::Log::Severity::None)
-      self.level = value ? ::Log::Severity::Debug : ::Log::Severity::Info
+      self.level = value ? ::Log::Severity::Debug : ::Log::Severity::Error
     end
 
     def initialize(
       module_id : String,
       logger_io : IO = ::PlaceOS::Driver.logger_io,
       @protocol : Protocol = Protocol.instance,
-      severity : ::Log::Severity = ::Log::Severity::Info
+      severity : ::Log::Severity = ::Log::Severity::Error
     )
       @debugging = false
 

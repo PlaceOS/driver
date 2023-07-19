@@ -93,6 +93,14 @@ abstract class PlaceOS::Driver
       # Direct type: Int32, Display
       # puts "{{name.var}} - {{ntype}} - {{optional}}"
       {% ntype = ntype.stringify %}
+      {% if implementing %}
+        {% components = ntype.split("_") %}
+        {% if components[-1].to_i %}
+          {% components = components[0..-2] %}
+        {% end %}
+        {% ntype_fixed = components.join("_").id %}
+        {{ raise "unsupported use of 'implementing', you probably meant: accessor Array(#{ntype_fixed}), implementing: #{implementing}\nsee options: https://placeos.github.io/driver/PlaceOS/Driver.html#accessor(name,implementing=nil)-macro" }}
+      {% end %}
     {% else %}
       {% if ntype.name.stringify == "Array" %}
         {% collection = true %}
