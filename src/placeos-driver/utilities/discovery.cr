@@ -95,7 +95,7 @@ abstract class PlaceOS::Driver
       {% ntype = ntype.stringify %}
       {% if implementing %}
         {% components = ntype.split("_") %}
-        {% if components[-1].to_i %}
+        {% if components[-1] =~ /\A\d+\z/ %}
           {% components = components[0..-2] %}
         {% end %}
         {% ntype_fixed = components.join("_").id %}
