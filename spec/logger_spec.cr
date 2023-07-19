@@ -24,13 +24,13 @@ describe PlaceOS::Driver::Log do
     # However we still don't want them being logged to our regular logs
     (std_out.size > 0).should eq(false)
 
-    # Warning and above logs should go to both
-    logger.warn { "hello-logs" }
+    # Error and above logs should go to both
+    logger.error { "hello-logs" }
 
     bytes_read = output.read(raw_data)
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq("mod-123")
-    req_out.payload.should eq(%{[4,"hello-logs"]})
+    req_out.payload.should eq(%{[5,"hello-logs"]})
 
     (std_out.size > 10).should eq(true)
   end
@@ -68,12 +68,12 @@ describe PlaceOS::Driver::Log do
     (std_out.size > 0).should eq(false)
 
     # Warning and above logs should go to both
-    logger.warn { "hello-logs" }
+    logger.error { "hello-logs" }
 
     bytes_read = output.read(raw_data)
     req_out = PlaceOS::Driver::Protocol::Request.from_json(String.new(raw_data[2, bytes_read - 4]))
     req_out.id.should eq("mod-123")
-    req_out.payload.should eq(%{[4,"hello-logs"]})
+    req_out.payload.should eq(%{[5,"hello-logs"]})
 
     (std_out.size > 10).should eq(true)
   end

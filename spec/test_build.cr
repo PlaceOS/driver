@@ -41,8 +41,8 @@ class Helper
     @username : String = ""
     @password : String = ""
 
-    accessor thing : Thing, implementing: IncludedAble
-    accessor main_lcd : Display_1, implementing: Powerable
+    accessor thing : Array(Thing), implementing: IncludedAble
+    accessor main_lcd : Display_1
     accessor switcher : Switcher
     accessor camera : Array(Camera), implementing: [Powerable, Moveable]
     accessor blinds : Array(Blind)?
