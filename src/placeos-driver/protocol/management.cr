@@ -535,7 +535,7 @@ class PlaceOS::Driver::Protocol::Management
       })
     when .setting?
       mod_id = request.id
-      setting_name, setting_value = Tuple(String, YAML::Any).from_yaml(request.payload.not_nil!)
+      setting_name, setting_value = Tuple(String, YAML::Any).from_yaml(request.payload.as(String))
       settings_update_lock.synchronize { on_setting.call(mod_id, setting_name, setting_value) }
     when .hset?
       # Redis proxy driver state (hash)
