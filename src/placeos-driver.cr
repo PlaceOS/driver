@@ -235,7 +235,7 @@ abstract class PlaceOS::Driver
 
   # if you would like to save an updated value to settings so it survives restarts
   def define_setting(name, value)
-    PlaceOS::Driver::Protocol.instance.request(@__module_id__, :setting, {name, value}.to_yaml, raw: true)
+    PlaceOS::Driver::Protocol.instance.request(@__module_id__, :setting, {name, value})
   end
 
   # Queue a task that intends to use the transport layer
