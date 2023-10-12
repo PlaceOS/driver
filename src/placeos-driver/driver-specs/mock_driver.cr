@@ -236,6 +236,11 @@ abstract class DriverSpecs::MockDriver
       @@functions : String?
       @@interface : String?
 
+      class_getter driver_interface : String do
+        functions
+        @@interface.as(String)
+      end
+
       def self.functions
         functions = @@interface
         return {functions, @@functions.not_nil!} if functions

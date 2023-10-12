@@ -3,11 +3,29 @@ require "json"
 abstract class PlaceOS::Driver
   # provides a discoverable interface for LLMs
   module Interface::ChatFunctions
+    annotation Description
+    end
+
+    macro build_function_descriptions
+      def function_descriptions
+        {
+          {% for method in @type.methods %}
+            {% if method.annotation(Description) %}
+              {{method.name}}: {{method.annotation(Description)[0]}},
+            {% end %}
+          {% end %}
+        }
+      end
+    end
+
+    macro included
+      macro finished
+        build_function_descriptions
+      end
+    end
+
     # overall description of what this driver implements
     abstract def capabilities : String
-
-    # function name => function description
-    abstract def function_descriptions : Hash(String, String)
 
     # returns function name => [function description, {param name => JSON Schema}]
     def function_schemas : Hash(String, Tuple(String, Hash(String, JSON::Any)))
