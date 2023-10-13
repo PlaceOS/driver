@@ -28,17 +28,21 @@ abstract class PlaceOS::Driver
     abstract def capabilities : String
 
     # returns function name => {param name => JSON Schema}
-    def function_schemas : Hash(String, Hash(String, JSON::Any))
+    def function_schemas : Array(NamedTuple(function: String, description: String, parameters: Hash(String, JSON::Any)))
       # function name => {param name => JSON Schema}
       interface = Hash(String, Hash(String, JSON::Any)).from_json(self.class.driver_interface)
-      output = Hash(String, Hash(String, JSON::Any)).new
+      output = Array(NamedTuple(function: String, description: String, parameters: Hash(String, JSON::Any))).new(interface.size)
 
       # filter the interface to those functions with descriptions
       # as these are the only ones that the LLM should use
       function_descriptions.each do |function_name, function_description|
         name = function_name.to_s
         if schema = interface[name]?
-          output[name] = schema
+          output << {
+            function:    name,
+            description: function_description,
+            parameters:  schema,
+          }
         else
           logger.warn { "described function not found: #{function_name}" }
         end
