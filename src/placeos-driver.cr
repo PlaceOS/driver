@@ -395,6 +395,10 @@ abstract class PlaceOS::Driver
     # Filter out abstract methods
     {% methods = methods.reject &.body.stringify.empty? %}
 
+    class_getter driver_interface : String do
+      JSON.parse(KlassExecutor.driver_interface)["interface"].to_json
+    end
+
     # :nodoc:
     class KlassExecutor
       # A class that handles executing every public method defined

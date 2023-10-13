@@ -145,7 +145,7 @@ abstract class DriverSpecs::MockDriver
 
     def self.driver_interface
       KlassExecutor.driver_interface
-    end  
+    end
 
     # :nodoc:
     class KlassExecutor < BaseExecutor
