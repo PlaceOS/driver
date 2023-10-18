@@ -16,6 +16,22 @@ abstract class PlaceOS::Driver
           {% end %}
         }
       end
+
+      def on_load
+        {% if @type.methods.find { |meth| meth.name.id.stringify == "on_load" } %}
+          previous_def
+        {% end %}
+        self[:capabilities] = capabilities
+        self[:function_schemas] = function_schemas
+      end
+
+      def on_update
+        {% if @type.methods.find { |meth| meth.name.id.stringify == "on_update" } %}
+          previous_def
+        {% end %}
+        self[:capabilities] = capabilities
+        self[:function_schemas] = function_schemas
+      end
     end
 
     macro included
