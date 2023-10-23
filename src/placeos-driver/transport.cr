@@ -32,13 +32,13 @@ abstract class PlaceOS::Driver::Transport
   delegate logger, to: @queue
 
   macro __build_http_helper__
-    {% if @type.name.stringify != "PlaceOS::Driver::TransportHTTP" %}
+    {% if @type.name.id.stringify != "PlaceOS::Driver::TransportHTTP" %}
       def http(method, path, body : ::HTTP::Client::BodyType = nil,
         params : Hash(String, String?) | URI::Params = URI::Params.new,
         headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
         secure = false, concurrent = true
       ) : ::HTTP::Client::Response
-        {% if @type.name.stringify == "PlaceOS::Driver::TransportLogic" %}
+        {% if @type.name.id.stringify == "PlaceOS::Driver::TransportLogic" %}
           raise "HTTP requests are not available in logic drivers"
         {% else %}
 
@@ -121,7 +121,7 @@ abstract class PlaceOS::Driver::Transport
       response
     end
 
-    {% if @type.name.stringify != "PlaceOS::Driver::TransportLogic" %}
+    {% if @type.name.id.stringify != "PlaceOS::Driver::TransportLogic" %}
       protected def new_http_client(uri, context)
         client = ConnectProxy::HTTPClient.new(uri, context, ignore_env: true)
         connect_timeout = (@settings.get { setting?(Int32, :http_connect_timeout) } || 10).seconds
@@ -169,7 +169,7 @@ abstract class PlaceOS::Driver::Transport
     {% end %}
 
     def enable_multicast_loop(state = true)
-      {% if @type.name.stringify == "PlaceOS::Driver::TransportUDP" %}
+      {% if @type.name.id.stringify == "PlaceOS::Driver::TransportUDP" %}
         @socket.try &.multicast_loopback = state
       {% end %}
       state
