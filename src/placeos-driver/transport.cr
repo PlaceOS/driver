@@ -31,68 +31,69 @@ abstract class PlaceOS::Driver::Transport
   # Use `logger` of `Driver::Queue`
   delegate logger, to: @queue
 
-  # Many devices have a HTTP service. Might as well make it easy to access.
-  macro inherited
-    def http(method, path, body : ::HTTP::Client::BodyType = nil,
-      params : Hash(String, String?) | URI::Params = URI::Params.new,
-      headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
-      secure = false, concurrent = true
-    ) : ::HTTP::Client::Response
-      {% if @type.name.stringify == "PlaceOS::Driver::TransportLogic" %}
-        raise "HTTP requests are not available in logic drivers"
-      {% else %}
+  macro __build_http_helper__
+    {% if @type.name.stringify != "PlaceOS::Driver::TransportHTTP" %}
+      def http(method, path, body : ::HTTP::Client::BodyType = nil,
+        params : Hash(String, String?) | URI::Params = URI::Params.new,
+        headers : Hash(String, String) | HTTP::Headers = HTTP::Headers.new,
+        secure = false, concurrent = true
+      ) : ::HTTP::Client::Response
+        {% if @type.name.stringify == "PlaceOS::Driver::TransportLogic" %}
+          raise "HTTP requests are not available in logic drivers"
+        {% else %}
 
-        if uri_override = http_uri_override
-          uri = uri_override
-        elsif (uri_config = @uri.try(&.strip)) && !uri_config.empty?
-          uri = URI.parse uri_config
-        end
+          if uri_override = http_uri_override
+            uri = uri_override
+          elsif (uri_config = @uri.try(&.strip)) && !uri_config.empty?
+            uri = URI.parse uri_config
+          end
 
-        if uri
-          context = case uri.scheme
-                    when "https", "wss"
-                      uri.scheme = "https"
-                      OpenSSL::SSL::Context::Client.new.tap &.verify_mode = OpenSSL::SSL::VerifyMode::NONE
-                    when "ws"
-                      uri.scheme = "http"
-                      nil
-                    else
-                      nil
-                    end
-        else
-          context = if secure
-                      uri = URI.parse "https://#{@ip}"
-
-                      if secure.is_a?(OpenSSL::SSL::Context::Client)
-                        secure
-                      else
+          if uri
+            context = case uri.scheme
+                      when "https", "wss"
+                        uri.scheme = "https"
                         OpenSSL::SSL::Context::Client.new.tap &.verify_mode = OpenSSL::SSL::VerifyMode::NONE
+                      when "ws"
+                        uri.scheme = "http"
+                        nil
+                      else
+                        nil
                       end
-                    else
-                      uri = URI.parse "http://#{@ip}"
-                      nil
-                    end
-        end
+          else
+            context = if secure
+                        uri = URI.parse "https://#{@ip}"
 
-        # Build the new URI
-        uri.path = path
-        params = if params.is_a?(Hash)
-                  URI::Params.new(params.transform_values { |v| v ? [v] : [] of String })
-                else
-                  params
-                end
-        uri.query_params = params
+                        if secure.is_a?(OpenSSL::SSL::Context::Client)
+                          secure
+                        else
+                          OpenSSL::SSL::Context::Client.new.tap &.verify_mode = OpenSSL::SSL::VerifyMode::NONE
+                        end
+                      else
+                        uri = URI.parse "http://#{@ip}"
+                        nil
+                      end
+          end
 
-        # Apply headers
-        headers = headers.is_a?(Hash) ? HTTP::Headers.new.tap { |head| headers.map { |key, value| head[key] = value } } : headers
+          # Build the new URI
+          uri.path = path
+          params = if params.is_a?(Hash)
+                    URI::Params.new(params.transform_values { |v| v ? [v] : [] of String })
+                  else
+                    params
+                  end
+          uri.query_params = params
 
-        # Make the request
-        client = new_http_client(uri, context)
-        cookies.add_request_headers(headers) unless @settings.get { setting?(Bool, :disable_cookies) } || false
-        logger.debug { "http helper requesting: #{method.to_s.upcase} #{uri.request_target}" }
-        check_http_response_encoding client.exec(method.to_s.upcase, uri.request_target, headers, body).tap { client.close }
-      {% end %}
-    end
+          # Apply headers
+          headers = headers.is_a?(Hash) ? HTTP::Headers.new.tap { |head| headers.map { |key, value| head[key] = value } } : headers
+
+          # Make the request
+          client = new_http_client(uri, context)
+          cookies.add_request_headers(headers) unless @settings.get { setting?(Bool, :disable_cookies) } || false
+          logger.debug { "http helper requesting: #{method.to_s.upcase} #{uri.request_target}" }
+          check_http_response_encoding client.exec(method.to_s.upcase, uri.request_target, headers, body).tap { client.close }
+        {% end %}
+      end
+    {% end %}
 
     protected def check_http_response_encoding(response)
       headers = response.headers
@@ -173,6 +174,11 @@ abstract class PlaceOS::Driver::Transport
       {% end %}
       state
     end
+  end
+
+  # Many devices have a HTTP service. Might as well make it easy to access.
+  macro inherited
+    __build_http_helper__
   end
 
   protected def new_tls_context(verify_mode : OpenSSL::SSL::VerifyMode? = nil) : OpenSSL::SSL::Context::Client
