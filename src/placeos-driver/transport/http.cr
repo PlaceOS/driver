@@ -254,6 +254,8 @@ class PlaceOS::Driver
       headers = headers.is_a?(Hash) ? HTTP::Headers.new.tap { |head| headers.map { |key, value| head[key] = value } } : headers
       cookies.add_request_headers(headers) unless @settings.get { setting?(Bool, :disable_cookies) } || false
 
+      logger.debug { "http transport requesting: #{method.to_s.upcase} #{uri.request_target}" }
+
       # Make the request
       response = if concurrent || @max_requests.zero?
                    # Does this request require a TLS context?
