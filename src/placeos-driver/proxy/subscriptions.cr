@@ -1,4 +1,8 @@
+require "log"
 require "../subscriptions"
+
+class PlaceOS::Driver::Log < ::Log
+end
 
 class PlaceOS::Driver::Proxy::Subscriptions
   # :nodoc:
