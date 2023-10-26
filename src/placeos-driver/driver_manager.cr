@@ -8,7 +8,7 @@ class PlaceOS::Driver::DriverManager
     @logger = PlaceOS::Driver::Log.new(@module_id, logger_io)
     @queue = Queue.new(@logger) { |state| connection(state) }
     @schedule = PlaceOS::Driver::Proxy::Scheduler.new(@logger)
-    @subscriptions = edge_driver ? nil : Proxy::Subscriptions.new(subscriptions || Subscriptions.new(module_id: @module_id))
+    @subscriptions = edge_driver ? nil : Proxy::Subscriptions.new(subscriptions || Subscriptions.new(module_id: @module_id), @logger)
 
     # Ensures execution all occurs on a single thread
     @requests = ::Channel(Tuple(::Channel(Nil), Protocol::Request)).new(1)
