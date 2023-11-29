@@ -50,6 +50,7 @@ abstract class PlaceOS::Driver
 
       # this could be UBA or AQI values, not sure if there is good way to convert between these
       AirQuality
+      PPM # https://en.wikipedia.org/wiki/Parts-per_notation
     end
 
     enum Status
