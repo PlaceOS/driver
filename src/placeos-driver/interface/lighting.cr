@@ -14,7 +14,7 @@ abstract class PlaceOS::Driver
       @[JSON::Field(ignore: true)]
       property append : String? = nil
 
-      def initialize(@id = nil, @channel = nil, @component = nil, @join = nil)
+      def initialize(@id = nil, @channel = nil, @component = nil, @join = nil, @append = nil)
       end
 
       def join_with(area : Area) : Area
