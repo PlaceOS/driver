@@ -20,6 +20,7 @@ struct PlaceOS::Driver::DriverModel
     property timezone : String?
     property support_url : String?
     property zones : Array(String)
+    property images : Array(String)?
   end
 
   struct Metadata
