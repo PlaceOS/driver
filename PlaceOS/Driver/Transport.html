@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Crystal Docs 1.9.2">
+<meta name="generator" content="Crystal Docs 1.10.1">
 <meta name="crystal_docs.project_version" content="master">
 <meta name="crystal_docs.project_name" content="placeos-driver">
 
@@ -713,7 +713,7 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L4" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L4" target="_blank">
         placeos-driver/transport.cr
       </a>
     
@@ -725,6 +725,25 @@
 
 
 
+
+
+
+  <h2>
+    <a id="macro-summary" class="anchor" href="#macro-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Macro Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#__build_http_helper__-macro" class="signature"><strong>__build_http_helper__</strong></a>
+        
+      </li>
+    
+  </ul>
 
 
 
@@ -847,25 +866,6 @@
 
 
 
-  <h2>
-    <a id="macro-summary" class="anchor" href="#macro-summary">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Macro Summary
-  </h2>
-  <ul class="list-summary">
-    
-      <li class="entry-summary">
-        <a href="#__build_http_helper__-macro" class="signature"><strong>__build_http_helper__</strong></a>
-        
-      </li>
-    
-  </ul>
-
-
-
 <div class="methods-inherited">
   
     
@@ -877,7 +877,13 @@
     
 
 
+    
+
+
   
+    
+
+
     
 
 
@@ -892,347 +898,6 @@
 
 
 
-
-
-
-  <h2>
-    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Instance Method Detail
-  </h2>
-  
-    <div class="entry-detail" id="before_request(&amp;before_request:HTTP::Request-&gt;)-instance-method">
-      <div class="signature">
-        
-        def <strong>before_request</strong>(&before_request : HTTP::Request -> )
-
-        <a class="method-permalink" href="#before_request%28%26before_request%3AHTTP%3A%3ARequest-%3E%29-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L23" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="connect(connect_timeout:Int32):Nil-instance-method">
-      <div class="signature">
-        abstract 
-        def <strong>connect</strong>(connect_timeout : Int32) : Nil
-
-        <a class="method-permalink" href="#connect%28connect_timeout%3AInt32%29%3ANil-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L10" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="cookies:HTTP::Cookies-instance-method">
-      <div class="signature">
-        
-        def <strong>cookies</strong> : HTTP::Cookies
-
-        <a class="method-permalink" href="#cookies%3AHTTP%3A%3ACookies-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L15" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="disconnect:Nil-instance-method">
-      <div class="signature">
-        abstract 
-        def <strong>disconnect</strong> : Nil
-
-        <a class="method-permalink" href="#disconnect%3ANil-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L8" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="exec(message):SSH2::Channel-instance-method">
-      <div class="signature">
-        
-        def <strong>exec</strong>(message) : SSH2::Channel
-
-        <a class="method-permalink" href="#exec%28message%29%3ASSH2%3A%3AChannel-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>Only SSH implements exec</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L27" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="http_uri_override:URI|Nil-instance-method">
-      <div class="signature">
-        
-        def <strong>http_uri_override</strong> : URI | Nil
-
-        <a class="method-permalink" href="#http_uri_override%3AURI%7CNil-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>for non-http drivers to define a non-default http endpoint</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L18" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="http_uri_override=(http_uri_override:URI|Nil)-instance-method">
-      <div class="signature">
-        
-        def <strong>http_uri_override=</strong>(http_uri_override : URI | Nil)
-
-        <a class="method-permalink" href="#http_uri_override%3D%28http_uri_override%3AURI%7CNil%29-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>for non-http drivers to define a non-default http endpoint</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L18" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="logger(*args,**options)-instance-method">
-      <div class="signature">
-        
-        def <strong>logger</strong>(*args, **options)
-
-        <a class="method-permalink" href="#logger%28%2Aargs%2C%2A%2Aoptions%29-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>Use <code><a href="../../PlaceOS/Driver/Transport.html#logger%28%2Aargs%2C%2A%2Aoptions%29-instance-method">#logger</a></code> of <code><a href="../../PlaceOS/Driver/Queue.html">Driver::Queue</a></code></p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L32" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="logger(*args,**options,&amp;)-instance-method">
-      <div class="signature">
-        
-        def <strong>logger</strong>(*args, **options, &)
-
-        <a class="method-permalink" href="#logger%28%2Aargs%2C%2A%2Aoptions%2C%26%29-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>Use <code><a href="../../PlaceOS/Driver/Transport.html#logger%28%2Aargs%2C%2A%2Aoptions%29-instance-method">#logger</a></code> of <code><a href="../../PlaceOS/Driver/Queue.html">Driver::Queue</a></code></p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L32" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="pre_processor:Bytes-&gt;Bytes|Nil|Nil-instance-method">
-      <div class="signature">
-        
-        def <strong>pre_processor</strong> : Bytes -> Bytes | Nil | Nil
-
-        <a class="method-permalink" href="#pre_processor%3ABytes-%3EBytes%7CNil%7CNil-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L13" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="pre_processor(&amp;pre_processor:Bytes-&gt;Bytes|Nil)-instance-method">
-      <div class="signature">
-        
-        def <strong>pre_processor</strong>(&pre_processor : Bytes -> Bytes | Nil)
-
-        <a class="method-permalink" href="#pre_processor%28%26pre_processor%3ABytes-%3EBytes%7CNil%29-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L20" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="pre_processor=(pre_processor:Bytes-&gt;Bytes|Nil|Nil)-instance-method">
-      <div class="signature">
-        
-        def <strong>pre_processor=</strong>(pre_processor : Bytes -> Bytes | Nil | Nil)
-
-        <a class="method-permalink" href="#pre_processor%3D%28pre_processor%3ABytes-%3EBytes%7CNil%7CNil%29-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L13" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="proxy_in_use:String|Nil-instance-method">
-      <div class="signature">
-        
-        def <strong>proxy_in_use</strong> : String | Nil
-
-        <a class="method-permalink" href="#proxy_in_use%3AString%7CNil-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L14" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="send(message):PlaceOS::Driver::Transport-instance-method">
-      <div class="signature">
-        abstract 
-        def <strong>send</strong>(message) : <a href="../../PlaceOS/Driver/Transport.html">PlaceOS::Driver::Transport</a>
-
-        <a class="method-permalink" href="#send%28message%29%3APlaceOS%3A%3ADriver%3A%3ATransport-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L5" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="send(message,task:PlaceOS::Driver::Task,&amp;_block:Bytes,PlaceOS::Driver::Task-&gt;Nil):PlaceOS::Driver::Transport-instance-method">
-      <div class="signature">
-        abstract 
-        def <strong>send</strong>(message, task : <a href="../../PlaceOS/Driver/Task.html">PlaceOS::Driver::Task</a>, &_block : Bytes, <a href="../../PlaceOS/Driver/Task.html">PlaceOS::Driver::Task</a> -> Nil) : <a href="../../PlaceOS/Driver/Transport.html">PlaceOS::Driver::Transport</a>
-
-        <a class="method-permalink" href="#send%28message%2Ctask%3APlaceOS%3A%3ADriver%3A%3ATask%2C%26_block%3ABytes%2CPlaceOS%3A%3ADriver%3A%3ATask-%3ENil%29%3APlaceOS%3A%3ADriver%3A%3ATransport-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L6" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="start_tls(verify_mode:OpenSSL::SSL::VerifyMode,context:OpenSSL::SSL::Context):Nil-instance-method">
-      <div class="signature">
-        abstract 
-        def <strong>start_tls</strong>(verify_mode : OpenSSL::SSL::VerifyMode, context : OpenSSL::SSL::Context) : Nil
-
-        <a class="method-permalink" href="#start_tls%28verify_mode%3AOpenSSL%3A%3ASSL%3A%3AVerifyMode%2Ccontext%3AOpenSSL%3A%3ASSL%3A%3AContext%29%3ANil-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L9" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="terminate:Nil-instance-method">
-      <div class="signature">
-        abstract 
-        def <strong>terminate</strong> : Nil
-
-        <a class="method-permalink" href="#terminate%3ANil-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L7" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="tokenizer:Tokenizer|Nil-instance-method">
-      <div class="signature">
-        
-        def <strong>tokenizer</strong> : Tokenizer | Nil
-
-        <a class="method-permalink" href="#tokenizer%3ATokenizer%7CNil-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L12" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="tokenizer=(tokenizer:Tokenizer|Nil)-instance-method">
-      <div class="signature">
-        
-        def <strong>tokenizer=</strong>(tokenizer : Tokenizer | Nil)
-
-        <a class="method-permalink" href="#tokenizer%3D%28tokenizer%3ATokenizer%7CNil%29-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L12" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
 
 
 
@@ -1256,7 +921,348 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/transport.cr#L34" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L34" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="before_request(&amp;before_request:HTTP::Request-&gt;)-instance-method">
+      <div class="signature">
+        
+        def <strong>before_request</strong>(&before_request : HTTP::Request -> )
+
+        <a class="method-permalink" href="#before_request%28%26before_request%3AHTTP%3A%3ARequest-%3E%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L23" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="connect(connect_timeout:Int32):Nil-instance-method">
+      <div class="signature">
+        abstract 
+        def <strong>connect</strong>(connect_timeout : Int32) : Nil
+
+        <a class="method-permalink" href="#connect%28connect_timeout%3AInt32%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L10" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="cookies:HTTP::Cookies-instance-method">
+      <div class="signature">
+        
+        def <strong>cookies</strong> : HTTP::Cookies
+
+        <a class="method-permalink" href="#cookies%3AHTTP%3A%3ACookies-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L15" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="disconnect:Nil-instance-method">
+      <div class="signature">
+        abstract 
+        def <strong>disconnect</strong> : Nil
+
+        <a class="method-permalink" href="#disconnect%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L8" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="exec(message):SSH2::Channel-instance-method">
+      <div class="signature">
+        
+        def <strong>exec</strong>(message) : SSH2::Channel
+
+        <a class="method-permalink" href="#exec%28message%29%3ASSH2%3A%3AChannel-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Only SSH implements exec</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L27" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="http_uri_override:URI|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>http_uri_override</strong> : URI | Nil
+
+        <a class="method-permalink" href="#http_uri_override%3AURI%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>for non-http drivers to define a non-default http endpoint</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L18" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="http_uri_override=(http_uri_override:URI|Nil)-instance-method">
+      <div class="signature">
+        
+        def <strong>http_uri_override=</strong>(http_uri_override : URI | Nil)
+
+        <a class="method-permalink" href="#http_uri_override%3D%28http_uri_override%3AURI%7CNil%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>for non-http drivers to define a non-default http endpoint</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L18" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="logger(*args,**options)-instance-method">
+      <div class="signature">
+        
+        def <strong>logger</strong>(*args, **options)
+
+        <a class="method-permalink" href="#logger%28%2Aargs%2C%2A%2Aoptions%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Use <code><a href="../../PlaceOS/Driver/Transport.html#logger%28%2Aargs%2C%2A%2Aoptions%29-instance-method">#logger</a></code> of <code><a href="../../PlaceOS/Driver/Queue.html">Driver::Queue</a></code></p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L32" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="logger(*args,**options,&amp;)-instance-method">
+      <div class="signature">
+        
+        def <strong>logger</strong>(*args, **options, &)
+
+        <a class="method-permalink" href="#logger%28%2Aargs%2C%2A%2Aoptions%2C%26%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Use <code><a href="../../PlaceOS/Driver/Transport.html#logger%28%2Aargs%2C%2A%2Aoptions%29-instance-method">#logger</a></code> of <code><a href="../../PlaceOS/Driver/Queue.html">Driver::Queue</a></code></p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L32" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pre_processor:Bytes-&gt;Bytes|Nil|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>pre_processor</strong> : Bytes -> Bytes | Nil | Nil
+
+        <a class="method-permalink" href="#pre_processor%3ABytes-%3EBytes%7CNil%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L13" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pre_processor(&amp;pre_processor:Bytes-&gt;Bytes|Nil)-instance-method">
+      <div class="signature">
+        
+        def <strong>pre_processor</strong>(&pre_processor : Bytes -> Bytes | Nil)
+
+        <a class="method-permalink" href="#pre_processor%28%26pre_processor%3ABytes-%3EBytes%7CNil%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L20" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pre_processor=(pre_processor:Bytes-&gt;Bytes|Nil|Nil)-instance-method">
+      <div class="signature">
+        
+        def <strong>pre_processor=</strong>(pre_processor : Bytes -> Bytes | Nil | Nil)
+
+        <a class="method-permalink" href="#pre_processor%3D%28pre_processor%3ABytes-%3EBytes%7CNil%7CNil%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L13" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="proxy_in_use:String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>proxy_in_use</strong> : String | Nil
+
+        <a class="method-permalink" href="#proxy_in_use%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L14" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="send(message):PlaceOS::Driver::Transport-instance-method">
+      <div class="signature">
+        abstract 
+        def <strong>send</strong>(message) : <a href="../../PlaceOS/Driver/Transport.html">PlaceOS::Driver::Transport</a>
+
+        <a class="method-permalink" href="#send%28message%29%3APlaceOS%3A%3ADriver%3A%3ATransport-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L5" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="send(message,task:PlaceOS::Driver::Task,&amp;_block:Bytes,PlaceOS::Driver::Task-&gt;Nil):PlaceOS::Driver::Transport-instance-method">
+      <div class="signature">
+        abstract 
+        def <strong>send</strong>(message, task : <a href="../../PlaceOS/Driver/Task.html">PlaceOS::Driver::Task</a>, &_block : Bytes, <a href="../../PlaceOS/Driver/Task.html">PlaceOS::Driver::Task</a> -> Nil) : <a href="../../PlaceOS/Driver/Transport.html">PlaceOS::Driver::Transport</a>
+
+        <a class="method-permalink" href="#send%28message%2Ctask%3APlaceOS%3A%3ADriver%3A%3ATask%2C%26_block%3ABytes%2CPlaceOS%3A%3ADriver%3A%3ATask-%3ENil%29%3APlaceOS%3A%3ADriver%3A%3ATransport-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L6" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="start_tls(verify_mode:OpenSSL::SSL::VerifyMode,context:OpenSSL::SSL::Context):Nil-instance-method">
+      <div class="signature">
+        abstract 
+        def <strong>start_tls</strong>(verify_mode : OpenSSL::SSL::VerifyMode, context : OpenSSL::SSL::Context) : Nil
+
+        <a class="method-permalink" href="#start_tls%28verify_mode%3AOpenSSL%3A%3ASSL%3A%3AVerifyMode%2Ccontext%3AOpenSSL%3A%3ASSL%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L9" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="terminate:Nil-instance-method">
+      <div class="signature">
+        abstract 
+        def <strong>terminate</strong> : Nil
+
+        <a class="method-permalink" href="#terminate%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L7" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="tokenizer:Tokenizer|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>tokenizer</strong> : Tokenizer | Nil
+
+        <a class="method-permalink" href="#tokenizer%3ATokenizer%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L12" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="tokenizer=(tokenizer:Tokenizer|Nil)-instance-method">
+      <div class="signature">
+        
+        def <strong>tokenizer=</strong>(tokenizer : Tokenizer | Nil)
+
+        <a class="method-permalink" href="#tokenizer%3D%28tokenizer%3ATokenizer%7CNil%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/transport.cr#L12" target="_blank">View source</a>]
         
       </div>
     </div>

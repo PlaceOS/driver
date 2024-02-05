@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Crystal Docs 1.9.2">
+<meta name="generator" content="Crystal Docs 1.10.1">
 <meta name="crystal_docs.project_version" content="master">
 <meta name="crystal_docs.project_name" content="placeos-driver">
 
@@ -689,7 +689,7 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/driver-specs/mock_driver.cr#L11" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/driver-specs/mock_driver.cr#L11" target="_blank">
         placeos-driver/driver-specs/mock_driver.cr
       </a>
     
@@ -701,6 +701,34 @@
 
 
 
+
+
+
+  <h2>
+    <a id="macro-summary" class="anchor" href="#macro-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Macro Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#status%28klass%2Ckey%29-macro" class="signature"><strong>status</strong>(klass, key)</a>
+        
+          <div class="summary"><p>reads a status key and deserialises the value into the class provided.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#status%3F%28klass%2Ckey%29-macro" class="signature"><strong>status?</strong>(klass, key)</a>
+        
+          <div class="summary"><p>reads a status key and deserialises the value into the class provided.</p></div>
+        
+      </li>
+    
+  </ul>
 
 
 
@@ -760,34 +788,6 @@
 
 
 
-  <h2>
-    <a id="macro-summary" class="anchor" href="#macro-summary">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Macro Summary
-  </h2>
-  <ul class="list-summary">
-    
-      <li class="entry-summary">
-        <a href="#status%28klass%2Ckey%29-macro" class="signature"><strong>status</strong>(klass, key)</a>
-        
-          <div class="summary"><p>reads a status key and deserialises the value into the class provided.</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#status%3F%28klass%2Ckey%29-macro" class="signature"><strong>status?</strong>(klass, key)</a>
-        
-          <div class="summary"><p>reads a status key and deserialises the value into the class provided.</p></div>
-        
-      </li>
-    
-  </ul>
-
-
-
 <div class="methods-inherited">
   
     
@@ -799,7 +799,13 @@
     
 
 
+    
+
+
   
+    
+
+
     
 
 
@@ -814,145 +820,6 @@
 
 
 
-
-
-
-  <h2>
-    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Instance Method Detail
-  </h2>
-  
-    <div class="entry-detail" id="[](key)-instance-method">
-      <div class="signature">
-        
-        def <strong>[]</strong>(key)
-
-        <a class="method-permalink" href="#%5B%5D%28key%29-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>returns the current value of a status value and raises if it does not exist</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/driver-specs/mock_driver.cr#L77" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="[]=(key,value)-instance-method">
-      <div class="signature">
-        
-        def <strong>[]=</strong>(key, value)
-
-        <a class="method-permalink" href="#%5B%5D%3D%28key%2Cvalue%29-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>Expose a status key to other mock drivers and the driver we're testing</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/driver-specs/mock_driver.cr#L63" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="[]?(key)-instance-method">
-      <div class="signature">
-        
-        def <strong>[]?</strong>(key)
-
-        <a class="method-permalink" href="#%5B%5D%3F%28key%29-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>returns the current value of a status value and nil if it does not exist</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/driver-specs/mock_driver.cr#L82" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="logger-instance-method">
-      <div class="signature">
-        
-        def <strong>logger</strong>
-
-        <a class="method-permalink" href="#logger-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>proxies <code>Log</code> so you can use the logger in the same way as drivers</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/driver-specs/mock_driver.cr#L58" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="signal_status(key)-instance-method">
-      <div class="signature">
-        
-        def <strong>signal_status</strong>(key)
-
-        <a class="method-permalink" href="#signal_status%28key%29-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>pushes a change notification for the key specified, even though it hasn't changed</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/driver-specs/mock_driver.cr#L89" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="system(module_id:String|Symbol):DriverSpecs::StatusHelper-instance-method">
-      <div class="signature">
-        
-        def <strong>system</strong>(module_id : String | Symbol) : <a href="../DriverSpecs/StatusHelper.html">DriverSpecs::StatusHelper</a>
-
-        <a class="method-permalink" href="#system%28module_id%3AString%7CSymbol%29%3ADriverSpecs%3A%3AStatusHelper-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>Grab the status storage for a mock module</p>
-<p>i.e. <code><a href="../DriverSpecs/MockDriver.html#system%28module_id%3AString%7CSymbol%29%3ADriverSpecs%3A%3AStatusHelper-instance-method">#system(&quot;Module_2&quot;)</a></code></p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/driver-specs/mock_driver.cr#L47" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
 
 
 
@@ -982,7 +849,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/driver-specs/mock_driver.cr#L96" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/driver-specs/mock_driver.cr#L96" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1004,7 +871,146 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/947ed6e6e5e25229ca63876202edb8c50c30fe64/src/placeos-driver/driver-specs/mock_driver.cr#L103" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/driver-specs/mock_driver.cr#L103" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="[](key)-instance-method">
+      <div class="signature">
+        
+        def <strong>[]</strong>(key)
+
+        <a class="method-permalink" href="#%5B%5D%28key%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>returns the current value of a status value and raises if it does not exist</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/driver-specs/mock_driver.cr#L77" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="[]=(key,value)-instance-method">
+      <div class="signature">
+        
+        def <strong>[]=</strong>(key, value)
+
+        <a class="method-permalink" href="#%5B%5D%3D%28key%2Cvalue%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Expose a status key to other mock drivers and the driver we're testing</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/driver-specs/mock_driver.cr#L63" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="[]?(key)-instance-method">
+      <div class="signature">
+        
+        def <strong>[]?</strong>(key)
+
+        <a class="method-permalink" href="#%5B%5D%3F%28key%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>returns the current value of a status value and nil if it does not exist</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/driver-specs/mock_driver.cr#L82" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="logger-instance-method">
+      <div class="signature">
+        
+        def <strong>logger</strong>
+
+        <a class="method-permalink" href="#logger-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>proxies <code>Log</code> so you can use the logger in the same way as drivers</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/driver-specs/mock_driver.cr#L58" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="signal_status(key)-instance-method">
+      <div class="signature">
+        
+        def <strong>signal_status</strong>(key)
+
+        <a class="method-permalink" href="#signal_status%28key%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>pushes a change notification for the key specified, even though it hasn't changed</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/driver-specs/mock_driver.cr#L89" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="system(module_id:String|Symbol):DriverSpecs::StatusHelper-instance-method">
+      <div class="signature">
+        
+        def <strong>system</strong>(module_id : String | Symbol) : <a href="../DriverSpecs/StatusHelper.html">DriverSpecs::StatusHelper</a>
+
+        <a class="method-permalink" href="#system%28module_id%3AString%7CSymbol%29%3ADriverSpecs%3A%3AStatusHelper-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Grab the status storage for a mock module</p>
+<p>i.e. <code><a href="../DriverSpecs/MockDriver.html#system%28module_id%3AString%7CSymbol%29%3ADriverSpecs%3A%3AStatusHelper-instance-method">#system(&quot;Module_2&quot;)</a></code></p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/8ae6bdf54bdd5ea10b42d1594684e110d3096a63/src/placeos-driver/driver-specs/mock_driver.cr#L47" target="_blank">View source</a>]
         
       </div>
     </div>
