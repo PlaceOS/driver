@@ -109,11 +109,13 @@ abstract class PlaceOS::Driver
       def initialize(
         @type, @value, @last_seen, @mac, @id, @name, @raw = nil, @loc = nil,
         @status = Status::Normal, @limit_high = nil, @limit_low = nil,
-        @resolution = nil, @module_id = nil, @binding = nil, @unit = nil
+        @resolution = nil, @module_id = nil, @binding = nil, @unit = nil,
+        @modifier = nil
       )
       end
 
       property status : Status
+      property modifier : String?
       property type : SensorType
 
       property value : Float64
@@ -166,6 +168,11 @@ abstract class PlaceOS::Driver
         return self.value unless this_unit
 
         Units::Measurement.new(self.value, this_unit).convert_to(other_unit).to_f
+      end
+
+      def modified_type : String
+        return "#{@modifier} #{@type}" if @modifier.presence
+        @type.to_s
       end
     end
   end
