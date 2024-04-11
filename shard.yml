@@ -1,5 +1,5 @@
 name: placeos-driver
-version: 6.10.0
+version: 6.11.0
 crystal: ">= 1.0.0"
 
 dependencies:
@@ -17,8 +17,10 @@ dependencies:
   debug:
     github: Sija/debug.cr
 
-  hound-dog:
-    github: place-labs/hound-dog
+  # clustering service discovery
+  redis_service_manager:
+    github: place-labs/redis_service_manager
+    version: ">= 3.0.0"
 
   ipaddress:
     github: Sija/ipaddress.cr
