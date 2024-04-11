@@ -114,8 +114,12 @@ module PlaceOS
 
     @@redis : Redis::Client? = nil
 
-    protected def self.shared_redis_client
-      @@redis_lock.synchronize { @@redis ||= new_redis_client }
+    def self.shared_redis_client : Redis::Client
+      @@redis || @@redis_lock.synchronize { @@redis = new_redis_client }
+    end
+
+    def self.redis_lock : Mutex
+      @@redis_lock
     end
   end
 end
