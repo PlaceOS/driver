@@ -221,7 +221,7 @@ abstract class PlaceOS::Driver
   #
   # you can extract index 2 number using: `setting(Int64, :values, 2)`
   macro setting(klass, *types)
-    @__setting__.get { setting({{klass}}, {{*types}}) }
+    @__setting__.get { setting({{klass}}, {{types.splat}}) }
   end
 
   # reads the provided class type out of the settings provided at the provided key.
@@ -230,7 +230,7 @@ abstract class PlaceOS::Driver
   #
   # you can extract the public key using: `setting?(String, :keys, :public)`
   macro setting?(klass, *types)
-    @__setting__.get { setting?({{klass}}, {{*types}}) }
+    @__setting__.get { setting?({{klass}}, {{types.splat}}) }
   end
 
   # if you would like to save an updated value to settings so it survives restarts
@@ -432,7 +432,7 @@ abstract class PlaceOS::Driver
 
               # Support argument lists
               if json.raw.is_a?(Array)
-                arg_names = { {{*args.map(&.name.stringify)}} }
+                arg_names = { {{args.map(&.name.stringify).splat}} }
                 args = json.as_a
 
                 raise "wrong number of arguments for '#{{{method.name.stringify}}}' (given #{args.size}, expected #{arg_names.size})" if args.size > arg_names.size

@@ -21,7 +21,7 @@ abstract class PlaceOS::Driver
     {% for klass, details in RESCUE_FROM %}
       {% block = details[1] %}
       {% if block != nil %}
-        protected def {{details[0]}}({{*details[1].args}})
+        protected def {{details[0]}}({{details[1].args.splat}})
           {{details[1].body}}
         end
       {% end %}
