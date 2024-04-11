@@ -1,4 +1,4 @@
-require "hound-dog"
+require "redis_service_manager"
 require "json"
 require "placeos-core-client"
 require "uuid"
@@ -19,6 +19,15 @@ require "./system"
 module PlaceOS::Driver::Proxy
   class RemoteDriver
     CORE_NAMESPACE = "core"
+
+    class_getter default_discovery : Clustering::Discovery do
+      manager = RedisServiceManager.new(
+        service: CORE_NAMESPACE,
+        redis: Driver::RedisStorage.shared_redis_client,
+        lock: Driver::RedisStorage.redis_lock
+      )
+      Clustering::Discovery.new(manager)
+    end
 
     enum Clearance
       User
@@ -70,7 +79,7 @@ module PlaceOS::Driver::Proxy
       @sys_id : String,
       @module_name : String,
       @index : Int32,
-      @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE),
+      @discovery : Clustering::Discovery = RemoteDriver.default_discovery,
       @user_id : String? = nil,
       &@edge_id : String -> String
     )
@@ -82,7 +91,7 @@ module PlaceOS::Driver::Proxy
       @sys_id : String,
       @module_name : String,
       @index : Int32 = 1,
-      @discovery : HoundDog::Discovery = HoundDog::Discovery.new(CORE_NAMESPACE),
+      @discovery : Clustering::Discovery = RemoteDriver.default_discovery,
       @user_id : String? = nil,
       &@edge_id : String -> String
     )
@@ -174,7 +183,7 @@ module PlaceOS::Driver::Proxy
                @discovery[hash_id]?
              end
       raise Error.new(ErrorCode::UnexpectedFailure, "No registered core instances", *@error_details) unless node
-      node[:uri]
+      node
     end
 
     # Executes a request against the appropriate core and returns the JSON result
