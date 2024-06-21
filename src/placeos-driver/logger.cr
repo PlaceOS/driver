@@ -1,5 +1,3 @@
-require "log_helper"
-
 require "./constants"
 require "./logger_io"
 

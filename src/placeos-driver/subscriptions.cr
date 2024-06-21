@@ -1,4 +1,3 @@
-require "log_helper"
 require "redis"
 require "simple_retry"
 
