@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../../../js/doc.js"></script>
 
   <meta name="repository-name" content="placeos-driver">
-  <title>PlaceOS::Driver::Interface::Locatable - placeos-driver master</title>
+  <title>PlaceOS::Driver::Interface::DeskControl - placeos-driver master</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../../";
   </script>
@@ -187,7 +187,7 @@
       
     </li>
   
-  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/DeskControl" data-name="placeos::driver::interface::deskcontrol">
+  <li class=" current" data-id="placeos-driver/PlaceOS/Driver/Interface/DeskControl" data-name="placeos::driver::interface::deskcontrol">
       <a href="../../../PlaceOS/Driver/Interface/DeskControl.html">DeskControl</a>
       
     </li>
@@ -252,7 +252,7 @@
       
     </li>
   
-  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface/Locatable" data-name="placeos::driver::interface::locatable">
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Locatable" data-name="placeos::driver::interface::locatable">
       <a href="../../../PlaceOS/Driver/Interface/Locatable.html">Locatable</a>
       
         <ul>
@@ -661,7 +661,7 @@
 <div class="main-content">
 <h1 class="type-name">
 
-  <span class="kind">module</span> PlaceOS::<wbr>Driver::<wbr>Interface::<wbr>Locatable
+  <span class="kind">module</span> PlaceOS::<wbr>Driver::<wbr>Interface::<wbr>DeskControl
 
 </h1>
 
@@ -678,7 +678,7 @@
     Overview
   </h2>
 
-  <p>a driver or service that can provide location information for people</p>
+  <p>Common desk control interface</p>
 
 
 
@@ -689,20 +689,6 @@
 
 
 
-
-  <h2>
-    <a id="direct-including-types" class="anchor" href="#direct-including-types">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Direct including types
-  </h2>
-  <ul class="other-types-list">
-    
-      <li class="other-type"><a href="../../../PlaceOS/Driver/Interface/Lockers.html">PlaceOS::Driver::Interface::Lockers</a></li>
-    
-  </ul>
 
 
 
@@ -717,8 +703,8 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/interface/locatable.cr#L3" target="_blank">
-        placeos-driver/interface/locatable.cr
+      <a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/interface/desk_control.cr#L3" target="_blank">
+        placeos-driver/interface/desk_control.cr
       </a>
     
     <br/>
@@ -745,30 +731,28 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#check_ownership_of%28mac_address%3AString%29%3AOwnershipMAC%7CNil-instance-method" class="signature"><strong>#check_ownership_of</strong>(mac_address : String) : OwnershipMAC | Nil</a>
+        <a href="#get_desk_height%28desk_key%3AString%29%3AInt32%7CNil-instance-method" class="signature"><strong>#get_desk_height</strong>(desk_key : String) : Int32 | Nil</a>
         
-          <div class="summary"><p>return <code>nil</code> or <code>{&quot;location&quot;: &quot;wireless&quot;, &quot;assigned_to&quot;: &quot;bob123&quot;, &quot;mac_address&quot;: &quot;abcd&quot;}</code></p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#device_locations%28zone_id%3AString%2Clocation%3AString%7CNil%3Dnil%29-instance-method" class="signature"><strong>#device_locations</strong>(zone_id : String, location : String | Nil = <span class="n">nil</span>)</a>
-        
-          <div class="summary"><p>array of devices and their x, y coordinates</p></div>
+          <div class="summary"><p>return nil on unknown height</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#locate_user%28email%3AString%7CNil%3Dnil%2Cusername%3AString%7CNil%3Dnil%29-instance-method" class="signature"><strong>#locate_user</strong>(email : String | Nil = <span class="n">nil</span>, username : String | Nil = <span class="n">nil</span>)</a>
-        
-          <div class="summary"><p>array of devices and their x, y coordinates, that are associated with this user</p></div>
+        <a href="#get_desk_power%28desk_key%3AString%29%3ABool%7CNil-instance-method" class="signature"><strong>#get_desk_power</strong>(desk_key : String) : Bool | Nil</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#macs_assigned_to%28email%3AString%7CNil%3Dnil%2Cusername%3AString%7CNil%3Dnil%29%3AArray%28String%29-instance-method" class="signature"><strong>#macs_assigned_to</strong>(email : String | Nil = <span class="n">nil</span>, username : String | Nil = <span class="n">nil</span>) : Array(String)</a>
+        <a href="#set_desk_height%28desk_key%3AString%2Cdesk_height%3AInt32%29-instance-method" class="signature"><strong>#set_desk_height</strong>(desk_key : String, desk_height : Int32)</a>
         
-          <div class="summary"><p>return an array of MAC address strings lowercase with no seperation characters abcdeffd1234 etc</p></div>
+          <div class="summary"><p>desk height is in mm</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#set_desk_power%28desk_key%3AString%2Cdesk_power%3ABool%7CNil%29-instance-method" class="signature"><strong>#set_desk_power</strong>(desk_key : String, desk_power : Bool | Nil)</a>
+        
+          <div class="summary"><p>desk_power on / off / nil == auto</p></div>
         
       </li>
     
@@ -796,87 +780,81 @@
     Instance Method Detail
   </h2>
   
-    <div class="entry-detail" id="check_ownership_of(mac_address:String):OwnershipMAC|Nil-instance-method">
+    <div class="entry-detail" id="get_desk_height(desk_key:String):Int32|Nil-instance-method">
       <div class="signature">
         abstract 
-        def <strong>check_ownership_of</strong>(mac_address : String) : <a href="../../../PlaceOS/Driver/Interface/Locatable/OwnershipMAC.html">OwnershipMAC</a> | Nil
+        def <strong>get_desk_height</strong>(desk_key : String) : Int32 | Nil
 
-        <a class="method-permalink" href="#check_ownership_of%28mac_address%3AString%29%3AOwnershipMAC%7CNil-instance-method">#</a>
+        <a class="method-permalink" href="#get_desk_height%28desk_key%3AString%29%3AInt32%7CNil-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>return <code>nil</code> or <code>{&quot;location&quot;: &quot;wireless&quot;, &quot;assigned_to&quot;: &quot;bob123&quot;, &quot;mac_address&quot;: &quot;abcd&quot;}</code></p>
+          <p>return nil on unknown height</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/interface/locatable.cr#L18" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/interface/desk_control.cr#L11" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="device_locations(zone_id:String,location:String|Nil=nil)-instance-method">
+    <div class="entry-detail" id="get_desk_power(desk_key:String):Bool|Nil-instance-method">
       <div class="signature">
         abstract 
-        def <strong>device_locations</strong>(zone_id : String, location : String | Nil = <span class="n">nil</span>)
+        def <strong>get_desk_power</strong>(desk_key : String) : Bool | Nil
 
-        <a class="method-permalink" href="#device_locations%28zone_id%3AString%2Clocation%3AString%7CNil%3Dnil%29-instance-method">#</a>
+        <a class="method-permalink" href="#get_desk_power%28desk_key%3AString%29%3ABool%7CNil-instance-method">#</a>
       </div>
-      
-        <div class="doc">
-          
-          <p>array of devices and their x, y coordinates</p>
-        </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/interface/locatable.cr#L21" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/interface/desk_control.cr#L19" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="locate_user(email:String|Nil=nil,username:String|Nil=nil)-instance-method">
+    <div class="entry-detail" id="set_desk_height(desk_key:String,desk_height:Int32)-instance-method">
       <div class="signature">
         abstract 
-        def <strong>locate_user</strong>(email : String | Nil = <span class="n">nil</span>, username : String | Nil = <span class="n">nil</span>)
+        def <strong>set_desk_height</strong>(desk_key : String, desk_height : Int32)
 
-        <a class="method-permalink" href="#locate_user%28email%3AString%7CNil%3Dnil%2Cusername%3AString%7CNil%3Dnil%29-instance-method">#</a>
+        <a class="method-permalink" href="#set_desk_height%28desk_key%3AString%2Cdesk_height%3AInt32%29-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>array of devices and their x, y coordinates, that are associated with this user</p>
+          <p>desk height is in mm</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/interface/locatable.cr#L5" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/interface/desk_control.cr#L5" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="macs_assigned_to(email:String|Nil=nil,username:String|Nil=nil):Array(String)-instance-method">
+    <div class="entry-detail" id="set_desk_power(desk_key:String,desk_power:Bool|Nil)-instance-method">
       <div class="signature">
         abstract 
-        def <strong>macs_assigned_to</strong>(email : String | Nil = <span class="n">nil</span>, username : String | Nil = <span class="n">nil</span>) : Array(String)
+        def <strong>set_desk_power</strong>(desk_key : String, desk_power : Bool | Nil)
 
-        <a class="method-permalink" href="#macs_assigned_to%28email%3AString%7CNil%3Dnil%2Cusername%3AString%7CNil%3Dnil%29%3AArray%28String%29-instance-method">#</a>
+        <a class="method-permalink" href="#set_desk_power%28desk_key%3AString%2Cdesk_power%3ABool%7CNil%29-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>return an array of MAC address strings
-lowercase with no seperation characters abcdeffd1234 etc</p>
+          <p>desk_power on / off / nil == auto</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/interface/locatable.cr#L9" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/interface/desk_control.cr#L14" target="_blank">View source</a>]
         
       </div>
     </div>

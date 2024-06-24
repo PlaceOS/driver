@@ -187,6 +187,11 @@
       
     </li>
   
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/DeskControl" data-name="placeos::driver::interface::deskcontrol">
+      <a href="../../../PlaceOS/Driver/Interface/DeskControl.html">DeskControl</a>
+      
+    </li>
+  
   <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/DoorSecurity" data-name="placeos::driver::interface::doorsecurity">
       <a href="../../../PlaceOS/Driver/Interface/DoorSecurity.html">DoorSecurity</a>
       
@@ -689,7 +694,7 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L20" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L20" target="_blank">
         placeos-driver/proxy/remote_driver.cr
       </a>
     
@@ -730,12 +735,12 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#new%28sys_id%3AString%2Cmodule_name%3AString%2Cindex%3AInt32%2Cdiscovery%3AHoundDog%3A%3ADiscovery%3DHoundDog%3A%3ADiscovery.new%28CORE_NAMESPACE%29%2Cuser_id%3AString%7CNil%3Dnil%2C%26edge_id%3AString-%3EString%29-class-method" class="signature"><strong>.new</strong>(sys_id : String, module_name : String, index : Int32, discovery : HoundDog::Discovery = <span class="t">HoundDog</span><span class="t">::</span><span class="t">Discovery</span>.new(<span class="t">CORE_NAMESPACE</span>), user_id : String | Nil = <span class="n">nil</span>, &edge_id : String -> String)</a>
+        <a href="#new%28sys_id%3AString%2Cmodule_name%3AString%2Cindex%3AInt32%2Cdiscovery%3AClustering%3A%3ADiscovery%3DRemoteDriver.default_discovery%2Cuser_id%3AString%7CNil%3Dnil%2C%26edge_id%3AString-%3EString%29-class-method" class="signature"><strong>.new</strong>(sys_id : String, module_name : String, index : Int32, discovery : Clustering::Discovery = <span class="t">RemoteDriver</span>.default_discovery, user_id : String | Nil = <span class="n">nil</span>, &edge_id : String -> String)</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#new%28module_id%3AString%2Csys_id%3AString%2Cmodule_name%3AString%2Cindex%3AInt32%3D1%2Cdiscovery%3AHoundDog%3A%3ADiscovery%3DHoundDog%3A%3ADiscovery.new%28CORE_NAMESPACE%29%2Cuser_id%3AString%7CNil%3Dnil%2C%26edge_id%3AString-%3EString%29-class-method" class="signature"><strong>.new</strong>(module_id : String, sys_id : String, module_name : String, index : Int32 = <span class="n">1</span>, discovery : HoundDog::Discovery = <span class="t">HoundDog</span><span class="t">::</span><span class="t">Discovery</span>.new(<span class="t">CORE_NAMESPACE</span>), user_id : String | Nil = <span class="n">nil</span>, &edge_id : String -> String)</a>
+        <a href="#new%28module_id%3AString%2Csys_id%3AString%2Cmodule_name%3AString%2Cindex%3AInt32%3D1%2Cdiscovery%3AClustering%3A%3ADiscovery%3DRemoteDriver.default_discovery%2Cuser_id%3AString%7CNil%3Dnil%2C%26edge_id%3AString-%3EString%29-class-method" class="signature"><strong>.new</strong>(module_id : String, sys_id : String, module_name : String, index : Int32 = <span class="n">1</span>, discovery : Clustering::Discovery = <span class="t">RemoteDriver</span>.default_discovery, user_id : String | Nil = <span class="n">nil</span>, &edge_id : String -> String)</a>
         
       </li>
     
@@ -752,6 +757,11 @@
     Class Method Summary
   </h2>
   <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#default_discovery%3AClustering%3A%3ADiscovery-class-method" class="signature"><strong>.default_discovery</strong> : Clustering::Discovery</a>
+        
+      </li>
     
       <li class="entry-summary">
         <a href="#get_parts%28module_id%3AString%7CSymbol%29%3ATuple%28String%2CInt32%29-class-method" class="signature"><strong>.get_parts</strong>(module_id : String | Symbol) : Tuple(String, Int32)</a>
@@ -925,34 +935,34 @@
     Constructor Detail
   </h2>
   
-    <div class="entry-detail" id="new(sys_id:String,module_name:String,index:Int32,discovery:HoundDog::Discovery=HoundDog::Discovery.new(CORE_NAMESPACE),user_id:String|Nil=nil,&amp;edge_id:String-&gt;String)-class-method">
+    <div class="entry-detail" id="new(sys_id:String,module_name:String,index:Int32,discovery:Clustering::Discovery=RemoteDriver.default_discovery,user_id:String|Nil=nil,&amp;edge_id:String-&gt;String)-class-method">
       <div class="signature">
         
-        def self.<strong>new</strong>(sys_id : String, module_name : String, index : Int32, discovery : HoundDog::Discovery = <span class="t">HoundDog</span><span class="t">::</span><span class="t">Discovery</span>.new(<span class="t">CORE_NAMESPACE</span>), user_id : String | Nil = <span class="n">nil</span>, &edge_id : String -> String)
+        def self.<strong>new</strong>(sys_id : String, module_name : String, index : Int32, discovery : Clustering::Discovery = <span class="t">RemoteDriver</span>.default_discovery, user_id : String | Nil = <span class="n">nil</span>, &edge_id : String -> String)
 
-        <a class="method-permalink" href="#new%28sys_id%3AString%2Cmodule_name%3AString%2Cindex%3AInt32%2Cdiscovery%3AHoundDog%3A%3ADiscovery%3DHoundDog%3A%3ADiscovery.new%28CORE_NAMESPACE%29%2Cuser_id%3AString%7CNil%3Dnil%2C%26edge_id%3AString-%3EString%29-class-method">#</a>
+        <a class="method-permalink" href="#new%28sys_id%3AString%2Cmodule_name%3AString%2Cindex%3AInt32%2Cdiscovery%3AClustering%3A%3ADiscovery%3DRemoteDriver.default_discovery%2Cuser_id%3AString%7CNil%3Dnil%2C%26edge_id%3AString-%3EString%29-class-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L69" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L78" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="new(module_id:String,sys_id:String,module_name:String,index:Int32=1,discovery:HoundDog::Discovery=HoundDog::Discovery.new(CORE_NAMESPACE),user_id:String|Nil=nil,&amp;edge_id:String-&gt;String)-class-method">
+    <div class="entry-detail" id="new(module_id:String,sys_id:String,module_name:String,index:Int32=1,discovery:Clustering::Discovery=RemoteDriver.default_discovery,user_id:String|Nil=nil,&amp;edge_id:String-&gt;String)-class-method">
       <div class="signature">
         
-        def self.<strong>new</strong>(module_id : String, sys_id : String, module_name : String, index : Int32 = <span class="n">1</span>, discovery : HoundDog::Discovery = <span class="t">HoundDog</span><span class="t">::</span><span class="t">Discovery</span>.new(<span class="t">CORE_NAMESPACE</span>), user_id : String | Nil = <span class="n">nil</span>, &edge_id : String -> String)
+        def self.<strong>new</strong>(module_id : String, sys_id : String, module_name : String, index : Int32 = <span class="n">1</span>, discovery : Clustering::Discovery = <span class="t">RemoteDriver</span>.default_discovery, user_id : String | Nil = <span class="n">nil</span>, &edge_id : String -> String)
 
-        <a class="method-permalink" href="#new%28module_id%3AString%2Csys_id%3AString%2Cmodule_name%3AString%2Cindex%3AInt32%3D1%2Cdiscovery%3AHoundDog%3A%3ADiscovery%3DHoundDog%3A%3ADiscovery.new%28CORE_NAMESPACE%29%2Cuser_id%3AString%7CNil%3Dnil%2C%26edge_id%3AString-%3EString%29-class-method">#</a>
+        <a class="method-permalink" href="#new%28module_id%3AString%2Csys_id%3AString%2Cmodule_name%3AString%2Cindex%3AInt32%3D1%2Cdiscovery%3AClustering%3A%3ADiscovery%3DRemoteDriver.default_discovery%2Cuser_id%3AString%7CNil%3Dnil%2C%26edge_id%3AString-%3EString%29-class-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L80" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L89" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -968,6 +978,22 @@
 </a>
     Class Method Detail
   </h2>
+  
+    <div class="entry-detail" id="default_discovery:Clustering::Discovery-class-method">
+      <div class="signature">
+        
+        def self.<strong>default_discovery</strong> : Clustering::Discovery
+
+        <a class="method-permalink" href="#default_discovery%3AClustering%3A%3ADiscovery-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L23" target="_blank">View source</a>]
+        
+      </div>
+    </div>
   
     <div class="entry-detail" id="get_parts(module_id:String|Symbol):Tuple(String,Int32)-class-method">
       <div class="signature">
@@ -988,7 +1014,7 @@ e.g. &quot;Display_3&quot; =&gt; {&quot;Display&quot;, 3}
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L257" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L266" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1018,7 +1044,7 @@ e.g. &quot;Display_3&quot; =&gt; {&quot;Display&quot;, 3}
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L210" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L219" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1034,7 +1060,7 @@ e.g. &quot;Display_3&quot; =&gt; {&quot;Display&quot;, 3}
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L215" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L224" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1057,7 +1083,7 @@ Easiest way to parse is: <code>Tuple(Logger::Severity, String).from_json(%([0, &
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L233" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L242" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1078,7 +1104,7 @@ Easiest way to parse is: <code>Tuple(Logger::Severity, String).from_json(%([0, &
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L182" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L191" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1094,7 +1120,7 @@ Easiest way to parse is: <code>Tuple(Logger::Severity, String).from_json(%([0, &
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L124" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L133" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1110,7 +1136,7 @@ Easiest way to parse is: <code>Tuple(Logger::Severity, String).from_json(%([0, &
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L132" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L141" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1126,7 +1152,7 @@ Easiest way to parse is: <code>Tuple(Logger::Severity, String).from_json(%([0, &
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L94" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L103" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1142,7 +1168,7 @@ Easiest way to parse is: <code>Tuple(Logger::Severity, String).from_json(%([0, &
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L92" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L101" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1158,7 +1184,7 @@ Easiest way to parse is: <code>Tuple(Logger::Severity, String).from_json(%([0, &
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L116" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L125" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1174,7 +1200,7 @@ Easiest way to parse is: <code>Tuple(Logger::Severity, String).from_json(%([0, &
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L93" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L102" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1190,7 +1216,7 @@ Easiest way to parse is: <code>Tuple(Logger::Severity, String).from_json(%([0, &
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L111" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L120" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1206,7 +1232,7 @@ Easiest way to parse is: <code>Tuple(Logger::Severity, String).from_json(%([0, &
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L94" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L103" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1222,7 +1248,7 @@ Easiest way to parse is: <code>Tuple(Logger::Severity, String).from_json(%([0, &
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L220" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L229" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1238,7 +1264,7 @@ Easiest way to parse is: <code>Tuple(Logger::Severity, String).from_json(%([0, &
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L102" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L111" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1254,7 +1280,7 @@ Easiest way to parse is: <code>Tuple(Logger::Severity, String).from_json(%([0, &
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L224" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L233" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1277,7 +1303,7 @@ of this instance of a driver, it's expected that this object is short lived</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L244" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L253" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1293,7 +1319,7 @@ of this instance of a driver, it's expected that this object is short lived</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L94" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L103" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1314,7 +1340,7 @@ of this instance of a driver, it's expected that this object is short lived</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L170" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L179" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1335,7 +1361,7 @@ of this instance of a driver, it's expected that this object is short lived</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8a460e77251241a2538a359ed04854916ce8064a/src/placeos-driver/proxy/remote_driver.cr#L159" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bbddf6828c5aaf9b1fc5050fcd6a3cc96ba9b387/src/placeos-driver/proxy/remote_driver.cr#L168" target="_blank">View source</a>]
         
       </div>
     </div>
