@@ -13,6 +13,8 @@ abstract class PlaceOS::Driver::Transport
   property pre_processor : ((Bytes) -> Bytes?) | Nil = nil
   getter proxy_in_use : String? = nil
   getter cookies : ::HTTP::Cookies { ::HTTP::Cookies.new }
+  getter private_key_file : String { File.tempname("pri-", ".pem") }
+  getter client_cert_file : String { File.tempname("cli-", ".pem") }
 
   # for non-http drivers to define a non-default http endpoint
   property http_uri_override : URI? = nil
@@ -216,6 +218,16 @@ abstract class PlaceOS::Driver::Transport
         tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
       end
     end
+
+    # allow for certificate based authentication
+    if (private_key = @settings.get { setting?(String, :https_private_key) }) &&
+       (client_cert = @settings.get { setting?(String, :https_client_cert) })
+      File.write(private_key_file, private_key)
+      File.write(client_cert_file, client_cert)
+      tls.private_key = private_key_file
+      tls.certificate_chain = client_cert_file
+    end
+
     tls
   end
 

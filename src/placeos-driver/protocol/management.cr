@@ -1,4 +1,3 @@
-require "log_helper"
 require "promise"
 require "set"
 require "socket"
