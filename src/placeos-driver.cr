@@ -591,10 +591,10 @@ abstract class PlaceOS::Driver
           rescue error
             Log.error(exception: error) { "failed to extract JSON schema from #{current_process} for interface\n#{iface_data.inspect}" }
             # fallback to interface without schema
-            {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
+            {{::PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
           end
         else
-          {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
+          {{::PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.metadata
         end
       end
     end
