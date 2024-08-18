@@ -6,7 +6,7 @@ abstract class PlaceOS::Driver
       include JSON::Serializable
 
       # Newer fields can be added if these don't meet requirements for newer lighting systems
-      getter id : UInt32?
+      getter id : UInt32 | String?
       getter join : UInt32?
       getter channel : UInt32?
       getter component : String?
