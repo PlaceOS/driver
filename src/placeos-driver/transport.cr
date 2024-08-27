@@ -248,9 +248,6 @@ abstract class PlaceOS::Driver::Transport
       if private_key != key_contents || cer_contents != client_cert
         File.write(private_key_file, private_key)
         File.write(client_cert_file, client_cert)
-
-        # ensure files are on the disk before OpenSSL attempts to read them
-        sleep 100.milliseconds
       end
       true
     else
