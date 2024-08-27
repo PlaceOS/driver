@@ -214,21 +214,48 @@ abstract class PlaceOS::Driver::Transport
           tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
         end
       rescue error
-        Log.warn(exception: error) { "issue configuring verify mode" }
+        logger.warn(exception: error) { "issue configuring verify mode" }
         tls.verify_mode = OpenSSL::SSL::VerifyMode::NONE
       end
     end
 
     # allow for certificate based authentication
-    if (private_key = @settings.get { setting?(String, :https_private_key) }) &&
-       (client_cert = @settings.get { setting?(String, :https_client_cert) })
-      File.write(private_key_file, private_key)
-      File.write(client_cert_file, client_cert)
+    if configure_client_certificates
       tls.private_key = private_key_file
       tls.certificate_chain = client_cert_file
     end
 
     tls
+  end
+
+  protected def configure_client_certificates : Bool
+    if (private_key = @settings.get { setting?(String, :https_private_key).presence }) &&
+       (client_cert = @settings.get { setting?(String, :https_client_cert).presence })
+      key_contents = begin
+        File.read(private_key_file)
+      rescue error
+        logger.debug { "will write private key" }
+        ""
+      end
+
+      cer_contents = begin
+        File.read(client_cert_file)
+      rescue error
+        logger.debug { "will write client certificate" }
+        ""
+      end
+
+      if private_key != key_contents || cer_contents != client_cert
+        File.write(private_key_file, private_key)
+        File.write(client_cert_file, client_cert)
+
+        # ensure files are on the disk before OpenSSL attempts to read them
+        sleep 100.milliseconds
+      end
+      true
+    else
+      false
+    end
   end
 
   private def process(data : Bytes) : Nil
@@ -250,7 +277,7 @@ abstract class PlaceOS::Driver::Transport
       Fiber.yield
     end
   rescue error
-    Log.error(exception: error) { "error processing data" }
+    logger.error(exception: error) { "error processing data" }
 
     # if there was an error here, we don't really want to be buffering anything
     @tokenizer.try &.clear
@@ -273,6 +300,6 @@ abstract class PlaceOS::Driver::Transport
     # See spec for how this callback is expected to be used
     @received.call(data, task)
   rescue error
-    Log.error(exception: error) { "error processing received data" }
+    logger.error(exception: error) { "error processing received data" }
   end
 end
