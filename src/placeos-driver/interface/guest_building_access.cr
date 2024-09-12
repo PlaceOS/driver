@@ -10,17 +10,21 @@ abstract class PlaceOS::Driver
       property card_hex : String
     end
 
+    macro included
+      {% begin %}
+        alias SubKlassAccessDetails = {{ parse_type("::AccessDetails").resolve.subclasses.first }}
+      {% end %}
+      
+      # revoke access to a building
+      def revoke_guest_access(details : SubKlassAccessDetails) : Nil
+        revoke_access details
+      end
+    end
+
     # a function for granting guests access to a building
     # should return a payload that can be encoded into a QR code
     # the response is expected to be hexstring
-    abstract def grant_guest_access(email : String, from : Int64, until : Int64) : AccessDetails
-
-    # revoke access to a building
-    def revoke_guest_access(access : AccessDetails) : Nil
-      access_json = access.to_json
-      details = {{ parse_type("::PlaceOS::Driver::Interface::GuestBuildingAccess::AccessDetails").resolve.subclasses.first }}.from_json(access_json)
-      revoke_access details
-    end
+    abstract def grant_guest_access(email : String, starting : Int64, ending : Int64) : AccessDetails
 
     # where details is an instance of your AccessDetails subclass
     abstract protected def revoke_access(details)
