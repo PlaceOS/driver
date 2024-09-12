@@ -24,7 +24,7 @@ abstract class PlaceOS::Driver
     # a function for granting guests access to a building
     # should return a payload that can be encoded into a QR code
     # the response is expected to be hexstring
-    abstract def grant_guest_access(email : String, starting : Int64, ending : Int64) : AccessDetails
+    abstract def grant_guest_access(name : String, email : String, starting : Int64, ending : Int64) : AccessDetails
 
     # where details is an instance of your AccessDetails subclass
     abstract protected def revoke_access(details)
