@@ -10,17 +10,25 @@ abstract class PlaceOS::Driver
       property card_hex : String
     end
 
+    # temp until finally is resolved
+    protected def __revoke_guest_access__(details : JSON::Any)
+    end
+
     macro included
       macro finally
         \{% begin %}
           alias SubKlassAccessDetails = \{{ parse_type("AccessDetails").resolve.subclasses.first }}
         \{% end %}
 
-        # revoke access to a building
-        def revoke_guest_access(details : SubKlassAccessDetails) : Nil
-          revoke_access details
+        protected def __revoke_guest_access__(details : JSON::Any)
+          revoke_access SubKlassAccessDetails.from_json(details.to_json)
         end
       end
+    end
+
+    # revoke access to a building
+    def revoke_guest_access(details : JSON::Any) : Nil
+      __revoke_guest_access__ details
     end
 
     # a function for granting guests access to a building
