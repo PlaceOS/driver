@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../../../js/doc.js"></script>
 
   <meta name="repository-name" content="placeos-driver">
-  <title>PlaceOS::Driver::Interface::Moveable - placeos-driver master</title>
+  <title>PlaceOS::Driver::Interface::GuestBuildingAccess - placeos-driver master</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../../";
   </script>
@@ -222,7 +222,7 @@
       
     </li>
   
-  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/GuestBuildingAccess" data-name="placeos::driver::interface::guestbuildingaccess">
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface/GuestBuildingAccess" data-name="placeos::driver::interface::guestbuildingaccess">
       <a href="../../../PlaceOS/Driver/Interface/GuestBuildingAccess.html">GuestBuildingAccess</a>
       
         <ul>
@@ -327,7 +327,7 @@
       
     </li>
   
-  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface/Moveable" data-name="placeos::driver::interface::moveable">
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Moveable" data-name="placeos::driver::interface::moveable">
       <a href="../../../PlaceOS/Driver/Interface/Moveable.html">Moveable</a>
       
         <ul>
@@ -676,7 +676,7 @@
 <div class="main-content">
 <h1 class="type-name">
 
-  <span class="kind">module</span> PlaceOS::<wbr>Driver::<wbr>Interface::<wbr>Moveable
+  <span class="kind">module</span> PlaceOS::<wbr>Driver::<wbr>Interface::<wbr>GuestBuildingAccess
 
 </h1>
 
@@ -684,19 +684,6 @@
 
 
 
-  <h2>
-    <a id="overview" class="anchor" href="#overview">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Overview
-  </h2>
-
-  <p>Expects status of the movable object to be defined as
-position{index} = Open / Close / Up / Down etc
-i.e. self[:position0] = MoveablePosition::Open
-(optional) self[moving0] = true / false</p>
 
 
 
@@ -706,21 +693,6 @@ i.e. self[:position0] = MoveablePosition::Open
 
 
 
-
-
-  <h2>
-    <a id="direct-including-types" class="anchor" href="#direct-including-types">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Direct including types
-  </h2>
-  <ul class="other-types-list">
-    
-      <li class="other-type"><a href="../../../PlaceOS/Driver/Interface/Camera.html">PlaceOS::Driver::Interface::Camera</a></li>
-    
-  </ul>
 
 
 
@@ -735,8 +707,8 @@ i.e. self[:position0] = MoveablePosition::Open
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/04ef324bcbb36ed84873514c711e8d9f63a7d5c2/src/placeos-driver/interface/moveable.cr#L6" target="_blank">
-        placeos-driver/interface/moveable.cr
+      <a href="https://github.com/PlaceOS/driver/blob/04ef324bcbb36ed84873514c711e8d9f63a7d5c2/src/placeos-driver/interface/guest_building_access.cr#L4" target="_blank">
+        placeos-driver/interface/guest_building_access.cr
       </a>
     
     <br/>
@@ -763,7 +735,9 @@ i.e. self[:position0] = MoveablePosition::Open
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#move%28position%3AMoveablePosition%2Cindex%3AInt32%7CString%3D0%29-instance-method" class="signature"><strong>#move</strong>(position : MoveablePosition, index : Int32 | String = <span class="n">0</span>)</a>
+        <a href="#grant_guest_access%28name%3AString%2Cemail%3AString%2Cstarting%3AInt64%2Cending%3AInt64%29%3AAccessDetails-instance-method" class="signature"><strong>#grant_guest_access</strong>(name : String, email : String, starting : Int64, ending : Int64) : AccessDetails</a>
+        
+          <div class="summary"><p>a function for granting guests access to a building should return a payload that can be encoded into a QR code the response is expected to be hexstring</p></div>
         
       </li>
     
@@ -791,18 +765,25 @@ i.e. self[:position0] = MoveablePosition::Open
     Instance Method Detail
   </h2>
   
-    <div class="entry-detail" id="move(position:MoveablePosition,index:Int32|String=0)-instance-method">
+    <div class="entry-detail" id="grant_guest_access(name:String,email:String,starting:Int64,ending:Int64):AccessDetails-instance-method">
       <div class="signature">
         abstract 
-        def <strong>move</strong>(position : <a href="../../../PlaceOS/Driver/Interface/Moveable/MoveablePosition.html">MoveablePosition</a>, index : Int32 | String = <span class="n">0</span>)
+        def <strong>grant_guest_access</strong>(name : String, email : String, starting : Int64, ending : Int64) : <a href="../../../PlaceOS/Driver/Interface/GuestBuildingAccess/AccessDetails.html">AccessDetails</a>
 
-        <a class="method-permalink" href="#move%28position%3AMoveablePosition%2Cindex%3AInt32%7CString%3D0%29-instance-method">#</a>
+        <a class="method-permalink" href="#grant_guest_access%28name%3AString%2Cemail%3AString%2Cstarting%3AInt64%2Cending%3AInt64%29%3AAccessDetails-instance-method">#</a>
       </div>
+      
+        <div class="doc">
+          
+          <p>a function for granting guests access to a building
+should return a payload that can be encoded into a QR code
+the response is expected to be hexstring</p>
+        </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/04ef324bcbb36ed84873514c711e8d9f63a7d5c2/src/placeos-driver/interface/moveable.cr#L18" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/04ef324bcbb36ed84873514c711e8d9f63a7d5c2/src/placeos-driver/interface/guest_building_access.cr#L27" target="_blank">View source</a>]
         
       </div>
     </div>
