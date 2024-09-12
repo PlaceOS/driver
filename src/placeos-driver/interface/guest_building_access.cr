@@ -27,6 +27,6 @@ abstract class PlaceOS::Driver
     abstract def grant_guest_access(name : String, email : String, starting : Int64, ending : Int64) : AccessDetails
 
     # where details is an instance of your AccessDetails subclass
-    abstract protected def revoke_access(details)
+    protected abstract def revoke_access(details)
   end
 end
