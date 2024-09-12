@@ -11,13 +11,15 @@ abstract class PlaceOS::Driver
     end
 
     macro included
-      {% begin %}
-        alias SubKlassAccessDetails = {{ parse_type("::PlaceOS::Driver::Interface::GuestBuildingAccess::AccessDetails").resolve.subclasses.first }}
-      {% end %}
+      macro finally
+        \{% begin %}
+          alias SubKlassAccessDetails = \{{ parse_type("AccessDetails").resolve.subclasses.first }}
+        \{% end %}
 
-      # revoke access to a building
-      def revoke_guest_access(details : SubKlassAccessDetails) : Nil
-        revoke_access details
+        # revoke access to a building
+        def revoke_guest_access(details : SubKlassAccessDetails) : Nil
+          revoke_access details
+        end
       end
     end
 
