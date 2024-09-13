@@ -707,7 +707,7 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/bfa81bb415d25df4ac329d00104008718fca524d/src/placeos-driver/interface/guest_building_access.cr#L4" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/10f1f1aa2033c0465bd8324eeb7f895335dec6cb/src/placeos-driver/interface/guest_building_access.cr#L4" target="_blank">
         placeos-driver/interface/guest_building_access.cr
       </a>
     
@@ -738,6 +738,13 @@
         <a href="#grant_guest_access%28name%3AString%2Cemail%3AString%2Cstarting%3AInt64%2Cending%3AInt64%29%3AAccessDetails-instance-method" class="signature"><strong>#grant_guest_access</strong>(name : String, email : String, starting : Int64, ending : Int64) : AccessDetails</a>
         
           <div class="summary"><p>a function for granting guests access to a building should return a payload that can be encoded into a QR code the response is expected to be hexstring</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#guest_access_configured%3F%3ABool-instance-method" class="signature"><strong>#guest_access_configured?</strong> : Bool</a>
+        
+          <div class="summary"><p>return true if we can grant guest access</p></div>
         
       </li>
     
@@ -790,7 +797,28 @@ the response is expected to be hexstring</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/bfa81bb415d25df4ac329d00104008718fca524d/src/placeos-driver/interface/guest_building_access.cr#L16" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/10f1f1aa2033c0465bd8324eeb7f895335dec6cb/src/placeos-driver/interface/guest_building_access.cr#L16" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="guest_access_configured?:Bool-instance-method">
+      <div class="signature">
+        abstract 
+        def <strong>guest_access_configured?</strong> : Bool
+
+        <a class="method-permalink" href="#guest_access_configured%3F%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>return true if we can grant guest access</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/10f1f1aa2033c0465bd8324eeb7f895335dec6cb/src/placeos-driver/interface/guest_building_access.cr#L22" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -811,7 +839,7 @@ the response is expected to be hexstring</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/bfa81bb415d25df4ac329d00104008718fca524d/src/placeos-driver/interface/guest_building_access.cr#L19" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/10f1f1aa2033c0465bd8324eeb7f895335dec6cb/src/placeos-driver/interface/guest_building_access.cr#L19" target="_blank">View source</a>]
         
       </div>
     </div>
