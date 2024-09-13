@@ -17,5 +17,8 @@ abstract class PlaceOS::Driver
 
     # revoke access to a building
     abstract def revoke_guest_access(details : JSON::Any)
+
+    # return true if we can grant guest access
+    abstract def guest_access_configured? : Bool
   end
 end

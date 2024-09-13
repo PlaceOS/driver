@@ -1,5 +1,5 @@
 name: placeos-driver
-version: 7.2.11
+version: 7.2.12
 crystal: ">= 1.0.0"
 
 dependencies:
