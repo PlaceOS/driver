@@ -27,7 +27,7 @@ describe PlaceOS::Driver::ProcessManager do
     input.write_bytes json.bytesize
     input.write json.to_slice
 
-    sleep 0.01
+    sleep 0.1
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
 
@@ -49,7 +49,7 @@ describe PlaceOS::Driver::ProcessManager do
     input.write_bytes json.bytesize
     input.write json.to_slice
 
-    sleep 0.01
+    sleep 0.1
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)
 
@@ -68,7 +68,7 @@ describe PlaceOS::Driver::ProcessManager do
     input.write json.to_slice
 
     process.loaded[driver_id].logger.debugging.should eq(false)
-    sleep 0.01
+    sleep 0.1
     process.loaded[driver_id].logger.debugging.should eq(true)
 
     # Disable debugging
@@ -80,7 +80,7 @@ describe PlaceOS::Driver::ProcessManager do
     input.write json.to_slice
 
     process.loaded["mod_1234"].logger.debugging.should eq(true)
-    sleep 0.01
+    sleep 0.1
     process.loaded["mod_1234"].logger.debugging.should eq(false)
 
     # Update settings
@@ -101,7 +101,7 @@ describe PlaceOS::Driver::ProcessManager do
     input.write json.to_slice
 
     process.loaded[driver_id].settings.json["test"]["number"].as_i.should eq(123)
-    sleep 0.01
+    sleep 0.1
     process.loaded[driver_id].settings.json["test"]["number"].as_i.should eq(1234)
 
     # Update settings where the IP address has changed
@@ -122,7 +122,7 @@ describe PlaceOS::Driver::ProcessManager do
     input.write json.to_slice
 
     process.loaded[driver_id].settings.json["test"]["number"].as_i.should eq(1234)
-    sleep 0.01
+    sleep 0.1
     process.loaded[driver_id].settings.json["test"]["number"].as_i.should eq(12345)
 
     # Check what's running on this node:
@@ -149,7 +149,7 @@ describe PlaceOS::Driver::ProcessManager do
     input.write json.to_slice
 
     process.loaded.size.should eq 1
-    sleep 0.01
+    sleep 0.1
     process.loaded.size.should eq 0
 
     # Ensure it terminates properly

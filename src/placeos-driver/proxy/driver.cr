@@ -89,7 +89,8 @@ class PlaceOS::Driver::Proxy::Driver
   end
 
   # provide a programatic way of calling a remote function similar to Ruby
-  def __send__(function_name : String | Symbol, arguments : Tuple = Tuple.new, named_args : NamedTuple = NamedTuple.new)
+  # array and hash types required for dynamic invocation across drivers
+  def __send__(function_name : String | Symbol, arguments : Array | Tuple = Tuple.new, named_args : NamedTuple | Hash = NamedTuple.new)
     function_name = function_name.to_s
     function = @metadata.interface[function_name]?
     __exec_request__(function_name, function, arguments, named_args)
