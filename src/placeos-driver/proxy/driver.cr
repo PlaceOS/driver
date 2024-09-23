@@ -64,6 +64,7 @@ class PlaceOS::Driver::Proxy::Driver
   # Don't raise errors directly.
   # Ensure they are logged and raise if the response is requested
   macro method_missing(call)
+    {% raise "error with dynamic cross module invocation. Types don't match __send__ interface: #{call.args.inspect}" if call.name.id.stringify == "__send__" %}
     function_name = {{call.name.id.stringify}}
     function = @metadata.interface[function_name]?
 
