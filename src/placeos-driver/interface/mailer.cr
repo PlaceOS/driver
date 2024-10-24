@@ -18,7 +18,8 @@ module PlaceOS::Driver::Interface::Mailer
     attachments : Array(Attachment) = [] of Attachment,
     cc : String | Array(String) = [] of String,
     bcc : String | Array(String) = [] of String,
-    from : String | Array(String) | Nil = nil
+    from : String | Array(String) | Nil = nil,
+    reply_to : String | Array(String) | Nil = nil
   )
 
   #                   event_name => notify_who => html => template
@@ -35,7 +36,8 @@ module PlaceOS::Driver::Interface::Mailer
     attachments : Array(Attachment) = [] of Attachment,
     cc : String | Array(String) = [] of String,
     bcc : String | Array(String) = [] of String,
-    from : String | Array(String) | Nil = nil
+    from : String | Array(String) | Nil = nil,
+    reply_to : String | Array(String) | Nil = nil
   )
     template = begin
       @templates[template[0]][template[1]]
@@ -48,7 +50,7 @@ module PlaceOS::Driver::Interface::Mailer
     text = build_template(template["text"]?, args)
     html = build_template(template["html"]?, args)
 
-    send_mail(to, subject, text || "", html || "", resource_attachments, attachments, cc, bcc, from)
+    send_mail(to, subject, text || "", html || "", resource_attachments, attachments, cc, bcc, from, reply_to)
   end
 
   def build_template(string : String?, args : TemplateItems)
