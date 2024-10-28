@@ -1,5 +1,3 @@
-require "json"
-
 abstract class PlaceOS::Driver; end
 
 # The namespace for all PlaceOS standard interfaces
