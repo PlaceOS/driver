@@ -7,38 +7,36 @@ module PlaceOS::Driver::Interface; end
 
 # Common Email templates interface
 module PlaceOS::Driver::Interface::MailerTemplates
-  # example implementation for multiple templates with the same fields:
-  # def template_fields : Array(TemplateFields)
-  #   [
-  #     {"bookings", "booked_by_notify", "Booking booked by notification"},
-  #     {"bookings", "booking_notify", "Booking notification"},
-  #   ].each do |template|
-  #     TemplateFields.new(
-  #       driver: "BookingNotifier",
-  #       template: {template[0], template[1]},
-  #       name: template[2],
-  #       fields: [
-  #         {name: "booking_id", description: "The ID of the booking"},
+  # Tuple(String, String) is the same as is being used for #send_template
+  # example: {"bookings", "booked_by_notify"}
+  #
+  # example implementation for multiple templates with shared fields:
+  #
+  # def template_fields : Hash(Tuple(String, String), TemplateFields)
+  #   common_fields = [
+  #     {name: "booking_id", description: "The ID of the booking"},
+  #   ]
+
+  #   {
+  #     {"bookings", "booked_by_notify"} => TemplateFields.new(
+  #       name: "Booking booked by notification",
+  #       fields: common_fields
+  #     ),
+  #     {"bookings", "booking_notify"} => TemplateFields.new(
+  #       name: "Booking notification",
+  #       fields: common_fields + [
+  #         {name: "start_time", description: "The start time of the booking"},
   #       ]
-  #     )
-  #   end
+  #     ),
+  #   }
   # end
-  abstract def template_fields : Array(TemplateFields)
+  #
+  abstract def template_fields : Hash(Tuple(String, String), TemplateFields)
 
-  struct TemplateFields
-    include JSON::Serializable
-
-    # The driver that this template is for
-    # example: "BookingNotifier"
-    property driver : String
-
-    # Same as is being used for #send_template
-    # example: ["bookings", "booked_by_notify"]
-    property template : Tuple(String, String)
-
+  alias TemplateFields = NamedTuple(
     # Human readable name
     # example: "Booking booked by notification"
-    property name : String
+    name: String,
 
     # List of fields that can be used in the template
     # name should match args used for #send_template
@@ -47,14 +45,5 @@ module PlaceOS::Driver::Interface::MailerTemplates
     # [
     #   {name: "booking_id", description: "The ID of the booking"},
     # ]
-    property fields : Array(NamedTuple(name: String, description: String))
-
-    def trigger(seperator : String = ".")
-      template.join(seperator)
-    end
-
-    def full_name(seperator : String = ": ")
-      "#{driver}#{seperator}#{name}"
-    end
-  end
+    fields: Array(NamedTuple(name: String, description: String)))
 end
