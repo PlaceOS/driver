@@ -12,16 +12,18 @@ module PlaceOS::Driver::Interface::MailerTemplates
   #   common_fields = [
   #     {name: "booking_id", description: "The ID of the booking"},
   #   ]
-  #
+
   #   [
   #     TemplateFields.new(
   #       trigger: {"bookings", "booked_by_notify"},
   #       name: "Booking booked by notification",
+  #       description: nil,
   #       fields: common_fields
   #     ),
   #     TemplateFields.new(
   #       trigger: {"bookings", "booking_notify"},
   #       name: "Booking notification",
+  #       description: "This template is used for booking notifications",
   #       fields: common_fields + [
   #         {name: "start_time", description: "The start time of the booking"},
   #       ]
@@ -39,6 +41,10 @@ module PlaceOS::Driver::Interface::MailerTemplates
     # Human readable name
     # example: "Booking booked by notification"
     name: String,
+
+    # Optional description of the template
+    # example: "This template is used for booking notifications"
+    description: String?,
 
     # List of fields that can be used in the template
     # name should match args used for #send_template
