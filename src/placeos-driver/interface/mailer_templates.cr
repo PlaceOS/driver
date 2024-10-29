@@ -12,7 +12,7 @@ module PlaceOS::Driver::Interface::MailerTemplates
   #   common_fields = [
   #     {name: "booking_id", description: "The ID of the booking"},
   #   ]
-
+  #
   #   [
   #     TemplateFields.new(
   #       trigger: {"bookings", "booked_by_notify"},
