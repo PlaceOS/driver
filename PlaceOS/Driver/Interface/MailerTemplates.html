@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../../../js/doc.js"></script>
 
   <meta name="repository-name" content="placeos-driver">
-  <title>PlaceOS::Driver::Interface::Zoomable - placeos-driver master</title>
+  <title>PlaceOS::Driver::Interface::MailerTemplates - placeos-driver master</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../../";
   </script>
@@ -327,7 +327,7 @@
       
     </li>
   
-  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/MailerTemplates" data-name="placeos::driver::interface::mailertemplates">
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface/MailerTemplates" data-name="placeos::driver::interface::mailertemplates">
       <a href="../../../PlaceOS/Driver/Interface/MailerTemplates.html">MailerTemplates</a>
       
         <ul>
@@ -457,7 +457,7 @@
       
     </li>
   
-  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface/Zoomable" data-name="placeos::driver::interface::zoomable">
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Zoomable" data-name="placeos::driver::interface::zoomable">
       <a href="../../../PlaceOS/Driver/Interface/Zoomable.html">Zoomable</a>
       
         <ul>
@@ -691,7 +691,7 @@
 <div class="main-content">
 <h1 class="type-name">
 
-  <span class="kind">module</span> PlaceOS::<wbr>Driver::<wbr>Interface::<wbr>Zoomable
+  <span class="kind">module</span> PlaceOS::<wbr>Driver::<wbr>Interface::<wbr>MailerTemplates
 
 </h1>
 
@@ -708,8 +708,7 @@
     Overview
   </h2>
 
-  <p>Implements the direct <code><a href="../../../PlaceOS/Driver/Interface/Zoomable.html#zoom_to%28position%3AFloat64%2Cauto_focus%3ABool%3Dtrue%2Cindex%3AInt32%7CString%3D0%29-instance-method">#zoom_to</a></code> function</p>
-<p>if the device supports continuous zoom then you should overwrite the included <code><a href="../../../PlaceOS/Driver/Interface/Zoomable.html#zoom%28direction%3AZoomDirection%2Cindex%3AInt32%7CString%3D0%29-instance-method">#zoom</a></code> function</p>
+  <p>Common Email templates interface</p>
 
 
 
@@ -720,20 +719,6 @@
 
 
 
-
-  <h2>
-    <a id="direct-including-types" class="anchor" href="#direct-including-types">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Direct including types
-  </h2>
-  <ul class="other-types-list">
-    
-      <li class="other-type"><a href="../../../PlaceOS/Driver/Interface/Camera.html">PlaceOS::Driver::Interface::Camera</a></li>
-    
-  </ul>
 
 
 
@@ -748,8 +733,8 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/dc481e0f72232cc8236a7a64079e25cedbce0a68/src/placeos-driver/interface/zoomable.cr#L5" target="_blank">
-        placeos-driver/interface/zoomable.cr
+      <a href="https://github.com/PlaceOS/driver/blob/dc481e0f72232cc8236a7a64079e25cedbce0a68/src/placeos-driver/interface/mailer_templates.cr#L7" target="_blank">
+        placeos-driver/interface/mailer_templates.cr
       </a>
     
     <br/>
@@ -776,16 +761,9 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#zoom%28direction%3AZoomDirection%2Cindex%3AInt32%7CString%3D0%29-instance-method" class="signature"><strong>#zoom</strong>(direction : ZoomDirection, index : Int32 | String = <span class="n">0</span>)</a>
+        <a href="#template_fields%3AArray%28TemplateFields%29-instance-method" class="signature"><strong>#template_fields</strong> : Array(TemplateFields)</a>
         
-          <div class="summary"><p>As zoom is typically discreet we manually implement the analogue version Simple enough to overwrite this as required</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#zoom_to%28position%3AFloat64%2Cauto_focus%3ABool%3Dtrue%2Cindex%3AInt32%7CString%3D0%29-instance-method" class="signature"><strong>#zoom_to</strong>(position : Float64, auto_focus : Bool = <span class="n">true</span>, index : Int32 | String = <span class="n">0</span>)</a>
-        
-          <div class="summary"><p>This a discrete level on most cameras</p></div>
+          <div class="summary"><p>[     TemplateFields.new(       trigger: {&quot;bookings&quot;, &quot;booked_by_notify&quot;},       name: &quot;Booking booked by notification&quot;,       description: nil,       fields: common_fields     ),     TemplateFields.new(       trigger: {&quot;bookings&quot;, &quot;booking_notify&quot;},       name: &quot;Booking notification&quot;,       description: &quot;This template is used for booking notifications&quot;,       fields: common_fields + [         {name: &quot;start_time&quot;, description: &quot;The start time of the booking&quot;},       ]     ),   ] end</p></div>
         
       </li>
     
@@ -813,45 +791,39 @@
     Instance Method Detail
   </h2>
   
-    <div class="entry-detail" id="zoom(direction:ZoomDirection,index:Int32|String=0)-instance-method">
-      <div class="signature">
-        
-        def <strong>zoom</strong>(direction : <a href="../../../PlaceOS/Driver/Interface/Zoomable/ZoomDirection.html">ZoomDirection</a>, index : Int32 | String = <span class="n">0</span>)
-
-        <a class="method-permalink" href="#zoom%28direction%3AZoomDirection%2Cindex%3AInt32%7CString%3D0%29-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>As zoom is typically discreet we manually implement the analogue version
-Simple enough to overwrite this as required</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/dc481e0f72232cc8236a7a64079e25cedbce0a68/src/placeos-driver/interface/zoomable.cr#L22" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="zoom_to(position:Float64,auto_focus:Bool=true,index:Int32|String=0)-instance-method">
+    <div class="entry-detail" id="template_fields:Array(TemplateFields)-instance-method">
       <div class="signature">
         abstract 
-        def <strong>zoom_to</strong>(position : Float64, auto_focus : Bool = <span class="n">true</span>, index : Int32 | String = <span class="n">0</span>)
+        def <strong>template_fields</strong> : Array(<a href="../../../PlaceOS/Driver/Interface/MailerTemplates/TemplateFields.html">TemplateFields</a>)
 
-        <a class="method-permalink" href="#zoom_to%28position%3AFloat64%2Cauto_focus%3ABool%3Dtrue%2Cindex%3AInt32%7CString%3D0%29-instance-method">#</a>
+        <a class="method-permalink" href="#template_fields%3AArray%28TemplateFields%29-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>This a discrete level on most cameras</p>
+          <p>[
+TemplateFields.new(
+trigger: {&quot;bookings&quot;, &quot;booked_by_notify&quot;},
+name: &quot;Booking booked by notification&quot;,
+description: nil,
+fields: common_fields
+),
+TemplateFields.new(
+trigger: {&quot;bookings&quot;, &quot;booking_notify&quot;},
+name: &quot;Booking notification&quot;,
+description: &quot;This template is used for booking notifications&quot;,
+fields: common_fields + [
+{name: &quot;start_time&quot;, description: &quot;The start time of the booking&quot;},
+]
+),
+]
+end</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/dc481e0f72232cc8236a7a64079e25cedbce0a68/src/placeos-driver/interface/zoomable.cr#L9" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/dc481e0f72232cc8236a7a64079e25cedbce0a68/src/placeos-driver/interface/mailer_templates.cr#L34" target="_blank">View source</a>]
         
       </div>
     </div>
