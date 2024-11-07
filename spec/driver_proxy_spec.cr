@@ -114,7 +114,7 @@ describe PlaceOS::Driver::Proxy::Driver do
       req_out.reply.should eq("reply_id")
       req_out.id.should eq("mod-1234")
 
-      sleep 0.5
+      sleep 500.milliseconds
 
       # reply to the execute request
       req_out.cmd = :result
@@ -170,7 +170,7 @@ describe PlaceOS::Driver::Proxy::Driver do
 
     # Subscription should not exist yet - i.e. no lookup
     subscription.module_id.should eq("mod-1234")
-    sleep 0.05
+    sleep 50.milliseconds
 
     # Update the status
     mod_store["power"] = true

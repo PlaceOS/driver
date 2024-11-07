@@ -128,7 +128,7 @@ class Helper
     end
 
     def future_add(a : Int32, b : Int32 = 200)
-      Promise.defer { sleep 0.01; a + b }
+      Promise.defer { sleep 10.milliseconds; a + b }
     end
 
     def future_error

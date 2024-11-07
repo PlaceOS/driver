@@ -16,7 +16,7 @@ module PlaceOS::Driver::Proxy
         channel.close
       end
 
-      sleep 0.005
+      sleep 50.milliseconds
 
       RedisStorage.with_redis &.publish("placeos/test", "whatwhat")
 
@@ -82,7 +82,7 @@ module PlaceOS::Driver::Proxy
       sys_lookup[lookup_key] = "mod-1234"
       RedisStorage.with_redis &.publish("lookup-change", "sys-123")
 
-      sleep 0.05
+      sleep 50.milliseconds
 
       # Update the status
       storage["power"] = true

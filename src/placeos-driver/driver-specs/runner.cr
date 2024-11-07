@@ -193,7 +193,7 @@ class DriverSpecs
         io.flush
 
         # give it a moment to shutdown
-        sleep 1
+        sleep 1.second
 
         puts "... spec passed".colorize(:green)
       rescue e

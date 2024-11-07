@@ -97,7 +97,7 @@ describe PlaceOS::Driver::Proxy::System do
 
     # Subscription should not exist yet - i.e. no lookup
     subscription.module_id.should eq("mod-5678")
-    sleep 0.05
+    sleep 50.milliseconds
 
     # Update the status
     mod_store["power"] = true

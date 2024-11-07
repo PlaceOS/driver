@@ -67,7 +67,7 @@ describe PlaceOS::Driver::Protocol::Management do
     manager.info.should eq(["mod-management-test"])
 
     manager.stop("mod-management-test")
-    sleep 0.2
+    sleep 200.milliseconds
     manager.running?.should eq(false)
     manager.terminated?.should eq(false)
     redis_callback.should eq 0
@@ -115,7 +115,7 @@ describe PlaceOS::Driver::Protocol::Management do
     }))
     manager.running?.should eq(true)
 
-    sleep 0.5
+    sleep 500.milliseconds
 
     # Clears the module state
     redis_clear.should eq 1
@@ -162,7 +162,7 @@ describe PlaceOS::Driver::Protocol::Management do
     manager.info.should eq(["mod-management-test"])
 
     manager.stop("mod-management-test")
-    sleep 0.2
+    sleep 200.milliseconds
     manager.running?.should eq(false)
     manager.terminated?.should eq(false)
   end

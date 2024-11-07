@@ -18,7 +18,7 @@ module PlaceOS
           channel.close
         end
 
-        sleep 0.005
+        sleep 50.milliseconds
 
         Subscriptions.new_redis.publish("placeos/test", "whatwhat")
 
@@ -86,7 +86,7 @@ module PlaceOS
         sys_lookup[lookup_key] = "mod-1234"
         redis.publish "lookup-change", "sys-123"
 
-        sleep 0.05
+        sleep 50.milliseconds
 
         # Update the status
         storage["power"] = true
@@ -143,11 +143,11 @@ module PlaceOS
         # Create the lookup and signal the change
         sys_lookup[lookup_key] = "mod-12345"
 
-        sleep 0.005
+        sleep 50.milliseconds
 
         redis.publish "lookup-change", "sys-12345"
 
-        sleep 0.005
+        sleep 50.milliseconds
 
         # Update the status
         storage["power"] = true
@@ -163,7 +163,7 @@ module PlaceOS
 
         # Give the loop a moment to start up again
         while !subs.running
-          sleep 0.1
+          sleep 100.milliseconds
         end
 
         in_callback = false

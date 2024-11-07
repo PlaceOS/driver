@@ -16,7 +16,7 @@ describe PlaceOS::Driver::Protocol do
     input.write json.to_slice
 
     while id.nil?
-      sleep 0.001
+      sleep 10.milliseconds
     end
 
     id.should eq("mod_1234")
@@ -53,7 +53,7 @@ describe PlaceOS::Driver::Protocol do
     IO.copy(io, input)
 
     while results.size < 2
-      sleep 0.001
+      sleep 10.milliseconds
     end
 
     input.close

@@ -47,7 +47,7 @@ class Helper
     input.write_bytes json.bytesize
     input.write json.to_slice
 
-    sleep 0.01
+    sleep 10.milliseconds
 
     raw_data = Bytes.new(4096)
     bytes_read = output.read(raw_data)

@@ -386,7 +386,7 @@ class PlaceOS::Driver::Protocol::Management
         end
 
         # attempt to relaunch
-        sleep 5
+        sleep 5.seconds
         return if @io || terminated?
         spawn(same_thread: true) { relaunch("-1") }
       end
