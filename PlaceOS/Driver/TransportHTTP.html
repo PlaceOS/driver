@@ -735,7 +735,7 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/8e76beb97dd6acbec200e1fc75d377dbb31599ee/src/placeos-driver/transport/http.cr#L114" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/594f02544ac604295a2744925cc231755200c944/src/placeos-driver/transport/http.cr#L114" target="_blank">
         placeos-driver/transport/http.cr
       </a>
     
@@ -757,7 +757,7 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#new%28queue%3APlaceOS%3A%3ADriver%3A%3AQueue%2Curi%3AString%2Csettings%3APlaceOS%3A%3ADriver%3A%3ASettings%29-class-method" class="signature"><strong>.new</strong>(queue : PlaceOS::Driver::Queue, uri : String, settings : PlaceOS::Driver::Settings)</a>
+        <a href="#new%28queue%3APlaceOS%3A%3ADriver%3A%3AQueue%2Curi%3AString%2Csettings%3APlaceOS%3A%3ADriver%3A%3ASettings%2C%26received%3A-%3ENil%29-class-method" class="signature"><strong>.new</strong>(queue : PlaceOS::Driver::Queue, uri : String, settings : PlaceOS::Driver::Settings, &received :  -> Nil)</a>
         
           <div class="summary"><p>timeouts in seconds</p></div>
         
@@ -806,12 +806,12 @@
       </li>
     
       <li class="entry-summary">
-        <a href="#received-instance-method" class="signature"><strong>#received</strong></a>
+        <a href="#received%3A-%3ENil-instance-method" class="signature"><strong>#received</strong> :  -> Nil</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#received%3D%28received%29-instance-method" class="signature"><strong>#received=</strong>(received)</a>
+        <a href="#received%3D%28received%3A-%3E_%29-instance-method" class="signature"><strong>#received=</strong>(received :  -> _)</a>
         
       </li>
     
@@ -995,12 +995,12 @@
     Constructor Detail
   </h2>
   
-    <div class="entry-detail" id="new(queue:PlaceOS::Driver::Queue,uri:String,settings:PlaceOS::Driver::Settings)-class-method">
+    <div class="entry-detail" id="new(queue:PlaceOS::Driver::Queue,uri:String,settings:PlaceOS::Driver::Settings,&amp;received:-&gt;Nil)-class-method">
       <div class="signature">
         
-        def self.<strong>new</strong>(queue : <a href="../../PlaceOS/Driver/Queue.html">PlaceOS::Driver::Queue</a>, uri : String, settings : PlaceOS::Driver::Settings)
+        def self.<strong>new</strong>(queue : <a href="../../PlaceOS/Driver/Queue.html">PlaceOS::Driver::Queue</a>, uri : String, settings : PlaceOS::Driver::Settings, &received :  -> Nil)
 
-        <a class="method-permalink" href="#new%28queue%3APlaceOS%3A%3ADriver%3A%3AQueue%2Curi%3AString%2Csettings%3APlaceOS%3A%3ADriver%3A%3ASettings%29-class-method">#</a>
+        <a class="method-permalink" href="#new%28queue%3APlaceOS%3A%3ADriver%3A%3AQueue%2Curi%3AString%2Csettings%3APlaceOS%3A%3ADriver%3A%3ASettings%2C%26received%3A-%3ENil%29-class-method">#</a>
       </div>
       
         <div class="doc">
@@ -1011,7 +1011,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8e76beb97dd6acbec200e1fc75d377dbb31599ee/src/placeos-driver/transport/http.cr#L116" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/594f02544ac604295a2744925cc231755200c944/src/placeos-driver/transport/http.cr#L116" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1043,7 +1043,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8e76beb97dd6acbec200e1fc75d377dbb31599ee/src/placeos-driver/transport/http.cr#L150" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/594f02544ac604295a2744925cc231755200c944/src/placeos-driver/transport/http.cr#L151" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1059,7 +1059,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8e76beb97dd6acbec200e1fc75d377dbb31599ee/src/placeos-driver/transport/http.cr#L303" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/594f02544ac604295a2744925cc231755200c944/src/placeos-driver/transport/http.cr#L305" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1099,39 +1099,39 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8e76beb97dd6acbec200e1fc75d377dbb31599ee/src/placeos-driver/transport/http.cr#L214" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/594f02544ac604295a2744925cc231755200c944/src/placeos-driver/transport/http.cr#L215" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="received-instance-method">
+    <div class="entry-detail" id="received:-&gt;Nil-instance-method">
       <div class="signature">
         
-        def <strong>received</strong>
+        def <strong>received</strong> :  -> Nil
 
-        <a class="method-permalink" href="#received-instance-method">#</a>
+        <a class="method-permalink" href="#received%3A-%3ENil-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8e76beb97dd6acbec200e1fc75d377dbb31599ee/src/placeos-driver/transport/http.cr#L148" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/594f02544ac604295a2744925cc231755200c944/src/placeos-driver/transport/http.cr#L149" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="received=(received)-instance-method">
+    <div class="entry-detail" id="received=(received:-&gt;_)-instance-method">
       <div class="signature">
         
-        def <strong>received=</strong>(received)
+        def <strong>received=</strong>(received :  -> _)
 
-        <a class="method-permalink" href="#received%3D%28received%29-instance-method">#</a>
+        <a class="method-permalink" href="#received%3D%28received%3A-%3E_%29-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8e76beb97dd6acbec200e1fc75d377dbb31599ee/src/placeos-driver/transport/http.cr#L148" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/594f02544ac604295a2744925cc231755200c944/src/placeos-driver/transport/http.cr#L149" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1147,7 +1147,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8e76beb97dd6acbec200e1fc75d377dbb31599ee/src/placeos-driver/transport/http.cr#L306" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/594f02544ac604295a2744925cc231755200c944/src/placeos-driver/transport/http.cr#L308" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1163,7 +1163,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8e76beb97dd6acbec200e1fc75d377dbb31599ee/src/placeos-driver/transport/http.cr#L310" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/594f02544ac604295a2744925cc231755200c944/src/placeos-driver/transport/http.cr#L312" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1179,7 +1179,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8e76beb97dd6acbec200e1fc75d377dbb31599ee/src/placeos-driver/transport/http.cr#L160" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/594f02544ac604295a2744925cc231755200c944/src/placeos-driver/transport/http.cr#L161" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1195,7 +1195,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/8e76beb97dd6acbec200e1fc75d377dbb31599ee/src/placeos-driver/transport/http.cr#L299" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/594f02544ac604295a2744925cc231755200c944/src/placeos-driver/transport/http.cr#L301" target="_blank">View source</a>]
         
       </div>
     </div>
