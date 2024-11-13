@@ -9,6 +9,7 @@ class PlaceOS::Driver::DriverManager
     @queue = Queue.new(@logger) { |state| connection(state) }
     @schedule = PlaceOS::Driver::Proxy::Scheduler.new(@logger)
     @subscriptions = edge_driver ? nil : Proxy::Subscriptions.new(subscriptions || Subscriptions.new(module_id: @module_id), @logger)
+    @calibrate_connected = false
 
     # Ensures execution all occurs on a single thread
     @requests = ::Channel(Tuple(::Channel(Nil), Protocol::Request)).new(1)
@@ -37,7 +38,9 @@ class PlaceOS::Driver::DriverManager
                      end
                    end
                  in .http?
-                   PlaceOS::Driver::TransportHTTP.new(@queue, @model.uri.not_nil!, @settings)
+                   PlaceOS::Driver::TransportHTTP.new(@queue, @model.uri.not_nil!, @settings) do
+                     http_received
+                   end
                  in .logic?
                    # nothing required to be done here
                    PlaceOS::Driver::TransportLogic.new(@queue)
@@ -52,6 +55,7 @@ class PlaceOS::Driver::DriverManager
 
   @subscriptions : Proxy::Subscriptions?
   getter model : ::PlaceOS::Driver::DriverModel
+  getter calibrate_connected : Bool
 
   # This hack is required to "dynamically" load the user defined class
   # The compiler is somewhat fragile when it comes to initializers
@@ -271,14 +275,23 @@ class PlaceOS::Driver::DriverManager
 
   private def connection(state : Bool) : Nil
     driver = @driver
+    # this is just a hint so we can ignore it if redis was offline
+    check_proxy_usage(driver) rescue nil
+
+    # connected status is more important so we should ensure this is calibrated
+    begin
+      driver[:connected] = state
+      @calibrate_connected = false
+    rescue error
+      @calibrate_connected = true
+      logger.warn(exception: error) { "error setting connected status #{driver.class} (#{@module_id})" }
+    end
+
+    # we want to run these callbacks even if redis was offline
     begin
       if state
-        check_proxy_usage(driver)
-        driver[:connected] = true
         driver.connected if driver.responds_to?(:connected)
       else
-        check_proxy_usage(driver)
-        driver[:connected] = false
         driver.disconnected if driver.responds_to?(:disconnected)
       end
     rescue error
@@ -306,6 +319,21 @@ class PlaceOS::Driver::DriverManager
       logger.warn { "no received function provided for #{driver.class} (#{@module_id})" }
       task.try &.abort("no received function provided")
     end
+
+    # ensure connected state is eventually consistent if there was an issue
+    # with redis when the connected state changed
+    ensure_connected_calibrate(driver) if @calibrate_connected
+  end
+
+  protected def http_received
+    ensure_connected_calibrate(@driver) if @calibrate_connected
+  end
+
+  private def ensure_connected_calibrate(driver) : Nil
+    driver[:connected] = true
+    check_proxy_usage(driver) rescue nil
+    @calibrate_connected = false
+  rescue
   end
 
   private def check_proxy_usage(driver)

@@ -116,7 +116,8 @@ class PlaceOS::Driver
     def initialize(
       @queue : PlaceOS::Driver::Queue,
       @uri : String,
-      @settings : ::PlaceOS::Driver::Settings
+      @settings : ::PlaceOS::Driver::Settings,
+      &@received : -> Nil
     )
       @terminated = false
       @tls = new_tls_context
@@ -276,6 +277,7 @@ class PlaceOS::Driver
 
       # assuming we're typically online, this check before assignment is more performant
       @queue.online = true unless @queue.online
+      @received.call
 
       # fallback in case the HTTP client lib doesn't decompress the response
       check_http_response_encoding response
