@@ -85,13 +85,17 @@ class PlaceOS::Driver::DriverManager
     # we don't want to block driver init processing too long
     # a driver might be making a HTTP request in on_load for exampe which
     # could block for a long time, resulting in poor feedback
-    if driver.responds_to?(:on_load)
+    if driver.responds_to?(:on_load) || driver.responds_to?(:on_update)
       wait_on_load = Channel(Nil).new
       spawn(same_thread: true) do
         begin
-          driver.on_load
+          if driver.responds_to?(:on_load)
+            driver.on_load
+          elsif driver.responds_to?(:on_update)
+            driver.on_update
+          end
         rescue error
-          logger.error(exception: error) { "in the on_load function of #{driver.class} (#{@module_id})" }
+          logger.error(exception: error) { "initializing #{driver.class} (#{@module_id})" }
         end
         wait_on_load.send nil
       end
@@ -99,7 +103,7 @@ class PlaceOS::Driver::DriverManager
       select
       when wait_on_load.receive
       when timeout(6.seconds)
-        logger.error { "timeout waiting for the on_load function of #{driver.class} (#{@module_id})" }
+        logger.error { "timeout initializing #{driver.class} (#{@module_id})" }
       end
 
       wait_on_load.close
