@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../../../js/doc.js"></script>
 
   <meta name="repository-name" content="placeos-driver">
-  <title>PlaceOS::Driver::Interface::Switchable(Input, Output) - placeos-driver master</title>
+  <title>PlaceOS::Driver::Interface::ZoneAccessSecurity - placeos-driver master</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../../";
   </script>
@@ -437,7 +437,7 @@
       
     </li>
   
-  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface/Switchable" data-name="placeos::driver::interface::switchable(input, output)">
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Switchable" data-name="placeos::driver::interface::switchable(input, output)">
       <a href="../../../PlaceOS/Driver/Interface/Switchable.html">Switchable</a>
       
         <ul>
@@ -457,7 +457,7 @@
       
     </li>
   
-  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/ZoneAccessSecurity" data-name="placeos::driver::interface::zoneaccesssecurity">
+  <li class=" current" data-id="placeos-driver/PlaceOS/Driver/Interface/ZoneAccessSecurity" data-name="placeos::driver::interface::zoneaccesssecurity">
       <a href="../../../PlaceOS/Driver/Interface/ZoneAccessSecurity.html">ZoneAccessSecurity</a>
       
     </li>
@@ -696,7 +696,7 @@
 <div class="main-content">
 <h1 class="type-name">
 
-  <span class="kind">module</span> PlaceOS::<wbr>Driver::<wbr>Interface::<wbr>Switchable(Input, Output)
+  <span class="kind">module</span> PlaceOS::<wbr>Driver::<wbr>Interface::<wbr>ZoneAccessSecurity
 
 </h1>
 
@@ -707,20 +707,6 @@
 
 
 
-
-  <h2>
-    <a id="included-modules" class="anchor" href="#included-modules">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Included Modules
-  </h2>
-  <ul class="other-types-list">
-    
-      <li class="other-type"><a href="../../../PlaceOS/Driver/Interface/InputSelection.html">PlaceOS::Driver::Interface::InputSelection(Input)</a></li>
-    
-  </ul>
 
 
 
@@ -741,8 +727,8 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/0eab93ef381eae2802594faf3780a6083aa13695/src/placeos-driver/interface/switchable.cr#L8" target="_blank">
-        placeos-driver/interface/switchable.cr
+      <a href="https://github.com/PlaceOS/driver/blob/0eab93ef381eae2802594faf3780a6083aa13695/src/placeos-driver/interface/zone_access_security.cr#L2" target="_blank">
+        placeos-driver/interface/zone_access_security.cr
       </a>
     
     <br/>
@@ -769,7 +755,37 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#switch%28map%3AHash%28Input%2CArray%28Output%29%29%2Clayer%3ASwitchLayer%7CNil%3Dnil%29-instance-method" class="signature"><strong>#switch</strong>(map : Hash(Input, Array(Output)), layer : SwitchLayer | Nil = <span class="n">nil</span>)</a>
+        <a href="#card_holder_id_lookup%28email%3AString%29%3AString%7CInt64-instance-method" class="signature"><strong>#card_holder_id_lookup</strong>(email : String) : String | Int64</a>
+        
+          <div class="summary"><p>using an email address, lookup the security system id for a user</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#zone_access_add_member%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%2Cfrom_unix%3AInt64%7CNil%3Dnil%2Cuntil_unix%3AInt64%7CNil%3Dnil%29-instance-method" class="signature"><strong>#zone_access_add_member</strong>(zone_id : String | Int64, card_holder_id : String | Int64, from_unix : Int64 | Nil = <span class="n">nil</span>, until_unix : Int64 | Nil = <span class="n">nil</span>)</a>
+        
+          <div class="summary"><p>add a member to the zone</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#zone_access_id_lookup%28name%3AString%2Cexact_match%3ABool%3Dtrue%29%3AString%7CInt64%7CNil-instance-method" class="signature"><strong>#zone_access_id_lookup</strong>(name : String, exact_match : Bool = <span class="n">true</span>) : String | Int64 | Nil</a>
+        
+          <div class="summary"><p>using a name, lookup the access zone id</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#zone_access_member%3F%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%29%3AString%7CInt64%7CNil-instance-method" class="signature"><strong>#zone_access_member?</strong>(zone_id : String | Int64, card_holder_id : String | Int64) : String | Int64 | Nil</a>
+        
+          <div class="summary"><p>return the id that represents the access permission (truthy indicates access)</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#zone_access_remove_member%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%29-instance-method" class="signature"><strong>#zone_access_remove_member</strong>(zone_id : String | Int64, card_holder_id : String | Int64)</a>
+        
+          <div class="summary"><p>remove a member from the zone</p></div>
         
       </li>
     
@@ -778,28 +794,6 @@
 
 
 <div class="methods-inherited">
-  
-    
-
-  <h3>Instance methods inherited from module <code><a href="../../../PlaceOS/Driver/Interface/InputSelection.html">PlaceOS::Driver::Interface::InputSelection(Input)</a></code></h3>
-  
-  
-    <a href="../../../PlaceOS/Driver/Interface/InputSelection.html#switch_to%28input%3AInput%29-instance-method" class="tooltip">
-      <span>switch_to(input : Input)</span>
-    switch_to</a>
-    
-  
-
-
-    
-
-
-    
-
-
-    
-
-
   
 </div>
 
@@ -819,18 +813,107 @@
     Instance Method Detail
   </h2>
   
-    <div class="entry-detail" id="switch(map:Hash(Input,Array(Output)),layer:SwitchLayer|Nil=nil)-instance-method">
+    <div class="entry-detail" id="card_holder_id_lookup(email:String):String|Int64-instance-method">
       <div class="signature">
         abstract 
-        def <strong>switch</strong>(map : Hash(Input, Array(Output)), layer : <a href="../../../PlaceOS/Driver/Interface/Switchable/SwitchLayer.html">SwitchLayer</a> | Nil = <span class="n">nil</span>)
+        def <strong>card_holder_id_lookup</strong>(email : String) : String | Int64
 
-        <a class="method-permalink" href="#switch%28map%3AHash%28Input%2CArray%28Output%29%29%2Clayer%3ASwitchLayer%7CNil%3Dnil%29-instance-method">#</a>
+        <a class="method-permalink" href="#card_holder_id_lookup%28email%3AString%29%3AString%7CInt64-instance-method">#</a>
       </div>
+      
+        <div class="doc">
+          
+          <p>using an email address, lookup the security system id for a user</p>
+        </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0eab93ef381eae2802594faf3780a6083aa13695/src/placeos-driver/interface/switchable.cr#L19" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0eab93ef381eae2802594faf3780a6083aa13695/src/placeos-driver/interface/zone_access_security.cr#L4" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="zone_access_add_member(zone_id:String|Int64,card_holder_id:String|Int64,from_unix:Int64|Nil=nil,until_unix:Int64|Nil=nil)-instance-method">
+      <div class="signature">
+        abstract 
+        def <strong>zone_access_add_member</strong>(zone_id : String | Int64, card_holder_id : String | Int64, from_unix : Int64 | Nil = <span class="n">nil</span>, until_unix : Int64 | Nil = <span class="n">nil</span>)
+
+        <a class="method-permalink" href="#zone_access_add_member%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%2Cfrom_unix%3AInt64%7CNil%3Dnil%2Cuntil_unix%3AInt64%7CNil%3Dnil%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>add a member to the zone</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/0eab93ef381eae2802594faf3780a6083aa13695/src/placeos-driver/interface/zone_access_security.cr#L13" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="zone_access_id_lookup(name:String,exact_match:Bool=true):String|Int64|Nil-instance-method">
+      <div class="signature">
+        abstract 
+        def <strong>zone_access_id_lookup</strong>(name : String, exact_match : Bool = <span class="n">true</span>) : String | Int64 | Nil
+
+        <a class="method-permalink" href="#zone_access_id_lookup%28name%3AString%2Cexact_match%3ABool%3Dtrue%29%3AString%7CInt64%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>using a name, lookup the access zone id</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/0eab93ef381eae2802594faf3780a6083aa13695/src/placeos-driver/interface/zone_access_security.cr#L7" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="zone_access_member?(zone_id:String|Int64,card_holder_id:String|Int64):String|Int64|Nil-instance-method">
+      <div class="signature">
+        abstract 
+        def <strong>zone_access_member?</strong>(zone_id : String | Int64, card_holder_id : String | Int64) : String | Int64 | Nil
+
+        <a class="method-permalink" href="#zone_access_member%3F%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%29%3AString%7CInt64%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>return the id that represents the access permission (truthy indicates access)</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/0eab93ef381eae2802594faf3780a6083aa13695/src/placeos-driver/interface/zone_access_security.cr#L10" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="zone_access_remove_member(zone_id:String|Int64,card_holder_id:String|Int64)-instance-method">
+      <div class="signature">
+        abstract 
+        def <strong>zone_access_remove_member</strong>(zone_id : String | Int64, card_holder_id : String | Int64)
+
+        <a class="method-permalink" href="#zone_access_remove_member%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>remove a member from the zone</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/0eab93ef381eae2802594faf3780a6083aa13695/src/placeos-driver/interface/zone_access_security.cr#L16" target="_blank">View source</a>]
         
       </div>
     </div>
