@@ -1,7 +1,7 @@
 abstract class PlaceOS::Driver
   module Interface::ZoneAccessSecurity
     # using an email address, lookup the security system id for a user
-    abstract def card_holder_id_lookup(email : String) : String | Int64
+    abstract def card_holder_id_lookup(email : String) : String | Int64 | Nil
 
     # using a name, lookup the access zone id
     abstract def zone_access_id_lookup(name : String, exact_match : Bool = true) : String | Int64 | Nil
