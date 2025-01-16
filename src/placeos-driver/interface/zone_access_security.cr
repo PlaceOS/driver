@@ -13,7 +13,7 @@ abstract class PlaceOS::Driver
       getter email : String?
     end
 
-    # using an email address, lookup the security system id for a user
+    # given a card holder id, lookup the details of the card holder
     abstract def card_holder_lookup(id : String | Int64) : CardHolderDetails
 
     # using a name, lookup the access zone id
@@ -27,6 +27,7 @@ abstract class PlaceOS::Driver
       getter description : String?
     end
 
+    # given an access zone id, lookup the details of the zone
     abstract def zone_access_lookup(id : String | Int64) : ZoneDetails
 
     # return the id that represents the access permission (truthy indicates access)
