@@ -1,5 +1,5 @@
 name: placeos-driver
-version: 7.3.2
+version: 7.3.3
 
 dependencies:
   action-controller:
