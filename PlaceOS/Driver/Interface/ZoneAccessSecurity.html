@@ -457,8 +457,23 @@
       
     </li>
   
-  <li class=" current" data-id="placeos-driver/PlaceOS/Driver/Interface/ZoneAccessSecurity" data-name="placeos::driver::interface::zoneaccesssecurity">
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface/ZoneAccessSecurity" data-name="placeos::driver::interface::zoneaccesssecurity">
       <a href="../../../PlaceOS/Driver/Interface/ZoneAccessSecurity.html">ZoneAccessSecurity</a>
+      
+        <ul>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/ZoneAccessSecurity/CardHolderDetails" data-name="placeos::driver::interface::zoneaccesssecurity::cardholderdetails">
+      <a href="../../../PlaceOS/Driver/Interface/ZoneAccessSecurity/CardHolderDetails.html">CardHolderDetails</a>
+      
+    </li>
+  
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/ZoneAccessSecurity/ZoneDetails" data-name="placeos::driver::interface::zoneaccesssecurity::zonedetails">
+      <a href="../../../PlaceOS/Driver/Interface/ZoneAccessSecurity/ZoneDetails.html">ZoneDetails</a>
+      
+    </li>
+  
+</ul>
+
       
     </li>
   
@@ -727,7 +742,7 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f075b87602051e96c3e2d090521186cae1fd53e7/src/placeos-driver/interface/zone_access_security.cr#L2" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/536c521a2e80d51d68a36dcc41a7220c8763af00/src/placeos-driver/interface/zone_access_security.cr#L4" target="_blank">
         placeos-driver/interface/zone_access_security.cr
       </a>
     
@@ -762,6 +777,13 @@
       </li>
     
       <li class="entry-summary">
+        <a href="#card_holder_lookup%28id%3AString%7CInt64%29%3ACardHolderDetails-instance-method" class="signature"><strong>#card_holder_lookup</strong>(id : String | Int64) : CardHolderDetails</a>
+        
+          <div class="summary"><p>using an email address, lookup the security system id for a user</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
         <a href="#zone_access_add_member%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%2Cfrom_unix%3AInt64%7CNil%3Dnil%2Cuntil_unix%3AInt64%7CNil%3Dnil%29-instance-method" class="signature"><strong>#zone_access_add_member</strong>(zone_id : String | Int64, card_holder_id : String | Int64, from_unix : Int64 | Nil = <span class="n">nil</span>, until_unix : Int64 | Nil = <span class="n">nil</span>)</a>
         
           <div class="summary"><p>add a member to the zone</p></div>
@@ -772,6 +794,11 @@
         <a href="#zone_access_id_lookup%28name%3AString%2Cexact_match%3ABool%3Dtrue%29%3AString%7CInt64%7CNil-instance-method" class="signature"><strong>#zone_access_id_lookup</strong>(name : String, exact_match : Bool = <span class="n">true</span>) : String | Int64 | Nil</a>
         
           <div class="summary"><p>using a name, lookup the access zone id</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#zone_access_lookup%28id%3AString%7CInt64%29%3AZoneDetails-instance-method" class="signature"><strong>#zone_access_lookup</strong>(id : String | Int64) : ZoneDetails</a>
         
       </li>
     
@@ -829,7 +856,28 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f075b87602051e96c3e2d090521186cae1fd53e7/src/placeos-driver/interface/zone_access_security.cr#L4" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/536c521a2e80d51d68a36dcc41a7220c8763af00/src/placeos-driver/interface/zone_access_security.cr#L6" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="card_holder_lookup(id:String|Int64):CardHolderDetails-instance-method">
+      <div class="signature">
+        abstract 
+        def <strong>card_holder_lookup</strong>(id : String | Int64) : <a href="../../../PlaceOS/Driver/Interface/ZoneAccessSecurity/CardHolderDetails.html">CardHolderDetails</a>
+
+        <a class="method-permalink" href="#card_holder_lookup%28id%3AString%7CInt64%29%3ACardHolderDetails-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>using an email address, lookup the security system id for a user</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/536c521a2e80d51d68a36dcc41a7220c8763af00/src/placeos-driver/interface/zone_access_security.cr#L17" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -850,7 +898,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f075b87602051e96c3e2d090521186cae1fd53e7/src/placeos-driver/interface/zone_access_security.cr#L13" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/536c521a2e80d51d68a36dcc41a7220c8763af00/src/placeos-driver/interface/zone_access_security.cr#L36" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -871,7 +919,23 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f075b87602051e96c3e2d090521186cae1fd53e7/src/placeos-driver/interface/zone_access_security.cr#L7" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/536c521a2e80d51d68a36dcc41a7220c8763af00/src/placeos-driver/interface/zone_access_security.cr#L20" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="zone_access_lookup(id:String|Int64):ZoneDetails-instance-method">
+      <div class="signature">
+        abstract 
+        def <strong>zone_access_lookup</strong>(id : String | Int64) : <a href="../../../PlaceOS/Driver/Interface/ZoneAccessSecurity/ZoneDetails.html">ZoneDetails</a>
+
+        <a class="method-permalink" href="#zone_access_lookup%28id%3AString%7CInt64%29%3AZoneDetails-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/536c521a2e80d51d68a36dcc41a7220c8763af00/src/placeos-driver/interface/zone_access_security.cr#L30" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -892,7 +956,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f075b87602051e96c3e2d090521186cae1fd53e7/src/placeos-driver/interface/zone_access_security.cr#L10" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/536c521a2e80d51d68a36dcc41a7220c8763af00/src/placeos-driver/interface/zone_access_security.cr#L33" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -913,7 +977,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f075b87602051e96c3e2d090521186cae1fd53e7/src/placeos-driver/interface/zone_access_security.cr#L16" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/536c521a2e80d51d68a36dcc41a7220c8763af00/src/placeos-driver/interface/zone_access_security.cr#L39" target="_blank">View source</a>]
         
       </div>
     </div>
