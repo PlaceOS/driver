@@ -22,6 +22,10 @@ abstract class PlaceOS::Driver
       # is the current locker allocated
       property? allocated : Bool?
 
+      # an indicator that can be synced with PlaceOS bookings
+      # could be the locker system user id or a booking id
+      property allocation_id : String | Int64? = nil
+
       # when the locker is released if known / enabled in the locker system
       @[JSON::Field(converter: Time::EpochConverter, type: "integer", format: "Int64")]
       property expires_at : Time? = nil
