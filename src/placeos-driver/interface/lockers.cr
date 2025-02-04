@@ -10,7 +10,7 @@ abstract class PlaceOS::Driver
       include JSON::Serializable
 
       # identifier for location services
-      getter location : Symbol = :locker
+      getter location : String = "locker"
 
       # the locker system ids
       property bank_id : String | Int64
