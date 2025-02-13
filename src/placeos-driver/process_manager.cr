@@ -43,7 +43,7 @@ class PlaceOS::Driver::ProcessManager
     request
   rescue error
     # Driver was unable to be loaded.
-    Log.error(exception: error) { "starting driver #{DriverManager.driver_class} (#{request.id})" }
+    Log.error(exception: error) { "starting driver #{DriverManager.driver_class} (#{request.id})\nrequest payload: #{request.payload}" }
     loaded.delete(module_id)
     request.set_error(error)
   end
