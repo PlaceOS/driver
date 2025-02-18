@@ -30,7 +30,7 @@ class PlaceOS::Driver::Protocol::Management
 
   property on_redis : Proc(RedisAction, String, String, String?, Nil) = ->(_action : RedisAction, _hash_id : String, _key_name : String, _status_value : String?) {}
 
-  getter shutting_down : Channel(Nil) = Channel(Nil).new(1)
+  @running : Bool = false
   getter? terminated : Bool = false
   getter proc : Process? = nil
   getter pid : Int64 = -1
@@ -329,15 +329,27 @@ class PlaceOS::Driver::Protocol::Management
 
   # Create the host driver process, then load modules that have been assigned.
   private def start_process : Nil
-    return if @io || terminated?
-    io = nil
-    process = nil
+    # 15 seconds for driver to start executing
+    wait_driver_open = begin
+      request_lock.synchronize do
+        return if @running || terminated?
+        @running = true
+      end
 
+      Promise.new(UNIXSocket, 15.seconds)
+    rescue error
+      Log.error(exception: error) { {message: "driver pre-launch issue", driver_path: @driver_path} }
+      request_lock.synchronize { @running = false }
+      sleep 1.second
+      launch_driver_failed
+      return
+    end
+
+    # Prepare driver IO
+    unix_server = nil
     begin
-      # Prepare driver IO
       unix_socket = File.tempname("pos", ".driver")
       unix_server = UNIXServer.new(unix_socket)
-      wait_driver_open = Promise.new(UNIXSocket, 15.seconds)
 
       # no need to keep the server open once the process has checked in
       spawn do
@@ -346,24 +358,39 @@ class PlaceOS::Driver::Protocol::Management
           # We want to be manually flushing our writes
           client.sync = false
           wait_driver_open.resolve client
-          unix_server.close
         rescue error
           wait_driver_open.reject error
+        ensure
+          unix_server.close
         end
       end
 
       @launch_count += 1
       @launch_time = Time.utc.to_unix
+    rescue error
+      # launch driver failed, we should attempt to restart it here
+      Log.error(exception: error) { {message: "driver socket init issue", driver_path: @driver_path} }
+      request_lock.synchronize { @running = false }
+      unix_server.try(&.close) rescue nil
+      sleep 1.second
+      launch_driver_failed
+      return
+    end
 
-      fetch_proc = Promise.new(Process)
-      spawn(same_thread: true) { launch_driver(fetch_proc, unix_socket) }
-      @proc = process = fetch_proc.get
-      @pid = process.pid
+    io = begin
+      spawn(same_thread: true) { launch_driver(unix_socket) }
+      wait_driver_open.get
+    rescue error
+      Log.error(exception: error) { {message: "driver launch timeout", driver_path: @driver_path} }
+      request_lock.synchronize { @running = false }
+      sleep 1.second
+      launch_driver_failed
+      return
+    end
 
-      io = wait_driver_open.get
-
-      # Start processing the output of the driver
-      loaded = Promise.new(Nil)
+    begin
+      # Start processing the output of the driver (15 seconds for it to check-in)
+      loaded = Promise.new(Nil, 15.seconds)
       spawn(same_thread: true) { process_comms(io, loaded) }
       loaded.get
 
@@ -375,26 +402,27 @@ class PlaceOS::Driver::Protocol::Management
         io.flush
       end
 
-      # events can now write directly to the io, driver is running
       @io = io
     rescue error
-      Log.error(exception: error) { {message: "failed to launch driver", driver_path: @driver_path} }
+      Log.error(exception: error) { {message: "driver launch failed", driver_path: @driver_path} }
 
-      if io.nil?
-        if process
-          process.terminate graceful: false
-        end
-
-        # attempt to relaunch
-        sleep 5.seconds
-        return if @io || terminated?
-        spawn(same_thread: true) { relaunch("-1") }
+      # try to force close any running instances
+      request_lock.synchronize { @running = false }
+      io.close rescue nil
+      if process = @proc
+        process.terminate(graceful: false) rescue nil
       end
+
+      # attempt to relaunch
+      sleep 5.seconds
+      launch_driver_failed
     end
   end
 
   # launches the driver and manages the process
-  private def launch_driver(fetch_proc, unix_socket) : Nil
+  private def launch_driver(unix_socket) : Nil
+    request_lock.synchronize { return unless @running }
+
     Process.run(
       @driver_path,
       @on_edge ? {"-p", "-e", "-s", unix_socket} : {"-p", "-s", unix_socket},
@@ -402,34 +430,35 @@ class PlaceOS::Driver::Protocol::Management
       output: Process::Redirect::Inherit,
       error: Process::Redirect::Inherit
     ) do |process|
-      fetch_proc.resolve process
+      @proc = process
+      @pid = process.pid
     end
 
+    # this executes once the driver has exited
     status = $?
-    last_exit_code = status.exit_code.to_s
-
-    Log.warn { {message: "driver process exited with #{last_exit_code}", driver_path: @driver_path} } unless status.success?
-
-    if io = @io
-      @pid = -1_i64
-      @proc = nil
-      io.close rescue nil
-      @shutting_down.send nil
-      @events.send(Request.new(last_exit_code, :exited))
-    end
+    request_lock.synchronize { @running = false }
+    @last_exit_code = exit_code = status.exit_code
+    Log.info { {message: "driver process exited with #{exit_code}", driver_path: @driver_path} } unless status.success?
   rescue error
     Log.error(exception: error) { "error launching driver: #{@driver_path}" }
-    fetch_proc.reject error
+  ensure
+    sleep 1.second
+    launch_driver_failed
   end
 
-  private def relaunch(last_exit_code : String) : Nil
-    @io = nil
+  private def launch_driver_failed
+    running = request_lock.synchronize { @running }
+    return if terminated? || running
+
     @pid = -1_i64
     @proc = nil
-    return if terminated?
-    @last_exit_code = last_exit_code.to_i? || -1
+    @io.try(&.close) rescue nil
+    @io = nil
+    @events.send(Request.new(@last_exit_code.to_s, :exited)) unless terminated?
+  end
 
-    @shutting_down = Channel(Nil).new(1)
+  private def relaunch(_last_exit_code : String) : Nil
+    return if terminated?
     start_process unless modules.empty?
   end
 
