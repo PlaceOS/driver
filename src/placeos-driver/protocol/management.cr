@@ -439,13 +439,20 @@ class PlaceOS::Driver::Protocol::Management
     # this executes once the driver has exited
     status = $?
     request_lock.synchronize { @running = false }
+    @pid = -1_i64
+    @proc = nil
     @last_exit_code = exit_code = status.exit_code
+    File.delete(unix_socket) rescue nil
     Log.info { {message: "driver process exited with #{exit_code}", driver_path: @driver_path} } unless status.success?
   rescue error
     Log.error(exception: error) { "error launching driver: #{@driver_path}" }
   ensure
-    sleep 1.second
-    launch_driver_failed
+    @io.try(&.close) rescue nil
+    @io = nil
+    if !modules.empty?
+      sleep 200.milliseconds
+      launch_driver_failed
+    end
   end
 
   private def launch_driver_failed
