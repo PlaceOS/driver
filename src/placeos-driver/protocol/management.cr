@@ -511,7 +511,7 @@ class PlaceOS::Driver::Protocol::Management
     end
   rescue error : IO::Error
     # Input stream closed. This should only occur on termination
-    Log.debug(exception: error) { "comms closed for #{@driver_path}" } unless terminated?
+    Log.warn(exception: error) { "comms closed for #{@driver_path}" } unless terminated?
     loaded.reject error
   ensure
     # Reject any pending request
