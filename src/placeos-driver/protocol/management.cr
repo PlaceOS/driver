@@ -178,6 +178,7 @@ class PlaceOS::Driver::Protocol::Management
 
   # ameba:disable Metrics/CyclomaticComplexity
   private def process_events
+    # by performing most processing on this fiber we avoid the need for locking
     until terminated?
       begin
         case (request = @events.receive).cmd
@@ -449,10 +450,8 @@ class PlaceOS::Driver::Protocol::Management
   ensure
     @io.try(&.close) rescue nil
     @io = nil
-    if !modules.empty?
-      sleep 200.milliseconds
-      launch_driver_failed
-    end
+    sleep 200.milliseconds
+    launch_driver_failed
   end
 
   private def launch_driver_failed
