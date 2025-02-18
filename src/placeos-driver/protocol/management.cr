@@ -283,7 +283,7 @@ class PlaceOS::Driver::Protocol::Management
 
   private def ensure_shutdown(channel)
     if process = proc
-      process.wait
+      process.wait rescue nil
     end
     channel.send(nil)
   end
