@@ -20,15 +20,16 @@ jobs:
         stable: [true]
         crystal:
           - latest
+          - 1.14.1
         include:
           - stable: false
             crystal: nightly
     # Service containers to run with `container-job`
     services:
       sshtest:
-        image: tutum/ubuntu:trusty
+        image: testcontainers/sshd:1.2.0
         env:
-          ROOT_PASS: somepassword
+          PASSWORD: somepassword
       # Label used to access the service container
       redis:
         # Docker Hub image
