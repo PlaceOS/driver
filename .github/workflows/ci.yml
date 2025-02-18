@@ -20,7 +20,7 @@ jobs:
         stable: [true]
         crystal:
           - latest
-          - 1.4.1
+          - 1.14.1
         include:
           - stable: false
             crystal: nightly
