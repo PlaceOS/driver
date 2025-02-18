@@ -260,29 +260,31 @@ class PlaceOS::Driver::Protocol::Management
     return unless io = @io
 
     modules.clear
-
-    channel = shutting_down
-    spawn(same_thread: true) { ensure_shutdown(channel) }
+    exited = Channel(Nil).new
+    spawn(same_thread: true) { ensure_shutdown(exited) }
 
     # The driver will shutdown the modules gracefully
     json = %({"id":"t","cmd":"terminate"})
     io.write_bytes json.bytesize
     io.write json.to_slice
     io.flush
+
+    select
+    when exited.receive
+    when timeout 10.seconds
+      raise "timeout on shutdown"
+    end
   rescue
     process = proc
     return unless process
-    process.terminate graceful: false
+    process.terminate(graceful: false) rescue nil
   end
 
   private def ensure_shutdown(channel)
-    select
-    when channel.receive
-    when timeout 10.seconds
-      if (process = proc) && channel == @shutting_down
-        process.terminate graceful: false
-      end
+    if process = proc
+      process.wait
     end
+    channel.send(nil)
   end
 
   private def exec(module_id : String, payload : String, seq : UInt64, user_id : String?) : Nil
