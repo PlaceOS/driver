@@ -133,7 +133,8 @@ class PlaceOS::Driver::Task
     end
 
     @channel.close
-    @complete.send true
+    # the channel might be closed in a response where the tokenizer splits the response
+    @complete.send(true) rescue nil
     @complete.close
     self
   end
