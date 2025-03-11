@@ -121,6 +121,7 @@ class PlaceOS::Driver::Task
   #
   # The result should support conversion to JSON otherwise the remote will only receive `nil`
   def success(result = nil, @code = 200)
+    return self unless @state.unknown?
     @state = :success
     @wait = false
 
@@ -168,9 +169,11 @@ class PlaceOS::Driver::Task
 
   # call when the task has failed and we don't want to retry
   def abort(reason = nil, @code = 500)
+    return self unless @state.unknown?
+    @state = :abort
+
     stop_timers
     @wait = false
-    @state = :abort
     @payload = reason.to_s if reason
     @channel.close
     @complete.send true
