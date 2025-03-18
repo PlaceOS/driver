@@ -1,5 +1,4 @@
 require "ipaddress"
-require "promise"
 
 # :nodoc:
 class PlaceOS::Driver::DriverManager
@@ -10,9 +9,6 @@ class PlaceOS::Driver::DriverManager
     @schedule = PlaceOS::Driver::Proxy::Scheduler.new(@logger)
     @subscriptions = edge_driver ? nil : Proxy::Subscriptions.new(subscriptions || Subscriptions.new(module_id: @module_id), @logger)
     @calibrate_connected = false
-
-    # Ensures execution all occurs on a single thread
-    @requests = ::Channel(Tuple(::Channel(Nil), Protocol::Request)).new(1)
 
     @transport = case @model.role
                  in .ssh?
@@ -77,7 +73,7 @@ class PlaceOS::Driver::DriverManager
     define_new_driver
   end
 
-  getter logger, module_id, settings, queue, requests
+  getter logger, module_id, settings, queue
 
   def start
     driver = @driver
@@ -120,16 +116,12 @@ class PlaceOS::Driver::DriverManager
     else
       spawn(same_thread: true) { @transport.connect }
     end
-
-    # Ensures all requests are running on this thread
-    spawn(same_thread: true) { process_requests! }
   end
 
   def terminate : Nil
     @transport.terminate
     driver = @driver
 
-    @requests.close
     @queue.terminate
     @schedule.terminate
     @subscriptions.try &.terminate
@@ -171,16 +163,7 @@ class PlaceOS::Driver::DriverManager
     executor.execute(@driver)
   end
 
-  private def process_requests!
-    loop do
-      req_data = @requests.receive?
-      break unless req_data
-      channel, request = req_data
-      spawn_request_fiber(channel, request)
-    end
-  end
-
-  private def spawn_request_fiber(channel, request)
+  protected def spawn_request_fiber(channel, request)
     spawn(same_thread: true, name: request.user_id) do
       Log.context.set user_id: (request.user_id || "internal"), request_id: request.id
       process request
@@ -196,18 +179,14 @@ class PlaceOS::Driver::DriverManager
       ret_val.map(&.message).to_json
     when ::Log::Entry
       ret_val.message.to_json
-    when Task
+    when ::PlaceOS::Driver::Task
       ret_val
     when Enum
       ret_val.to_s.to_json
     when JSON::Serializable
       ret_val.to_json
     else
-      ret_val = if ret_val.is_a?(::Future::Compute) || ret_val.is_a?(::Promise) || ret_val.is_a?(::PlaceOS::Driver::Task)
-                  ret_val.responds_to?(:get) ? ret_val.get : ret_val
-                else
-                  ret_val
-                end
+      ret_val = ret_val.responds_to?(:get) ? ret_val.get : ret_val
 
       begin
         ret_val.try_to_json("null")
@@ -292,15 +271,13 @@ class PlaceOS::Driver::DriverManager
     end
 
     # we want to run these callbacks even if redis was offline
-    begin
-      if state
-        driver.connected if driver.responds_to?(:connected)
-      else
-        driver.disconnected if driver.responds_to?(:disconnected)
-      end
-    rescue error
-      logger.warn(exception: error) { "error changing connected state #{driver.class} (#{@module_id})" }
+    if state
+      driver.connected if driver.responds_to?(:connected)
+    else
+      driver.disconnected if driver.responds_to?(:disconnected)
     end
+  rescue error
+    logger.warn(exception: error) { "error changing connected state #{@driver.class} (#{@module_id})" }
   end
 
   private def websocket_headers : HTTP::Headers

@@ -36,7 +36,8 @@ class PlaceOS::Driver::Queue
   def online=(state : Bool)
     state_changed = state != @online
     @online = state
-    spawn(same_thread: true) { @connected_callback.call(state) } if state_changed
+    @connected_callback.call(state) if state_changed
+
     if @online && @waiting && @queue.size > 0
       @waiting = false
       @channel.send(nil)
