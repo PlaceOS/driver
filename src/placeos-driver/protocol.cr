@@ -20,12 +20,6 @@ STDOUT.sync = true
 class PlaceOS::Driver::Protocol
   Log = ::Log.for(self)
 
-  getter callbacks : Hash(Request::Command, Array(Request -> Request?)) do
-    Hash(Request::Command, Array(Request -> Request?)).new(Request::Command.values.size) do |h, k|
-      h[k] = [] of Request -> Request?
-    end
-  end
-
   private getter tracking : Hash(UInt64, Channel(Request))
 
   # Send outgoing data
@@ -39,6 +33,8 @@ class PlaceOS::Driver::Protocol
   private getter current_requests : Hash(UInt64, Request)
   private getter next_requests : Hash(UInt64, Request)
 
+  getter process_manager : PlaceOS::Driver::ProcessManagerInterface
+
   # NOTE:: potentially move to using https://github.com/jeromegn/protobuf.cr
   # 10_000 decodes
   # Proto decoding   0.020000   0.040000   0.060000 (  0.020322)
@@ -46,7 +42,12 @@ class PlaceOS::Driver::Protocol
   # Should be a simple change.
   # Another option would be: https://github.com/Papierkorb/cannon
   # which should be even more efficient
-  def initialize(input = STDIN, output = STDERR, timeout = 2.minutes)
+  def initialize(input = STDIN, output = STDERR, timeout = 2.minutes, logger_io = ::PlaceOS::Driver.logger_io, edge_driver : Bool = false, process_manager : PlaceOS::Driver::ProcessManagerInterface? = nil)
+    @process_manager = process_manager || PlaceOS::Driver::ProcessManager.new(
+      logger_io: logger_io,
+      input: input,
+      edge_driver: edge_driver
+    )
     output.sync = false if output.responds_to?(:sync)
     @io = IO::Stapled.new(input, output, true)
     @tokenizer = ::Tokenizer.new do |io|
@@ -84,8 +85,8 @@ class PlaceOS::Driver::Protocol
   end
 
   # For process manager
-  def self.new_instance(input = STDIN, output = STDERR) : PlaceOS::Driver::Protocol
-    @@instance = ::PlaceOS::Driver::Protocol.new(input, output)
+  def self.new_instance(input = STDIN, output = STDERR, timeout = 2.minutes, logger_io = ::PlaceOS::Driver.logger_io, edge_driver : Bool = false, process_manager : PlaceOS::Driver::ProcessManagerInterface? = nil) : PlaceOS::Driver::Protocol
+    @@instance = ::PlaceOS::Driver::Protocol.new(input, output, timeout, logger_io, edge_driver, process_manager)
   end
 
   def self.new_instance(instance : PlaceOS::Driver::Protocol) : PlaceOS::Driver::Protocol
@@ -94,10 +95,6 @@ class PlaceOS::Driver::Protocol
 
   # For other classes
   class_getter! instance : PlaceOS::Driver::Protocol?
-
-  def register(type : Request::Command, &block : Request -> Request?)
-    callbacks[type] << block
-  end
 
   private def process!
     while message = @processor.receive?
@@ -127,18 +124,34 @@ class PlaceOS::Driver::Protocol
       return
     end
 
-    if watching = callbacks[message.cmd]?
-      spawn(same_thread: true) { call_watchers(watching, message) }
-    end
+    spawn(same_thread: true) { dispatch_request(message) }
   end
 
-  protected def call_watchers(watching, message)
-    watching.each do |callback|
-      if response = callback.call(message)
-        Log.debug { "protocol queuing response: #{response.inspect}" }
-        @producer.send({response, nil})
-        break
-      end
+  protected def dispatch_request(message)
+    response = case message.cmd
+               in .exec?
+                 @process_manager.exec(message)
+               in .info?
+                 @process_manager.info(message)
+               in .update?
+                 @process_manager.update(message)
+               in .start?
+                 @process_manager.start(message)
+               in .stop?
+                 @process_manager.stop(message)
+               in .terminate?
+                 @process_manager.terminate
+               in .debug?
+                 @process_manager.debug(message)
+               in .ignore?
+                 @process_manager.ignore(message)
+               in .sys?, .setting?, .hset?, .set?, .clear?, .publish?, .result?, .exited?
+                 # these are not expected
+               end
+
+    if response
+      Log.debug { "protocol queuing response: #{response.inspect}" }
+      @producer.send({response, nil})
     end
   rescue error
     message.payload = nil

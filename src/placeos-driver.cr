@@ -629,19 +629,19 @@ macro finished
   if PlaceOS::Startup.exec_process_manager
     if socket = PlaceOS::Startup.socket
       sock = UNIXSocket.new(socket)
-      process = PlaceOS::Driver::ProcessManager.new(input: sock, output: sock, edge_driver: PlaceOS::Startup.is_edge_driver)
+      protocol = PlaceOS::Driver::Protocol.new_instance(input: sock, output: sock, edge_driver: PlaceOS::Startup.is_edge_driver)
     else
-      process = PlaceOS::Driver::ProcessManager.new(edge_driver: PlaceOS::Startup.is_edge_driver)
+      protocol = PlaceOS::Driver::Protocol.new_instance(edge_driver: PlaceOS::Startup.is_edge_driver)
     end
 
     # Detect ctr-c to shutdown gracefully
     Signal::INT.trap do |signal|
       puts " > terminating gracefully"
-      spawn(same_thread: true) { process.terminate }
+      spawn(same_thread: true) { protocol.process_manager.terminate }
       signal.ignore
     end
 
-    process.terminated.receive?
+    protocol.process_manager.as(PlaceOS::Driver::ProcessManager).terminated.receive?
   end
 
   # If we are launching for the purposes of printing messages then we want to

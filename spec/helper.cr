@@ -8,12 +8,53 @@ Spec.before_suite do
   ::Log.setup "*", :debug
 end
 
+class PlaceOS::Driver::ProcessManagerMock
+  include PlaceOS::Driver::ProcessManagerInterface
+
+  alias Request = PlaceOS::Driver::Protocol::Request
+
+  class_getter callbacks : Hash(String, Proc(Request, Request?)) = {} of String => Request -> Request?
+
+  def self.register(name : String, &callback : Request -> Request?)
+    ProcessManagerMock.callbacks[name] = callback
+  end
+
+  def start(request : Protocol::Request, driver_model = nil) : Protocol::Request
+    ProcessManagerMock.callbacks["start"]?.try(&.call(request))
+    request
+  end
+
+  def stop(request : Protocol::Request) : Nil
+  end
+
+  def update(request : Protocol::Request) : Nil
+  end
+
+  def exec(request : Protocol::Request) : Protocol::Request
+    request
+  end
+
+  def debug(request : Protocol::Request) : Nil
+  end
+
+  def ignore(request : Protocol::Request) : Nil
+  end
+
+  def info(request : Protocol::Request) : Protocol::Request
+    request
+  end
+
+  def terminate : Nil
+  end
+end
+
 class Helper
   # Creates the input / output IO required to test protocol functions
   def self.protocol
+    manager = PlaceOS::Driver::ProcessManagerMock.new
     input = IO::Stapled.new(*IO.pipe, true)
     output = IO::Stapled.new(*IO.pipe, true)
-    proto = PlaceOS::Driver::Protocol.new(input, output, 10.milliseconds)
+    proto = PlaceOS::Driver::Protocol.new(input, output, 10.milliseconds, process_manager: manager)
     output.read_string(1)
     {proto, input, output}
   end
@@ -22,7 +63,8 @@ class Helper
     input = IO::Stapled.new(*IO.pipe, true)
     output = IO::Stapled.new(*IO.pipe, true)
     logs = IO::Stapled.new(*IO.pipe, true)
-    process = PlaceOS::Driver::ProcessManager.new(logs, input, output)
+    protocol = PlaceOS::Driver::Protocol.new(input, output, logger_io: logs)
+    process = protocol.process_manager.as(PlaceOS::Driver::ProcessManager)
     process.loaded.size.should eq 0
 
     # Wait for ready signal

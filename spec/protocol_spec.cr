@@ -5,7 +5,7 @@ describe PlaceOS::Driver::Protocol do
     proto, input, _ = Helper.protocol
 
     id = nil
-    proto.register :start do |request|
+    PlaceOS::Driver::ProcessManagerMock.register "start" do |request|
       id = request.id
       input.close
       nil
@@ -36,7 +36,7 @@ describe PlaceOS::Driver::Protocol do
     proto, input, _ = Helper.protocol
 
     results = [] of String
-    proto.register :start do |request|
+    PlaceOS::Driver::ProcessManagerMock.register "start" do |request|
       results << request.id.not_nil!
       nil
     end
