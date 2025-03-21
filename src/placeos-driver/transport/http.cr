@@ -125,10 +125,10 @@ class PlaceOS::Driver
       @http_client_mutex = Mutex.new
       @params_base = @uri_base.query_params
 
-      keep_alive = @settings.get { setting?(UInt32, :http_keep_alive_seconds) } || 5
+      keep_alive = @settings.get { setting?(UInt32, :http_keep_alive_seconds) } || 20
       @keep_alive = keep_alive.seconds
 
-      max_requests = @settings.get { setting?(Int32, :http_max_requests) } || 20
+      max_requests = @settings.get { setting?(Int32, :http_max_requests) } || 1000
       @max_requests = max_requests
       @client_idle = Time.monotonic
       @client_requests = 0
