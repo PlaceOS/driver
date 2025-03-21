@@ -1,6 +1,8 @@
 require "json"
-require "crunits"
 require "s2_cells"
+
+# only require if unit conversions are required as it uses a lot of memory
+# require "crunits"
 
 abstract class PlaceOS::Driver
   # a device or service that provides sensor data, either singular or for multiple devices
@@ -163,16 +165,22 @@ abstract class PlaceOS::Driver
         Time.unix(last_seen)
       end
 
-      def convert_measurement_to(other_unit : String)
-        this_unit = self.unit
-        return self.value unless this_unit
-
-        Units::Measurement.new(self.value, this_unit).convert_to(other_unit).to_f
-      end
-
       def modified_type : String
         return "#{@modifier} #{@type}" if @modifier.presence
         @type.to_s
+      end
+    end
+
+    macro include_unit_conversions
+      require "crunits"
+
+      class ::PlaceOS::Driver::Interface::Sensor::Detail
+        def convert_measurement_to(other_unit : String)
+          this_unit = self.unit
+          return self.value unless this_unit
+  
+          Units::Measurement.new(self.value, this_unit).convert_to(other_unit).to_f
+        end
       end
     end
   end
