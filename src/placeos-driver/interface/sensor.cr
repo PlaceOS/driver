@@ -178,7 +178,7 @@ abstract class PlaceOS::Driver
         def convert_measurement_to(other_unit : String)
           this_unit = self.unit
           return self.value unless this_unit
-  
+
           Units::Measurement.new(self.value, this_unit).convert_to(other_unit).to_f
         end
       end
