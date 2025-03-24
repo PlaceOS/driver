@@ -84,6 +84,14 @@ class PlaceOS::Driver::TransportUDP < PlaceOS::Driver::Transport
     raise error
   end
 
+  {% if compare_versions(LibSSL::OPENSSL_VERSION, "1.0.2") >= 0 %}
+    class_getter default_tls : OpenSSL::SSL::Context::Client do
+      ctx = DTLS::Context::Client.new(LibSSL.dtls_method)
+      ctx.verify_mode = OpenSSL::SSL::VerifyMode::NONE
+      ctx
+    end
+  {% end %}
+
   def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = @tls) : Nil
     {% if compare_versions(LibSSL::OPENSSL_VERSION, "1.0.2") >= 0 %}
       @mutex.synchronize do
@@ -95,7 +103,7 @@ class PlaceOS::Driver::TransportUDP < PlaceOS::Driver::Transport
         socket.sync = true
 
         # we can re-use the context
-        tls = context || DTLS::Context::Client.new(LibSSL.dtls_method)
+        tls = context || self.class.default_tls
         tls.verify_mode = verify_mode
         @tls = tls
 

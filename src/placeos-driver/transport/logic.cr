@@ -4,9 +4,6 @@ class PlaceOS::Driver::TransportLogic < PlaceOS::Driver::Transport
   def initialize(@queue : PlaceOS::Driver::Queue)
   end
 
-  def start_tls(verify_mode, context) : Nil
-  end
-
   def terminate : Nil
   end
 

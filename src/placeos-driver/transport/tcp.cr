@@ -79,7 +79,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
       socket.sync = true
 
       # we can re-use the context
-      tls = context || OpenSSL::SSL::Context::Client.new
+      tls = context || self.class.default_tls
       tls.verify_mode = verify_mode
       @tls = tls
 

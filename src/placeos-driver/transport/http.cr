@@ -133,8 +133,8 @@ class PlaceOS::Driver
       @client_idle = Time.monotonic
       @client_requests = 0
 
-      context = __is_https? ? new_tls_context : nil
-      @client = new_http_client(@uri_base, context)
+      @tls = __is_https? ? new_tls_context : nil
+      @client = new_http_client(@uri_base, @tls)
     end
 
     @params_base : URI::Params
@@ -143,6 +143,7 @@ class PlaceOS::Driver
     @keep_alive : Time::Span
     @max_requests : Int32
     @ip : String
+    @tls : OpenSSL::SSL::Context::Client?
 
     property :received
 
@@ -156,30 +157,18 @@ class PlaceOS::Driver
       @queue.online = true
     end
 
-    def start_tls(verify_mode : OpenSSL::SSL::VerifyMode, context : OpenSSL::SSL::Context = new_tls_context) : Nil
-      context.verify_mode = verify_mode
-
-      # Re-create the client with the new TLS configuration
-      @http_client_mutex.synchronize do
-        @client = new_http_client(@uri_base, context)
-        @client_requests = 0
-      end
-    end
-
     protected def __is_https?
       (@uri_base.scheme || "http").ends_with?('s')
     end
 
     protected def __new_http_client
-      context = __is_https? ? new_tls_context : nil
-
       begin
         @client.try &.close
       rescue
       end
 
       # NOTE:: modify in initializer if editing here
-      @client = new_http_client(@uri_base, context)
+      @client = new_http_client(@uri_base, @tls)
       @client_requests = 0
       @client
     end
@@ -257,13 +246,8 @@ class PlaceOS::Driver
 
       # Make the request
       response = if concurrent || @max_requests.zero?
-                   # Does this request require a TLS context?
-                   context = __is_https? ? new_tls_context : nil
-                   client = new_http_client(uri, context)
-                   client.exec(method.to_s.upcase, uri.request_target, headers, body).tap do
-                     client.close
-                     context = nil
-                   end
+                   client = new_http_client(uri, @tls)
+                   client.exec(method.to_s.upcase, uri.request_target, headers, body).tap { client.close }
                  else
                    # Only a single request can occur at a time
                    # crystal does not provide any queuing mechanism so this mutex does the trick

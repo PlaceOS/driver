@@ -334,8 +334,5 @@ class PlaceOS::Driver
         messages.try &.close
       end
     end
-
-    def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = nil) : Nil
-    end
   end
 end

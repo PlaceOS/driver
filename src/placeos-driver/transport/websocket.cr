@@ -104,15 +104,6 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     logger.info(exception: error) { "calling disconnect" }
   end
 
-  def start_tls(verify_mode = OpenSSL::SSL::VerifyMode::NONE, context = @tls) : Nil
-    tls = context || OpenSSL::SSL::Context::Client.new
-    tls.verify_mode = verify_mode
-    @tls = tls
-
-    # Forces use of this TLS
-    disconnect
-  end
-
   def send(message) : PlaceOS::Driver::TransportWebsocket
     websocket = @websocket
     return self if websocket.nil? || websocket.closed?

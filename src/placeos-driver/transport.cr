@@ -6,7 +6,6 @@ abstract class PlaceOS::Driver::Transport
   abstract def send(message, task : PlaceOS::Driver::Task, &_block : (Bytes, PlaceOS::Driver::Task) -> Nil) : PlaceOS::Driver::Transport
   abstract def terminate : Nil
   abstract def disconnect : Nil
-  abstract def start_tls(verify_mode : OpenSSL::SSL::VerifyMode, context : OpenSSL::SSL::Context) : Nil
   abstract def connect(connect_timeout : Int32) : Nil
 
   property tokenizer : ::Tokenizer? = nil
@@ -33,6 +32,15 @@ abstract class PlaceOS::Driver::Transport
   # Use `logger` of `Driver::Queue`
   delegate logger, to: @queue
 
+  class_getter tls_context_mutex : Mutex = Mutex.new
+  class_getter insecure_tls : OpenSSL::SSL::Context::Client? = nil
+  class_getter secure_tls : OpenSSL::SSL::Context::Client? = nil
+  class_getter default_tls : OpenSSL::SSL::Context::Client do
+    ctx = OpenSSL::SSL::Context::Client.new
+    ctx.verify_mode = OpenSSL::SSL::VerifyMode::NONE
+    ctx
+  end
+
   macro __build_http_helper__
     {% if @type.name.id.stringify != "PlaceOS::Driver::TransportHTTP" %}
       def http(method, path, body : ::HTTP::Client::BodyType = nil,
@@ -54,7 +62,7 @@ abstract class PlaceOS::Driver::Transport
             context = case uri.scheme
                       when "https", "wss"
                         uri.scheme = "https"
-                        OpenSSL::SSL::Context::Client.new.tap &.verify_mode = OpenSSL::SSL::VerifyMode::NONE
+                        self.class.default_tls
                       when "ws"
                         uri.scheme = "http"
                         nil
@@ -68,7 +76,7 @@ abstract class PlaceOS::Driver::Transport
                         if secure.is_a?(OpenSSL::SSL::Context::Client)
                           secure
                         else
-                          OpenSSL::SSL::Context::Client.new.tap &.verify_mode = OpenSSL::SSL::VerifyMode::NONE
+                          self.class.default_tls
                         end
                       else
                         uri = URI.parse "http://#{@ip}"
@@ -185,7 +193,16 @@ abstract class PlaceOS::Driver::Transport
 
   protected def new_tls_context(verify_mode : OpenSSL::SSL::VerifyMode? = nil) : OpenSSL::SSL::Context::Client
     use_insecure_cipher = @settings.get { setting?(Bool, :https_insecure) }
-    tls = use_insecure_cipher ? OpenSSL::SSL::Context::Client.insecure : OpenSSL::SSL::Context::Client.new
+    tls = uninitialized OpenSSL::SSL::Context::Client
+
+    self.class.tls_context_mutex.synchronize do
+      tls = if use_insecure_cipher
+              @@insecure_tls = @@insecure_tls || OpenSSL::SSL::Context::Client.insecure
+            else
+              @@secure_tls = @@secure_tls || OpenSSL::SSL::Context::Client.new
+            end
+    end
+
     if verify_mode
       tls.verify_mode = verify_mode
     else
