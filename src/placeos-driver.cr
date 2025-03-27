@@ -400,7 +400,7 @@ abstract class PlaceOS::Driver
     end
 
     # :nodoc:
-    class KlassExecutor
+    struct KlassExecutor
       # A class that handles executing every public method defined
       # NOTE:: currently doesn't handle multiple methods signatures (except block
       # and no block). Technically we could add the support however the JSON

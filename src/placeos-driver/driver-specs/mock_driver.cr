@@ -13,7 +13,7 @@ abstract class DriverSpecs::MockDriver
   Log = ::Log.for("mock")
 
   # :nodoc:
-  abstract class BaseExecutor
+  abstract struct BaseExecutor
     def initialize(json : String)
       @lookup = Hash(String, JSON::Any).from_json(json)
       @exec = @lookup["__exec__"].as_s
@@ -148,7 +148,7 @@ abstract class DriverSpecs::MockDriver
     end
 
     # :nodoc:
-    class KlassExecutor < BaseExecutor
+    struct KlassExecutor < BaseExecutor
       EXECUTORS = {
         {% for method in methods %}
           {% index = 0 %}
