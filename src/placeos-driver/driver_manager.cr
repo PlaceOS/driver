@@ -148,7 +148,7 @@ class PlaceOS::Driver::DriverManager
   end
 
   # update the modules view of the world
-  def update(driver_model)
+  def update(driver_model) : Nil
     @settings.json = driver_model.settings
     driver = @driver
     driver.config = driver_model
