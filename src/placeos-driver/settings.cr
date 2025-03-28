@@ -1,5 +1,5 @@
 # :nodoc:
-struct PlaceOS::Driver::Settings
+class PlaceOS::Driver::Settings
   # :nodoc:
   # key => {class, required}
   SETTINGS_REQ = {} of Nil => Nil
