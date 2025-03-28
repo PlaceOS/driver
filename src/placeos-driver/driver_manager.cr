@@ -163,41 +163,43 @@ class PlaceOS::Driver::DriverManager
     executor.execute(@driver)
   end
 
-  protected def spawn_request_fiber(channel, request)
+  protected def spawn_request_fiber(channel, request) : Nil
     spawn(same_thread: true, name: request.user_id) do
       Log.context.set user_id: (request.user_id || "internal"), request_id: request.id
-      process request
-      channel.send(nil)
+      response = process(request)
+      channel.send(response)
     end
   rescue error
     Log.error(exception: error) { "error spawning request fiber" }
   end
 
-  def self.process_result(klass, method_name, ret_val)
+  def self.process_result(klass, method_name, ret_val) : String | Task
+    return ret_val if ret_val.is_a?(::PlaceOS::Driver::Task)
+
+    # handle futures and promises
+    ret_val = ret_val.responds_to?(:get) ? ret_val.get : ret_val
+
+    # convert response to JSON
     case ret_val
     when Array(::Log::Entry)
       ret_val.map(&.message).to_json
     when ::Log::Entry
       ret_val.message.to_json
-    when ::PlaceOS::Driver::Task
-      ret_val
     when Enum
       ret_val.to_s.to_json
-    when JSON::Serializable
+    when JSON::Serializable, Bool
       ret_val.to_json
     else
-      ret_val = ret_val.responds_to?(:get) ? ret_val.get : ret_val
-
       begin
         ret_val.try_to_json("null")
       rescue error
-        klass.logger.info(exception: error) { "unable to convert result to json executing #{method_name} on #{klass.class}\n#{ret_val.inspect}" }
+        klass.logger.debug(exception: error) { "unable to convert result to json executing #{method_name} on #{klass.class}\n#{ret_val.inspect}" }
         "null"
       end
     end
   end
 
-  protected def process_execute_result(request, result)
+  protected def process_execute_result(request, result) : Protocol::Request
     case result
     when Task
       # get returns self so outcome is of type Task
@@ -222,10 +224,11 @@ class PlaceOS::Driver::DriverManager
       request.code ||= 200
       request.payload = result
     end
+    request
   end
 
   macro define_run_execute
-    private def run_execute(request)
+    private def run_execute(request) : Protocol::Request
       {% if !::PlaceOS::Driver::RESCUE_FROM.empty? %}
         begin
       {% end %}
@@ -243,7 +246,7 @@ class PlaceOS::Driver::DriverManager
     end
   end
 
-  private def process(request)
+  private def process(request) : Protocol::Request?
     case request.cmd
     when .exec?   then run_execute(request)
     when .update? then update(request.driver_model.not_nil!)

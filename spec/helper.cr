@@ -63,7 +63,7 @@ class Helper
     input = IO::Stapled.new(*IO.pipe, true)
     output = IO::Stapled.new(*IO.pipe, true)
     logs = IO::Stapled.new(*IO.pipe, true)
-    protocol = PlaceOS::Driver::Protocol.new(input, output, logger_io: logs)
+    protocol = PlaceOS::Driver::Protocol.new_instance(input, output, logger_io: logs)
     process = protocol.process_manager.as(PlaceOS::Driver::ProcessManager)
     process.loaded.size.should eq 0
 

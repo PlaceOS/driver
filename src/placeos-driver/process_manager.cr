@@ -56,7 +56,7 @@ class PlaceOS::Driver::ProcessManager
   def stop(request : Protocol::Request) : Nil
     driver = loaded.delete request.id
     if driver
-      channel = Channel(Nil).new.tap { |chan| driver.spawn_request_fiber(chan, request) }
+      channel = Channel(Protocol::Request?).new.tap { |chan| driver.spawn_request_fiber(chan, request) }
       channel.receive
       channel.close
     end
@@ -80,7 +80,7 @@ class PlaceOS::Driver::ProcessManager
     else
       # No change required
       request.driver_model = updated
-      channel = Channel(Nil).new.tap { |chan| driver.spawn_request_fiber(chan, request) }
+      channel = Channel(Protocol::Request?).new.tap { |chan| driver.spawn_request_fiber(chan, request) }
       channel.receive
       channel.close
     end
@@ -90,11 +90,11 @@ class PlaceOS::Driver::ProcessManager
     driver = loaded[request.id]?
     raise "driver not available" unless driver
 
-    channel = Channel(Nil).new.tap { |chan| driver.spawn_request_fiber(chan, request) }
-    channel.receive
+    channel = Channel(Protocol::Request?).new.tap { |chan| driver.spawn_request_fiber(chan, request) }
+    response = channel.receive || request
     channel.close
-    request.cmd = :result
-    request
+    response.cmd = :result
+    response
   rescue error
     Log.error(exception: error) { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})" }
     request.set_error(error)
@@ -123,7 +123,7 @@ class PlaceOS::Driver::ProcessManager
     # Shutdown all the connections gracefully
     request = Protocol::Request.new("", :stop)
     loaded.map { |_key, driver|
-      Channel(Nil).new.tap { |chan| driver.spawn_request_fiber(chan, request) }
+      Channel(Protocol::Request?).new.tap { |chan| driver.spawn_request_fiber(chan, request) }
     }.each do |channel|
       channel.receive
       channel.close
