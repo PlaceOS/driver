@@ -157,10 +157,6 @@ struct PlaceOS::Driver::DriverModel
   property settings : Hash(String, JSON::Any)
   property notes : String?
 
-  {% if compare_versions(Crystal::VERSION, "1.0.0") >= 0 %}
-    @[JSON::Field(converter: Enum::ValueConverter(PlaceOS::Driver::DriverModel::Role))]
-    property role : Role
-  {% else %}
-    property role : Role
-  {% end %}
+  @[JSON::Field(converter: Enum::ValueConverter(PlaceOS::Driver::DriverModel::Role))]
+  property role : Role
 end

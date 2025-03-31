@@ -58,15 +58,4 @@ abstract class PlaceOS::Driver::Storage
   delegate each, to: to_h
 end
 
-# Fix for a Hash dup issues on crystal 0.36.0
-{% if compare_versions(Crystal::VERSION, "0.36.0") == 0 %}
-  class Hash(K, V)
-    def dup
-      hash = Hash(K, V).new
-      hash.initialize_dup(self)
-      hash
-    end
-  end
-{% end %}
-
 require "./storage/redis-storage"

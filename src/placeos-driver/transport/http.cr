@@ -162,10 +162,7 @@ class PlaceOS::Driver
     end
 
     protected def __new_http_client
-      begin
-        @client.try &.close
-      rescue
-      end
+      @client.try(&.close) rescue nil
 
       # NOTE:: modify in initializer if editing here
       @client = new_http_client(@uri_base, @tls)

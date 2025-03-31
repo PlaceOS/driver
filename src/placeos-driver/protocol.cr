@@ -246,11 +246,7 @@ class PlaceOS::Driver::Protocol
     io = @io
 
     # provide a ready signal
-    {% if compare_versions(Crystal::VERSION, "1.1.1") <= 0 %}
-      io.write_utf8("r".to_slice)
-    {% else %}
-      io.write_string("r".to_slice)
-    {% end %}
+    io.write_string("r".to_slice)
     io.flush
 
     until io.closed? || (bytes_read = io.read(raw_data)).nil? || bytes_read.zero?

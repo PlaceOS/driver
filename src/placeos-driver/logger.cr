@@ -35,14 +35,9 @@ class PlaceOS::Driver
   class ProtocolBackend < ::Log::Backend
     getter protocol : Protocol
 
-    {% if compare_versions(Crystal::VERSION, "0.36.0") < 0 %}
-      def initialize(@protocol = Protocol.instance)
-      end
-    {% else %}
-      def initialize(@protocol = Protocol.instance)
-        @dispatcher = ::Log::Dispatcher.for(:async)
-      end
-    {% end %}
+    def initialize(@protocol = Protocol.instance)
+      @dispatcher = ::Log::AsyncDispatcher.new(16)
+    end
 
     def write(entry : ::Log::Entry)
       message = (exception = entry.exception) ? "#{entry.message}\n#{exception.inspect_with_backtrace}" : entry.message
