@@ -6,15 +6,13 @@ module PlaceOS::Driver::Stats
   Log = ::Log.for(self)
 
   def self.memory_usage
-    total = GC.stats.total_bytes
-    stats = GC.prof_stats
+    stats = GC.stats
     one_mib = 1048576
     {
-      free:     "#{(stats.free_bytes / one_mib).round(1)}MiB",
-      heap:     "#{(stats.heap_size / one_mib).round(1)}MiB",
-      total:    "#{(total / one_mib).round(1)}MiB",
-      unmapped: "#{(stats.unmapped_bytes / one_mib).round(1)}MiB",
-      non_gc:   "#{(stats.non_gc_bytes / one_mib).round(1)}MiB",
+      stats_free:     "#{(stats.free_bytes / one_mib).round(1)}MiB",
+      stats_heap:     "#{(stats.heap_size / one_mib).round(1)}MiB",
+      stats_total:    "#{(stats.total_bytes / one_mib).round(1)}MiB",
+      stats_unmapped: "#{(stats.unmapped_bytes / one_mib).round(1)}MiB",
     }
   end
 
