@@ -7,7 +7,7 @@ class PlaceOS::Driver::Protocol; end
 require "../driver_model"
 
 module PlaceOS
-  struct Driver::Protocol::Request
+  class Driver::Protocol::Request
     include JSON::Serializable
 
     enum Command
@@ -64,7 +64,6 @@ module PlaceOS
     property error : String?
     property backtrace : Array(String)?
 
-    @[AlwaysInline]
     def set_error(error)
       self.code ||= 500
       self.payload = error.message
