@@ -45,7 +45,7 @@ abstract class PlaceOS::Driver
         @card_id = nil,
         @user_name = nil,
         @user_email = nil,
-        @timestamp = Time.utc.to_unix
+        @timestamp = Time.utc.to_unix,
       )
       end
     end

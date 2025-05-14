@@ -19,7 +19,7 @@ module PlaceOS::Driver::Interface::Mailer
     cc : String | Array(String) = [] of String,
     bcc : String | Array(String) = [] of String,
     from : String | Array(String) | Nil = nil,
-    reply_to : String | Array(String) | Nil = nil
+    reply_to : String | Array(String) | Nil = nil,
   )
 
   #                   event_name => notify_who => html => template
@@ -37,7 +37,7 @@ module PlaceOS::Driver::Interface::Mailer
     cc : String | Array(String) = [] of String,
     bcc : String | Array(String) = [] of String,
     from : String | Array(String) | Nil = nil,
-    reply_to : String | Array(String) | Nil = nil
+    reply_to : String | Array(String) | Nil = nil,
   )
     template = begin
       @templates[template[0]][template[1]]

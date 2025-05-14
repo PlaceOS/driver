@@ -154,6 +154,14 @@ class Helper
       exec("ls").gets_to_end
     end
 
+    def return_false : Bool
+      false
+    end
+
+    def get_system_email : String?
+      config.control_system.try(&.email)
+    end
+
     def received(data, task)
       response = IO::Memory.new(data).to_s
       task.try &.success(response)

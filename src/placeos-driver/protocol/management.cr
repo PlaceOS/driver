@@ -14,11 +14,11 @@ class PlaceOS::Driver::Protocol::Management
   alias DebugCallback = String -> Nil
 
   # Core should update this callback to route requests
-  property on_exec : Proc(Request, Proc(Request, Nil), Nil) = ->(_request : Request, _callback : Proc(Request, Nil)) {}
-  property on_setting : Proc(String, String, YAML::Any, Nil) = ->(_module_id : String, _setting_name : String, _setting_value : YAML::Any) {}
+  property on_exec : Proc(Request, Proc(Request, Nil), Nil) = ->(_request : Request, _callback : Proc(Request, Nil)) { }
+  property on_setting : Proc(String, String, YAML::Any, Nil) = ->(_module_id : String, _setting_name : String, _setting_value : YAML::Any) { }
 
   # A request for the system model as defined in the database
-  property on_system_model : Proc(Request, Proc(Request, Nil), Nil) = ->(_request : Request, _callback : Proc(Request, Nil)) {}
+  property on_system_model : Proc(Request, Proc(Request, Nil), Nil) = ->(_request : Request, _callback : Proc(Request, Nil)) { }
 
   # These are the events coming from the driver where edge is expected to update redis on the drivers behalf
   enum RedisAction
@@ -28,7 +28,7 @@ class PlaceOS::Driver::Protocol::Management
     PUBLISH
   end
 
-  property on_redis : Proc(RedisAction, String, String, String?, Nil) = ->(_action : RedisAction, _hash_id : String, _key_name : String, _status_value : String?) {}
+  property on_redis : Proc(RedisAction, String, String, String?, Nil) = ->(_action : RedisAction, _hash_id : String, _key_name : String, _status_value : String?) { }
 
   @running : Bool = false
   getter? terminated : Bool = false

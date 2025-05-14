@@ -72,6 +72,8 @@ describe PlaceOS::Driver::DriverManager do
       "not_json":{},
       "test_http":{},
       "test_exec":{},
+      "return_false":{},
+      "get_system_email":{},
       "implemented_in_base_class":{}
     }).gsub(/\s/, "").gsub(/\|/, " | "))
 
@@ -99,6 +101,8 @@ describe PlaceOS::Driver::DriverManager do
       "not_json":{},
       "test_http":{},
       "test_exec":{},
+      "return_false":{},
+      "get_system_email":{},
       "implemented_in_base_class":{}
     }).gsub(/\s/, "").gsub(/\|/, " | "))
   end
@@ -140,6 +144,46 @@ describe PlaceOS::Driver::DriverManager do
       "role": 1,
       "settings": {"test": {"number": 123}}
     }))
-    PlaceOS::Driver::DriverManager.new "mod-driverman", model
+    manager = PlaceOS::Driver::DriverManager.new "mod-driverman", model
+
+    manager.execute(%(
+        {
+          "__exec__": "get_system_email",
+          "get_system_email": {}
+        }
+    )).should eq("null")
+
+    model = PlaceOS::Driver::DriverModel.from_json(%({
+      "ip": "localhost",
+      "port": 23,
+      "udp": false,
+      "tls": false,
+      "makebreak": false,
+      "role": 1,
+      "settings": {"test": {"number": 123}},
+      "control_system": {
+        "id": "crtl-sys-id",
+        "name": "Sys Name",
+        "email": "test@email.com",
+        "bookable": false,
+        "capacity": 2,
+        "zones": ["zone-building"]
+      }
+    }))
+    manager.update(model)
+
+    manager.execute(%(
+        {
+          "__exec__": "get_system_email",
+          "get_system_email": {}
+        }
+    )).should eq(%("test@email.com"))
+
+    manager.execute(%(
+        {
+          "__exec__": "return_false",
+          "return_false": {}
+        }
+    )).should eq("false")
   end
 end

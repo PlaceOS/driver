@@ -205,22 +205,25 @@ abstract class DriverSpecs::MockDriver
               ret_val = klass.{{method.name}}
             {% end %}
 
+            # handle futures and promises
+            ret_val = ret_val.is_a?(Bool) ? ret_val : (ret_val || nil)
+            ret_val = ret_val.responds_to?(:get) ? ret_val.get : ret_val
+
+            # convert response to JSON
             case ret_val
+            when Array(::Log::Entry)
+              ret_val.map(&.message).to_json
+            when ::Log::Entry
+              ret_val.message.to_json
             when Enum
               ret_val.to_s.to_json
-            when JSON::Serializable
+            when JSON::Serializable, Bool
               ret_val.to_json
             else
-              ret_val = if ret_val.is_a?(::Future::Compute) || ret_val.is_a?(::Promise) || ret_val.is_a?(::PlaceOS::Driver::Task)
-                ret_val.responds_to?(:get) ? ret_val.get : ret_val
-              else
-                ret_val
-              end
-
               begin
                 ret_val.try_to_json("null")
               rescue error
-                klass.logger.info(exception: error) { "unable to convert result to json executing #{{{method.name.stringify}}} on #{klass.class}\n#{ret_val.inspect}" }
+                klass.logger.debug(exception: error) { "unable to convert result to json executing #{method_name} on #{klass.class}\n#{ret_val.inspect}" }
                 "null"
               end
             end

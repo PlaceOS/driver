@@ -7,7 +7,7 @@ abstract class PlaceOS::Driver
       # Is it an SMS or MMS
       format : String? = "SMS",
       # Source / originating number
-      source : String? = nil
+      source : String? = nil,
     )
   end
 end

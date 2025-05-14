@@ -66,7 +66,7 @@ class PlaceOS::Driver
       module_id : String,
       logger_io : IO = ::PlaceOS::Driver.logger_io,
       @protocol : Protocol = Protocol.instance,
-      severity : ::Log::Severity = ::Log::Severity::Error
+      severity : ::Log::Severity = ::Log::Severity::Error,
     )
       @debugging = false
 

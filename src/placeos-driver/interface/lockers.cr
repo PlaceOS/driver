@@ -52,7 +52,7 @@ abstract class PlaceOS::Driver
       locker_id : String | Int64? = nil,
 
       # attempts to create a booking that expires at the time specified
-      expires_at : Int64? = nil
+      expires_at : Int64? = nil,
     ) : PlaceLocker
 
     # return the locker to the pool
@@ -61,7 +61,7 @@ abstract class PlaceOS::Driver
       locker_id : String | Int64,
 
       # release / unshare just this user - otherwise release the whole locker
-      owner_id : String? = nil
+      owner_id : String? = nil,
     ) : Nil
 
     # a list of lockers that are allocated to the user
@@ -71,7 +71,7 @@ abstract class PlaceOS::Driver
       bank_id : String | Int64,
       locker_id : String | Int64,
       owner_id : String,
-      share_with : String
+      share_with : String,
     ) : Nil
 
     abstract def locker_unshare(
@@ -79,7 +79,7 @@ abstract class PlaceOS::Driver
       locker_id : String | Int64,
       owner_id : String,
       # the individual you previously shared with (optional)
-      shared_with_id : String? = nil
+      shared_with_id : String? = nil,
     ) : Nil
 
     # a list of user-ids that the locker is shared with.
@@ -87,7 +87,7 @@ abstract class PlaceOS::Driver
     abstract def locker_shared_with(
       bank_id : String | Int64,
       locker_id : String | Int64,
-      owner_id : String
+      owner_id : String,
     ) : Array(String)
 
     abstract def locker_unlock(
@@ -98,7 +98,7 @@ abstract class PlaceOS::Driver
       owner_id : String? = nil,
       # time in seconds the locker should be unlocked
       # (can be ignored if not implemented)
-      open_time : Int32 = 60
+      open_time : Int32 = 60,
     ) : Nil
 
     # ========================================
@@ -115,14 +115,14 @@ abstract class PlaceOS::Driver
     def locker_allocate_me(
       bank_id : String | Int64,
       locker_id : String | Int64? = nil,
-      expires_at : Int64? = nil
+      expires_at : Int64? = nil,
     )
       locker_allocate(__ensure_user_id__, bank_id, locker_id, expires_at)
     end
 
     def locker_release_mine(
       bank_id : String | Int64,
-      locker_id : String | Int64
+      locker_id : String | Int64,
     )
       locker_release(bank_id, locker_id, __ensure_user_id__)
     end
@@ -134,7 +134,7 @@ abstract class PlaceOS::Driver
     def locker_share_mine(
       bank_id : String | Int64,
       locker_id : String | Int64,
-      share_with : String
+      share_with : String,
     )
       locker_share(bank_id, locker_id, __ensure_user_id__, share_with)
     end
@@ -142,14 +142,14 @@ abstract class PlaceOS::Driver
     def locker_unshare_mine(
       bank_id : String | Int64,
       locker_id : String | Int64,
-      shared_with_id : String? = nil
+      shared_with_id : String? = nil,
     )
       locker_unshare(bank_id, locker_id, __ensure_user_id__, shared_with_id)
     end
 
     def locker_shared_with_others(
       bank_id : String | Int64,
-      locker_id : String | Int64
+      locker_id : String | Int64,
     )
       locker_shared_with(bank_id, locker_id, __ensure_user_id__)
     end
@@ -157,7 +157,7 @@ abstract class PlaceOS::Driver
     def locker_unlock_mine(
       bank_id : String | Int64,
       locker_id : String | Int64,
-      open_time : Int32 = 60
+      open_time : Int32 = 60,
     )
       locker_unlock(bank_id, locker_id, __ensure_user_id__, open_time)
     end

@@ -3,13 +3,13 @@ require "json"
 require "../driver_model"
 require "./remote_driver"
 
-class PlaceOS::Driver::Proxy::System
+struct PlaceOS::Driver::Proxy::System
   # Local system available to logic driver
   def initialize(
     model : DriverModel::ControlSystem,
     @reply_id : String,
     @logger : ::Log = ::Log.for(PlaceOS::Driver::Proxy::System),
-    @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new
+    @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new,
   )
     @config = model
     @system_id = model.id
@@ -21,7 +21,7 @@ class PlaceOS::Driver::Proxy::System
     @system_id : String,
     @reply_id : String,
     @logger : ::Log = ::Log.for(PlaceOS::Driver::Proxy::System),
-    @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new
+    @subscriptions : Proxy::Subscriptions = Proxy::Subscriptions.new,
   )
     @system = PlaceOS::Driver::RedisStorage.new(@system_id, "system")
   end

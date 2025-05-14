@@ -87,7 +87,7 @@ abstract class PlaceOS::Driver
     @__schedule__ = Proxy::Scheduler.new,
     @__subscriptions__ = Proxy::Subscriptions.new,
     @__driver_model__ = DriverModel.from_json(%({"udp":false,"tls":false,"makebreak":false,"settings":{},"role":1})),
-    @__edge_driver__ : Bool = false
+    @__edge_driver__ : Bool = false,
   )
     metadata = {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.driver_interface
     metadata = %(#{metadata[0..-2]},"notes":#{@__driver_model__.notes.to_json}})
@@ -472,7 +472,9 @@ abstract class PlaceOS::Driver
               ret_val = klass.{{method.name}}
             {% end %}
 
-            ::PlaceOS::Driver::DriverManager.process_result(klass, {{method.name.stringify}}, ret_val || nil)
+            # ensures false is returned
+            ret_val = ret_val.is_a?(Bool) ? ret_val : (ret_val || nil)
+            ::PlaceOS::Driver::DriverManager.process_result(klass, {{method.name.stringify}}, ret_val)
           end,
         {% end %}
       } {% if methods.empty? %} of String => Nil {% end %}

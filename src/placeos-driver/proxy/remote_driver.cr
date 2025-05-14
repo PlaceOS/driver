@@ -69,7 +69,7 @@ module PlaceOS::Driver::Proxy
         @module_name : String = "",
         @index : Int32 = 1,
         @remote_backtrace : Array(String)? = nil,
-        @response_code : Int32 = 500
+        @response_code : Int32 = 500,
       )
         super(message)
       end
@@ -194,7 +194,7 @@ module PlaceOS::Driver::Proxy
       args = nil,
       named_args = nil,
       request_id : String? = nil,
-      user_id : String? = @user_id
+      user_id : String? = @user_id,
     ) : {String, Int32}
       metadata = metadata?
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module", *@error_details) unless metadata

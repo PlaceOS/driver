@@ -33,7 +33,7 @@ struct PlaceOS::Driver::DriverModel
       @requirements : Hash(String, Array(String)) = {} of String => Array(String),
       @security : Hash(String, Array(String)) = {} of String => Array(String),
       @settings = {type: "object", properties: {} of String => JSON::Any, required: [] of String},
-      @notes = nil
+      @notes = nil,
     )
       @interface ||= {} of String => Hash(String, JSON::Any)
       @functions = nil
@@ -46,7 +46,7 @@ struct PlaceOS::Driver::DriverModel
       @implements = [] of String,
       @requirements = {} of String => Array(String),
       @security = {} of String => Array(String),
-      @settings = {type: "object", properties: {} of String => JSON::Any, required: [] of String}
+      @settings = {type: "object", properties: {} of String => JSON::Any, required: [] of String},
     )
       @functions ||= {} of String => Hash(String, Array(JSON::Any))
       @interface = nil

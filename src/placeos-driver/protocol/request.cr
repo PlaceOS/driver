@@ -43,7 +43,7 @@ module PlaceOS
       @backtrace = nil,
       @seq = nil,
       @reply = nil,
-      @user_id = nil
+      @user_id = nil,
     )
     end
 

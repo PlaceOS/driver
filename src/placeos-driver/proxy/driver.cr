@@ -1,13 +1,13 @@
 require "json"
 
-class PlaceOS::Driver::Proxy::Driver
+struct PlaceOS::Driver::Proxy::Driver
   def initialize(
     @reply_id : String,
     @module_name : String,
     @index : Int32,
     @module_id : String,
     @system : PlaceOS::Driver::Proxy::System,
-    @metadata : PlaceOS::Driver::DriverModel::Metadata
+    @metadata : PlaceOS::Driver::DriverModel::Metadata,
   )
     @status = PlaceOS::Driver::RedisStorage.new(@module_id)
   end
@@ -152,7 +152,7 @@ class PlaceOS::Driver::Proxy::Driver
     function,
     arguments,
     named_args,
-    module_metadata : NamedTuple(name: String, index: Int32, id: String)
+    module_metadata : NamedTuple(name: String, index: Int32, id: String),
   )
     String.build do |str|
       str << %({"__exec__":") << function_name << %(",") << function_name << %(":{)

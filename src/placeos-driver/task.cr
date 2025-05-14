@@ -14,7 +14,7 @@ class PlaceOS::Driver::Task
     @wait : Bool,
     @name : String?,
     @delay : Time::Span?,
-    @clear_queue : Bool = false
+    @clear_queue : Bool = false,
   )
     @response_required = false
     @last_executed = 0_i64

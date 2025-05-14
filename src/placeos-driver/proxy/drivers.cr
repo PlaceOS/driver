@@ -2,7 +2,7 @@ require "json"
 
 require "./driver"
 
-class PlaceOS::Driver::Proxy::Drivers
+struct PlaceOS::Driver::Proxy::Drivers
   include Enumerable(PlaceOS::Driver::Proxy::Driver)
 
   def initialize(@drivers : Array(PlaceOS::Driver::Proxy::Driver))

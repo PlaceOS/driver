@@ -7,7 +7,10 @@ abstract class PlaceOS::Driver
       include JSON::Serializable
       include JSON::Serializable::Unmapped
 
-      property card_hex : String
+      property user_id : String? = nil
+      property permission_id : String? = nil
+      property card_number : Int64? = nil
+      property card_facility : Int64? = nil
     end
 
     # a function for granting guests access to a building

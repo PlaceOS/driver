@@ -4,7 +4,7 @@ abstract class PlaceOS::Driver
     # desk height is in mm
     abstract def set_desk_height(
       desk_key : String,
-      desk_height : Int32
+      desk_height : Int32,
     )
 
     # return nil on unknown height
@@ -13,7 +13,7 @@ abstract class PlaceOS::Driver
     # desk_power on / off / nil == auto
     abstract def set_desk_power(
       desk_key : String,
-      desk_power : Bool?
+      desk_power : Bool?,
     )
 
     abstract def get_desk_power(desk_key : String) : Bool?
