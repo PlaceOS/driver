@@ -73,7 +73,9 @@ describe PlaceOS::Driver::DriverManager do
       "test_http":{},
       "test_exec":{},
       "return_false":{},
-      "get_system_email":{},
+      "get_system_email":{
+        "proxy":{"type":"boolean", "title": "Bool", "default": false}
+      },
       "implemented_in_base_class":{}
     }).gsub(/\s/, "").gsub(/\|/, " | "))
 
@@ -102,7 +104,9 @@ describe PlaceOS::Driver::DriverManager do
       "test_http":{},
       "test_exec":{},
       "return_false":{},
-      "get_system_email":{},
+      "get_system_email":{
+        "proxy":["Bool", false]
+      },
       "implemented_in_base_class":{}
     }).gsub(/\s/, "").gsub(/\|/, " | "))
   end
@@ -149,7 +153,7 @@ describe PlaceOS::Driver::DriverManager do
     manager.execute(%(
         {
           "__exec__": "get_system_email",
-          "get_system_email": {}
+          "get_system_email": {"proxy": false}
         }
     )).should eq("null")
 
@@ -175,9 +179,35 @@ describe PlaceOS::Driver::DriverManager do
     manager.execute(%(
         {
           "__exec__": "get_system_email",
-          "get_system_email": {}
+          "get_system_email": {"proxy": true}
         }
     )).should eq(%("test@email.com"))
+
+    model = PlaceOS::Driver::DriverModel.from_json(%({
+      "ip": "localhost",
+      "port": 23,
+      "udp": false,
+      "tls": false,
+      "makebreak": false,
+      "role": 1,
+      "settings": {"test": {"number": 123}},
+      "control_system": {
+        "id": "crtl-sys-id",
+        "name": "Sys Name",
+        "email": "test2@email.com",
+        "bookable": false,
+        "capacity": 2,
+        "zones": ["zone-building"]
+      }
+    }))
+    manager.update(model)
+
+    manager.execute(%(
+        {
+          "__exec__": "get_system_email",
+          "get_system_email": {"proxy": true}
+        }
+    )).should eq(%("test2@email.com"))
 
     manager.execute(%(
         {

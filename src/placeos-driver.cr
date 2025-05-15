@@ -130,6 +130,7 @@ abstract class PlaceOS::Driver
 
   # :nodoc:
   def config=(data : ::PlaceOS::Driver::DriverModel)
+    @__system__ = nil
     @__driver_model__ = data
   end
 

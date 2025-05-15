@@ -158,8 +158,9 @@ class Helper
       false
     end
 
-    def get_system_email : String?
-      config.control_system.try(&.email)
+    def get_system_email(proxy : Bool = false) : String?
+      return config.control_system.try(&.email) unless proxy
+      system.email
     end
 
     def received(data, task)
