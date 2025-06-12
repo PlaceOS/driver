@@ -770,35 +770,35 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/mock_driver.cr#L9" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/mock_driver.cr#L9" target="_blank">
         placeos-driver/driver-specs/mock_driver.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/mock_http.cr#L3" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/mock_http.cr#L3" target="_blank">
         placeos-driver/driver-specs/mock_http.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/responder.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/responder.cr#L1" target="_blank">
         placeos-driver/driver-specs/responder.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L30" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L30" target="_blank">
         placeos-driver/driver-specs/runner.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/status_helper.cr#L7" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/status_helper.cr#L7" target="_blank">
         placeos-driver/driver-specs/status_helper.cr
       </a>
     
@@ -868,6 +868,16 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
+        <a href="#errors%3AArray%28Tuple%28Exception%2CString%2CString%2CInt32%29%29-instance-method" class="signature"><strong>#errors</strong> : Array(Tuple(Exception, String, String, Int32))</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#example_count%3AInt32-instance-method" class="signature"><strong>#example_count</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
         <a href="#exec%28function%2C%2Aargs%2Cuser_id%3Dnil%29-instance-method" class="signature"><strong>#exec</strong>(function, *args, user_id = <span class="n">nil</span>)</a>
         
           <div class="summary"><p>executes a function on the driver being tested and returns response promise</p></div>
@@ -913,6 +923,11 @@
         <a href="#expect_send%28timeout%3D500.milliseconds%29%3ABytes-instance-method" class="signature"><strong>#expect_send</strong>(timeout = <span class="n">500</span>.milliseconds) : Bytes</a>
         
           <div class="summary"><p>obtain some data you were expecting to receive from the driver.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#it%28description%3AString%2Cfile%3D__FILE__%2Cline%3D__LINE__%2C%2A%2Aargs%2C%26%29-instance-method" class="signature"><strong>#it</strong>(description : String, file = __FILE__, line = __LINE__, **args, &)</a>
         
       </li>
     
@@ -1029,7 +1044,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L34" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L44" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1047,6 +1062,38 @@
 </a>
     Instance Method Detail
   </h2>
+  
+    <div class="entry-detail" id="errors:Array(Tuple(Exception,String,String,Int32))-instance-method">
+      <div class="signature">
+        
+        def <strong>errors</strong> : Array(Tuple(Exception, String, String, Int32))
+
+        <a class="method-permalink" href="#errors%3AArray%28Tuple%28Exception%2CString%2CString%2CInt32%29%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L35" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="example_count:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>example_count</strong> : Int32
+
+        <a class="method-permalink" href="#example_count%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L34" target="_blank">View source</a>]
+        
+      </div>
+    </div>
   
     <div class="entry-detail" id="exec(function,*args,user_id=nil)-instance-method">
       <div class="signature">
@@ -1066,7 +1113,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L408" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L435" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1089,7 +1136,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L415" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L442" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1112,7 +1159,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L422" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L449" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1135,7 +1182,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L429" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L456" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1157,7 +1204,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L614" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L641" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1179,7 +1226,7 @@ Then we want to wait for the reconnect to occur before continuing the spec</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L387" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L414" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1201,7 +1248,23 @@ Then we want to wait for the reconnect to occur before continuing the spec</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L475" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L502" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="it(description:String,file=__FILE__,line=__LINE__,**args,&amp;)-instance-method">
+      <div class="signature">
+        
+        def <strong>it</strong>(description : String, file = __FILE__, line = __LINE__, **args, &)
+
+        <a class="method-permalink" href="#it%28description%3AString%2Cfile%3D__FILE__%2Cline%3D__LINE__%2C%2A%2Aargs%2C%26%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L37" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1222,7 +1285,7 @@ Then we want to wait for the reconnect to occur before continuing the spec</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L663" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L690" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1244,7 +1307,7 @@ Then we want to wait for the reconnect to occur before continuing the spec</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L607" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L634" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1266,7 +1329,7 @@ Then we want to wait for the reconnect to occur before continuing the spec</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L729" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L756" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1288,7 +1351,7 @@ Then we want to wait for the reconnect to occur before continuing the spec</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L505" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L532" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1310,7 +1373,7 @@ Then we want to wait for the reconnect to occur before continuing the spec</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L276" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L303" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1334,7 +1397,7 @@ Then we want to wait for the reconnect to occur before continuing the spec</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L716" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L743" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1357,7 +1420,7 @@ Then we want to wait for the reconnect to occur before continuing the spec</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L679" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L706" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1379,7 +1442,7 @@ Then we want to wait for the reconnect to occur before continuing the spec</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/5e45b56367985a9db9215d93ad5dc45ae9007069/src/placeos-driver/driver-specs/runner.cr#L580" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/bfc93fcdb9a05a1e8fa9ca7957f3dc9af1bb1ba0/src/placeos-driver/driver-specs/runner.cr#L607" target="_blank">View source</a>]
         
       </div>
     </div>
