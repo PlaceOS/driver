@@ -176,7 +176,7 @@ class PlaceOS::Driver
           # It may not be fatal if a shell is unable to be negotiated
           # however this would be a rare device so we log the issue.
           if shell = @shell
-            shell.close
+            shell.close rescue nil
             @shell = nil
           end
           logger.warn(exception: error) { "unable to negotiage a shell on SSH connection" }
@@ -200,7 +200,7 @@ class PlaceOS::Driver
         # Enable queuing
         @queue.online = true
       rescue error
-        logger.info(exception: error) {
+        logger.error(exception: error) {
           supported_methods = ", supported authentication methods: #{supported_methods}" if supported_methods
           "connecting to device#{supported_methods}"
         }
@@ -214,6 +214,8 @@ class PlaceOS::Driver
         end
         raise error
       end
+    ensure
+      Fiber.yield
     end
 
     protected def perform_reconnect
@@ -259,8 +261,8 @@ class PlaceOS::Driver
 
         begin
           Tasker.timeout(3.seconds) {
-            shell.try &.close
-            session.try &.disconnect
+            shell.try(&.close) rescue nil
+            session.try(&.disconnect) rescue nil
           }
         rescue
         end
