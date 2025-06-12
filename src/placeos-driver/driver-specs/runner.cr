@@ -31,6 +31,16 @@ class DriverSpecs
   DRIVER_ID = "spec_runner"
   SYSTEM_ID = "spec_runner_system"
 
+  getter example_count : Int32 = 0
+  getter errors : Array(Tuple(Exception, String, String, Int32)) = [] of Tuple(Exception, String, String, Int32)
+
+  def it(description : String, file = __FILE__, line = __LINE__, **args, &)
+    @example_count += 1
+    with self yield
+  rescue error
+    @errors << {error, description, file, line}
+  end
+
   def self.mock_driver(driver_name : String, driver_exec = ENV["SPEC_RUN_DRIVER"], &)
     # Prepare driver IO
     unix_socket = File.tempname("pos", ".driver")
@@ -196,7 +206,24 @@ class DriverSpecs
         # give it a moment to shutdown
         sleep 1.second
 
-        puts "... spec passed".colorize(:green)
+        if spec.errors.empty?
+          puts "    #{spec.example_count} examples, 0 errors" if spec.example_count > 0
+          puts "... spec passed".colorize(:green)
+        else
+          puts "\nFailures:"
+          spec.errors.each_with_index do |error, index|
+            puts "\n  #{index + 1}) #{error[1]}"
+            puts error[0].inspect_with_backtrace.colorize(:red)
+            puts "\n  # #{error[2]}:#{error[3]}".colorize(:blue)
+          end
+          puts "\n    #{spec.example_count} examples, #{spec.errors.size} errors"
+          puts "Failed examples:"
+          spec.errors.each do |error|
+            print "  - #{error[2]}:#{error[3]}".colorize(:red)
+            puts " # #{error[1]}".colorize(:blue)
+          end
+          puts "\n... spec failed".colorize(:red)
+        end
       rescue e
         puts "level=ERROR : unhandled exception in spec".colorize(:red)
         e.inspect_with_backtrace(STDOUT)
