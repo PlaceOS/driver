@@ -19,6 +19,9 @@ abstract class PlaceOS::Driver
       Granted
       Denied
       Tamper
+      Duress
+      ForcedDoor
+      SecurityBreach
       RequestToExit # REX
     end
 
