@@ -23,7 +23,7 @@ class PlaceOS::Driver
     @keepalive : Tasker::Task?
     @ssh_settings : Settings?
     @messages : Channel(Bytes)?
-    @connecting : Bool = false
+    @connection_state_changing : Bool = false
     @connect_lock : Mutex = Mutex.new
 
     property :received
@@ -53,8 +53,8 @@ class PlaceOS::Driver
 
     def connect(connect_timeout : Int32 = 10) : Nil
       @connect_lock.synchronize do
-        return if @terminated || @connecting || @messages
-        @connecting = true
+        return if @terminated || @connection_state_changing || @messages
+        @connection_state_changing = true
       end
 
       # Clear any buffered data before we re-connect
@@ -68,8 +68,8 @@ class PlaceOS::Driver
       ) do
         start_socket(connect_timeout) unless @terminated
       end
-
-      @connect_lock.synchronize { @connecting = false }
+    ensure
+      @connect_lock.synchronize { @connection_state_changing = false }
       disconnect if @terminated
     end
 
@@ -193,7 +193,7 @@ class PlaceOS::Driver
           else
             # if we are not running in shell mode we want to connect on messages close
             @messages.try &.receive?
-            perform_reconnect
+            disconnect
           end
         end
 
@@ -218,12 +218,6 @@ class PlaceOS::Driver
       Fiber.yield
     end
 
-    protected def perform_reconnect
-      disconnect
-      @queue.online = false
-      connect
-    end
-
     def keepalive(period)
       @keepalive = Tasker.every(period.seconds) do
         begin
@@ -242,7 +236,12 @@ class PlaceOS::Driver
 
     def disconnect : Nil
       @connect_lock.synchronize do
-        return if @connecting
+        return if @connection_state_changing
+        @connection_state_changing = true
+      end
+
+      begin
+        @queue.online = false rescue nil
 
         # Create local copies as reconnect could be called while we are still disconnecting
         messages = @messages
@@ -273,9 +272,15 @@ class PlaceOS::Driver
         ensure
           messages.try &.close
         end
+      rescue error
+        logger.info(exception: error) { "calling disconnect" }
+      ensure
+        @connect_lock.synchronize do
+          @connection_state_changing = false
+        end
       end
-    rescue error
-      logger.info(exception: error) { "calling disconnect" }
+    ensure
+      connect unless @terminated
     end
 
     def send(message) : TransportSSH
@@ -313,7 +318,7 @@ class PlaceOS::Driver
     rescue error
       logger.error(exception: error) { "error consuming IO" }
     ensure
-      perform_reconnect
+      disconnect
     end
 
     private def consume_io
