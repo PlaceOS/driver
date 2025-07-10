@@ -2,6 +2,7 @@ require "simple_retry"
 require "socket"
 require "ssh2"
 require "tasker"
+require "openssl_ext"
 
 require "../transport"
 
@@ -38,8 +39,6 @@ class PlaceOS::Driver
       property password : String?
       property passphrase : String?
       property private_key : String?
-
-      # We should be able to remove this by generating the public from the private
       property public_key : String?
     end
 
@@ -104,7 +103,7 @@ class PlaceOS::Driver
               when "publickey"
                 if prikey = settings.private_key
                   begin
-                    pubkey = settings.public_key.not_nil!
+                    pubkey = settings.public_key || OpenSSL::PKey.read(prikey, settings.passphrase).public_key.to_pem
                     session.login_with_data(settings.username, prikey, pubkey, settings.passphrase)
                   rescue SSH2::SessionError
                     logger.warn { "publickey auth failed, incorrect key" }
