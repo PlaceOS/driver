@@ -15,7 +15,7 @@ class DriverSpecs::Responder
     elsif payload = request.payload
       JSON.parse(payload)
     else
-      nil
+      JSON.parse("null")
     end
   end
 end
