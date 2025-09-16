@@ -144,6 +144,7 @@ class PlaceOS::Driver
     @max_requests : Int32
     @ip : String
     @tls : OpenSSL::SSL::Context::Client?
+    @connected_state : Bool = true
 
     property :received
 
@@ -155,6 +156,18 @@ class PlaceOS::Driver
 
       # Enable queuing
       @queue.online = true
+    end
+
+    # don't stop processing commands in HTTP drivers
+    # the requests are required to re-enable the queue
+    # and queue based HTTP drivers are less common
+    protected def set_connected_state(state : Bool)
+      @connected_state = state
+      if state && !@queue.online
+        @queue.online = true
+      else
+        @queue.set_connected state
+      end
     end
 
     protected def __is_https?
@@ -257,14 +270,14 @@ class PlaceOS::Driver
                    end
                  end
 
-      # assuming we're typically online, this check before assignment is more performant
-      @queue.online = true unless @queue.online
+      # we don't want to be calling connected callback each time a request succeeds
+      set_connected_state(true) unless @connected_state
       @received.call
 
       # fallback in case the HTTP client lib doesn't decompress the response
       check_http_response_encoding response
     rescue error : IO::Error | ArgumentError
-      @queue.online = false
+      set_connected_state(false)
       raise error
     end
 

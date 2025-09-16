@@ -4,11 +4,11 @@ describe PlaceOS::Driver::TransportHTTP do
   it "should perform a secure request" do
     responses = 0
     queue = Helper.queue
-    transport = PlaceOS::Driver::TransportHTTP.new(queue, "https://www.google.com.au/", ::PlaceOS::Driver::Settings.new(%({"disable_cookies": true}))) do
+    transport = PlaceOS::Driver::TransportHTTP.new(queue, "https://www.google.com/", ::PlaceOS::Driver::Settings.new(%({"disable_cookies": true}))) do
       responses += 1
     end
     transport.before_request do |request|
-      request.hostname.should eq "www.google.com.au"
+      request.hostname.should eq "www.google.com"
     end
     transport.connect
     queue.online.should eq(true)
