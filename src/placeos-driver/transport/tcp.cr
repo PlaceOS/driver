@@ -18,6 +18,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
   @uri : String?
   @socket : IO?
   @tls : OpenSSL::SSL::Context::Client?
+  @connected_state : Bool? = nil
   property :received
 
   def connect(connect_timeout : Int32 = 10) : Nil
@@ -43,6 +44,20 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
     end
   end
 
+  # don't stop processing commands on makebreak devices
+  protected def set_connected_state(state : Bool)
+    current_state = @connected_state
+    @connected_state = state
+
+    if state && !@queue.online
+      @queue.online = true
+    elsif @makebreak
+      @queue.set_connected(state) if state != current_state
+    else
+      @queue.online = state
+    end
+  end
+
   private def start_socket(connect_timeout)
     @mutex.synchronize do
       @socket = socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
@@ -57,14 +72,14 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
       socket.sync = false
     end
 
-    # Enable queuing
-    @queue.online = true
+    # Signal connected state / enable queuing
+    set_connected_state(true)
 
     # Start consuming data from the socket
     spawn(same_thread: true) { consume_io }
   rescue error
     logger.info(exception: error) { "error connecting to device on #{@ip}:#{@port}" }
-    @queue.online = false
+    set_connected_state(false)
     raise error
   end
 
@@ -141,7 +156,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
   ensure
     disconnect
     unless @makebreak
-      @queue.online = false
+      set_connected_state(false)
       connect
     end
   end

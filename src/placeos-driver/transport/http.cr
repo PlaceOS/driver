@@ -162,11 +162,13 @@ class PlaceOS::Driver
     # the requests are required to re-enable the queue
     # and queue based HTTP drivers are less common
     protected def set_connected_state(state : Bool)
+      current_state = @connected_state
       @connected_state = state
+
       if state && !@queue.online
         @queue.online = true
       else
-        @queue.set_connected state
+        @queue.set_connected(state) if state != current_state
       end
     end
 
