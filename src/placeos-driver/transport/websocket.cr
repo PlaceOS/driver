@@ -21,6 +21,8 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     @tls = @use_tls ? new_tls_context : nil
   end
 
+  @connect_lock : Mutex = Mutex.new
+  @connection_state_changing : Bool = false
   @headers_callback : -> HTTP::Headers
   @ip : String
   @path : String
@@ -31,7 +33,11 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
   property :received
 
   def connect(connect_timeout : Int32 = 10) : Nil
-    return if @terminated
+    @connect_lock.synchronize do
+      return if @terminated || @connection_state_changing
+      @connection_state_changing = true
+    end
+
     if websocket = @websocket
       return unless websocket.closed?
     end
@@ -47,6 +53,9 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     ) do
       start_socket(connect_timeout)
     end
+  ensure
+    @connect_lock.synchronize { @connection_state_changing = false }
+    disconnect if @terminated || @websocket.nil? || @websocket.try(&.closed?)
   end
 
   private def start_socket(connect_timeout)
@@ -78,30 +87,43 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
             end
     @proxy_in_use = proxy.try &.proxy_host
 
-    # Configure websocket to auto pong
+    # configure websocket
     websocket = @websocket = ConnectProxy::WebSocket.new(@ip, @path, @port, @tls, headers, proxy, ignore_env: true)
-    websocket.on_ping { |message| websocket.pong(message) }
 
     # Enable queuing
-    @queue.online = true
+    set_connected_state(true)
 
     # Start consuming data from the socket
-    spawn(same_thread: true) { consume_io }
+    spawn(same_thread: true) { consume_io(websocket) }
   rescue error
     logger.info(exception: error) { "error connecting to device on #{@ip}:#{@port}#{@path}" }
-    @queue.online = false
+    set_connected_state(false)
     raise error
   end
 
   def terminate : Nil
     @terminated = true
-    @websocket.try &.close
+    @websocket.try(&.close) rescue nil
+    @websocket = nil
   end
 
   def disconnect : Nil
-    @websocket.try &.close
+    websocket = @websocket
+    @connect_lock.synchronize do
+      return if @connection_state_changing
+      @websocket = nil
+    end
+    websocket.try(&.close) rescue nil
+    set_connected_state(false)
+    connect
   rescue error
     logger.info(exception: error) { "calling disconnect" }
+  end
+
+  protected def set_connected_state(state : Bool)
+    @queue.online = state
+  rescue error
+    logger.info(exception: error) { "setting connected state" }
   end
 
   def send(message) : PlaceOS::Driver::TransportWebsocket
@@ -139,18 +161,18 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     @websocket.try &.pong(message)
   end
 
-  private def consume_io
-    if websocket = @websocket
-      websocket.on_binary { |bytes| process bytes }
-      websocket.on_message { |string| process string.to_slice }
-      websocket.run
-    end
+  private def consume_io(websocket)
+    websocket.on_ping { |message| websocket.pong(message) }
+    websocket.on_binary { |bytes| process bytes }
+    websocket.on_message { |string| process string.to_slice }
+    websocket.run
   rescue IO::Error
   rescue error
     logger.error(exception: error) { "error consuming IO" }
   ensure
-    disconnect
-    @queue.online = false
-    connect
+    # only call disconnect if we're still processing the same socket
+    # if not then connect has already been called or disconnect was
+    # called explicitly
+    disconnect if websocket == @websocket
   end
 end
