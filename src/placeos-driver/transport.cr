@@ -270,6 +270,9 @@ abstract class PlaceOS::Driver::Transport
     else
       false
     end
+  rescue error
+    logger.error(exception: error) { "issue configuring client certificates" }
+    false
   end
 
   private def process(data : Bytes) : Nil
