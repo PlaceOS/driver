@@ -237,19 +237,17 @@ abstract class PlaceOS::Driver::Transport
     end
 
     # allow for certificate based authentication
-    if configure_private_key
+    if configure_client_certificates
       tls.private_key = private_key_file
-    end
-
-    if configure_client_certificate
       tls.certificate_chain = client_cert_file
     end
 
     tls
   end
 
-  protected def configure_private_key : Bool
-    if (private_key = @settings.get { setting?(String, :https_private_key).presence })
+  protected def configure_client_certificates : Bool
+    if (private_key = @settings.get { setting?(String, :https_private_key).presence }) &&
+       (client_cert = @settings.get { setting?(String, :https_client_cert).presence })
       key_contents = begin
         File.read(private_key_file)
       rescue error
@@ -257,20 +255,6 @@ abstract class PlaceOS::Driver::Transport
         ""
       end
 
-      if private_key != key_contents
-        File.write(private_key_file, private_key)
-      end
-      true
-    else
-      false
-    end
-  rescue error
-    logger.error(exception: error) { "issue configuring TLS private key" }
-    false
-  end
-
-  protected def configure_client_certificate : Bool
-    if (client_cert = @settings.get { setting?(String, :https_client_cert).presence })
       cer_contents = begin
         File.read(client_cert_file)
       rescue error
@@ -278,16 +262,14 @@ abstract class PlaceOS::Driver::Transport
         ""
       end
 
-      if cer_contents != client_cert
+      if private_key != key_contents || cer_contents != client_cert
+        File.write(private_key_file, private_key)
         File.write(client_cert_file, client_cert)
       end
       true
     else
       false
     end
-  rescue error
-    logger.error(exception: error) { "issue configuring TLS client certificate" }
-    false
   end
 
   private def process(data : Bytes) : Nil
