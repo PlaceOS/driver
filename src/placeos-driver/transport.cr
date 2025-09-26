@@ -12,8 +12,9 @@ abstract class PlaceOS::Driver::Transport
   property pre_processor : ((Bytes) -> Bytes?) | Nil = nil
   getter proxy_in_use : String? = nil
   getter cookies : ::HTTP::Cookies { ::HTTP::Cookies.new }
-  getter private_key_file : String { File.tempname("pri-", ".pem") }
-  getter client_cert_file : String { File.tempname("cli-", ".pem") }
+  getter private_key_file : String { File.tempname("key-", ".pem") }
+  getter client_cert_file : String { File.tempname("cert-", ".pem") }
+  getter ca_certificates_file : String { File.tempname("ca-", ".pem") }
 
   # for non-http drivers to define a non-default http endpoint
   property http_uri_override : URI? = nil
@@ -242,6 +243,11 @@ abstract class PlaceOS::Driver::Transport
       tls.certificate_chain = client_cert_file
     end
 
+    # Root CA certificates are optional
+    if configure_ca_certificates
+      tls.ca_certificates = ca_certificates_file
+    end
+
     tls
   end
 
@@ -251,27 +257,46 @@ abstract class PlaceOS::Driver::Transport
       key_contents = begin
         File.read(private_key_file)
       rescue error
-        logger.debug { "will write private key" }
-        ""
+        "" # this used to indicate that the file does not exist
       end
 
-      cer_contents = begin
+      cert_contents = begin
         File.read(client_cert_file)
       rescue error
-        logger.debug { "will write client certificate" }
         ""
       end
 
-      if private_key != key_contents || cer_contents != client_cert
+      if private_key != key_contents || cert_contents != client_cert
         File.write(private_key_file, private_key)
         File.write(client_cert_file, client_cert)
       end
+
       true
     else
       false
     end
   rescue error
     logger.error(exception: error) { "issue configuring client certificates" }
+    false
+  end
+
+  protected def configure_ca_certificates
+    ca_certificates = @settings.get { setting?(String, :https_ca_certificates).presence }
+    return false unless ca_certificates
+
+    ca_contents = begin
+      File.read(ca_certificates_file)
+    rescue error
+      ""
+    end
+
+    if ca_contents != ca_certificates
+      File.write(ca_certificates_file, ca_certificates)
+    end
+
+    true
+  rescue error
+    logger.error(exception: error) { "issue configuring CA certificates" }
     false
   end
 
