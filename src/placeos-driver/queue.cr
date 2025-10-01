@@ -23,6 +23,7 @@ class PlaceOS::Driver::Queue
   getter current : Task? = nil
   getter previous : Task? = nil
   getter terminated : Bool
+  getter connected_state : Bool? = nil
   @online : Bool? = nil
 
   # for modifying defaults
@@ -35,7 +36,7 @@ class PlaceOS::Driver::Queue
 
   def online=(state : Bool)
     state_changed = state != @online
-    @online = state
+    @connected_state = @online = state
     @connected_callback.call(state) if state_changed
 
     if @online && @waiting && @queue.size > 0
@@ -71,8 +72,17 @@ class PlaceOS::Driver::Queue
 
   # A helper method for setting the connected state, without effecting queue
   # processing. UDP device not responding, incorrect login etc
-  def set_connected(state)
-    @connected_callback.call(state)
+  def set_connected(state : Bool)
+    current_state = @connected_state
+    @connected_state = state
+
+    if state && !online
+      self.online = true
+    elsif state != current_state
+      @connected_callback.call(state)
+    end
+
+    self
   end
 
   # adds a task callback to the queue

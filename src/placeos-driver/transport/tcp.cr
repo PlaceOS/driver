@@ -18,7 +18,6 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
   @uri : String?
   @socket : IO?
   @tls : OpenSSL::SSL::Context::Client?
-  @connected_state : Bool? = nil
   property :received
 
   def connect(connect_timeout : Int32 = 10) : Nil
@@ -46,13 +45,10 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
 
   # don't stop processing commands on makebreak devices
   protected def set_connected_state(state : Bool)
-    current_state = @connected_state
-    @connected_state = state
-
     if state && !@queue.online
       @queue.online = true
     elsif @makebreak
-      @queue.set_connected(state) if state != current_state
+      @queue.set_connected(state) if state != @queue.connected_state
     else
       @queue.online = state
     end
