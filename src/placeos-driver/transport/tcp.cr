@@ -6,7 +6,6 @@ require "../transport"
 class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
   # timeouts in seconds
   def initialize(@queue : PlaceOS::Driver::Queue, @ip : String, @port : Int32, @settings : ::PlaceOS::Driver::Settings, @start_tls = false, @uri = nil, @makebreak = false, &@received : (Bytes, PlaceOS::Driver::Task?) -> Nil)
-    # TODO:: makebreak needs a little more consideration around setting connected / disconnected status
     @terminated = false
     @tls_started = false
 
@@ -45,10 +44,8 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
 
   # don't stop processing commands on makebreak devices
   protected def set_connected_state(state : Bool)
-    if state && !@queue.online
-      @queue.online = true
-    elsif @makebreak
-      @queue.set_connected(state) if state != @queue.connected_state
+    if @makebreak
+      @queue.set_connected(state)
     else
       @queue.online = state
     end
@@ -66,13 +63,13 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
       # Classes that support `#write_bytes` may write to the IO multiple times
       # however we don't want packets sent for every call to write
       socket.sync = false
+
+      # Start consuming data from the socket
+      spawn(same_thread: true) { consume_io(socket) }
     end
 
     # Signal connected state / enable queuing
     set_connected_state(true)
-
-    # Start consuming data from the socket
-    spawn(same_thread: true) { consume_io }
   rescue error
     logger.info(exception: error) { "error connecting to device on #{@ip}:#{@port}" }
     set_connected_state(false)
@@ -108,6 +105,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
 
   def disconnect : Nil
     @socket.try &.close
+    @socket = nil
   rescue error
     logger.info(exception: error) { "calling disconnect" }
   end
@@ -128,6 +126,9 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
       socket.flush
     end
     self
+  rescue error : IO::Error
+    logger.error(exception: error) { "error sending message" }
+    disconnect
   end
 
   def send(message, task : PlaceOS::Driver::Task, &block : (Bytes, PlaceOS::Driver::Task) -> Nil) : PlaceOS::Driver::TransportTCP
@@ -135,10 +136,10 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
     send(message)
   end
 
-  private def consume_io
+  private def consume_io(socket)
     raw_data = Bytes.new(2048)
 
-    while (socket = @socket) && !socket.closed?
+    while !socket.closed?
       bytes_read = socket.read(raw_data)
       break if bytes_read.zero? # IO was closed
 
@@ -150,10 +151,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
   rescue error
     logger.error(exception: error) { "error consuming IO" }
   ensure
-    disconnect
-    unless @makebreak
-      set_connected_state(false)
-      connect
-    end
+    disconnect unless socket != @socket
+    connect unless @makebreak
   end
 end
