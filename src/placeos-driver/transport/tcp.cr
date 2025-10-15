@@ -129,6 +129,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
   rescue error : IO::Error
     logger.error(exception: error) { "error sending message" }
     disconnect
+    self
   end
 
   def send(message, task : PlaceOS::Driver::Task, &block : (Bytes, PlaceOS::Driver::Task) -> Nil) : PlaceOS::Driver::TransportTCP
