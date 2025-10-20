@@ -263,17 +263,10 @@ class DriverSpecs
     @write_mutex = Mutex.new
     @event_mutex = Mutex.new
 
-    @received_http = [] of MockHTTP
-    @expected_http = [] of Channel(MockHTTP)
+    @received_http = Channel(MockHTTP).new(5)
     @http_server = HTTP::Server.new do |context|
       request = MockHTTP.new(context)
-      @event_mutex.synchronize do
-        if @expected_http.empty?
-          @received_http << request
-        else
-          @expected_http.shift.send(request)
-        end
-      end
+      @received_http.send(request)
       request.wait_for_data
     end
 
@@ -639,41 +632,29 @@ class DriverSpecs
   #
   # for an example of how this works see [an existing driver](https://github.com/PlaceOS/drivers/blob/master/drivers/message_media/sms_spec.cr#L10-L25)
   def expect_http_request(timeout = 1.seconds, &)
-    channel = nil
-
-    @event_mutex.synchronize do
-      if @received_http.empty?
-        channel = Channel(MockHTTP).new(1)
-        @expected_http << channel
-      end
+    mock_http = select
+    when temp_http = @received_http.receive
+      temp_http
+    when timeout(timeout)
+      puts "level=ERROR : timeout waiting for expected HTTP request".colorize(:red)
+      raise "timeout waiting for expected HTTP request"
     end
 
-    mock_http = if channel
-                  select
-                  when temp_http = channel.receive
-                    temp_http
-                  when timeout(timeout)
-                    puts "level=ERROR : timeout waiting for expected HTTP request".colorize(:red)
-                    @event_mutex.synchronize { @expected_http.delete(channel) }
-                    raise "timeout waiting for expected HTTP request"
-                  end
-                else
-                  @event_mutex.synchronize { @received_http.shift }
-                end
-
-    puts "-> expected HTTP request received"
+    req = mock_http.context.request
 
     # Make a copy of the body for debugging later
-    io = mock_http.context.request.body
+    io = req.body
     request_body = begin
       io ? String.new(io.peek || Bytes.new(0)) : ""
     rescue
       io ? io.peek.inspect : ""
     end
 
+    puts "-> received HTTP request: #{req.method} #{req.path}"
+
     # Process the request
     begin
-      yield mock_http.context.request, mock_http.context.response
+      yield req, mock_http.context.response
     rescue e
       puts "-> ------"
       puts "   unhandled error processing request:\n#{mock_http.context.request.inspect}"
