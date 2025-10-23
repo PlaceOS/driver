@@ -195,6 +195,7 @@ class PlaceOS::Driver::Protocol
 
   private def produce_io(timeout_period)
     spawn(same_thread: true) { self.process! }
+    spawn { self.redis_health_check }
 
     # Ensures all outgoing event processing is done on the same thread
     @timeouts = Tasker.every(timeout_period) do
@@ -275,5 +276,31 @@ class PlaceOS::Driver::Protocol
     @producer.close
     @processor.close
     @timeouts.try &.cancel
+  end
+
+  private def redis_health_check
+    failures = 0
+    loop do
+      return if @process_manager.terminated.closed?
+
+      time = (50 + rand(10)).seconds
+      select
+      when @process_manager.terminated.receive?
+        return
+      when timeout(time)
+        # perform health check
+        begin
+          ::PlaceOS::Driver::RedisStorage.with_redis(&.ping)
+          failures = 0
+        rescue error
+          failures += 1
+          raise error if failures >= 2
+          Log.warn(exception: error) { "redis healthcheck failed - retrying" }
+        end
+      end
+    end
+  rescue error
+    Log.fatal(exception: error) { "redis healthcheck failed - terminating process" }
+    @process_manager.terminate
   end
 end

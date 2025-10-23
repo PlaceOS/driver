@@ -15,6 +15,8 @@ class PlaceOS::Driver::ProcessManagerMock
 
   class_getter callbacks : Hash(String, Proc(Request, Request?)) = {} of String => Request -> Request?
 
+  getter terminated : Channel(Nil) { Channel(Nil).new }
+
   def self.register(name : String, &callback : Request -> Request?)
     ProcessManagerMock.callbacks[name] = callback
   end
