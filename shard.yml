@@ -1,5 +1,5 @@
 name: placeos-driver
-version: 7.14.0
+version: 7.15.0
 
 dependencies:
   action-controller:
@@ -29,8 +29,8 @@ dependencies:
     version: ~> 3.0
 
   redis-cluster:
-    github: caspiano/redis-cluster.cr
-    version: ">= 0.8.4"
+    github: place-labs/redis-cluster.cr
+    version: ">= 0.8.6"
 
   simple_retry:
     github: spider-gazelle/simple_retry
