@@ -94,7 +94,7 @@ class PlaceOS::Driver::Proxy::Scheduler
     schedules.each &.cancel(terminate: @terminated)
   end
 
-  private def run_now(block)
+  private def run_now(block) : Nil
     block.call
   rescue error
     logger.error(exception: error) { "in scheduled task on #{DriverManager.driver_class}" }

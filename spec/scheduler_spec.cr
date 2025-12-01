@@ -32,12 +32,12 @@ describe PlaceOS::Driver::Proxy::Scheduler do
     sched.size.should eq(0)
   end
 
-  it "should be possible to obtain the return value of the task" do
+  it "should be possible to wait for a task to complete" do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
 
     # Test execution
     task = sched.at(2.milliseconds.from_now) { true }
-    task.get.should eq true
+    task.get.should eq nil
 
     # Test failure
     task = sched.at(2.milliseconds.from_now) { raise "was error" }
@@ -138,7 +138,7 @@ describe PlaceOS::Driver::Proxy::Scheduler do
     task.cancel
   end
 
-  it "should be possible to obtain the next value of a repeating" do
+  it "should be possible to step through a repeating task" do
     sched = PlaceOS::Driver::Proxy::Scheduler.new
     ran = 0
     task = sched.every(2.milliseconds) do
@@ -148,14 +148,18 @@ describe PlaceOS::Driver::Proxy::Scheduler do
     end
 
     # Test execution
-    task.get.should eq 1
-    task.get.should eq 2
-    task.get.should eq 3
+    task.get
+    ran.should eq 1
+    task.get
+    ran.should eq 2
+    task.get
+    ran.should eq 3
     expect_raises(Exception, "some error") do
-      task.get.should eq 4
+      task.get
       raise "failed"
     end
-    task.get.should eq 5
+    task.get
+    ran.should eq 5
 
     # Test cancelation
     spawn(same_thread: true) { task.cancel }
