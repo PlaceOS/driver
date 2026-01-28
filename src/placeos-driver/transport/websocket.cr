@@ -65,7 +65,14 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     # Grab any pre-defined headers
     begin
       if header_hash = @settings.get { setting?(Hash(String, String | Array(String)), :headers) }
-        header_hash.each { |key, value| headers[key] = value }
+        header_hash.each do |key, value|
+          case value
+          in String
+            headers[key] = value
+          in Array(String)
+            headers[key] = value
+          end
+        end
       end
     rescue error
       logger.info(exception: error) { "loading websocket headers" }
