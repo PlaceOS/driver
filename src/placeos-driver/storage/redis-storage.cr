@@ -22,7 +22,8 @@ module PlaceOS
     #################################################################################################
 
     def to_h : Hash(String, String)
-      @@redis_lock.synchronize { redis.hgetall(hash_key) }
+      vals = @@redis_lock.synchronize { redis.hgetall(hash_key) }
+      vals.map(&.to_s).each_slice(2).to_h
     end
 
     def []=(status_name, json_value)

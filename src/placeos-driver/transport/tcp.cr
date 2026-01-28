@@ -63,6 +63,11 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
       # Classes that support `#write_bytes` may write to the IO multiple times
       # however we don't want packets sent for every call to write
       socket.sync = false
+      socket.tcp_keepalive_idle = 60
+      socket.tcp_keepalive_interval = 30
+      socket.tcp_keepalive_count = 3
+      socket.keepalive = true
+      socket.write_timeout = connect_timeout.seconds
 
       # Start consuming data from the socket
       spawn(same_thread: true) { consume_io(socket) }

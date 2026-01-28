@@ -87,6 +87,11 @@ class PlaceOS::Driver
         # Open a connection
         @socket = socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
         socket.tcp_nodelay = true
+        socket.tcp_keepalive_idle = 60
+        socket.tcp_keepalive_interval = 30
+        socket.tcp_keepalive_count = 3
+        socket.keepalive = true
+        socket.write_timeout = connect_timeout.seconds
         socket.sync = true
 
         # Negotiate the SSH session
