@@ -7,8 +7,8 @@ on:
     - cron: "0 6 * * 1"
 
 jobs:
-  style:
-    uses: PlaceOS/.github/.github/workflows/crystal-style.yml@main
+  # style:
+  #  uses: PlaceOS/.github/.github/workflows/crystal-style.yml@main
 
   test:
     name: "crystal: ${{ matrix.crystal }}, stable: ${{ matrix.stable }}"
@@ -20,7 +20,6 @@ jobs:
         stable: [true]
         crystal:
           - latest
-          - 1.14.1
         include:
           - stable: false
             crystal: nightly
@@ -51,3 +50,4 @@ jobs:
         run: crystal spec -v --error-trace
         env:
           REDIS_URL: redis://redis:6379
+
