@@ -7,7 +7,7 @@ class PlaceOS::Driver::DriverManager
     @logger = PlaceOS::Driver::Log.new(@module_id, logger_io)
     @queue = Queue.new(@logger) { |state| connection(state) }
     @schedule = PlaceOS::Driver::Proxy::Scheduler.new(@logger)
-    @subscriptions = edge_driver ? nil : Proxy::Subscriptions.new(subscriptions || Subscriptions.new(module_id: @module_id), @logger)
+    @subscriptions = edge_driver ? nil : Proxy::Subscriptions.new(subscriptions || Subscriptions.new, @logger)
     @calibrate_connected = false
 
     @transport = case @model.role

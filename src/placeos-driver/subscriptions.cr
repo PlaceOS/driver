@@ -34,7 +34,7 @@ class PlaceOS::Driver
 
     private property subscription_channel : Channel(Tuple(Bool, String)) = Channel(Tuple(Bool, String)).new
 
-    def initialize(module_id : String = "")
+    def initialize
       spawn(same_thread: true) { monitor_changes }
     end
 
@@ -70,13 +70,21 @@ class PlaceOS::Driver
     def channel(name, &callback : (PlaceOS::Driver::Subscriptions::ChannelSubscription, String) -> Nil) : PlaceOS::Driver::Subscriptions::ChannelSubscription
       sub = PlaceOS::Driver::Subscriptions::ChannelSubscription.new(name.to_s, &callback)
       if channel = sub.subscribe_to
+        notify = false
+
         # update the subscription cache
-        if channel_subscriptions = subscriptions[channel]?
-          channel_subscriptions << sub
-        else
-          channel_subscriptions = subscriptions[channel] = [] of PlaceOS::Driver::Subscriptions::Subscription
-          channel_subscriptions << sub
-          subscription_channel.send({true, channel})
+        mutex.synchronize do
+          if channel_subscriptions = subscriptions[channel]?
+            channel_subscriptions << sub
+          else
+            channel_subscriptions = subscriptions[channel] = [] of PlaceOS::Driver::Subscriptions::Subscription
+            channel_subscriptions << sub
+            notify = true
+          end
+        end
+
+        if notify
+          subscription_channel.send({true, channel}) rescue nil
         end
       end
 
@@ -100,7 +108,7 @@ class PlaceOS::Driver
     private def on_message(channel, message)
       if channel == SYSTEM_ORDER_UPDATE
         remap_indirect(message)
-      elsif channel_subscriptions = subscriptions[channel]?
+      elsif channel_subscriptions = mutex.synchronize { subscriptions[channel]? }
         channel_subscriptions.each do |subscription|
           spawn { subscription.callback Log, message }
         end
@@ -125,7 +133,8 @@ class PlaceOS::Driver
             wait.receive?
             # re-subscribe to existing subscriptions here
             # NOTE:: sending an empty array errors
-            redis.subscribe(subscriptions.keys) if subscriptions.size > 0
+            keys = mutex.synchronize { subscriptions.keys }
+            redis.subscribe(keys) if keys.size > 0
 
             spawn(same_thread: true) {
               # re-check indirect subscriptions
@@ -176,8 +185,11 @@ class PlaceOS::Driver
           raise e
         ensure
           wait.close
-          subscription_channel.close
-          self.subscription_channel = Channel(Tuple(Bool, String)).new
+
+          mutex.synchronize do
+            subscription_channel.close
+            self.subscription_channel = Channel(Tuple(Bool, String)).new
+          end
 
           @running = false
 
@@ -213,13 +225,21 @@ class PlaceOS::Driver
 
     private def perform_subscribe(subscription)
       if channel = subscription.subscribe_to
-        # update the subscription cache
-        if channel_subscriptions = subscriptions[channel]?
-          channel_subscriptions << subscription
-        else
-          channel_subscriptions = subscriptions[channel] = [] of PlaceOS::Driver::Subscriptions::Subscription
-          channel_subscriptions << subscription
-          subscription_channel.send({true, channel})
+        notify = false
+
+        mutex.synchronize do
+          # update the subscription cache
+          if channel_subscriptions = subscriptions[channel]?
+            channel_subscriptions << subscription
+          else
+            channel_subscriptions = subscriptions[channel] = [] of PlaceOS::Driver::Subscriptions::Subscription
+            channel_subscriptions << subscription
+            notify = true
+          end
+        end
+
+        if notify
+          subscription_channel.send({true, channel}) rescue nil
         end
 
         # notify of current value
@@ -230,12 +250,20 @@ class PlaceOS::Driver
     end
 
     private def perform_unsubscribe(subscription : PlaceOS::Driver::Subscriptions::Subscription, channel : String)
-      if channel_subscriptions = subscriptions[channel]?
-        sub = channel_subscriptions.delete(subscription)
-        if sub == subscription && subscriptions.empty?
-          channel_subscriptions.delete(channel)
-          subscription_channel.send({false, channel})
+      notify = false
+
+      mutex.synchronize do
+        if channel_subscriptions = subscriptions[channel]?
+          channel_subscriptions.delete(subscription)
+          if channel_subscriptions.empty?
+            subscriptions.delete(channel)
+            notify = true
+          end
         end
+      end
+
+      if notify
+        subscription_channel.send({false, channel}) rescue nil
       end
     end
 
