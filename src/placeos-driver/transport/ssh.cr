@@ -304,6 +304,10 @@ class PlaceOS::Driver
         socket << message
       end
       self
+    rescue error
+      # disconnect on failed sends - we need to reset state
+      spawn(same_thread: true) { disconnect }
+      raise error
     end
 
     def send(message, task : PlaceOS::Driver::Task, &block : (Bytes, PlaceOS::Driver::Task) -> Nil) : TransportSSH
