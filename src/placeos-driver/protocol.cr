@@ -6,14 +6,9 @@ require "tokenizer"
 
 require "./protocol/request"
 
-STDIN.blocking = false
 STDIN.sync = false
-
 STDERR.flush_on_newline = false
-STDERR.blocking = false
-STDERR.sync = true # we mark this as false if in use for protocol comms
-
-STDOUT.blocking = false
+STDERR.sync = true
 STDOUT.sync = true
 
 # :nodoc:

@@ -130,7 +130,7 @@ class PlaceOS::Driver
 
       max_requests = @settings.get { setting?(Int32, :http_max_requests) } || 1000
       @max_requests = max_requests
-      @client_idle = Time.monotonic
+      @client_idle = Time.instant
       @client_requests = 0
 
       @tls = __is_https? ? new_tls_context : nil
@@ -139,7 +139,7 @@ class PlaceOS::Driver
 
     @params_base : URI::Params
     @client : ConnectProxy::HTTPClient
-    @client_idle : Time::Span
+    @client_idle : Time::Instant
     @keep_alive : Time::Span
     @max_requests : Int32
     @ip : String
@@ -179,7 +179,7 @@ class PlaceOS::Driver
 
     protected def with_shared_client(&)
       @http_client_mutex.synchronize do
-        now = Time.monotonic
+        now = Time.instant
         idle_for = now - @client_idle
         __new_http_client if @client.__place_socket_invalid? || idle_for >= @keep_alive || @client_requests >= @max_requests
         @client_idle = now
