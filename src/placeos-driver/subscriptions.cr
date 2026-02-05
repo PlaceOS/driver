@@ -173,14 +173,16 @@ class PlaceOS::Driver
           # requires a block and subsequent ones throw an error with a block.
           # NOTE:: this version of subscribe only supports splat arguments
           redis.subscribe(SYSTEM_ORDER_UPDATE) do |on|
+            monitor_count += 1
             on.message { |c, m| on_message(c, m) }
             spawn(same_thread: true) do
               instance = monitor_count
               wait.close
+              puts "\n\n\nNEW SUBSCRIPTION LOOP!!!! #{monitor_count}\n\n\n"
               loop do
                 sleep 1.second
+                puts "PING SUBSCRIPTION REDIS: #{monitor_count} == #{instance}"
                 break if instance != monitor_count
-                puts "PING SUBSCRIPTION REDIS"
                 subscription_channel.send({true, SYSTEM_ORDER_UPDATE})
               rescue error
                 puts "\n\nERROR PINGING REDIS: #{error.inspect_with_backtrace}\n\n"
