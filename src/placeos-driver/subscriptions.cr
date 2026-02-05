@@ -188,6 +188,7 @@ class PlaceOS::Driver
             spawn(same_thread: true) do
               instance = monitor_count
               wait.close
+              sleep 10.seconds
               loop do
                 sleep 1.second
                 break if instance != monitor_count
