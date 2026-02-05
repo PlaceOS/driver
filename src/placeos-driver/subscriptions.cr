@@ -119,6 +119,8 @@ class PlaceOS::Driver
     end
 
     private def monitor_changes
+      monitor_count = 0
+
       SimpleRetry.try_to(
         base_interval: 1.second,
         max_interval: 5.seconds,
@@ -126,6 +128,7 @@ class PlaceOS::Driver
       ) do
         puts "\n\nSTART SUBSCRIPTION MONITORING\n\n"
         return if terminated?
+        monitor_count += 1
         wait = Channel(Nil).new
         begin
           # This will run on redis reconnect
@@ -153,6 +156,11 @@ class PlaceOS::Driver
             while details = subscription_channel.receive?
               sub, chan = details
 
+              if chan == "ping"
+                redis.ping
+                next
+              end
+
               begin
                 SimpleRetry.try_to(
                   max_attempts: 4,
@@ -177,7 +185,15 @@ class PlaceOS::Driver
           # NOTE:: this version of subscribe only supports splat arguments
           redis.subscribe(SYSTEM_ORDER_UPDATE) do |on|
             on.message { |c, m| on_message(c, m) }
-            spawn(same_thread: true) { wait.close }
+            spawn(same_thread: true) do
+              instance = monitor_count
+              wait.close
+              loop do
+                sleep 1.second
+                break if instance != monitor_count
+                subscription_channel.send({true, "ping"}) rescue nil
+              end
+            end
           end
 
           raise "no subscriptions, restarting loop" unless terminated?
