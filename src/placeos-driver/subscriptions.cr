@@ -126,7 +126,6 @@ class PlaceOS::Driver
         max_interval: 5.seconds,
         randomise: 500.milliseconds
       ) do
-        puts "\n\nSTART SUBSCRIPTION MONITORING\n\n"
         return if terminated?
         monitor_count += 1
         subscribe_count = monitor_count
@@ -141,7 +140,6 @@ class PlaceOS::Driver
             # NOTE:: sending an empty array errors
             keys = mutex.synchronize { subscriptions.keys }
             if keys.size > 0
-              puts "\n\nFOUND #{keys.size} EXISTING SUBSCRIPTIONS\n\n"
               redis.subscribe(keys)
             end
 
@@ -181,14 +179,10 @@ class PlaceOS::Driver
             spawn(same_thread: true) do
               instance = monitor_count
               wait.close
-              puts "\n\n\nNEW SUBSCRIPTION LOOP!!!! #{monitor_count}\n\n\n"
               loop do
                 sleep 1.second
-                puts "PING SUBSCRIPTION REDIS: #{monitor_count} == #{instance}"
                 break if instance != monitor_count
                 subscription_channel.send({true, SYSTEM_ORDER_UPDATE})
-              rescue error
-                puts "\n\nERROR PINGING REDIS: #{error.inspect_with_backtrace}\n\n"
               end
             end
           end
@@ -196,7 +190,6 @@ class PlaceOS::Driver
           raise "no subscriptions, restarting loop" unless terminated?
         rescue e
           Log.warn(exception: e) { "redis subscription loop exited" }
-          puts "\n\nERROR SUBSCRIPTION MONITORING: #{e.message}\n\n"
           raise e
         ensure
           wait.close
