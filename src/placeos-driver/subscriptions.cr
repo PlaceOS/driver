@@ -157,17 +157,10 @@ class PlaceOS::Driver
               sub, chan = details
 
               begin
-                SimpleRetry.try_to(
-                  max_attempts: 4,
-                  base_interval: 20.milliseconds,
-                  max_interval: 1.seconds,
-                  randomise: 80.milliseconds
-                ) do
-                  if sub
-                    redis.subscribe [chan]
-                  else
-                    redis.unsubscribe [chan]
-                  end
+                if sub
+                  redis.subscribe [chan]
+                else
+                  redis.unsubscribe [chan]
                 end
               rescue error
                 Log.fatal(exception: error) { "redis subscription failed... some components may not function correctly" }
@@ -186,7 +179,10 @@ class PlaceOS::Driver
               loop do
                 sleep 1.second
                 break if instance != monitor_count
-                subscription_channel.send({true, SYSTEM_ORDER_UPDATE}) rescue nil
+                puts "PING SUBSCRIPTION REDIS"
+                subscription_channel.send({true, SYSTEM_ORDER_UPDATE})
+              rescue error
+                puts "\n\nERROR PINGING REDIS: #{error.inspect_with_backtrace}\n\n"
               end
             end
           end
