@@ -129,6 +129,7 @@ class PlaceOS::Driver
         puts "\n\nSTART SUBSCRIPTION MONITORING\n\n"
         return if terminated?
         monitor_count += 1
+        subscribe_count = monitor_count
         wait = Channel(Nil).new
         begin
           # This will run on redis reconnect
@@ -140,7 +141,7 @@ class PlaceOS::Driver
             # NOTE:: sending an empty array errors
             keys = mutex.synchronize { subscriptions.keys }
             if keys.size > 0
-              puts "\n\nFOUND #{keys} EXISTING SUBSCRIPTIONS\n\n"
+              puts "\n\nFOUND #{keys.size} EXISTING SUBSCRIPTIONS\n\n"
               redis.subscribe(keys)
             end
 
@@ -173,7 +174,9 @@ class PlaceOS::Driver
           # requires a block and subsequent ones throw an error with a block.
           # NOTE:: this version of subscribe only supports splat arguments
           redis.subscribe(SYSTEM_ORDER_UPDATE) do |on|
-            monitor_count += 1
+            raise "redis reconnect detected" if subscribe_count != monitor_count
+            subscribe_count += 1
+
             on.message { |c, m| on_message(c, m) }
             spawn(same_thread: true) do
               instance = monitor_count
@@ -212,6 +215,7 @@ class PlaceOS::Driver
             client.close rescue nil
           in Nil
           end
+          @redis_cluster = nil
           @redis = nil
         end
       end
@@ -291,7 +295,7 @@ class PlaceOS::Driver
     @redis : Redis? = nil
 
     protected def self.new_clustered_redis
-      Redis::Client.boot(ENV["REDIS_URL"]? || "redis://localhost:6379")
+      Redis::Client.boot(ENV["REDIS_URL"]? || "redis://localhost:6379", reconnect: false)
     end
 
     private def redis_cluster
