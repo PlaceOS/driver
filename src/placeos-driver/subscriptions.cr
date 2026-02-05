@@ -156,11 +156,6 @@ class PlaceOS::Driver
             while details = subscription_channel.receive?
               sub, chan = details
 
-              if chan == "ping"
-                redis.ping
-                next
-              end
-
               begin
                 SimpleRetry.try_to(
                   max_attempts: 4,
@@ -188,11 +183,10 @@ class PlaceOS::Driver
             spawn(same_thread: true) do
               instance = monitor_count
               wait.close
-              sleep 10.seconds
               loop do
                 sleep 1.second
                 break if instance != monitor_count
-                subscription_channel.send({true, "ping"}) rescue nil
+                subscription_channel.send({true, SYSTEM_ORDER_UPDATE}) rescue nil
               end
             end
           end
