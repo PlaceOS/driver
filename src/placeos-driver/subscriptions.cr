@@ -161,6 +161,7 @@ class PlaceOS::Driver
                 else
                   redis.unsubscribe [chan]
                 end
+                sleep 1.milliseconds
               rescue error
                 Log.fatal(exception: error) { "redis subscription failed... some components may not function correctly" }
                 redis.close
