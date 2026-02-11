@@ -161,7 +161,6 @@ class PlaceOS::Driver
                 else
                   redis.unsubscribe [chan]
                 end
-                sleep 1.milliseconds
               rescue error
                 Log.fatal(exception: error) { "redis subscription failed... some components may not function correctly" }
                 redis.close
@@ -181,7 +180,7 @@ class PlaceOS::Driver
               instance = monitor_count
               wait.close
               loop do
-                sleep 5.seconds
+                sleep 3.seconds
                 break if instance != monitor_count
                 subscription_channel.send({true, SYSTEM_ORDER_UPDATE})
               end
@@ -289,7 +288,7 @@ class PlaceOS::Driver
     @redis : Redis? = nil
 
     protected def self.new_clustered_redis
-      Redis::Client.boot(ENV["REDIS_URL"]? || "redis://localhost:6379", reconnect: false, command_timeout: 30.seconds)
+      Redis::Client.boot(ENV["REDIS_URL"]? || "redis://localhost:6379", reconnect: false, command_timeout: 10.seconds)
     end
 
     private def redis_cluster
