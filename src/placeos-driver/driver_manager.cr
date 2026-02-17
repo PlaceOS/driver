@@ -122,6 +122,9 @@ class PlaceOS::Driver::DriverManager
     @transport.terminate
     driver = @driver
 
+    # shutdown with connected true to reduce false positives
+    # in analytics dashboards
+    driver.set_connected_state(true) rescue nil
     @queue.terminate
     @schedule.terminate
     @subscriptions.try &.terminate
