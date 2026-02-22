@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../../../../js/doc.js"></script>
 
   <meta name="repository-name" content="placeos-driver">
-  <title>PlaceOS::Driver::Interface::Lockers::PlaceLocker - placeos-driver master</title>
+  <title>PlaceOS::Driver::Interface::DeviceInfo::Descriptor - placeos-driver master</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../../../";
   </script>
@@ -192,12 +192,12 @@
       
     </li>
   
-  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/DeviceInfo" data-name="placeos::driver::interface::deviceinfo">
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface/DeviceInfo" data-name="placeos::driver::interface::deviceinfo">
       <a href="../../../../PlaceOS/Driver/Interface/DeviceInfo.html">DeviceInfo</a>
       
         <ul>
   
-  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/DeviceInfo/Descriptor" data-name="placeos::driver::interface::deviceinfo::descriptor">
+  <li class=" current" data-id="placeos-driver/PlaceOS/Driver/Interface/DeviceInfo/Descriptor" data-name="placeos::driver::interface::deviceinfo::descriptor">
       <a href="../../../../PlaceOS/Driver/Interface/DeviceInfo/Descriptor.html">Descriptor</a>
       
     </li>
@@ -297,12 +297,12 @@
       
     </li>
   
-  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface/Lockers" data-name="placeos::driver::interface::lockers">
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Lockers" data-name="placeos::driver::interface::lockers">
       <a href="../../../../PlaceOS/Driver/Interface/Lockers.html">Lockers</a>
       
         <ul>
   
-  <li class=" current" data-id="placeos-driver/PlaceOS/Driver/Interface/Lockers/PlaceLocker" data-name="placeos::driver::interface::lockers::placelocker">
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Lockers/PlaceLocker" data-name="placeos::driver::interface::lockers::placelocker">
       <a href="../../../../PlaceOS/Driver/Interface/Lockers/PlaceLocker.html">PlaceLocker</a>
       
     </li>
@@ -732,27 +732,16 @@
 <h1 class="type-name">
 
   <span class="kind">
-    class
-  </span> PlaceOS::<wbr>Driver::<wbr>Interface::<wbr>Lockers::<wbr>PlaceLocker
+    struct
+  </span> PlaceOS::<wbr>Driver::<wbr>Interface::<wbr>DeviceInfo::<wbr>Descriptor
 
 </h1>
 
 
-  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../../../PlaceOS/Driver/Interface/Lockers/PlaceLocker.html">PlaceOS::Driver::Interface::Lockers::PlaceLocker</a></li><li class="superclass">Reference</li><li class="superclass"><a href="../../../../Object.html">Object</a></li></ul>
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../../../PlaceOS/Driver/Interface/DeviceInfo/Descriptor.html">PlaceOS::Driver::Interface::DeviceInfo::Descriptor</a></li><li class="superclass">Struct</li><li class="superclass">Value</li><li class="superclass"><a href="../../../../Object.html">Object</a></li></ul>
 
 
 
-
-  <h2>
-    <a id="overview" class="anchor" href="#overview">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Overview
-  </h2>
-
-  <p>inherit this to extend with additional locker information</p>
 
 
 
@@ -807,8 +796,8 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L9" target="_blank">
-        placeos-driver/interface/lockers.cr
+      <a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L5" target="_blank">
+        placeos-driver/interface/device_info.cr
       </a>
     
     <br/>
@@ -828,6 +817,11 @@
     Constructors
   </h2>
   <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28make%3AString%2Cmodel%3AString%2Cserial%3ANil%7CString%3Dnil%2Cfirmware%3ANil%7CString%3Dnil%2Cmac_address%3ANil%7CString%3Dnil%2Cip_address%3ANil%7CString%3Dnil%2Chostname%3ANil%7CString%3Dnil%29-class-method" class="signature"><strong>.new</strong>(make : String, model : String, serial : Nil | String = <span class="n">nil</span>, firmware : Nil | String = <span class="n">nil</span>, mac_address : Nil | String = <span class="n">nil</span>, ip_address : Nil | String = <span class="n">nil</span>, hostname : Nil | String = <span class="n">nil</span>)</a>
+        
+      </li>
     
       <li class="entry-summary">
         <a href="#new%28pull%3AJSON%3A%3APullParser%29-class-method" class="signature"><strong>.new</strong>(pull : JSON::PullParser)</a>
@@ -858,127 +852,100 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#allocated%3D%28allocated%3ABool%7CNil%29-instance-method" class="signature"><strong>#allocated=</strong>(allocated : Bool | Nil)</a>
+        <a href="#firmware%3AString%7CNil-instance-method" class="signature"><strong>#firmware</strong> : String | Nil</a>
         
-          <div class="summary"><p>is the current locker allocated</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#allocated%3F%3ABool%7CNil-instance-method" class="signature"><strong>#allocated?</strong> : Bool | Nil</a>
-        
-          <div class="summary"><p>is the current locker allocated</p></div>
+          <div class="summary"><p>The version of code running on the device</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#allocation_id%3AString%7CInt64%7CNil-instance-method" class="signature"><strong>#allocation_id</strong> : String | Int64 | Nil</a>
+        <a href="#firmware%3D%28firmware%3AString%7CNil%29-instance-method" class="signature"><strong>#firmware=</strong>(firmware : String | Nil)</a>
         
-          <div class="summary"><p>an indicator that can be synced with PlaceOS bookings could be the locker system user id or a booking id</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#allocation_id%3D%28allocation_id%3AString%7CInt64%7CNil%29-instance-method" class="signature"><strong>#allocation_id=</strong>(allocation_id : String | Int64 | Nil)</a>
-        
-          <div class="summary"><p>an indicator that can be synced with PlaceOS bookings could be the locker system user id or a booking id</p></div>
+          <div class="summary"><p>The version of code running on the device</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#bank_id%3AString%7CInt64-instance-method" class="signature"><strong>#bank_id</strong> : String | Int64</a>
+        <a href="#hostname%3AString%7CNil-instance-method" class="signature"><strong>#hostname</strong> : String | Nil</a>
         
-          <div class="summary"><p>the locker system ids</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#bank_id%3D%28bank_id%3AString%7CInt64%29-instance-method" class="signature"><strong>#bank_id=</strong>(bank_id : String | Int64)</a>
-        
-          <div class="summary"><p>the locker system ids</p></div>
+          <div class="summary"><p>The DNS/mDNS name of the device</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#building%3AString%7CNil-instance-method" class="signature"><strong>#building</strong> : String | Nil</a>
+        <a href="#hostname%3D%28hostname%3AString%7CNil%29-instance-method" class="signature"><strong>#hostname=</strong>(hostname : String | Nil)</a>
         
-          <div class="summary"><p>metadata for locating the locker (if known) - placeos zone ids</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#building%3D%28building%3AString%7CNil%29-instance-method" class="signature"><strong>#building=</strong>(building : String | Nil)</a>
-        
-          <div class="summary"><p>metadata for locating the locker (if known) - placeos zone ids</p></div>
+          <div class="summary"><p>The DNS/mDNS name of the device</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#expires_at%3ATime%7CNil-instance-method" class="signature"><strong>#expires_at</strong> : Time | Nil</a>
+        <a href="#ip_address%3AString%7CNil-instance-method" class="signature"><strong>#ip_address</strong> : String | Nil</a>
         
-          <div class="summary"><p>when the locker is released if known / enabled in the locker system</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#expires_at%3D%28expires_at%3ATime%7CNil%29-instance-method" class="signature"><strong>#expires_at=</strong>(expires_at : Time | Nil)</a>
-        
-          <div class="summary"><p>when the locker is released if known / enabled in the locker system</p></div>
+          <div class="summary"><p>The network address</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#level%3AString%7CNil-instance-method" class="signature"><strong>#level</strong> : String | Nil</a>
+        <a href="#ip_address%3D%28ip_address%3AString%7CNil%29-instance-method" class="signature"><strong>#ip_address=</strong>(ip_address : String | Nil)</a>
+        
+          <div class="summary"><p>The network address</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#level%3D%28level%3AString%7CNil%29-instance-method" class="signature"><strong>#level=</strong>(level : String | Nil)</a>
+        <a href="#mac_address%3AString%7CNil-instance-method" class="signature"><strong>#mac_address</strong> : String | Nil</a>
+        
+          <div class="summary"><p>The network hardware address</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#location%3AString-instance-method" class="signature"><strong>#location</strong> : String</a>
+        <a href="#mac_address%3D%28mac_address%3AString%7CNil%29-instance-method" class="signature"><strong>#mac_address=</strong>(mac_address : String | Nil)</a>
         
-          <div class="summary"><p>identifier for location services</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#locker_id%3AString%7CInt64-instance-method" class="signature"><strong>#locker_id</strong> : String | Int64</a>
+          <div class="summary"><p>The network hardware address</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#locker_id%3D%28locker_id%3AString%7CInt64%29-instance-method" class="signature"><strong>#locker_id=</strong>(locker_id : String | Int64)</a>
+        <a href="#make%3AString-instance-method" class="signature"><strong>#make</strong> : String</a>
+        
+          <div class="summary"><p>The manufacturer of the device</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#locker_name%3AString-instance-method" class="signature"><strong>#locker_name</strong> : String</a>
+        <a href="#make%3D%28make%3AString%29-instance-method" class="signature"><strong>#make=</strong>(make : String)</a>
         
-          <div class="summary"><p>the text on the outside of the locker</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#locker_name%3D%28locker_name%3AString%29-instance-method" class="signature"><strong>#locker_name=</strong>(locker_name : String)</a>
-        
-          <div class="summary"><p>the text on the outside of the locker</p></div>
+          <div class="summary"><p>The manufacturer of the device</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#mac%3AString%7CNil-instance-method" class="signature"><strong>#mac</strong> : String | Nil</a>
+        <a href="#model%3AString-instance-method" class="signature"><strong>#model</strong> : String</a>
         
-          <div class="summary"><p>a single field that can be used to uniquely identify a locker should not clash with other systems and ideally be usable to identify the user who is allocated to the locker (via a lookup function)</p></div>
+          <div class="summary"><p>The product identifier</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#mac%3D%28mac%3AString%7CNil%29-instance-method" class="signature"><strong>#mac=</strong>(mac : String | Nil)</a>
+        <a href="#model%3D%28model%3AString%29-instance-method" class="signature"><strong>#model=</strong>(model : String)</a>
         
-          <div class="summary"><p>a single field that can be used to uniquely identify a locker should not clash with other systems and ideally be usable to identify the user who is allocated to the locker (via a lookup function)</p></div>
+          <div class="summary"><p>The product identifier</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#serial%3AString%7CNil-instance-method" class="signature"><strong>#serial</strong> : String | Nil</a>
+        
+          <div class="summary"><p>The unique identifier</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#serial%3D%28serial%3AString%7CNil%29-instance-method" class="signature"><strong>#serial=</strong>(serial : String | Nil)</a>
+        
+          <div class="summary"><p>The unique identifier</p></div>
         
       </li>
     
@@ -987,6 +954,19 @@
 
 
   <div class="methods-inherited">
+    
+      
+
+
+      
+
+
+      
+
+
+      
+
+
     
       
 
@@ -1039,6 +1019,22 @@
     Constructor Detail
   </h2>
   
+    <div class="entry-detail" id="new(make:String,model:String,serial:Nil|String=nil,firmware:Nil|String=nil,mac_address:Nil|String=nil,ip_address:Nil|String=nil,hostname:Nil|String=nil)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(make : String, model : String, serial : Nil | String = <span class="n">nil</span>, firmware : Nil | String = <span class="n">nil</span>, mac_address : Nil | String = <span class="n">nil</span>, ip_address : Nil | String = <span class="n">nil</span>, hostname : Nil | String = <span class="n">nil</span>)
+
+        <a class="method-permalink" href="#new%28make%3AString%2Cmodel%3AString%2Cserial%3ANil%7CString%3Dnil%2Cfirmware%3ANil%7CString%3Dnil%2Cmac_address%3ANil%7CString%3Dnil%2Cip_address%3ANil%7CString%3Dnil%2Chostname%3ANil%7CString%3Dnil%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L8" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
     <div class="entry-detail" id="new(pull:JSON::PullParser)-class-method">
       <div class="signature">
         
@@ -1050,7 +1046,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L10" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L6" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1066,7 +1062,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L10" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L6" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1087,387 +1083,296 @@
     Instance Method Detail
   </h2>
   
-    <div class="entry-detail" id="allocated=(allocated:Bool|Nil)-instance-method">
+    <div class="entry-detail" id="firmware:String|Nil-instance-method">
       <div class="signature">
         
-        def <strong>allocated=</strong>(allocated : Bool | Nil)
+        def <strong>firmware</strong> : String | Nil
 
-        <a class="method-permalink" href="#allocated%3D%28allocated%3ABool%7CNil%29-instance-method">#</a>
+        <a class="method-permalink" href="#firmware%3AString%7CNil-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>is the current locker allocated</p>
+          <p>The version of code running on the device</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L23" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L29" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="allocated?:Bool|Nil-instance-method">
+    <div class="entry-detail" id="firmware=(firmware:String|Nil)-instance-method">
       <div class="signature">
         
-        def <strong>allocated?</strong> : Bool | Nil
+        def <strong>firmware=</strong>(firmware : String | Nil)
 
-        <a class="method-permalink" href="#allocated%3F%3ABool%7CNil-instance-method">#</a>
+        <a class="method-permalink" href="#firmware%3D%28firmware%3AString%7CNil%29-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>is the current locker allocated</p>
+          <p>The version of code running on the device</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L23" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L29" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="allocation_id:String|Int64|Nil-instance-method">
+    <div class="entry-detail" id="hostname:String|Nil-instance-method">
       <div class="signature">
         
-        def <strong>allocation_id</strong> : String | Int64 | Nil
+        def <strong>hostname</strong> : String | Nil
 
-        <a class="method-permalink" href="#allocation_id%3AString%7CInt64%7CNil-instance-method">#</a>
+        <a class="method-permalink" href="#hostname%3AString%7CNil-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>an indicator that can be synced with PlaceOS bookings
-could be the locker system user id or a booking id</p>
+          <p>The DNS/mDNS name of the device</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L27" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L38" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="allocation_id=(allocation_id:String|Int64|Nil)-instance-method">
+    <div class="entry-detail" id="hostname=(hostname:String|Nil)-instance-method">
       <div class="signature">
         
-        def <strong>allocation_id=</strong>(allocation_id : String | Int64 | Nil)
+        def <strong>hostname=</strong>(hostname : String | Nil)
 
-        <a class="method-permalink" href="#allocation_id%3D%28allocation_id%3AString%7CInt64%7CNil%29-instance-method">#</a>
+        <a class="method-permalink" href="#hostname%3D%28hostname%3AString%7CNil%29-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>an indicator that can be synced with PlaceOS bookings
-could be the locker system user id or a booking id</p>
+          <p>The DNS/mDNS name of the device</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L27" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L38" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="bank_id:String|Int64-instance-method">
+    <div class="entry-detail" id="ip_address:String|Nil-instance-method">
       <div class="signature">
         
-        def <strong>bank_id</strong> : String | Int64
+        def <strong>ip_address</strong> : String | Nil
 
-        <a class="method-permalink" href="#bank_id%3AString%7CInt64-instance-method">#</a>
+        <a class="method-permalink" href="#ip_address%3AString%7CNil-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>the locker system ids</p>
+          <p>The network address</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L16" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L35" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="bank_id=(bank_id:String|Int64)-instance-method">
+    <div class="entry-detail" id="ip_address=(ip_address:String|Nil)-instance-method">
       <div class="signature">
         
-        def <strong>bank_id=</strong>(bank_id : String | Int64)
+        def <strong>ip_address=</strong>(ip_address : String | Nil)
 
-        <a class="method-permalink" href="#bank_id%3D%28bank_id%3AString%7CInt64%29-instance-method">#</a>
+        <a class="method-permalink" href="#ip_address%3D%28ip_address%3AString%7CNil%29-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>the locker system ids</p>
+          <p>The network address</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L16" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L35" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="building:String|Nil-instance-method">
+    <div class="entry-detail" id="mac_address:String|Nil-instance-method">
       <div class="signature">
         
-        def <strong>building</strong> : String | Nil
+        def <strong>mac_address</strong> : String | Nil
 
-        <a class="method-permalink" href="#building%3AString%7CNil-instance-method">#</a>
+        <a class="method-permalink" href="#mac_address%3AString%7CNil-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>metadata for locating the locker (if known) - placeos zone ids</p>
+          <p>The network hardware address</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L39" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L32" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="building=(building:String|Nil)-instance-method">
+    <div class="entry-detail" id="mac_address=(mac_address:String|Nil)-instance-method">
       <div class="signature">
         
-        def <strong>building=</strong>(building : String | Nil)
+        def <strong>mac_address=</strong>(mac_address : String | Nil)
 
-        <a class="method-permalink" href="#building%3D%28building%3AString%7CNil%29-instance-method">#</a>
+        <a class="method-permalink" href="#mac_address%3D%28mac_address%3AString%7CNil%29-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>metadata for locating the locker (if known) - placeos zone ids</p>
+          <p>The network hardware address</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L39" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L32" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="expires_at:Time|Nil-instance-method">
+    <div class="entry-detail" id="make:String-instance-method">
       <div class="signature">
         
-        def <strong>expires_at</strong> : Time | Nil
+        def <strong>make</strong> : String
 
-        <a class="method-permalink" href="#expires_at%3ATime%7CNil-instance-method">#</a>
+        <a class="method-permalink" href="#make%3AString-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>when the locker is released if known / enabled in the locker system</p>
+          <p>The manufacturer of the device</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L31" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L20" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="expires_at=(expires_at:Time|Nil)-instance-method">
+    <div class="entry-detail" id="make=(make:String)-instance-method">
       <div class="signature">
         
-        def <strong>expires_at=</strong>(expires_at : Time | Nil)
+        def <strong>make=</strong>(make : String)
 
-        <a class="method-permalink" href="#expires_at%3D%28expires_at%3ATime%7CNil%29-instance-method">#</a>
+        <a class="method-permalink" href="#make%3D%28make%3AString%29-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>when the locker is released if known / enabled in the locker system</p>
+          <p>The manufacturer of the device</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L31" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L20" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="level:String|Nil-instance-method">
+    <div class="entry-detail" id="model:String-instance-method">
       <div class="signature">
         
-        def <strong>level</strong> : String | Nil
+        def <strong>model</strong> : String
 
-        <a class="method-permalink" href="#level%3AString%7CNil-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L40" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="level=(level:String|Nil)-instance-method">
-      <div class="signature">
-        
-        def <strong>level=</strong>(level : String | Nil)
-
-        <a class="method-permalink" href="#level%3D%28level%3AString%7CNil%29-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L40" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="location:String-instance-method">
-      <div class="signature">
-        
-        def <strong>location</strong> : String
-
-        <a class="method-permalink" href="#location%3AString-instance-method">#</a>
+        <a class="method-permalink" href="#model%3AString-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>identifier for location services</p>
+          <p>The product identifier</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L13" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L23" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="locker_id:String|Int64-instance-method">
+    <div class="entry-detail" id="model=(model:String)-instance-method">
       <div class="signature">
         
-        def <strong>locker_id</strong> : String | Int64
+        def <strong>model=</strong>(model : String)
 
-        <a class="method-permalink" href="#locker_id%3AString%7CInt64-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L17" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="locker_id=(locker_id:String|Int64)-instance-method">
-      <div class="signature">
-        
-        def <strong>locker_id=</strong>(locker_id : String | Int64)
-
-        <a class="method-permalink" href="#locker_id%3D%28locker_id%3AString%7CInt64%29-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L17" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="locker_name:String-instance-method">
-      <div class="signature">
-        
-        def <strong>locker_name</strong> : String
-
-        <a class="method-permalink" href="#locker_name%3AString-instance-method">#</a>
+        <a class="method-permalink" href="#model%3D%28model%3AString%29-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>the text on the outside of the locker</p>
+          <p>The product identifier</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L20" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L23" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="locker_name=(locker_name:String)-instance-method">
+    <div class="entry-detail" id="serial:String|Nil-instance-method">
       <div class="signature">
         
-        def <strong>locker_name=</strong>(locker_name : String)
+        def <strong>serial</strong> : String | Nil
 
-        <a class="method-permalink" href="#locker_name%3D%28locker_name%3AString%29-instance-method">#</a>
+        <a class="method-permalink" href="#serial%3AString%7CNil-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>the text on the outside of the locker</p>
+          <p>The unique identifier</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L20" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L26" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="mac:String|Nil-instance-method">
+    <div class="entry-detail" id="serial=(serial:String|Nil)-instance-method">
       <div class="signature">
         
-        def <strong>mac</strong> : String | Nil
+        def <strong>serial=</strong>(serial : String | Nil)
 
-        <a class="method-permalink" href="#mac%3AString%7CNil-instance-method">#</a>
+        <a class="method-permalink" href="#serial%3D%28serial%3AString%7CNil%29-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>a single field that can be used to uniquely identify a locker
-should not clash with other systems and ideally be usable to
-identify the user who is allocated to the locker (via a lookup function)</p>
+          <p>The unique identifier</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L36" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="mac=(mac:String|Nil)-instance-method">
-      <div class="signature">
-        
-        def <strong>mac=</strong>(mac : String | Nil)
-
-        <a class="method-permalink" href="#mac%3D%28mac%3AString%7CNil%29-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>a single field that can be used to uniquely identify a locker
-should not clash with other systems and ideally be usable to
-identify the user who is allocated to the locker (via a lookup function)</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/lockers.cr#L36" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L26" target="_blank">View source</a>]
         
       </div>
     </div>

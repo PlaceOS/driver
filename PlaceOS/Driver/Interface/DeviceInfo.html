@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../../../js/doc.js"></script>
 
   <meta name="repository-name" content="placeos-driver">
-  <title>PlaceOS::Driver::Proxy::Subscriptions - placeos-driver master</title>
+  <title>PlaceOS::Driver::Interface::DeviceInfo - placeos-driver master</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../../";
   </script>
@@ -117,7 +117,7 @@
       
     </li>
   
-  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface" data-name="placeos::driver::interface">
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface" data-name="placeos::driver::interface">
       <a href="../../../PlaceOS/Driver/Interface.html">Interface</a>
       
         <ul>
@@ -192,7 +192,7 @@
       
     </li>
   
-  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/DeviceInfo" data-name="placeos::driver::interface::deviceinfo">
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface/DeviceInfo" data-name="placeos::driver::interface::deviceinfo">
       <a href="../../../PlaceOS/Driver/Interface/DeviceInfo.html">DeviceInfo</a>
       
         <ul>
@@ -522,7 +522,7 @@
       
     </li>
   
-  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Proxy" data-name="placeos::driver::proxy">
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Proxy" data-name="placeos::driver::proxy">
       <a href="../../../PlaceOS/Driver/Proxy.html">Proxy</a>
       
         <ul>
@@ -602,7 +602,7 @@
       
     </li>
   
-  <li class=" current" data-id="placeos-driver/PlaceOS/Driver/Proxy/Subscriptions" data-name="placeos::driver::proxy::subscriptions">
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/Subscriptions" data-name="placeos::driver::proxy::subscriptions">
       <a href="../../../PlaceOS/Driver/Proxy/Subscriptions.html">Subscriptions</a>
       
     </li>
@@ -732,13 +732,11 @@
 <h1 class="type-name">
 
   <span class="kind">
-    class
-  </span> PlaceOS::<wbr>Driver::<wbr>Proxy::<wbr>Subscriptions
+    module
+  </span> PlaceOS::<wbr>Driver::<wbr>Interface::<wbr>DeviceInfo
 
 </h1>
 
-
-  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../../PlaceOS/Driver/Proxy/Subscriptions.html">PlaceOS::Driver::Proxy::Subscriptions</a></li><li class="superclass">Reference</li><li class="superclass"><a href="../../../Object.html">Object</a></li></ul>
 
 
 
@@ -768,8 +766,8 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/proxy/subscriptions.cr#L7" target="_blank">
-        placeos-driver/proxy/subscriptions.cr
+      <a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L4" target="_blank">
+        placeos-driver/interface/device_info.cr
       </a>
     
     <br/>
@@ -797,32 +795,14 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#channel%28name%2C%26callback%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3AChannelSubscription%2CString-%3ENil%29%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3AChannelSubscription-instance-method" class="signature"><strong>#channel</strong>(name, &callback : PlaceOS::Driver::Subscriptions::ChannelSubscription, String -> Nil) : PlaceOS::Driver::Subscriptions::ChannelSubscription</a>
+        <a href="#device_info%3ADescriptor-instance-method" class="signature"><strong>#device_info</strong> : Descriptor</a>
+        
+          <div class="summary"><p>the target class must implement this function</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#clear%3ANil-instance-method" class="signature"><strong>#clear</strong> : Nil</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#logger%3APlaceOS%3A%3ADriver%3A%3ALog%7CNil-instance-method" class="signature"><strong>#logger</strong> : PlaceOS::Driver::Log | Nil</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#subscribe%28system_id%2Cmodule_name%2Cindex%2Cstatus%2C%26callback%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3AIndirectSubscription%2CString-%3ENil%29%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3AIndirectSubscription-instance-method" class="signature"><strong>#subscribe</strong>(system_id, module_name, index, status, &callback : PlaceOS::Driver::Subscriptions::IndirectSubscription, String -> Nil) : PlaceOS::Driver::Subscriptions::IndirectSubscription</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#subscribe%28module_id%2Cstatus%2C%26callback%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3ADirectSubscription%2CString-%3ENil%29%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3ADirectSubscription-instance-method" class="signature"><strong>#subscribe</strong>(module_id, status, &callback : PlaceOS::Driver::Subscriptions::DirectSubscription, String -> Nil) : PlaceOS::Driver::Subscriptions::DirectSubscription</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#unsubscribe%28subscription%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3ASubscription%29-instance-method" class="signature"><strong>#unsubscribe</strong>(subscription : PlaceOS::Driver::Subscriptions::Subscription)</a>
+        <a href="#update_device_info-instance-method" class="signature"><strong>#update_device_info</strong></a>
         
       </li>
     
@@ -831,32 +811,6 @@
 
 
   <div class="methods-inherited">
-    
-      
-
-
-      
-
-
-      
-
-
-      
-
-
-    
-      
-
-
-      
-
-
-      
-
-
-      
-
-
     
   </div>
 
@@ -876,98 +830,39 @@
     Instance Method Detail
   </h2>
   
-    <div class="entry-detail" id="channel(name,&amp;callback:PlaceOS::Driver::Subscriptions::ChannelSubscription,String-&gt;Nil):PlaceOS::Driver::Subscriptions::ChannelSubscription-instance-method">
+    <div class="entry-detail" id="device_info:Descriptor-instance-method">
       <div class="signature">
-        
-        def <strong>channel</strong>(name, &callback : PlaceOS::Driver::Subscriptions::ChannelSubscription, String -> Nil) : PlaceOS::Driver::Subscriptions::ChannelSubscription
+        abstract 
+        def <strong>device_info</strong> : <a href="../../../PlaceOS/Driver/Interface/DeviceInfo/Descriptor.html">Descriptor</a>
 
-        <a class="method-permalink" href="#channel%28name%2C%26callback%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3AChannelSubscription%2CString-%3ENil%29%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3AChannelSubscription-instance-method">#</a>
+        <a class="method-permalink" href="#device_info%3ADescriptor-instance-method">#</a>
       </div>
+      
+        <div class="doc">
+          
+          <p>the target class must implement this function</p>
+        </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/proxy/subscriptions.cr#L35" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L72" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="clear:Nil-instance-method">
+    <div class="entry-detail" id="update_device_info-instance-method">
       <div class="signature">
         
-        def <strong>clear</strong> : Nil
+        def <strong>update_device_info</strong>
 
-        <a class="method-permalink" href="#clear%3ANil-instance-method">#</a>
+        <a class="method-permalink" href="#update_device_info-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/proxy/subscriptions.cr#L22" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="logger:PlaceOS::Driver::Log|Nil-instance-method">
-      <div class="signature">
-        
-        def <strong>logger</strong> : PlaceOS::Driver::Log | Nil
-
-        <a class="method-permalink" href="#logger%3APlaceOS%3A%3ADriver%3A%3ALog%7CNil-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/proxy/subscriptions.cr#L14" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="subscribe(system_id,module_name,index,status,&amp;callback:PlaceOS::Driver::Subscriptions::IndirectSubscription,String-&gt;Nil):PlaceOS::Driver::Subscriptions::IndirectSubscription-instance-method">
-      <div class="signature">
-        
-        def <strong>subscribe</strong>(system_id, module_name, index, status, &callback : PlaceOS::Driver::Subscriptions::IndirectSubscription, String -> Nil) : PlaceOS::Driver::Subscriptions::IndirectSubscription
-
-        <a class="method-permalink" href="#subscribe%28system_id%2Cmodule_name%2Cindex%2Cstatus%2C%26callback%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3AIndirectSubscription%2CString-%3ENil%29%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3AIndirectSubscription-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/proxy/subscriptions.cr#L49" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="subscribe(module_id,status,&amp;callback:PlaceOS::Driver::Subscriptions::DirectSubscription,String-&gt;Nil):PlaceOS::Driver::Subscriptions::DirectSubscription-instance-method">
-      <div class="signature">
-        
-        def <strong>subscribe</strong>(module_id, status, &callback : PlaceOS::Driver::Subscriptions::DirectSubscription, String -> Nil) : PlaceOS::Driver::Subscriptions::DirectSubscription
-
-        <a class="method-permalink" href="#subscribe%28module_id%2Cstatus%2C%26callback%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3ADirectSubscription%2CString-%3ENil%29%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3ADirectSubscription-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/proxy/subscriptions.cr#L63" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="unsubscribe(subscription:PlaceOS::Driver::Subscriptions::Subscription)-instance-method">
-      <div class="signature">
-        
-        def <strong>unsubscribe</strong>(subscription : PlaceOS::Driver::Subscriptions::Subscription)
-
-        <a class="method-permalink" href="#unsubscribe%28subscription%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3ASubscription%29-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/proxy/subscriptions.cr#L30" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/0cfc8dd0f0ef14046a9475ba75c70e5f47e6f713/src/placeos-driver/interface/device_info.cr#L74" target="_blank">View source</a>]
         
       </div>
     </div>
