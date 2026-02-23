@@ -81,29 +81,23 @@ class PlaceOS::Driver::DriverManager
     # we don't want to block driver init processing too long
     # a driver might be making a HTTP request in on_load for exampe which
     # could block for a long time, resulting in poor feedback
-    if driver.responds_to?(:on_load) || driver.responds_to?(:on_update)
-      wait_on_load = Channel(Nil).new
-      spawn(same_thread: true) do
-        begin
-          if driver.responds_to?(:on_load)
-            driver.on_load
-          elsif driver.responds_to?(:on_update)
-            driver.on_update
-          end
-        rescue error
-          logger.error(exception: error) { "initializing #{driver.class} (#{@module_id})" }
-        end
-        wait_on_load.send nil
+    wait_on_load = Channel(Nil).new
+    spawn(same_thread: true) do
+      begin
+        driver.on_load
+      rescue error
+        logger.error(exception: error) { "initializing #{driver.class} (#{@module_id})" }
       end
-
-      select
-      when wait_on_load.receive
-      when timeout(6.seconds)
-        logger.error { "timeout initializing #{driver.class} (#{@module_id})" }
-      end
-
-      wait_on_load.close
+      wait_on_load.send nil
     end
+
+    select
+    when wait_on_load.receive
+    when timeout(6.seconds)
+      logger.error { "timeout initializing #{driver.class} (#{@module_id})" }
+    end
+
+    wait_on_load.close
 
     begin
       driver.__apply_bindings__
@@ -156,7 +150,7 @@ class PlaceOS::Driver::DriverManager
     driver = @driver
     driver.config = driver_model
     driver[:proxy_in_use] = nil
-    driver.on_update if driver.responds_to?(:on_update)
+    driver.on_update
   rescue error
     logger.error(exception: error) { "during settings update of #{@driver.class} (#{@module_id})" }
   end
@@ -278,9 +272,9 @@ class PlaceOS::Driver::DriverManager
 
     # we want to run these callbacks even if redis was offline
     if state
-      driver.connected if driver.responds_to?(:connected)
+      driver.connected
     else
-      driver.disconnected if driver.responds_to?(:disconnected)
+      driver.disconnected
     end
   rescue error
     logger.warn(exception: error) { "error changing connected state #{@driver.class} (#{@module_id})" }

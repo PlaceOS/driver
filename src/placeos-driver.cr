@@ -117,6 +117,25 @@ abstract class PlaceOS::Driver
     end
   {% end %}
 
+  # :nodoc:
+  def on_update
+    # these functions are implemented by default
+    # to allow for simplified overloading and calls to previous_def
+  end
+
+  # :nodoc:
+  def on_load
+    on_update
+  end
+
+  # :nodoc:
+  def connected
+  end
+
+  # :nodoc:
+  def disconnected
+  end
+
   # provides access to the modules subscriptions tracker
   def subscriptions : ::PlaceOS::Driver::Proxy::Subscriptions
     raise "unsupported when running on the edge" if @__edge_driver__

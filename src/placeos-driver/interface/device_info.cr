@@ -46,23 +46,19 @@ abstract class PlaceOS::Driver
 
       macro finished
         def connected
-          {% if @type.methods.find { |meth| meth.name.id.stringify == "connected" } %}
-            previous_def
-          {% end %}
+          previous_def
         ensure
           @__device_info_schedule__ = schedule.every(1.hour) { update_device_info }
           @__device_info_now__ = schedule.in(5.seconds + rand(5000).milliseconds) { update_device_info }
         end
 
         def disconnected
-          {% if @type.methods.find { |meth| meth.name.id.stringify == "disconnected" } %}
-            previous_def
-          {% end %}
+          previous_def
         ensure
-          @__device_info_schedule__.try &.cancel
+          @__device_info_schedule__.try(&.cancel) rescue nil
           @__device_info_schedule__ = nil
 
-          @__device_info_now__.try &.cancel
+          @__device_info_now__.try(&.cancel) rescue nil
           @__device_info_now__ = nil
         end
       end
