@@ -48,6 +48,9 @@ abstract class PlaceOS::Driver
         def connected
           previous_def
         ensure
+          @__device_info_schedule__.try(&.cancel) rescue nil
+          @__device_info_now__.try(&.cancel) rescue nil
+
           @__device_info_schedule__ = schedule.every(1.hour) { update_device_info }
           @__device_info_now__ = schedule.in(5.seconds + rand(5000).milliseconds) { update_device_info }
         end
