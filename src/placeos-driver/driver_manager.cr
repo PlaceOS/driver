@@ -4,7 +4,9 @@ require "ipaddress"
 class PlaceOS::Driver::DriverManager
   def initialize(@module_id : String, @model : DriverModel, logger_io = STDOUT, subscriptions = nil, edge_driver = false)
     @settings = Settings.new @model.settings
-    @logger = PlaceOS::Driver::Log.new(@module_id, logger_io)
+    log_level = (@settings.get { setting?(::Log::Severity, :persistent_log_level) } || ::Log::Severity::Error) rescue ::Log::Severity::Error
+
+    @logger = PlaceOS::Driver::Log.new(@module_id, logger_io, severity: log_level)
     @queue = Queue.new(@logger) { |state| connection(state) }
     @schedule = PlaceOS::Driver::Proxy::Scheduler.new(@logger)
     @subscriptions = edge_driver ? nil : Proxy::Subscriptions.new(subscriptions || Subscriptions.new, @logger)
@@ -153,6 +155,10 @@ class PlaceOS::Driver::DriverManager
     driver.on_update
   rescue error
     logger.error(exception: error) { "during settings update of #{@driver.class} (#{@module_id})" }
+  ensure
+    # set any new persistent log levels
+    log_level = (@settings.get { setting?(::Log::Severity, :persistent_log_level) } || ::Log::Severity::Error) rescue ::Log::Severity::Error
+    @logger.override_io_severity(log_level)
   end
 
   def execute(json)

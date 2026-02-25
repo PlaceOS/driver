@@ -52,6 +52,7 @@ class PlaceOS::Driver
     getter io_backend : ::Log::IOBackend
     getter protocol_backend : ProtocolBackend
     getter debugging : Bool
+    getter io_severity : ::Log::Severity
 
     def debugging=(value : Bool)
       @debugging = value
@@ -59,7 +60,14 @@ class PlaceOS::Driver
       # Don't worry it's not really an append, it's updating a hash with the
       # backend as the key, so this is a clean update
       @broadcast_backend.append(@protocol_backend, value ? ::Log::Severity::Debug : ::Log::Severity::None)
-      self.level = value ? ::Log::Severity::Debug : ::Log::Severity::Error
+      self.level = value ? ::Log::Severity::Debug : @io_severity
+    end
+
+    def override_io_severity(severity : ::Log::Severity)
+      @io_severity = severity
+      # Don't worry it's not really an append, it's updating a hash
+      @broadcast_backend.append(@io_backend, severity)
+      self.level = @debugging ? ::Log::Severity::Debug : severity
     end
 
     def initialize(
@@ -69,6 +77,7 @@ class PlaceOS::Driver
       severity : ::Log::Severity = ::Log::Severity::Error,
     )
       @debugging = false
+      @io_severity = severity
 
       # Create a Driver protocol log backend
       @protocol_backend = ProtocolBackend.new(protocol: @protocol)
