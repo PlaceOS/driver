@@ -157,6 +157,14 @@ class PlaceOS::Driver
       @queue.online = true
     end
 
+    # NOTE:: overloading base version of this
+    def before_request(&@before_request : HTTP::Request ->)
+      super
+      if before_req = @before_request
+        @client.before_request &before_req
+      end
+    end
+
     # don't stop processing commands in HTTP drivers
     # the requests are required to re-enable the queue
     # and queue based HTTP drivers are less common

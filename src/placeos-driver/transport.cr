@@ -22,6 +22,7 @@ abstract class PlaceOS::Driver::Transport
   def pre_processor(&@pre_processor : (Bytes) -> Bytes?)
   end
 
+  # NOTE:: overloaded in transport/http
   def before_request(&@before_request : HTTP::Request ->)
   end
 
