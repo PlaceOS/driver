@@ -159,7 +159,6 @@ class PlaceOS::Driver
 
     # NOTE:: overloading base version of this
     def before_request(&@before_request : HTTP::Request ->)
-      super
       if before_req = @before_request
         @client.before_request &before_req
       end
