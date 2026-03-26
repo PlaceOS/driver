@@ -1,5 +1,5 @@
 name: placeos-driver
-version: 7.20.1
+version: 7.20.2
 
 dependencies:
   action-controller:
@@ -56,9 +56,6 @@ dependencies:
 
   json-schema:
     github: spider-gazelle/json-schema
-
-  dns:
-    github: spider-gazelle/dns
 
 development_dependencies:
   ameba:
