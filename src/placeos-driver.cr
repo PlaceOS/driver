@@ -1,6 +1,8 @@
 require "json-schema"
 require "option_parser"
 require "yaml"
+require "dns"
+require "dns/ext/addrinfo"
 
 # :nodoc:
 class PlaceOS::Startup
