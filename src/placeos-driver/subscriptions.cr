@@ -34,7 +34,14 @@ class PlaceOS::Driver
 
     private property subscription_channel : Channel(Tuple(Bool, String)) = Channel(Tuple(Bool, String)).new
 
-    def initialize
+    # `ack_timeout` and `heartbeat_interval` configure the watchdog that
+    # detects a stalled (TCP-blackholed) subscription connection. Each
+    # `heartbeat_interval` we re-SUBSCRIBE to SYSTEM_ORDER_UPDATE; if the
+    # server hasn't acknowledged any subscribe in `ack_timeout`, we close
+    # the redis client and let SimpleRetry establish a fresh connection.
+    @last_ack : Time::Span = Time.monotonic
+
+    def initialize(@ack_timeout : Time::Span = 15.seconds, @heartbeat_interval : Time::Span = 3.seconds)
       spawn(same_thread: true) { monitor_changes }
     end
 
@@ -130,6 +137,9 @@ class PlaceOS::Driver
         monitor_count += 1
         subscribe_count = monitor_count
         wait = Channel(Nil).new
+        # Reset the watchdog clock so the heartbeat has a full ack_timeout
+        # window to receive its first SUBSCRIBE ack on this iteration.
+        @last_ack = Time.monotonic
         begin
           # This will run on redis reconnect
           # We can't have this run in the subscribe block as the subscribe block
@@ -164,6 +174,12 @@ class PlaceOS::Driver
               rescue error
                 Log.fatal(exception: error) { "redis subscription failed... some components may not function correctly" }
                 redis.close
+                # Break to stop draining subscription_channel against a dead
+                # connection. Every further op would raise "Not connected to
+                # Redis server and reconnect=false" and log another FATAL.
+                # SimpleRetry will re-establish the subscription loop and
+                # re-subscribe to every channel still in the cache.
+                break
               end
             end
           }
@@ -175,13 +191,23 @@ class PlaceOS::Driver
             raise "redis reconnect detected" if subscribe_count != monitor_count
             subscribe_count += 1
 
+            # Watchdog: every SUBSCRIBE ack from the server stamps @last_ack.
+            # Combined with the periodic re-SUBSCRIBE below, this gives us
+            # liveness — if no acks for `ack_timeout` we know the connection
+            # is blackholed and force a reconnect.
+            on.subscribe { |_, _| @last_ack = Time.monotonic }
             on.message { |c, m| on_message(c, m) }
             spawn(same_thread: true) do
               instance = monitor_count
               wait.close
               loop do
-                sleep 3.seconds
+                sleep @heartbeat_interval
                 break if instance != monitor_count
+                if Time.monotonic - @last_ack > @ack_timeout
+                  Log.warn { "no subscribe ack within #{@ack_timeout.total_seconds}s — forcing reconnect" }
+                  redis.close
+                  break
+                end
                 subscription_channel.send({true, SYSTEM_ORDER_UPDATE})
               end
             end
