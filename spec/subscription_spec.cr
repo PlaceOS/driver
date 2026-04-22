@@ -476,9 +476,9 @@ module PlaceOS
         )
 
         # First iteration must come up before we can assert anything.
-        deadline = Time.monotonic + 5.seconds
+        deadline = Time.instant + 5.seconds
         until subs.running
-          fail "subscription loop never started" if Time.monotonic > deadline
+          fail "subscription loop never started" if Time.instant > deadline
           sleep 10.milliseconds
         end
 
@@ -486,18 +486,18 @@ module PlaceOS
 
         # Watchdog should close the first BlackholeRedis once the ack
         # window elapses. Allow generous slack on top of ack_timeout.
-        deadline = Time.monotonic + 2.seconds
+        deadline = Time.instant + 2.seconds
         until first_blackhole.close_count.get > 0
-          fail "watchdog never fired (close not called within 2s)" if Time.monotonic > deadline
+          fail "watchdog never fired (close not called within 2s)" if Time.instant > deadline
           sleep 20.milliseconds
         end
 
         first_blackhole.close_count.get.should be > 0
 
         # SimpleRetry should bring up a fresh iteration with a NEW mock.
-        deadline = Time.monotonic + 5.seconds
+        deadline = Time.instant + 5.seconds
         until subs.blackholes.size >= 2
-          fail "loop did not restart with a new redis" if Time.monotonic > deadline
+          fail "loop did not restart with a new redis" if Time.instant > deadline
           sleep 20.milliseconds
         end
 

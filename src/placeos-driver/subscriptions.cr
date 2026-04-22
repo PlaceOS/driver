@@ -39,7 +39,7 @@ class PlaceOS::Driver
     # `heartbeat_interval` we re-SUBSCRIBE to SYSTEM_ORDER_UPDATE; if the
     # server hasn't acknowledged any subscribe in `ack_timeout`, we close
     # the redis client and let SimpleRetry establish a fresh connection.
-    @last_ack : Time::Span = Time.monotonic
+    @last_ack : Time::Instant = Time.instant
 
     def initialize(@ack_timeout : Time::Span = 15.seconds, @heartbeat_interval : Time::Span = 3.seconds)
       spawn(same_thread: true) { monitor_changes }
@@ -139,7 +139,7 @@ class PlaceOS::Driver
         wait = Channel(Nil).new
         # Reset the watchdog clock so the heartbeat has a full ack_timeout
         # window to receive its first SUBSCRIBE ack on this iteration.
-        @last_ack = Time.monotonic
+        @last_ack = Time.instant
         begin
           # This will run on redis reconnect
           # We can't have this run in the subscribe block as the subscribe block
@@ -195,7 +195,7 @@ class PlaceOS::Driver
             # Combined with the periodic re-SUBSCRIBE below, this gives us
             # liveness — if no acks for `ack_timeout` we know the connection
             # is blackholed and force a reconnect.
-            on.subscribe { |_, _| @last_ack = Time.monotonic }
+            on.subscribe { |_, _| @last_ack = Time.instant }
             on.message { |c, m| on_message(c, m) }
             spawn(same_thread: true) do
               instance = monitor_count
@@ -203,7 +203,7 @@ class PlaceOS::Driver
               loop do
                 sleep @heartbeat_interval
                 break if instance != monitor_count
-                if Time.monotonic - @last_ack > @ack_timeout
+                if Time.instant - @last_ack > @ack_timeout
                   Log.warn { "no subscribe ack within #{@ack_timeout.total_seconds}s — forcing reconnect" }
                   redis.close
                   break
