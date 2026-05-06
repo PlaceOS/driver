@@ -21,6 +21,7 @@ struct PlaceOS::Driver::DriverModel
     property support_url : String?
     property zones : Array(String)
     property images : Array(String)?
+    property security_groups : Array(String)?
   end
 
   struct Metadata
