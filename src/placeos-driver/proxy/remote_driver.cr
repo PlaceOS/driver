@@ -186,6 +186,25 @@ module PlaceOS::Driver::Proxy
       node
     end
 
+    # Same as `which_core` but returns nil when no node is registered, so
+    # callers in error-recovery paths don't have to defend against a raise
+    # while already handling another error.
+    private def which_core? : URI?
+      if module_id = module_id?
+        if module_id.ends_with? EDGE_HINT
+          @discovery[@edge_id.call(module_id)]?
+        else
+          @discovery[module_id]?
+        end
+      end
+    end
+
+    # Number of HTTP-level retries inside `Core::Client` per attempt. Lower
+    # than the lib default (10) so a single unreachable host can't pin a
+    # caller for ~3 minutes. The rebalance retry below covers the
+    # stale-URI case independently.
+    private CORE_CLIENT_RETRIES = 4
+
     # Executes a request against the appropriate core and returns the JSON result
     #
     def exec(
@@ -205,12 +224,33 @@ module PlaceOS::Driver::Proxy
       raise Error.new(ErrorCode::ModuleNotFound, "could not find module id", *@error_details) unless module_id
 
       exec_args = args || named_args
-      Core::Client.client(which_core, request_id) do |client|
+      uri = which_core
+      rebalanced = false
+
+      loop do
         begin
-          client.execute(module_id, function, exec_args, user_id: user_id)
+          return Core::Client.client(uri, request_id, retries: CORE_CLIENT_RETRIES) do |client|
+            client.execute(module_id, function, exec_args, user_id: user_id)
+          end
         rescue error : Core::DriverRaisedError
           raise Error.new(ErrorCode::RequestFailed, error.message, *@error_details, error.remote_backtrace, error.response_code)
-        rescue error : Core::UnexpectedFailureError | Core::APIResponseError | IO::Error
+        rescue error : IO::Error
+          # Connection-level failure: the host may have been recycled or had
+          # its IP change since discovery last refreshed. Force a re-read of
+          # the cluster and try once more if a different node is now picked.
+          # Only on IO::Error — APIResponseError / UnexpectedFailureError
+          # imply we got a response from core, so a rebalance retry could
+          # double-execute side effects.
+          unless rebalanced
+            @discovery.expire!
+            if (fresh = which_core?) && fresh != uri
+              uri = fresh
+              rebalanced = true
+              next
+            end
+          end
+          raise Error.new(ErrorCode::UnexpectedFailure, error.message, *@error_details)
+        rescue error : Core::UnexpectedFailureError | Core::APIResponseError
           raise Error.new(ErrorCode::UnexpectedFailure, error.message, *@error_details)
         end
       end
