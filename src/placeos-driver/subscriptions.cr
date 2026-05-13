@@ -50,8 +50,11 @@ class PlaceOS::Driver
       @running = false
 
       # Unsubscribe with no arguments unsubscribes from all, this will terminate
-      # the subscription loop, allowing monitor_changes to return
-      redis.unsubscribe([] of String)
+      # the subscription loop, allowing monitor_changes to return.
+      # Only act on an existing connection — otherwise the lazy getter would
+      # build a fresh cluster + subscription client just to send UNSUBSCRIBE
+      # and leak the whole stack on the way out.
+      @redis.try(&.unsubscribe([] of String))
     end
 
     # Self reference subscription
@@ -144,45 +147,9 @@ class PlaceOS::Driver
           # This will run on redis reconnect
           # We can't have this run in the subscribe block as the subscribe block
           # needs to return before we subscribe to further channels
-          spawn(same_thread: true) {
-            wait.receive?
-            # re-subscribe to existing subscriptions here
-            # NOTE:: sending an empty array errors
-            keys = mutex.synchronize { subscriptions.keys }
-            if keys.size > 0
-              redis.subscribe(keys)
-            end
-
-            spawn(same_thread: true) {
-              # re-check indirect subscriptions, these are registered by the subscriptions above
-              redirections.each_key do |system_id|
-                remap_indirect(system_id)
-              end
-            }
-
-            @running = true
-
-            while details = subscription_channel.receive?
-              sub, chan = details
-
-              begin
-                if sub
-                  redis.subscribe [chan]
-                else
-                  redis.unsubscribe [chan]
-                end
-              rescue error
-                Log.fatal(exception: error) { "redis subscription failed... some components may not function correctly" }
-                redis.close
-                # Break to stop draining subscription_channel against a dead
-                # connection. Every further op would raise "Not connected to
-                # Redis server and reconnect=false" and log another FATAL.
-                # SimpleRetry will re-establish the subscription loop and
-                # re-subscribe to every channel still in the cache.
-                break
-              end
-            end
-          }
+          iter = monitor_count
+          channel = subscription_channel
+          spawn(same_thread: true) { drive_subscriptions(wait, channel, iter, -> { monitor_count }) }
 
           # The reason for all the sync and spawns is that the first subscribe
           # requires a block and subsequent ones throw an error with a block.
@@ -227,15 +194,79 @@ class PlaceOS::Driver
 
           @running = false
 
-          case client = @redis
-          in ::Redis::Cluster::Client
-            client.close!
-          in Redis
-            client.close rescue nil
-          in Nil
-          end
-          @redis_cluster = nil
+          @redis.try(&.close) rescue nil
           @redis = nil
+          @redis_cluster.try(&.close!) rescue nil
+          @redis_cluster = nil
+        end
+      end
+    end
+
+    # Drives re-subscription and the subscribe/unsubscribe drain loop for a
+    # single iteration of `monitor_changes`. Extracted so its branches don't
+    # bloat the parent method's cyclomatic complexity.
+    #
+    # `wait` is closed when the outer SUBSCRIBE has either entered its block
+    # (happy path, fired by the heartbeat fiber) or aborted before doing so
+    # (ensure path). The `current_iter` lambda lets us notice if SimpleRetry
+    # has moved on to a new iteration while we were scheduling.
+    private def drive_subscriptions(wait : Channel(Nil), channel : Channel(Tuple(Bool, String)), iter : Int32, current_iter : -> Int32) : Nil
+      wait.receive?
+      # If the outer subscribe failed before entering its block, the
+      # heartbeat fiber never fires wait.close — the ensure block does.
+      # In that case @redis has been closed/nilled already and we must
+      # not proceed, otherwise the lazy getter would build a fresh
+      # client to subscribe on and then strand it waiting on the
+      # replaced subscription_channel.
+      return if terminated? || iter != current_iter.call || @redis.nil?
+
+      # re-subscribe to existing subscriptions here
+      # NOTE:: sending an empty array errors
+      keys = mutex.synchronize { subscriptions.keys }
+      if keys.size > 0
+        begin
+          redis.subscribe(keys)
+        rescue error
+          Log.warn(exception: error) { "failed to re-subscribe on reconnect" }
+          return
+        end
+      end
+
+      spawn(same_thread: true) {
+        # re-check indirect subscriptions, these are registered by the subscriptions above
+        redirections.each_key do |system_id|
+          remap_indirect(system_id)
+        end
+      }
+
+      @running = true
+
+      # `channel` is captured locally — the ensure block replaces
+      # `subscription_channel` after closing it, and reading via the getter
+      # would silently switch us onto a brand new channel with no writers,
+      # stranding this fiber (and its redis connection).
+      drain_subscription_channel(channel)
+    end
+
+    private def drain_subscription_channel(channel : Channel(Tuple(Bool, String))) : Nil
+      while details = channel.receive?
+        sub, chan = details
+
+        begin
+          if sub
+            redis.subscribe [chan]
+          else
+            redis.unsubscribe [chan]
+          end
+        rescue error
+          Log.fatal(exception: error) { "redis subscription failed... some components may not function correctly" }
+          redis.close
+          # Break to stop draining subscription_channel against a dead
+          # connection. Every further op would raise "Not connected to
+          # Redis server and reconnect=false" and log another FATAL.
+          # SimpleRetry will re-establish the subscription loop and
+          # re-subscribe to every channel still in the cache.
+          break
         end
       end
     end
