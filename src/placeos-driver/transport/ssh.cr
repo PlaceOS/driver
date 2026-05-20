@@ -284,7 +284,10 @@ class PlaceOS::Driver
         end
       end
     ensure
-      connect unless @terminated
+      # Spawn the reconnect so disconnect can't grow the stack via the
+      # disconnect -> connect -> (on failure) disconnect chain when the device
+      # rapidly closes the new session.
+      spawn(same_thread: true) { connect } unless @terminated
     end
 
     def send(message) : TransportSSH

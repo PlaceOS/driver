@@ -276,11 +276,21 @@ class PlaceOS::Driver::DriverManager
       logger.warn(exception: error) { "error setting connected status #{driver.class} (#{@module_id})" }
     end
 
-    # we want to run these callbacks even if redis was offline
-    if state
-      driver.connected
-    else
-      driver.disconnected
+    # Run lifecycle callbacks on a fresh fiber so user code cannot synchronously
+    # re-enter this callback. Without the spawn, a driver that toggles queue
+    # state (e.g. `queue.set_connected`) from inside `connected`/`disconnected`
+    # would call back into `connection` on the same stack — historically a
+    # source of stack-overflow bugs in transport-driven auth flows.
+    spawn(same_thread: true) do
+      begin
+        if state
+          driver.connected
+        else
+          driver.disconnected
+        end
+      rescue error
+        logger.warn(exception: error) { "error changing connected state #{driver.class} (#{@module_id})" }
+      end
     end
   rescue error
     logger.warn(exception: error) { "error changing connected state #{@driver.class} (#{@module_id})" }

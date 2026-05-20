@@ -122,7 +122,10 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     end
     websocket.try(&.close) rescue nil
     set_connected_state(false)
-    connect
+    # Spawn the reconnect so disconnect can't grow the stack via the
+    # disconnect -> connect -> (ensure) disconnect chain when the device
+    # rapidly closes the new socket.
+    spawn(same_thread: true) { connect } unless @terminated
   rescue error
     logger.info(exception: error) { "calling disconnect" }
   end
