@@ -32,6 +32,12 @@ class PlaceOS::Driver
     # Is the subscription terminated
     private property? terminated = false
 
+    # subscription_channel feeds drain_subscription_channel. It MUST stay
+    # unbuffered: the implicit back-pressure on `perform_subscribe.send` is
+    # what guarantees `subscribe(...)` doesn't return until drain has sent
+    # SUBSCRIBE to Redis. Buffering breaks that contract — callers proceed
+    # before the Redis subscription is registered, and any PUBLISH that
+    # follows is lost (Redis pub/sub has no replay).
     private property subscription_channel : Channel(Tuple(Bool, String)) = Channel(Tuple(Bool, String)).new
 
     # `ack_timeout` and `heartbeat_interval` configure the watchdog that
@@ -228,6 +234,12 @@ class PlaceOS::Driver
           redis.subscribe(keys)
         rescue error
           Log.warn(exception: error) { "failed to re-subscribe on reconnect" }
+          # Close redis so the outer SUBSCRIBE on SYSTEM_ORDER_UPDATE fails
+          # and SimpleRetry restarts monitor_changes. Otherwise we'd be stuck
+          # with user channels missing from Redis, drain_subscription_channel
+          # never starting, and perform_subscribe blocking on the unbuffered
+          # path — until the watchdog ack-timeout fires (15s by default).
+          redis.close rescue nil
           return
         end
       end

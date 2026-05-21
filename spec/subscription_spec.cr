@@ -457,8 +457,12 @@ module PlaceOS
         # scheduling). With the fix: exactly one FATAL, then break.
         fatal_backend.count.should be <= 2
 
-        # Best-effort cleanup. The outer fiber is still blocked on the real
-        # redis; the test's scope is enough to exercise the behavior.
+        # NOTE: the outer subscribe fiber is still blocked on the real redis
+        # (its connection isn't the one we swapped). `subs.terminate` here
+        # only addresses @redis (FailingRedis, a no-op). The stranded loop
+        # produces a couple of `no subscribe ack within 15s` WARN lines
+        # later in the run; accepted as the cost of isolating this
+        # behaviour from the outer fiber.
         subs.terminate rescue nil
       end
 
