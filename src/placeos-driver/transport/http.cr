@@ -178,6 +178,14 @@ class PlaceOS::Driver
     protected def __new_http_client
       @client.try(&.close) rescue nil
 
+      # Drop any cookies that have expired since the last rotation, so the
+      # jar can't grow unbounded across the transport's lifetime. Session
+      # cookies (no `expires` / no `max_age`) report `expired? == false`
+      # and are preserved.
+      if (jar = @cookies) && !jar.empty?
+        jar.to_a.each { |cookie| jar.delete(cookie.name) if cookie.expired? }
+      end
+
       # NOTE:: modify in initializer if editing here
       @client = new_http_client(@uri_base, @tls)
       @client_requests = 0
