@@ -52,6 +52,12 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
   end
 
   private def start_socket(connect_timeout)
+    # Track whether ownership has been transferred to the consume_io fiber.
+    # If anything between TCPSocket.new and the spawn raises (TLS handshake
+    # failure, socket option failure), we close the socket ourselves so it
+    # doesn't sit open as an orphan while @socket is overwritten by the
+    # next start_socket attempt.
+    handed_off = false
     @mutex.synchronize do
       @socket = socket = TCPSocket.new(@ip, @port, connect_timeout: connect_timeout)
       socket.tcp_nodelay = true
@@ -69,14 +75,17 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
       socket.keepalive = true
       socket.write_timeout = connect_timeout.seconds
 
-      # Start consuming data from the socket
       spawn(same_thread: true) { consume_io(socket) }
+      handed_off = true
     end
 
     # Signal connected state / enable queuing
     set_connected_state(true)
   rescue error
     logger.info(exception: error) { "error connecting to device on #{@ip}:#{@port}" }
+    unless handed_off
+      @socket.try(&.close) rescue nil
+    end
     set_connected_state(false)
     raise error
   end
@@ -157,7 +166,15 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
   rescue error
     logger.error(exception: error) { "error consuming IO" }
   ensure
-    disconnect unless socket != @socket
+    if socket == @socket
+      disconnect
+    else
+      # The transport has moved on to a new socket; close ours so the FD
+      # and kernel buffers are released immediately rather than waiting
+      # for GC. Otherwise concurrent connect() races (or makebreak's
+      # per-send connect) silently leak the orphan socket.
+      socket.close rescue nil
+    end
     connect unless @makebreak
   end
 end
