@@ -173,6 +173,39 @@ module PlaceOS
         subs.terminate
       end
 
+      # Regression: `subscribe(...)` must not return until Redis has
+      # actually registered the subscription. Otherwise a PUBLISH issued
+      # immediately afterwards races our SUBSCRIBE on the server and is
+      # silently lost (Redis pub/sub has no replay). Caused the flaky
+      # 10s-then-hang failure mode where the subscription loop times out
+      # waiting for any data because the original publish was already gone
+      # and no further messages were coming.
+      it "subscribe synchronously registers with Redis so an immediate publish is received" do
+        # Run the race many times to surface timing-sensitive failures.
+        20.times do |i|
+          module_id = "mod-race-#{i}-#{Random.new.hex(4)}"
+          callback_fired = Channel(Nil).new
+
+          subs = Subscriptions.new
+          subs.subscribe(module_id, :power) do |_sub, _message|
+            callback_fired.close
+          end
+
+          storage = RedisStorage.new(module_id)
+          storage["power"] = "true"
+
+          select
+          when callback_fired.receive?
+            # success — subscription was registered before the publish
+          when timeout(1.second)
+            fail "iteration #{i}: callback never fired — SUBSCRIBE was not acked before PUBLISH (race)"
+          end
+
+          storage.delete("power")
+          subs.terminate
+        end
+      end
+
       it "should indirectly subscribe to a status" do
         in_callback = false
         sub_passed = nil

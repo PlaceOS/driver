@@ -40,6 +40,18 @@ class PlaceOS::Driver
     # follows is lost (Redis pub/sub has no replay).
     private property subscription_channel : Channel(Tuple(Bool, String)) = Channel(Tuple(Bool, String)).new
 
+    # Per-channel "waiting for SUBSCRIBE ack" map. perform_subscribe parks
+    # on the ack channel after sending; the outer subscribe's on.subscribe
+    # handler signals it. Guarantees subscribe(...) doesn't return until
+    # Redis has actually registered the subscription, so an immediately-
+    # following PUBLISH is delivered to us. Guarded by `mutex`.
+    @pending_subscribes : Hash(String, Channel(Nil)) = {} of String => Channel(Nil)
+
+    # If we don't see a SUBSCRIBE ack within this window, log and continue
+    # — the subscription is still in the hash and will be re-registered on
+    # the next monitor_changes iteration.
+    SUBSCRIBE_ACK_TIMEOUT = 2.seconds
+
     # `ack_timeout` and `heartbeat_interval` configure the watchdog that
     # detects a stalled (TCP-blackholed) subscription connection. Each
     # `heartbeat_interval` we re-SUBSCRIBE to SYSTEM_ORDER_UPDATE; if the
@@ -100,11 +112,34 @@ class PlaceOS::Driver
         end
 
         if notify
-          subscription_channel.send({true, channel}) rescue nil
+          wait_for_subscribe_ack(channel) do
+            subscription_channel.send({true, channel}) rescue nil
+          end
         end
       end
 
       sub
+    end
+
+    # Sends the subscribe request (via the supplied block) and blocks until
+    # the outer subscribe's on.subscribe handler signals that Redis has
+    # acked SUBSCRIBE for this channel — or `SUBSCRIBE_ACK_TIMEOUT`
+    # elapses, in which case the subscription is still in the hash and
+    # will be re-registered on the next monitor_changes iteration.
+    private def wait_for_subscribe_ack(channel : String, &) : Nil
+      waiter = Channel(Nil).new(1)
+      mutex.synchronize { @pending_subscribes[channel] = waiter }
+      begin
+        yield
+        select
+        when waiter.receive?
+          # Redis has registered the subscription; safe to return.
+        when timeout(SUBSCRIBE_ACK_TIMEOUT)
+          Log.debug { "no SUBSCRIBE ack for #{channel} within #{SUBSCRIBE_ACK_TIMEOUT}; will retry on next loop iteration" }
+        end
+      ensure
+        mutex.synchronize { @pending_subscribes.delete(channel) }
+      end
     end
 
     def unsubscribe(subscription : PlaceOS::Driver::Subscriptions::Subscription) : Nil
@@ -168,7 +203,14 @@ class PlaceOS::Driver
             # Combined with the periodic re-SUBSCRIBE below, this gives us
             # liveness — if no acks for `ack_timeout` we know the connection
             # is blackholed and force a reconnect.
-            on.subscribe { |_, _| @last_ack = Time.instant }
+            on.subscribe do |chan, _count|
+              @last_ack = Time.instant
+              # Wake any caller of perform_subscribe / channel waiting for
+              # confirmation that Redis has registered this channel.
+              if waiter = mutex.synchronize { @pending_subscribes[chan]? }
+                waiter.send(nil) rescue nil
+              end
+            end
             on.message { |c, m| on_message(c, m) }
             spawn(same_thread: true) do
               instance = monitor_count
@@ -181,7 +223,10 @@ class PlaceOS::Driver
                   redis.close
                   break
                 end
-                subscription_channel.send({true, SYSTEM_ORDER_UPDATE})
+                # rescue break: if the channel was just closed by the
+                # ensure block (loop restart), exit cleanly rather than
+                # crashing the fiber with an unhandled ClosedError.
+                subscription_channel.send({true, SYSTEM_ORDER_UPDATE}) rescue break
               end
             end
           end
@@ -325,7 +370,9 @@ class PlaceOS::Driver
         end
 
         if notify
-          subscription_channel.send({true, channel}) rescue nil
+          wait_for_subscribe_ack(channel) do
+            subscription_channel.send({true, channel}) rescue nil
+          end
         end
 
         # notify of current value
