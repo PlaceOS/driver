@@ -1,5 +1,5 @@
 name: placeos-driver
-version: 7.23.0
+version: 7.24.0
 
 dependencies:
   action-controller:
@@ -41,7 +41,7 @@ dependencies:
 
   tasker:
     github: spider-gazelle/tasker
-    version: ~> 2.0
+    version: ~> 3.0
 
   tokenizer:
     github: spider-gazelle/tokenizer
