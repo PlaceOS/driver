@@ -160,9 +160,12 @@ class PlaceOS::Driver::Queue
 
     if @online
       @mutex.synchronize do
-        @queue.push task
-        @queue.sort! { |a, b| b.apparent_priority <=> a.apparent_priority }
-        @queue.reject! { |t| t != task && t.name == name } if name
+        if name
+          insert_named_task(name, task)
+        else
+          @queue.push task
+          @queue.sort! { |a, b| b.apparent_priority <=> a.apparent_priority }
+        end
       end
 
       # buffered channel so this shouldn't block receive
@@ -171,14 +174,21 @@ class PlaceOS::Driver::Queue
         @channel.send(nil)
       end
     elsif name
-      @mutex.synchronize do
-        @queue.push task
-        @queue.sort! { |a, b| b.apparent_priority <=> a.apparent_priority }
-        @queue.reject! { |t| t != task && t.name == name }
-      end
+      @mutex.synchronize { insert_named_task(name, task) }
     else
       spawn(same_thread: true) { task.abort("transport is currently offline") }
     end
     task
+  end
+
+  protected def insert_named_task(name, task)
+    if existing = @queue.index { |t| t.name == name }
+      old_task = @queue[existing]
+      @queue[existing] = task
+      spawn(same_thread: true) { old_task.abort(warn: false) }
+    else
+      @queue.push task
+    end
+    @queue.sort! { |a, b| b.apparent_priority <=> a.apparent_priority }
   end
 end

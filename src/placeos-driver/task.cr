@@ -125,6 +125,9 @@ class PlaceOS::Driver::Task
     @state = :success
     @wait = false
 
+    # the response arrived, so the timeout timer is no longer needed.
+    stop_timers
+
     if @response_required
       begin
         @payload = result.try_to_json("null")
@@ -168,7 +171,7 @@ class PlaceOS::Driver::Task
   end
 
   # call when the task has failed and we don't want to retry
-  def abort(reason = nil, @code = 500)
+  def abort(reason = nil, @code = 500, warn : Bool = true)
     return self unless @state.unknown?
     @state = :abort
 
@@ -178,11 +181,13 @@ class PlaceOS::Driver::Task
     @channel.close
     @complete.send true
     @complete.close
-    logger.warn do
-      if @name
-        "aborting task, #{@name.inspect}, #{reason}"
-      else
-        "aborting task, #{reason}"
+    if warn
+      logger.warn do
+        if @name
+          "aborting task, #{@name.inspect}, #{reason}"
+        else
+          "aborting task, #{reason}"
+        end
       end
     end
     self

@@ -8,7 +8,16 @@ module PlaceOS::Driver::Stats
   def self.memory_usage
     stats = GC.stats
     one_mib = 1048576
+
+    # live = retained (reachable) bytes. This is the number that climbs on a
+    # true object-retention leak; RSS/heap can sit at a high-water mark without
+    # leaking. Fiber count climbs on a fiber leak.
+    fiber_count = 0
+    Fiber.unsafe_each { fiber_count += 1 }
+
     {
+      fibers:         fiber_count,
+      stats_live:     "#{((stats.heap_size - stats.free_bytes) / one_mib).round(1)}MiB",
       stats_free:     "#{(stats.free_bytes / one_mib).round(1)}MiB",
       stats_heap:     "#{(stats.heap_size / one_mib).round(1)}MiB",
       stats_total:    "#{(stats.total_bytes / one_mib).round(1)}MiB",
