@@ -34,17 +34,26 @@ module PlaceOS::Driver::Stats
     }
   end
 
+  # Histogram of live fibers grouped by name. Spawns without an explicit name
+  # are grouped under "unnamed". A leaking spawn site shows up here as a count
+  # that climbs between dumps - which pinpoints the source without guessing.
+  def self.fiber_breakdown
+    counts = Hash(String, Int32).new(0)
+    Fiber.unsafe_each { |fiber| counts[fiber.name || "unnamed"] += 1 }
+    counts.to_a.sort_by! { |(_name, count)| -count }
+  end
+
   # Useful for debugging, it outputs memory usage and internal protocol queue values
   #
   # to obtain the stats you need to signal the process `kill -s USR2 %PID`
   def self.dump_stats
-    Log.warn { "\n\n#{memory_usage}\n#{protocol_tracking}\n\n" }
+    Log.warn { "\n\n#{memory_usage}\n#{protocol_tracking}\nfibers_by_name: #{fiber_breakdown}\n\n" }
   end
 
   # :nodoc:
   def self.setup_signal
     Signal::USR2.trap do |signal|
-      spawn { PlaceOS::Driver::Stats.dump_stats }
+      spawn(name: "stats-dump") { PlaceOS::Driver::Stats.dump_stats }
       signal.ignore
       setup_signal
     end

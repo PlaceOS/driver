@@ -43,7 +43,7 @@ class PlaceOS::Driver::ProcessManager
     loaded[module_id] = driver
 
     # Drivers can all run on a different thread
-    spawn(same_thread: true) { driver.start }
+    spawn(same_thread: true, name: "driver-start") { driver.start }
     request.payload = nil
     request
   rescue error

@@ -45,7 +45,7 @@ class PlaceOS::Driver::Proxy::Scheduler
 
   def at(time, immediate = false, &block : -> _)
     raise "schedule proxy terminated" if @terminated
-    spawn(same_thread: true) { run_now(block) } if immediate
+    spawn(same_thread: true, name: "schedule-immediate") { run_now(block) } if immediate
     wrapped = nil
     task = Tasker.at(time) do
       @schedules.delete(wrapped)
@@ -58,7 +58,7 @@ class PlaceOS::Driver::Proxy::Scheduler
 
   def in(time, immediate = false, &block : -> _)
     raise "schedule proxy terminated" if @terminated
-    spawn(same_thread: true) { run_now(block) } if immediate
+    spawn(same_thread: true, name: "schedule-immediate") { run_now(block) } if immediate
     wrapped = nil
     task = Tasker.in(time) do
       @schedules.delete(wrapped)
@@ -71,14 +71,14 @@ class PlaceOS::Driver::Proxy::Scheduler
 
   def every(time, immediate = false, &block : -> _)
     raise "schedule proxy terminated" if @terminated
-    spawn(same_thread: true) { run_now(block) } if immediate
+    spawn(same_thread: true, name: "schedule-immediate") { run_now(block) } if immediate
     task = Tasker.every(time) { run_now(block) }
     TaskWrapper.new(task, @callback).tap { |wrapper| @schedules << wrapper }
   end
 
   def cron(string, timezone : Time::Location = Time::Location.local, immediate = false, &block : -> _)
     raise "schedule proxy terminated" if @terminated
-    spawn(same_thread: true) { run_now(block) } if immediate
+    spawn(same_thread: true, name: "schedule-immediate") { run_now(block) } if immediate
     task = Tasker.cron(string, timezone) { run_now(block) }
     TaskWrapper.new(task, @callback).tap { |wrapper| @schedules << wrapper }
   end

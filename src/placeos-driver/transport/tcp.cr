@@ -75,7 +75,7 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
       socket.keepalive = true
       socket.write_timeout = connect_timeout.seconds
 
-      spawn(same_thread: true) { consume_io(socket) }
+      spawn(same_thread: true, name: "tcp-consume") { consume_io(socket) }
       handed_off = true
     end
 

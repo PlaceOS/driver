@@ -67,8 +67,8 @@ class PlaceOS::Driver::Protocol
     @current_requests = {} of UInt64 => Request
     @next_requests = {} of UInt64 => Request
 
-    spawn(same_thread: true) { self.produce_io(timeout) }
-    spawn(same_thread: true) { self.consume_io }
+    spawn(same_thread: true, name: "protocol-produce") { self.produce_io(timeout) }
+    spawn(same_thread: true, name: "protocol-consume") { self.consume_io }
   end
 
   @timeouts : Tasker::Task? = nil
@@ -119,7 +119,7 @@ class PlaceOS::Driver::Protocol
       return
     end
 
-    spawn(same_thread: true) { dispatch_request(message) }
+    spawn(same_thread: true, name: "dispatch-request") { dispatch_request(message) }
   end
 
   protected def dispatch_request(message)
@@ -189,8 +189,8 @@ class PlaceOS::Driver::Protocol
   DELIMITER = "\x00\x03"
 
   private def produce_io(timeout_period)
-    spawn(same_thread: true) { self.process! }
-    spawn { self.redis_health_check }
+    spawn(same_thread: true, name: "protocol-process") { self.process! }
+    spawn(name: "redis-health") { self.redis_health_check }
 
     # Ensures all outgoing event processing is done on the same thread
     @timeouts = Tasker.every(timeout_period) do

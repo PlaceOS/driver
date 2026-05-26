@@ -60,7 +60,7 @@ class PlaceOS::Driver
     @last_ack : Time::Instant = Time.instant
 
     def initialize(@ack_timeout : Time::Span = 15.seconds, @heartbeat_interval : Time::Span = 3.seconds)
-      spawn(same_thread: true) { monitor_changes }
+      spawn(same_thread: true, name: "sub-monitor") { monitor_changes }
     end
 
     def terminate(terminate = true) : Nil
@@ -161,7 +161,7 @@ class PlaceOS::Driver
         remap_indirect(message)
       elsif channel_subscriptions = mutex.synchronize { subscriptions[channel]? }
         channel_subscriptions.each do |subscription|
-          spawn { subscription.callback Log, message }
+          spawn(name: "sub-callback") { subscription.callback Log, message }
         end
       else
         # subscribed to channel but no subscriptions
@@ -190,7 +190,7 @@ class PlaceOS::Driver
           # needs to return before we subscribe to further channels
           iter = monitor_count
           channel = subscription_channel
-          spawn(same_thread: true) { drive_subscriptions(wait, channel, iter, -> { monitor_count }) }
+          spawn(same_thread: true, name: "sub-drive") { drive_subscriptions(wait, channel, iter, -> { monitor_count }) }
 
           # The reason for all the sync and spawns is that the first subscribe
           # requires a block and subsequent ones throw an error with a block.
@@ -212,7 +212,7 @@ class PlaceOS::Driver
               end
             end
             on.message { |c, m| on_message(c, m) }
-            spawn(same_thread: true) do
+            spawn(same_thread: true, name: "sub-heartbeat") do
               instance = monitor_count
               wait.close
               loop do
@@ -289,7 +289,7 @@ class PlaceOS::Driver
         end
       end
 
-      spawn(same_thread: true) {
+      spawn(same_thread: true, name: "sub-remap") {
         # re-check indirect subscriptions, these are registered by the subscriptions above
         redirections.each_key do |system_id|
           remap_indirect(system_id)
@@ -377,7 +377,7 @@ class PlaceOS::Driver
 
         # notify of current value
         if current_value = subscription.current_value
-          spawn(same_thread: true) { subscription.callback(Log, current_value.not_nil!) }
+          spawn(same_thread: true, name: "sub-initial") { subscription.callback(Log, current_value.not_nil!) }
         end
       end
     end

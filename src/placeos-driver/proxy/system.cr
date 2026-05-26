@@ -164,7 +164,7 @@ struct PlaceOS::Driver::Proxy::System
 
     # NOTE:: we assume the cluster is ready on load.
     # All drivers should handle this cleanly
-    spawn(same_thread: true) do
+    spawn(same_thread: true, name: "load-complete") do
       begin
         callback.call(subscription, "ready")
       rescue error

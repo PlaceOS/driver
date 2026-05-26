@@ -101,7 +101,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     set_connected_state(true)
 
     # Start consuming data from the socket
-    spawn(same_thread: true) { consume_io(websocket) }
+    spawn(same_thread: true, name: "ws-consume") { consume_io(websocket) }
   rescue error
     logger.info(exception: error) { "error connecting to device on #{@ip}:#{@port}#{@path}" }
     set_connected_state(false)
@@ -125,7 +125,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     # Spawn the reconnect so disconnect can't grow the stack via the
     # disconnect -> connect -> (ensure) disconnect chain when the device
     # rapidly closes the new socket.
-    spawn(same_thread: true) { connect } unless @terminated
+    spawn(same_thread: true, name: "ws-reconnect") { connect } unless @terminated
   rescue error
     logger.info(exception: error) { "calling disconnect" }
   end

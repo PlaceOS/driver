@@ -312,11 +312,11 @@ abstract class PlaceOS::Driver::Transport
     if tokenize = @tokenizer
       messages = tokenize.extract(data)
       messages.each do |message|
-        spawn(same_thread: true) { process_message(message) }
+        spawn(same_thread: true, name: "transport-recv") { process_message(message) }
         Fiber.yield
       end
     else
-      spawn(same_thread: true) { process_message(data) }
+      spawn(same_thread: true, name: "transport-recv") { process_message(data) }
       Fiber.yield
     end
   rescue error
