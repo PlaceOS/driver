@@ -59,7 +59,7 @@ class PlaceOS::Driver::Protocol::Management
     end
 
     @sequence = 1_u64
-    spawn(same_thread: true) { process_events }
+    spawn(same_thread: true, name: "process_events") { process_events }
   end
 
   def running?
@@ -262,7 +262,7 @@ class PlaceOS::Driver::Protocol::Management
 
     modules.clear
     exited = Channel(Nil).new
-    spawn(same_thread: true) { ensure_shutdown(exited) }
+    spawn(same_thread: true, name: "ensure_shutdown") { ensure_shutdown(exited) }
 
     # The driver will shutdown the modules gracefully
     json = %({"id":"t","cmd":"terminate"})
@@ -381,7 +381,7 @@ class PlaceOS::Driver::Protocol::Management
     end
 
     io = begin
-      spawn(same_thread: true) { launch_driver(unix_socket) }
+      spawn(same_thread: true, name: "launch_driver") { launch_driver(unix_socket) }
       wait_driver_open.get
     rescue error
       Log.error(exception: error) { {message: "driver launch timeout", driver_path: @driver_path} }
@@ -394,7 +394,7 @@ class PlaceOS::Driver::Protocol::Management
     begin
       # Start processing the output of the driver (15 seconds for it to check-in)
       loaded = Promise.new(Nil, 15.seconds)
-      spawn(same_thread: true) { process_comms(io, loaded) }
+      spawn(same_thread: true, name: "process_comms") { process_comms(io, loaded) }
       loaded.get
 
       # start the desired instances
@@ -502,7 +502,7 @@ class PlaceOS::Driver::Protocol::Management
           # end
 
           request = Request.from_json(string)
-          spawn(same_thread: true) { process(request) }
+          spawn(same_thread: true, name: "process_request") { process(request) }
         rescue error
           Log.warn(exception: error) { "error parsing request #{string.inspect}" }
         end

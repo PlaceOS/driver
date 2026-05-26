@@ -126,7 +126,7 @@ struct PlaceOS::Driver::Proxy::Driver
       channel = PlaceOS::Driver::Protocol.instance.expect_response(@module_id, @reply_id, :exec, request, raw: true, user_id: user_id)
 
       # Grab the result if required
-      lazy do
+      lazy(name: "lazy_result") do
         result = channel.receive
 
         if error = result.error
@@ -143,7 +143,7 @@ struct PlaceOS::Driver::Proxy::Driver
     end
   rescue error
     @system.logger.warn { error.inspect_with_backtrace }
-    lazy { raise error; JSON.parse("") }
+    lazy(name: "lazy_error") { raise error; JSON.parse("") }
   end
 
   # Build the `exec` request payload

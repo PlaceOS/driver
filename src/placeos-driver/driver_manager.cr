@@ -144,6 +144,10 @@ class PlaceOS::Driver::DriverManager
 
       wait_on_unload.close
     end
+
+    # Close the logger last (after on_unload, which may log) so its async
+    # dispatcher fibers exit instead of leaking on every module stop/restart.
+    @logger.close rescue nil
   end
 
   # update the modules view of the world

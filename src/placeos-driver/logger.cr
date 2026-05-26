@@ -5,9 +5,23 @@ class PlaceOS::Driver
   # Set up logging
   log_io = PlaceOS::Startup.suppress_logs ? IO::Memory.new : STDOUT
   PlaceOS::Driver.logger_io = log_io
-  backend = ::Log::IOBackend.new(log_io)
-  backend.formatter = LOG_FORMATTER
-  ::Log.setup("*", ::Log::Severity::Error, backend)
+
+  # Process-wide root-logger backend, created once and reused. Reusing it means
+  # toggling the log level (USR1) doesn't strand the previous backend's async
+  # dispatcher fiber.
+  @@global_log_backend : ::Log::IOBackend? = nil
+
+  def self.global_log_backend : ::Log::IOBackend
+    existing = @@global_log_backend
+    return existing if existing
+
+    backend = ::Log::IOBackend.new(PlaceOS::Driver.logger_io)
+    backend.formatter = LOG_FORMATTER
+    @@global_log_backend = backend
+    backend
+  end
+
+  ::Log.setup("*", ::Log::Severity::Error, global_log_backend)
 
   # :nodoc:
   class_getter trace : Bool = false
@@ -20,9 +34,12 @@ class PlaceOS::Driver
       level = @@trace ? ::Log::Severity::Trace : ::Log::Severity::Error
       Log.info { "> Log level changed to #{level}" }
 
-      backend = ::Log::IOBackend.new(PlaceOS::Driver.logger_io)
-      backend.formatter = PlaceOS::Driver::LOG_FORMATTER
-      Log.builder.bind "*", level, backend
+      # Reuse the existing backend and re-run `Log.setup` (which resets the
+      # bindings) at the new level. Previously each toggle created a fresh
+      # `Log::IOBackend` and `builder.bind`ed it: the old backends were never
+      # closed (leaking their async dispatcher fibers) and stayed bound
+      # (duplicating every log line).
+      ::Log.setup("*", level, global_log_backend)
       signal.ignore
       register_log_level_signal
     end
@@ -101,6 +118,16 @@ class PlaceOS::Driver
 
       # NOTE:: if broadcast level is set then it overrides the backend severity levels
       @broadcast_backend.level = nil
+    end
+
+    # Shuts down the backends' async dispatchers. Each `Log::IOBackend` /
+    # `ProtocolBackend` owns a `Log::AsyncDispatcher` whose `write_logs` fiber
+    # blocks forever on its channel until closed. Without this, every module
+    # stop/restart strands two of those fibers (they keep the dispatcher
+    # referenced, so GC can't finalize them) - a per-module fiber leak.
+    # Closing the dispatchers does not affect the shared output IO.
+    def close : Nil
+      @broadcast_backend.close
     end
   end
 end
