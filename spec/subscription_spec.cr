@@ -206,6 +206,151 @@ module PlaceOS
         end
       end
 
+      # Regression: a subscription is registered but the subscriber is never
+      # notified of the current value. Reproduces the production symptom where
+      # "redis and the service launched at the same time" — the value-setting
+      # PUBLISH lands in the window before our SUBSCRIBE is (re)registered and
+      # is lost (redis pub/sub has no replay). The current value is only read
+      # once, inline in perform_subscribe; the re-subscribe paths re-register
+      # the SUBSCRIBE but never re-read/re-deliver the current value, so the
+      # binding stays stale forever even though the value exists in redis.
+      #
+      # Driven deterministically through the reconnect path: subscribe with no
+      # value present, force the loop down, set the value while the connection
+      # is down (so the PUBLISH is missed), then assert the value is delivered
+      # once the loop re-subscribes.
+      it "delivers the current value after re-subscribing when the publish was missed" do
+        module_id = "mod-missed-pub-#{Random.new.hex(4)}"
+        storage = RedisStorage.new(module_id)
+        storage.delete("power")
+
+        fired = Channel(String).new(8)
+        subs = Subscriptions.new
+        subs.subscribe(module_id, :power) do |_sub, message|
+          fired.send(message)
+        end
+
+        # Wait for the loop to come up and register the initial subscribe.
+        deadline = Time.instant + 5.seconds
+        until subs.running
+          fail "subscription loop never started" if Time.instant > deadline
+          sleep 10.milliseconds
+        end
+        sleep 100.milliseconds
+
+        # No value yet — nothing should have fired.
+        select
+        when msg = fired.receive
+          fail "unexpected early callback with #{msg.inspect}"
+        when timeout(100.milliseconds)
+        end
+
+        # Force the loop down (terminate(false) tears down then restarts).
+        subs.terminate(false)
+        deadline = Time.instant + 5.seconds
+        while subs.running
+          fail "subscription loop never went down" if Time.instant > deadline
+          sleep 5.milliseconds
+        end
+        # Ensure the teardown (UNSUBSCRIBE + close) has fully completed so the
+        # publish below cannot be caught by the dying connection.
+        sleep 100.milliseconds
+
+        # Set the value while the subscription connection is down. The PUBLISH
+        # is emitted but no one is subscribed, so it is lost.
+        storage["power"] = "true"
+
+        # Wait for the loop to recover and re-subscribe.
+        deadline = Time.instant + 10.seconds
+        until subs.running
+          fail "subscription loop never recovered" if Time.instant > deadline
+          sleep 10.milliseconds
+        end
+
+        # The value exists in redis but the registering publish was missed.
+        # With the bug the callback never fires; the binding is stuck stale.
+        select
+        when msg = fired.receive
+          msg.should eq("true")
+        when timeout(3.seconds)
+          fail "current value was never delivered after re-subscribe (binding stuck stale)"
+        end
+
+        storage.delete("power")
+        subs.terminate
+      end
+
+      # Regression for the production report: "unbind then rebind to various
+      # statuses — initial values arrive for some re-bindings and not others."
+      # A rebind to a different status whose value-setting PUBLISH lands in the
+      # SUBSCRIBE registration gap is never re-read, so the binding stays stale
+      # forever even though the value sits in the redis hash.
+      #
+      # Deterministic: an established :power binding is unbound, then :volume is
+      # bound; :volume's value is set while the loop is forced down (PUBLISH
+      # lost — redis pub/sub has no replay); on recovery the rebound binding
+      # must still be told the current value.
+      it "delivers the current value to a status rebound after unsubscribe" do
+        module_id = "mod-rebind-#{Random.new.hex(4)}"
+        storage = RedisStorage.new(module_id)
+        storage.delete("power")
+        storage.delete("volume")
+
+        fired = Channel(String).new(8)
+        subs = Subscriptions.new
+
+        deadline = Time.instant + 5.seconds
+        until subs.running
+          fail "subscription loop never started" if Time.instant > deadline
+          sleep 10.milliseconds
+        end
+
+        # Establish the first binding and confirm it leaves the awaiting tracker
+        # once it receives its value.
+        storage["power"] = "on"
+        power_sub = subs.subscribe(module_id, :power) { |_s, m| fired.send(m) }
+        select
+        when msg = fired.receive
+          msg.should eq("on")
+        when timeout(2.seconds)
+          fail "initial :power value never delivered"
+        end
+
+        # Unbind :power and rebind to a different status that has no value yet.
+        subs.unsubscribe(power_sub)
+        sleep 50.milliseconds
+        subs.subscribe(module_id, :volume) { |_s, m| fired.send(m) }
+        sleep 100.milliseconds
+
+        # Force the loop down, then set :volume while it's down so the PUBLISH
+        # is lost and only the re-read on recovery can surface it.
+        subs.terminate(false)
+        deadline = Time.instant + 5.seconds
+        while subs.running
+          fail "subscription loop never went down" if Time.instant > deadline
+          sleep 5.milliseconds
+        end
+        sleep 100.milliseconds
+        storage["volume"] = "5"
+
+        deadline = Time.instant + 10.seconds
+        until subs.running
+          fail "subscription loop never recovered" if Time.instant > deadline
+          sleep 10.milliseconds
+        end
+
+        select
+        when msg = fired.receive
+          msg.should eq("5")
+        when timeout(3.seconds)
+          fail "rebound :volume current value was never delivered (binding stuck stale)"
+        end
+
+        storage.delete("power")
+        storage.delete("volume")
+        subs.terminate
+      end
+
       it "should indirectly subscribe to a status" do
         in_callback = false
         sub_passed = nil

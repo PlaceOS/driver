@@ -21,6 +21,17 @@ class PlaceOS::Driver
     # System ID to subscriptions
     private getter redirections : Hash(String, Array(PlaceOS::Driver::Subscriptions::IndirectSubscription)) = {} of String => Array(PlaceOS::Driver::Subscriptions::IndirectSubscription)
 
+    # Subscriptions that have NOT yet received their first value, keyed by
+    # channel. A redis SUBSCRIBE only delivers values published *after* it is
+    # registered, so a value already in the hash (or one published into the
+    # registration gap during startup / reconnect) would otherwise never reach
+    # a brand new binding. Entries are added on subscribe and removed the moment
+    # the binding receives any value (initial read in #notify_awaiting or a
+    # pub/sub message in #on_message) or is unsubscribed — so this only ever
+    # holds bindings still legitimately waiting for a first value and never
+    # accumulates. Guarded by `mutex`.
+    private getter awaiting_value : Hash(String, Array(PlaceOS::Driver::Subscriptions::Subscription)) = {} of String => Array(PlaceOS::Driver::Subscriptions::Subscription)
+
     # Subscriptions need their own seperate client
     private def redis
       @redis ||= Subscriptions.new_redis(redis_cluster)
@@ -159,7 +170,9 @@ class PlaceOS::Driver
     private def on_message(channel, message)
       if channel == SYSTEM_ORDER_UPDATE
         remap_indirect(message)
-      elsif channel_subscriptions = mutex.synchronize { subscriptions[channel]? }
+      elsif channel_subscriptions = mutex.synchronize { awaiting_value.delete(channel); subscriptions[channel]? }
+        # every binding on this channel is receiving a value, so none are
+        # awaiting their first value any more (delete handled above)
         channel_subscriptions.each do |subscription|
           spawn(name: "sub-callback") { subscription.callback Log, message }
         end
@@ -287,6 +300,13 @@ class PlaceOS::Driver
           redis.close rescue nil
           return
         end
+
+        # A PUBLISH issued while the connection was down is gone (redis pub/sub
+        # has no replay), so any binding that never received its first value
+        # would stay stale. Re-deliver only to those still-awaiting bindings —
+        # not every channel — to avoid a reconnect-time flood of HGETs and
+        # duplicate callbacks for already-initialised bindings.
+        mutex.synchronize { awaiting_value.keys }.each { |chan| notify_awaiting(chan) }
       end
 
       spawn(same_thread: true, name: "sub-remap") {
@@ -307,13 +327,23 @@ class PlaceOS::Driver
 
     private def drain_subscription_channel(channel : Channel(Tuple(Bool, String))) : Nil
       while details = channel.receive?
-        sub, chan = details
+        subscribe, chan = details
 
         begin
-          if sub
+          if subscribe
             redis.subscribe [chan]
+            # SUBSCRIBE is now registered with redis: deliver the current value
+            # to any binding on this channel that hasn't received one yet. Done
+            # here (post-registration) so a value published into the gap before
+            # registration isn't lost.
+            notify_awaiting(chan)
           else
-            redis.unsubscribe [chan]
+            # Guarded unsubscribe: a concurrent re-subscribe (a different fiber)
+            # may have re-added this channel after the {false, chan} was queued.
+            # Tearing it down here would leave redis unsubscribed while the cache
+            # still holds live bindings, silently dropping their future updates.
+            # Only unsubscribe when the cache truly has no subscriptions for it.
+            redis.unsubscribe [chan] unless mutex.synchronize { subscriptions.has_key?(chan) }
           end
         rescue error
           Log.fatal(exception: error) { "redis subscription failed... some components may not function correctly" }
@@ -324,6 +354,37 @@ class PlaceOS::Driver
           # SimpleRetry will re-establish the subscription loop and
           # re-subscribe to every channel still in the cache.
           break
+        end
+      end
+    end
+
+    # Delivers the current value to every subscription on `channel` that is
+    # still awaiting its first value, then drops the ones it delivered to. Must
+    # be called *after* redis has registered the SUBSCRIBE for the channel so a
+    # value already present in the hash is surfaced without a future publish.
+    # The subscriber list is snapshotted under the mutex (`.dup`) so the
+    # suspending HGET in `current_value` runs without holding the lock. No-op
+    # for SYSTEM_ORDER_UPDATE (never tracked) and for channels whose bindings
+    # have all received a value.
+    private def notify_awaiting(channel : String) : Nil
+      pending = mutex.synchronize { awaiting_value[channel]?.try(&.dup) }
+      return unless pending
+
+      delivered = [] of PlaceOS::Driver::Subscriptions::Subscription
+      pending.each do |subscription|
+        if current_value = subscription.current_value
+          value = current_value
+          spawn(same_thread: true, name: "sub-initial") { subscription.callback(Log, value) }
+          delivered << subscription
+        end
+      end
+
+      return if delivered.empty?
+
+      mutex.synchronize do
+        if list = awaiting_value[channel]?
+          delivered.each { |subscription| list.delete(subscription) }
+          awaiting_value.delete(channel) if list.empty?
         end
       end
     end
@@ -367,17 +428,24 @@ class PlaceOS::Driver
             channel_subscriptions << subscription
             notify = true
           end
+
+          # track until this binding has received its first value
+          (awaiting_value[channel] ||= [] of PlaceOS::Driver::Subscriptions::Subscription) << subscription
         end
 
         if notify
           wait_for_subscribe_ack(channel) do
             subscription_channel.send({true, channel}) rescue nil
           end
-        end
-
-        # notify of current value
-        if current_value = subscription.current_value
-          spawn(same_thread: true, name: "sub-initial") { subscription.callback(Log, current_value.not_nil!) }
+          # the current value is delivered by the drain once redis has
+          # registered the SUBSCRIBE for this new channel (see notify_awaiting
+          # in drain_subscription_channel) so a value published into the
+          # registration gap isn't missed.
+        else
+          # the channel is already registered with redis (another binding
+          # subscribed first) and the drain won't fire for this one, so deliver
+          # the current value inline.
+          notify_awaiting(channel)
         end
       end
     end
@@ -392,6 +460,13 @@ class PlaceOS::Driver
             subscriptions.delete(channel)
             notify = true
           end
+        end
+
+        # drop from the awaiting-first-value tracker so it can't leak a binding
+        # that was unsubscribed before it ever received a value
+        if awaiting = awaiting_value[channel]?
+          awaiting.delete(subscription)
+          awaiting_value.delete(channel) if awaiting.empty?
         end
       end
 
