@@ -4,6 +4,10 @@ struct PlaceOS::Driver::Proxy::ExecResponse
   def initialize(@future_result : Future::Compute(String))
   end
 
+  def initialize(json_payload : String)
+    @future_result = lazy { json_payload }
+  end
+
   def get_json : String
     @future_result.get
   end

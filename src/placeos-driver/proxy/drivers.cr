@@ -35,6 +35,9 @@ end
 struct PlaceOS::Driver::Proxy::Drivers
   include Enumerable(PlaceOS::Driver::Proxy::Driver)
 
+  # for backwards compatibility
+  alias Responses = PlaceOS::Driver::Proxy::Responses
+
   def initialize(@drivers : Array(PlaceOS::Driver::Proxy::Driver))
   end
 
