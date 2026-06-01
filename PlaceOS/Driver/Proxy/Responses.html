@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../../../js/doc.js"></script>
 
   <meta name="repository-name" content="placeos-driver">
-  <title>PlaceOS::Driver::Interface::Lighting - placeos-driver master</title>
+  <title>PlaceOS::Driver::Proxy::Responses - placeos-driver master</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../../";
   </script>
@@ -117,7 +117,7 @@
       
     </li>
   
-  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface" data-name="placeos::driver::interface">
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface" data-name="placeos::driver::interface">
       <a href="../../../PlaceOS/Driver/Interface.html">Interface</a>
       
         <ul>
@@ -257,7 +257,7 @@
       
     </li>
   
-  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface/Lighting" data-name="placeos::driver::interface::lighting">
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Lighting" data-name="placeos::driver::interface::lighting">
       <a href="../../../PlaceOS/Driver/Interface/Lighting.html">Lighting</a>
       
         <ul>
@@ -527,7 +527,7 @@
       
     </li>
   
-  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Proxy" data-name="placeos::driver::proxy">
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Proxy" data-name="placeos::driver::proxy">
       <a href="../../../PlaceOS/Driver/Proxy.html">Proxy</a>
       
         <ul>
@@ -572,7 +572,7 @@
       
     </li>
   
-  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/Responses" data-name="placeos::driver::proxy::responses">
+  <li class=" current" data-id="placeos-driver/PlaceOS/Driver/Proxy/Responses" data-name="placeos::driver::proxy::responses">
       <a href="../../../PlaceOS/Driver/Proxy/Responses.html">Responses</a>
       
     </li>
@@ -737,11 +737,13 @@
 <h1 class="type-name">
 
   <span class="kind">
-    module
-  </span> PlaceOS::<wbr>Driver::<wbr>Interface::<wbr>Lighting
+    struct
+  </span> PlaceOS::<wbr>Driver::<wbr>Proxy::<wbr>Responses
 
 </h1>
 
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../../PlaceOS/Driver/Proxy/Responses.html">PlaceOS::Driver::Proxy::Responses</a></li><li class="superclass">Struct</li><li class="superclass">Value</li><li class="superclass"><a href="../../../Object.html">Object</a></li></ul>
 
 
 
@@ -771,8 +773,8 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/aace17a561d4223e4fecb35d14cc0861204b21b6/src/placeos-driver/interface/lighting.cr#L4" target="_blank">
-        placeos-driver/interface/lighting.cr
+      <a href="https://github.com/PlaceOS/driver/blob/aace17a561d4223e4fecb35d14cc0861204b21b6/src/placeos-driver/proxy/drivers.cr#L5" target="_blank">
+        placeos-driver/proxy/drivers.cr
       </a>
     
     <br/>
@@ -783,25 +785,192 @@
 
 
   
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28results%3AArray%28ExecResponse%29%29-class-method" class="signature"><strong>.new</strong>(results : Array(ExecResponse))</a>
+        
+      </li>
+    
+  </ul>
+
 
   
 
   
 
   
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#get%28raise_on_error%3ABool%3Dfalse%29%3AArray%28JSON%3A%3AAny%29-instance-method" class="signature"><strong>#get</strong>(raise_on_error : Bool = <span class="n">false</span>) : Array(JSON::Any)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_json%28raise_on_error%3ABool%3Dfalse%29%3AString-instance-method" class="signature"><strong>#get_json</strong>(raise_on_error : Bool = <span class="n">false</span>) : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#results%3AArray%28ExecResponse%29-instance-method" class="signature"><strong>#results</strong> : Array(ExecResponse)</a>
+        
+      </li>
+    
+  </ul>
+
 
 
   <div class="methods-inherited">
     
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+    
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+    
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+    
   </div>
 
   
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(results:Array(ExecResponse))-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(results : Array(<a href="../../../PlaceOS/Driver/Proxy/ExecResponse.html">ExecResponse</a>))
+
+        <a class="method-permalink" href="#new%28results%3AArray%28ExecResponse%29%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/aace17a561d4223e4fecb35d14cc0861204b21b6/src/placeos-driver/proxy/drivers.cr#L6" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
 
   
 
   
 
   
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="get(raise_on_error:Bool=false):Array(JSON::Any)-instance-method">
+      <div class="signature">
+        
+        def <strong>get</strong>(raise_on_error : Bool = <span class="n">false</span>) : Array(JSON::Any)
+
+        <a class="method-permalink" href="#get%28raise_on_error%3ABool%3Dfalse%29%3AArray%28JSON%3A%3AAny%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/aace17a561d4223e4fecb35d14cc0861204b21b6/src/placeos-driver/proxy/drivers.cr#L30" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_json(raise_on_error:Bool=false):String-instance-method">
+      <div class="signature">
+        
+        def <strong>get_json</strong>(raise_on_error : Bool = <span class="n">false</span>) : String
+
+        <a class="method-permalink" href="#get_json%28raise_on_error%3ABool%3Dfalse%29%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/aace17a561d4223e4fecb35d14cc0861204b21b6/src/placeos-driver/proxy/drivers.cr#L11" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="results:Array(ExecResponse)-instance-method">
+      <div class="signature">
+        
+        def <strong>results</strong> : Array(<a href="../../../PlaceOS/Driver/Proxy/ExecResponse.html">ExecResponse</a>)
+
+        <a class="method-permalink" href="#results%3AArray%28ExecResponse%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/aace17a561d4223e4fecb35d14cc0861204b21b6/src/placeos-driver/proxy/drivers.cr#L9" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
 
 
 </div>
