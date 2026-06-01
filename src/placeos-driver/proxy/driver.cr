@@ -1,5 +1,18 @@
 require "json"
 
+struct PlaceOS::Driver::Proxy::ExecResponse
+  def initialize(@future_result : Future::Compute(String))
+  end
+
+  def get_json : String
+    @future_result.get
+  end
+
+  def get : JSON::Any
+    JSON.parse get_json
+  end
+end
+
 struct PlaceOS::Driver::Proxy::Driver
   def initialize(
     @reply_id : String,
@@ -126,7 +139,7 @@ struct PlaceOS::Driver::Proxy::Driver
       channel = PlaceOS::Driver::Protocol.instance.expect_response(@module_id, @reply_id, :exec, request, raw: true, user_id: user_id)
 
       # Grab the result if required
-      lazy(name: "lazy_result") do
+      ExecResponse.new(lazy {
         result = channel.receive
 
         if error = result.error
@@ -135,15 +148,15 @@ struct PlaceOS::Driver::Proxy::Driver
           @system.logger.warn(exception: remote_error) { remote_error.message }
           raise remote_error
         else
-          JSON.parse(result.payload.not_nil!)
+          result.payload.not_nil!
         end
-      end
+      })
     else
       raise "undefined method '#{function_name}' for #{@module_name}_#{@index} (#{@module_id})"
     end
   rescue error
     @system.logger.warn { error.inspect_with_backtrace }
-    lazy(name: "lazy_error") { raise error; JSON.parse("") }
+    ExecResponse.new(lazy { raise error; "" })
   end
 
   # Build the `exec` request payload

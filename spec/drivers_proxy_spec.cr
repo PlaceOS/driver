@@ -2,18 +2,49 @@ require "./helper"
 
 module PlaceOS::Driver::Proxy
   describe Drivers do
+    it "Proxy::Responses should build json array" do
+      responses = Responses.new([
+        ExecResponse.new(lazy { "1" }),
+        ExecResponse.new(lazy { "2" }),
+      ])
+      responses.get_json.should eq "[1,2]"
+      responses.get.should eq Array(JSON::Any).from_json("[1,2]")
+
+      responses = Responses.new([
+        ExecResponse.new(lazy { raise "some error"; "" }),
+        ExecResponse.new(lazy { "2" }),
+      ])
+      responses.get_json.should eq "[2]"
+      responses.get.should eq Array(JSON::Any).from_json("[2]")
+
+      responses = Responses.new([
+        ExecResponse.new(lazy { raise "some error"; "" }),
+        ExecResponse.new(lazy { "2" }),
+      ])
+      expect_raises(Exception) do
+        responses.get_json(raise_on_error: true)
+      end
+      expect_raises(Exception) do
+        responses.get(raise_on_error: true)
+      end
+
+      responses = Responses.new([] of ExecResponse)
+      responses.get_json.should eq "[]"
+      responses.get.should eq Array(JSON::Any).from_json("[]")
+    end
+
     it "should execute functions on collections of remote drivers" do
       cs = PlaceOS::Driver::DriverModel::ControlSystem.from_json(%(
-        {
-          "id": "sys-1236",
-          "name": "Tesing System",
-          "email": "name@email.com",
-          "capacity": 20,
-          "features": ["in-house-pc","projector"],
-          "bookable": true,
-          "zones": ["zone-1234"]
-        }
-    ))
+          {
+            "id": "sys-1236",
+            "name": "Tesing System",
+            "email": "name@email.com",
+            "capacity": 20,
+            "features": ["in-house-pc","projector"],
+            "bookable": true,
+            "zones": ["zone-1234"]
+          }
+      ))
 
       system = PlaceOS::Driver::Proxy::System.new cs, "reply_id"
       system.id.should eq("sys-1236")
@@ -74,7 +105,7 @@ module PlaceOS::Driver::Proxy
 
       # Execute a remote function
       result = system.all(:Display).function1
-      result.is_a?(PlaceOS::Driver::Proxy::Drivers::Responses).should eq(true)
+      result.is_a?(PlaceOS::Driver::Proxy::Responses).should eq(true)
 
       # Check the exec request
       raw_data = Bytes.new(4096)
@@ -96,7 +127,7 @@ module PlaceOS::Driver::Proxy
 
       # Execute a remote function with default values
       result = system.all(:Display).function3(30)
-      result.is_a?(PlaceOS::Driver::Proxy::Drivers::Responses).should eq(true)
+      result.is_a?(PlaceOS::Driver::Proxy::Responses).should eq(true)
 
       # Check the exec request
       raw_data = Bytes.new(4096)

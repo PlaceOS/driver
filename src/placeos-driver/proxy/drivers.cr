@@ -2,6 +2,36 @@ require "json"
 
 require "./driver"
 
+struct PlaceOS::Driver::Proxy::Responses
+  def initialize(@results : Array(ExecResponse))
+  end
+
+  getter results : Array(ExecResponse)
+
+  def get_json(raise_on_error : Bool = false) : String
+    String.build do |str|
+      str << '['
+      size = 0
+      @results.each do |result|
+        begin
+          str << result.get_json
+          str << ','
+          size += 1
+        rescue error
+          # error will have been logged on the remote so no need to here as well
+          raise error if raise_on_error
+        end
+      end
+      str.back(1) unless size.zero?
+      str << ']'
+    end
+  end
+
+  def get(raise_on_error : Bool = false) : Array(JSON::Any)
+    Array(JSON::Any).from_json(get_json(raise_on_error))
+  end
+end
+
 struct PlaceOS::Driver::Proxy::Drivers
   include Enumerable(PlaceOS::Driver::Proxy::Driver)
 
@@ -51,34 +81,13 @@ struct PlaceOS::Driver::Proxy::Drivers
     {{ raise "Can't subscribe to state on a collection of drivers" }}
   end
 
-  class Responses
-    def initialize(@results : Array(::Future::Compute(JSON::Any)))
-    end
-
-    @computed : Array(JSON::Any)?
-
-    def get(raise_on_error : Bool = false) : Array(JSON::Any)
-      computed = @computed
-      return computed if computed
-      @computed = computed = @results.compact_map do |result|
-        begin
-          result.get
-        rescue error
-          raise error if raise_on_error
-          nil
-        end
-      end
-      computed
-    end
-  end
-
   # Collect all the futures from the function calls and make them available to the user
   macro method_missing(call)
     results = @drivers.map do |driver|
       begin
         driver.{{call.name.id}}( {{call.args.splat}} {% if !call.named_args.is_a?(Nop) && call.named_args.size > 0 %}, {{call.named_args.double_splat}} {% end %} )
       rescue error
-        ::Future::Compute(JSON::Any).new(false) { raise error }
+        ExecResponse.new(lazy { raise error; "" })
       end
     end
 

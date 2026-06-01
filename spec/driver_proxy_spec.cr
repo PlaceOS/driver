@@ -47,7 +47,7 @@ describe PlaceOS::Driver::Proxy::Driver do
 
       # Execute a remote function
       result = system[:Display_1].function1
-      result.is_a?(::Future::Compute(JSON::Any)).should eq(true)
+      result.is_a?(::PlaceOS::Driver::Proxy::ExecResponse).should eq(true)
 
       # Check the exec request
       raw_data = Bytes.new(4096)
@@ -64,11 +64,12 @@ describe PlaceOS::Driver::Proxy::Driver do
       input.write_bytes json_resp.bytesize
       input.write json_resp.to_slice
 
+      result.get_json.should eq("12345")
       result.get.should eq(12345)
 
       # Attempt to execute a function that doesn't exist
       result = system[:Display_1].function8
-      result.is_a?(::Future::Compute(JSON::Any)).should eq(true)
+      result.is_a?(::PlaceOS::Driver::Proxy::ExecResponse).should eq(true)
 
       expect_raises(Exception) do
         result.get
@@ -76,7 +77,7 @@ describe PlaceOS::Driver::Proxy::Driver do
 
       # Attempt to execute a function with invalid arguments
       result = system[:Display_1].function2
-      result.is_a?(::Future::Compute(JSON::Any)).should eq(true)
+      result.is_a?(::PlaceOS::Driver::Proxy::ExecResponse).should eq(true)
 
       expect_raises(Exception) do
         result.get
@@ -84,7 +85,7 @@ describe PlaceOS::Driver::Proxy::Driver do
 
       # Execute a remote function with arguments
       result = system[:Display_1].function2(12_345)
-      result.is_a?(::Future::Compute(JSON::Any)).should eq(true)
+      result.is_a?(::PlaceOS::Driver::Proxy::ExecResponse).should eq(true)
 
       # Check the exec request
       raw_data = Bytes.new(4096)
@@ -94,7 +95,7 @@ describe PlaceOS::Driver::Proxy::Driver do
 
       # Execute a remote function with named arguments
       result = system[:Display_1].function3(arg2: 12_345, arg1: 123)
-      result.is_a?(::Future::Compute(JSON::Any)).should eq(true)
+      result.is_a?(::PlaceOS::Driver::Proxy::ExecResponse).should eq(true)
 
       # Check the exec request
       raw_data = Bytes.new(4096)
@@ -104,7 +105,7 @@ describe PlaceOS::Driver::Proxy::Driver do
 
       # Ensure timeouts work!!
       result = system[:Display_1].function1
-      result.is_a?(::Future::Compute(JSON::Any)).should eq(true)
+      result.is_a?(::PlaceOS::Driver::Proxy::ExecResponse).should eq(true)
 
       # Check the exec request
       raw_data = Bytes.new(4096)
@@ -124,7 +125,7 @@ describe PlaceOS::Driver::Proxy::Driver do
       input.write json_resp.to_slice
 
       expect_raises(PlaceOS::Driver::RemoteException) do
-        result.get
+        result.get_json
       end
 
       # CLEAN UP

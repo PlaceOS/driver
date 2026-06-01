@@ -181,7 +181,12 @@ class PlaceOS::Driver::DriverManager
   end
 
   def self.process_result(klass, method_name, ret_val) : String | Task
-    return ret_val if ret_val.is_a?(::PlaceOS::Driver::Task)
+    case ret_val
+    when ::PlaceOS::Driver::Task
+      return ret_val
+    when ::PlaceOS::Driver::Proxy::ExecResponse, PlaceOS::Driver::Proxy::Responses
+      return ret_val.get_json
+    end
 
     # handle futures and promises
     ret_val = ret_val.responds_to?(:get) ? ret_val.get : ret_val
