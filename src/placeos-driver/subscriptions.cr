@@ -97,9 +97,12 @@ class PlaceOS::Driver
     def subscribe(system_id, module_name, index, status, &callback : (PlaceOS::Driver::Subscriptions::IndirectSubscription, String) ->) : PlaceOS::Driver::Subscriptions::IndirectSubscription
       sub = PlaceOS::Driver::Subscriptions::IndirectSubscription.new(system_id.to_s, module_name.to_s, index.to_i, status.to_s, &callback)
 
-      # Track indirect subscriptions
-      subscriptions = redirections[system_id] ||= [] of PlaceOS::Driver::Subscriptions::IndirectSubscription
-      subscriptions << sub
+      # Track indirect subscriptions. `redirections` is shared with the
+      # reception-loop / sub-remap fibers, so the mutation must be guarded;
+      # perform_subscribe stays OUTSIDE the lock as it re-locks the mutex.
+      mutex.synchronize do
+        (redirections[system_id] ||= [] of PlaceOS::Driver::Subscriptions::IndirectSubscription) << sub
+      end
       perform_subscribe(sub)
 
       sub
@@ -154,11 +157,14 @@ class PlaceOS::Driver
     end
 
     def unsubscribe(subscription : PlaceOS::Driver::Subscriptions::Subscription) : Nil
-      # clean up indirect subscription (if this is one)
-      if redirect = redirections[subscription.system_id]?
-        sub = redirect.delete(subscription)
-        if sub == subscription && redirect.empty?
-          redirections.delete(subscription.system_id)
+      # clean up indirect subscription (if this is one). Guarded — `redirections`
+      # is shared with the reception-loop / sub-remap fibers.
+      mutex.synchronize do
+        if redirect = redirections[subscription.system_id]?
+          sub = redirect.delete(subscription)
+          if sub == subscription && redirect.empty?
+            redirections.delete(subscription.system_id)
+          end
         end
       end
 
@@ -310,8 +316,12 @@ class PlaceOS::Driver
       end
 
       spawn(same_thread: true, name: "sub-remap") {
-        # re-check indirect subscriptions, these are registered by the subscriptions above
-        redirections.each_key do |system_id|
+        # re-check indirect subscriptions, these are registered by the
+        # subscriptions above. Snapshot the keys under the lock (mirroring the
+        # `subscriptions.keys` idiom above) so we never iterate the live hash
+        # while a user fiber mutates it; remap_indirect re-locks the mutex
+        # internally so it must run outside the synchronized block.
+        mutex.synchronize { redirections.keys }.each do |system_id|
           remap_indirect(system_id)
         end
       }
@@ -347,7 +357,10 @@ class PlaceOS::Driver
           end
         rescue error
           Log.fatal(exception: error) { "redis subscription failed... some components may not function correctly" }
-          redis.close
+          # `rescue nil` (matching the other close sites): on a TLS connection
+          # close can itself raise OpenSSL::SSL::Error, which would escape this
+          # fiber and skip the break below.
+          redis.close rescue nil
           # Break to stop draining subscription_channel against a dead
           # connection. Every further op would raise "Not connected to
           # Redis server and reconnect=false" and log another FATAL.
@@ -370,28 +383,37 @@ class PlaceOS::Driver
       pending = mutex.synchronize { awaiting_value[channel]?.try(&.dup) }
       return unless pending
 
-      delivered = [] of PlaceOS::Driver::Subscriptions::Subscription
       pending.each do |subscription|
-        if current_value = subscription.current_value
-          value = current_value
-          spawn(same_thread: true, name: "sub-initial") { subscription.callback(Log, value) }
-          delivered << subscription
-        end
-      end
+        # The HGET in current_value suspends the fiber, so it must run OUTSIDE
+        # the lock. A pub/sub message for this channel can therefore arrive
+        # mid-read and on_message will deliver + clear `awaiting_value` for it.
+        next unless current_value = subscription.current_value
+        value = current_value
 
-      return if delivered.empty?
-
-      mutex.synchronize do
-        if list = awaiting_value[channel]?
-          delivered.each { |subscription| list.delete(subscription) }
-          awaiting_value.delete(channel) if list.empty?
+        # `awaiting_value` membership is the single claim token shared with
+        # on_message: re-check under the lock and only deliver if this binding
+        # is STILL awaiting its first value. Whichever of us removes it wins, so
+        # the first value reaches the binding exactly once (no double-delivery,
+        # and no stale HGET value landing after a newer published one).
+        claimed = mutex.synchronize do
+          if (list = awaiting_value[channel]?) && list.delete(subscription)
+            awaiting_value.delete(channel) if list.empty?
+            true
+          else
+            false
+          end
         end
+
+        spawn(same_thread: true, name: "sub-initial") { subscription.callback(Log, value) } if claimed
       end
     end
 
     private def remap_indirect(system_id)
-      if subscriptions = redirections[system_id]?
-        subscriptions.each do |sub|
+      # Snapshot the array under the lock — it is shared with subscribe /
+      # unsubscribe on user fibers. perform_subscribe / perform_unsubscribe
+      # below re-lock the mutex, so they must run outside the synchronized block.
+      if subs = mutex.synchronize { redirections[system_id]?.try(&.dup) }
+        subs.each do |sub|
           subscribed = false
 
           # Check if currently mapped
