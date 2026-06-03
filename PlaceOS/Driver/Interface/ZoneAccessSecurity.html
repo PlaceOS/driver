@@ -781,7 +781,7 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/4499c2219815ef9c1136627209b67ccaf8739d47/src/placeos-driver/interface/zone_access_security.cr#L4" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/f1c05a4eb5fffe297fbf60e22a7c7987ca3e0023/src/placeos-driver/interface/zone_access_security.cr#L4" target="_blank">
         placeos-driver/interface/zone_access_security.cr
       </a>
     
@@ -845,14 +845,14 @@
       </li>
     
       <li class="entry-summary">
-        <a href="#zone_access_member%3F%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%29%3AString%7CInt64%7CNil-instance-method" class="signature"><strong>#zone_access_member?</strong>(zone_id : String | Int64, card_holder_id : String | Int64) : String | Int64 | Nil</a>
+        <a href="#zone_access_member%3F%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%2Cfrom_unix%3AInt64%7CNil%3Dnil%2Cuntil_unix%3AInt64%7CNil%3Dnil%29%3AString%7CInt64%7CNil-instance-method" class="signature"><strong>#zone_access_member?</strong>(zone_id : String | Int64, card_holder_id : String | Int64, from_unix : Int64 | Nil = <span class="n">nil</span>, until_unix : Int64 | Nil = <span class="n">nil</span>) : String | Int64 | Nil</a>
         
           <div class="summary"><p>return the id that represents the access permission (truthy indicates access)</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#zone_access_remove_member%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%29-instance-method" class="signature"><strong>#zone_access_remove_member</strong>(zone_id : String | Int64, card_holder_id : String | Int64)</a>
+        <a href="#zone_access_remove_member%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%2Cfrom_unix%3AInt64%7CNil%3Dnil%2Cuntil_unix%3AInt64%7CNil%3Dnil%29-instance-method" class="signature"><strong>#zone_access_remove_member</strong>(zone_id : String | Int64, card_holder_id : String | Int64, from_unix : Int64 | Nil = <span class="n">nil</span>, until_unix : Int64 | Nil = <span class="n">nil</span>)</a>
         
           <div class="summary"><p>remove a member from the zone</p></div>
         
@@ -898,7 +898,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/4499c2219815ef9c1136627209b67ccaf8739d47/src/placeos-driver/interface/zone_access_security.cr#L6" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/f1c05a4eb5fffe297fbf60e22a7c7987ca3e0023/src/placeos-driver/interface/zone_access_security.cr#L6" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -919,7 +919,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/4499c2219815ef9c1136627209b67ccaf8739d47/src/placeos-driver/interface/zone_access_security.cr#L17" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/f1c05a4eb5fffe297fbf60e22a7c7987ca3e0023/src/placeos-driver/interface/zone_access_security.cr#L17" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -940,7 +940,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/4499c2219815ef9c1136627209b67ccaf8739d47/src/placeos-driver/interface/zone_access_security.cr#L37" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/f1c05a4eb5fffe297fbf60e22a7c7987ca3e0023/src/placeos-driver/interface/zone_access_security.cr#L37" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -961,7 +961,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/4499c2219815ef9c1136627209b67ccaf8739d47/src/placeos-driver/interface/zone_access_security.cr#L20" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/f1c05a4eb5fffe297fbf60e22a7c7987ca3e0023/src/placeos-driver/interface/zone_access_security.cr#L20" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -982,17 +982,17 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/4499c2219815ef9c1136627209b67ccaf8739d47/src/placeos-driver/interface/zone_access_security.cr#L31" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/f1c05a4eb5fffe297fbf60e22a7c7987ca3e0023/src/placeos-driver/interface/zone_access_security.cr#L31" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="zone_access_member?(zone_id:String|Int64,card_holder_id:String|Int64):String|Int64|Nil-instance-method">
+    <div class="entry-detail" id="zone_access_member?(zone_id:String|Int64,card_holder_id:String|Int64,from_unix:Int64|Nil=nil,until_unix:Int64|Nil=nil):String|Int64|Nil-instance-method">
       <div class="signature">
         abstract 
-        def <strong>zone_access_member?</strong>(zone_id : String | Int64, card_holder_id : String | Int64) : String | Int64 | Nil
+        def <strong>zone_access_member?</strong>(zone_id : String | Int64, card_holder_id : String | Int64, from_unix : Int64 | Nil = <span class="n">nil</span>, until_unix : Int64 | Nil = <span class="n">nil</span>) : String | Int64 | Nil
 
-        <a class="method-permalink" href="#zone_access_member%3F%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%29%3AString%7CInt64%7CNil-instance-method">#</a>
+        <a class="method-permalink" href="#zone_access_member%3F%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%2Cfrom_unix%3AInt64%7CNil%3Dnil%2Cuntil_unix%3AInt64%7CNil%3Dnil%29%3AString%7CInt64%7CNil-instance-method">#</a>
       </div>
       
         <div class="doc">
@@ -1003,17 +1003,17 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/4499c2219815ef9c1136627209b67ccaf8739d47/src/placeos-driver/interface/zone_access_security.cr#L34" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/f1c05a4eb5fffe297fbf60e22a7c7987ca3e0023/src/placeos-driver/interface/zone_access_security.cr#L34" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="zone_access_remove_member(zone_id:String|Int64,card_holder_id:String|Int64)-instance-method">
+    <div class="entry-detail" id="zone_access_remove_member(zone_id:String|Int64,card_holder_id:String|Int64,from_unix:Int64|Nil=nil,until_unix:Int64|Nil=nil)-instance-method">
       <div class="signature">
         abstract 
-        def <strong>zone_access_remove_member</strong>(zone_id : String | Int64, card_holder_id : String | Int64)
+        def <strong>zone_access_remove_member</strong>(zone_id : String | Int64, card_holder_id : String | Int64, from_unix : Int64 | Nil = <span class="n">nil</span>, until_unix : Int64 | Nil = <span class="n">nil</span>)
 
-        <a class="method-permalink" href="#zone_access_remove_member%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%29-instance-method">#</a>
+        <a class="method-permalink" href="#zone_access_remove_member%28zone_id%3AString%7CInt64%2Ccard_holder_id%3AString%7CInt64%2Cfrom_unix%3AInt64%7CNil%3Dnil%2Cuntil_unix%3AInt64%7CNil%3Dnil%29-instance-method">#</a>
       </div>
       
         <div class="doc">
@@ -1024,7 +1024,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/4499c2219815ef9c1136627209b67ccaf8739d47/src/placeos-driver/interface/zone_access_security.cr#L40" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/f1c05a4eb5fffe297fbf60e22a7c7987ca3e0023/src/placeos-driver/interface/zone_access_security.cr#L40" target="_blank">View source</a>]
         
       </div>
     </div>
