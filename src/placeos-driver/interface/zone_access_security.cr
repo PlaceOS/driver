@@ -31,12 +31,12 @@ abstract class PlaceOS::Driver
     abstract def zone_access_lookup(id : String | Int64) : ZoneDetails
 
     # return the id that represents the access permission (truthy indicates access)
-    abstract def zone_access_member?(zone_id : String | Int64, card_holder_id : String | Int64) : String | Int64 | Nil
+    abstract def zone_access_member?(zone_id : String | Int64, card_holder_id : String | Int64, from_unix : Int64? = nil, until_unix : Int64? = nil) : String | Int64 | Nil
 
     # add a member to the zone
     abstract def zone_access_add_member(zone_id : String | Int64, card_holder_id : String | Int64, from_unix : Int64? = nil, until_unix : Int64? = nil)
 
     # remove a member from the zone
-    abstract def zone_access_remove_member(zone_id : String | Int64, card_holder_id : String | Int64)
+    abstract def zone_access_remove_member(zone_id : String | Int64, card_holder_id : String | Int64, from_unix : Int64? = nil, until_unix : Int64? = nil)
   end
 end
