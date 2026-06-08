@@ -94,13 +94,25 @@ private class BlackholeRedis < ::Redis
   end
 end
 
+# Models the production failure mode: a TLS subscription socket created with
+# `sync_close: false`. `redis.close` tears down the SSL layer but never closes
+# the underlying fd, so the reception loop blocked in `@connection.receive` is
+# NOT woken — i.e. close() is called but does NOT unblock the outer subscribe.
+private class StuckCloseBlackholeRedis < BlackholeRedis
+  def close
+    close_count.add(1)
+    # Deliberately do NOT close @block_channel: the reception loop stays
+    # parked, exactly as a TLS fd left open by a sync_close:false close.
+  end
+end
+
 # Pre-injects a fresh BlackholeRedis on each iteration so monitor_changes
 # never tries to connect to a real redis. Each restart of the loop uses a
 # new mock so tests can count restarts via `blackholes.size`.
 private class WatchdogTestSubscriptions < PlaceOS::Driver::Subscriptions
   getter blackholes = [] of BlackholeRedis
 
-  def initialize(ack_timeout : Time::Span, heartbeat_interval : Time::Span)
+  def initialize(ack_timeout : Time::Span, heartbeat_interval : Time::Span, @stuck_close : Bool = false)
     @redis = next_blackhole
     super(ack_timeout: ack_timeout, heartbeat_interval: heartbeat_interval)
   end
@@ -110,7 +122,7 @@ private class WatchdogTestSubscriptions < PlaceOS::Driver::Subscriptions
   end
 
   private def next_blackhole : BlackholeRedis
-    bh = BlackholeRedis.new
+    bh = @stuck_close ? StuckCloseBlackholeRedis.new : BlackholeRedis.new
     @blackholes << bh
     bh
   end
@@ -680,6 +692,56 @@ module PlaceOS
         deadline = Time.instant + 5.seconds
         until subs.blackholes.size >= 2
           fail "loop did not restart with a new redis" if Time.instant > deadline
+          sleep 20.milliseconds
+        end
+
+        subs.blackholes.size.should be >= 2
+
+        subs.terminate rescue nil
+      end
+
+      # Regression for the production wedge: the watchdog fired
+      # ("no subscribe ack within 15s — forcing reconnect"), a FATAL followed,
+      # then the subscription loop froze permanently (a rest-api restart was
+      # needed to recover). Root cause: the TLS subscription socket is created
+      # with `sync_close: false`, so `redis.close` tears down SSL but never
+      # closes the underlying fd; the reception loop parked in
+      # `@connection.receive` is never woken, `monitor_changes` never returns
+      # and SimpleRetry never restarts.
+      #
+      # Recovery must NOT depend on `redis.close` interrupting the parked read.
+      # This drives the watchdog against a redis whose `close` is called but
+      # leaves the reception loop blocked, and asserts the loop still restarts
+      # with a fresh connection.
+      it "force-reconnects even when redis.close does not unblock the reception loop" do
+        subs = WatchdogTestSubscriptions.new(
+          ack_timeout: 300.milliseconds,
+          heartbeat_interval: 50.milliseconds,
+          stuck_close: true,
+        )
+
+        deadline = Time.instant + 5.seconds
+        until subs.running
+          fail "subscription loop never started" if Time.instant > deadline
+          sleep 10.milliseconds
+        end
+
+        first_blackhole = subs.blackholes.first
+
+        # The watchdog still attempts a (best-effort) close once the ack window
+        # elapses...
+        deadline = Time.instant + 2.seconds
+        until first_blackhole.close_count.get > 0
+          fail "watchdog never fired (close not called within 2s)" if Time.instant > deadline
+          sleep 20.milliseconds
+        end
+
+        # ...but that close leaves the reception loop wedged. The loop must
+        # restart anyway, on a fresh connection. With the bug it never does:
+        # monitor_changes stays parked in the outer subscribe forever.
+        deadline = Time.instant + 5.seconds
+        until subs.blackholes.size >= 2
+          fail "loop did not restart despite a close that left the reception loop wedged" if Time.instant > deadline
           sleep 20.milliseconds
         end
 

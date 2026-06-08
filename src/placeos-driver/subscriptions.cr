@@ -198,7 +198,6 @@ class PlaceOS::Driver
       ) do
         return if terminated?
         monitor_count += 1
-        subscribe_count = monitor_count
         wait = Channel(Nil).new
         # Reset the watchdog clock so the heartbeat has a full ack_timeout
         # window to receive its first SUBSCRIBE ack on this iteration.
@@ -209,48 +208,37 @@ class PlaceOS::Driver
           # needs to return before we subscribe to further channels
           iter = monitor_count
           channel = subscription_channel
+
+          # Signalled by the watchdog (below) to force a fresh iteration even
+          # when the reception loop is wedged. Recovery must NOT depend solely
+          # on `redis.close` interrupting the parked `@connection.receive`: a
+          # TLS socket created with `sync_close: false` tears down SSL on close
+          # but leaves the underlying fd open, so the blocked read is never
+          # woken. Without this escape hatch the loop freezes permanently after
+          # a single watchdog warning (the production "WARN then FATAL then
+          # frozen" symptom).
+          force_reconnect = Channel(Nil).new(1)
+
           spawn(same_thread: true, name: "sub-drive") { drive_subscriptions(wait, channel, iter, -> { monitor_count }) }
 
-          # The reason for all the sync and spawns is that the first subscribe
-          # requires a block and subsequent ones throw an error with a block.
-          # NOTE:: this version of subscribe only supports splat arguments
-          redis.subscribe(SYSTEM_ORDER_UPDATE) do |on|
-            raise "redis reconnect detected" if subscribe_count != monitor_count
-            subscribe_count += 1
-
-            # Watchdog: every SUBSCRIBE ack from the server stamps @last_ack.
-            # Combined with the periodic re-SUBSCRIBE below, this gives us
-            # liveness — if no acks for `ack_timeout` we know the connection
-            # is blackholed and force a reconnect.
-            on.subscribe do |chan, _count|
-              @last_ack = Time.instant
-              # Wake any caller of perform_subscribe / channel waiting for
-              # confirmation that Redis has registered this channel.
-              if waiter = mutex.synchronize { @pending_subscribes[chan]? }
-                waiter.send(nil) rescue nil
-              end
-            end
-            on.message { |c, m| on_message(c, m) }
-            spawn(same_thread: true, name: "sub-heartbeat") do
-              instance = monitor_count
-              wait.close
-              loop do
-                sleep @heartbeat_interval
-                break if instance != monitor_count
-                if Time.instant - @last_ack > @ack_timeout
-                  Log.warn { "no subscribe ack within #{@ack_timeout.total_seconds}s — forcing reconnect" }
-                  redis.close
-                  break
-                end
-                # rescue break: if the channel was just closed by the
-                # ensure block (loop restart), exit cleanly rather than
-                # crashing the fiber with an unhandled ClosedError.
-                subscription_channel.send({true, SYSTEM_ORDER_UPDATE}) rescue break
-              end
-            end
+          # The blocking reception loop runs in its OWN fiber so the watchdog
+          # can abandon it if `redis.close` fails to free the connection. Its
+          # exit (normal or error) is reported via `loop_done`.
+          loop_done = Channel(Exception?).new(1)
+          spawn(same_thread: true, name: "sub-receive") do
+            run_reception_loop(wait, force_reconnect, loop_done, iter, -> { monitor_count })
           end
 
-          raise "no subscriptions, restarting loop" unless terminated?
+          # Restart on whichever comes first: the reception loop exiting
+          # (normally or with an error) or the watchdog forcing a reconnect
+          # because the loop is wedged and `redis.close` could not free it.
+          select
+          when result = loop_done.receive
+            raise result if result
+            raise "no subscriptions, restarting loop" unless terminated?
+          when force_reconnect.receive
+            raise "watchdog forced reconnect" unless terminated?
+          end
         rescue e
           Log.warn(exception: e) { "redis subscription loop exited" }
           raise e
@@ -269,6 +257,68 @@ class PlaceOS::Driver
           @redis_cluster.try(&.close!) rescue nil
           @redis_cluster = nil
         end
+      end
+    end
+
+    # Runs the blocking SYSTEM_ORDER_UPDATE subscription — the redis "reception
+    # loop" that dispatches pub/sub messages and SUBSCRIBE acks. Lives in its
+    # own method/fiber (spawned by `monitor_changes`) so the watchdog can
+    # abandon a wedged loop: if `redis.close` can't free a blackholed/TLS
+    # connection, `monitor_changes` still restarts via `force_reconnect`.
+    #
+    # The first subscribe requires a block; subsequent ones (from the drain)
+    # must not pass a block. NOTE:: this version of subscribe only supports
+    # splat arguments. The exit (normal or error) is reported via `loop_done`.
+    private def run_reception_loop(wait : Channel(Nil), force_reconnect : Channel(Nil), loop_done : Channel(Exception?), iter : Int32, current_iter : -> Int32) : Nil
+      subscribe_count = iter
+      redis.subscribe(SYSTEM_ORDER_UPDATE) do |on|
+        raise "redis reconnect detected" if subscribe_count != current_iter.call
+        subscribe_count += 1
+
+        # Watchdog: every SUBSCRIBE ack from the server stamps @last_ack.
+        # Combined with the periodic re-SUBSCRIBE in the heartbeat, this gives
+        # us liveness — if no acks for `ack_timeout` the connection is
+        # blackholed and we force a reconnect.
+        on.subscribe do |chan, _count|
+          @last_ack = Time.instant
+          # Wake any caller of perform_subscribe / channel waiting for
+          # confirmation that Redis has registered this channel.
+          if waiter = mutex.synchronize { @pending_subscribes[chan]? }
+            waiter.send(nil) rescue nil
+          end
+        end
+        on.message { |c, m| on_message(c, m) }
+        spawn(same_thread: true, name: "sub-heartbeat") { run_heartbeat(wait, force_reconnect, current_iter) }
+      end
+      loop_done.send(nil) rescue nil
+    rescue e
+      loop_done.send(e) rescue nil
+    end
+
+    # Periodic liveness check for the reception loop. Re-SUBSCRIBEs to
+    # SYSTEM_ORDER_UPDATE each interval (each ack stamps `@last_ack`); if no ack
+    # has arrived within `@ack_timeout` the connection is blackholed, so it
+    # best-effort closes redis and signals `force_reconnect` to restart the
+    # monitor loop — recovery must not depend on `redis.close` freeing the fd.
+    private def run_heartbeat(wait : Channel(Nil), force_reconnect : Channel(Nil), current_iter : -> Int32) : Nil
+      instance = current_iter.call
+      wait.close
+      loop do
+        sleep @heartbeat_interval
+        break if instance != current_iter.call
+        if Time.instant - @last_ack > @ack_timeout
+          Log.warn { "no subscribe ack within #{@ack_timeout.total_seconds}s — forcing reconnect" }
+          # Best-effort graceful close (guarded: a TLS close can itself raise
+          # OpenSSL::SSL::Error), then force the monitor to restart regardless
+          # of whether close actually freed the connection.
+          redis.close rescue nil
+          force_reconnect.send(nil) rescue nil
+          break
+        end
+        # rescue break: if the channel was just closed by the ensure block
+        # (loop restart), exit cleanly rather than crashing the fiber with an
+        # unhandled ClosedError.
+        subscription_channel.send({true, SYSTEM_ORDER_UPDATE}) rescue break
       end
     end
 
