@@ -12,6 +12,10 @@ struct PlaceOS::Driver::Proxy::ExecResponse
     @future_result.get
   end
 
+  def get_json(klass : Class)
+    klass.from_json get_json
+  end
+
   def get : JSON::Any
     JSON.parse get_json
   end

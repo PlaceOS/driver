@@ -8,7 +8,7 @@ struct PlaceOS::Driver::Proxy::Responses
 
   getter results : Array(ExecResponse)
 
-  def get_json(raise_on_error : Bool = false) : String
+  def get_json(*, raise_on_error : Bool = false) : String
     String.build do |str|
       str << '['
       size = 0
@@ -27,8 +27,20 @@ struct PlaceOS::Driver::Proxy::Responses
     end
   end
 
+  def get_json(klass : Class, raise_on_error : Bool = false)
+    results.compact_map do |result|
+      begin
+        result.get_json(klass)
+      rescue error
+        # error will have been logged on the remote so no need to here as well
+        raise error if raise_on_error
+        nil
+      end
+    end
+  end
+
   def get(raise_on_error : Bool = false) : Array(JSON::Any)
-    Array(JSON::Any).from_json(get_json(raise_on_error))
+    Array(JSON::Any).from_json(get_json(raise_on_error: raise_on_error))
   end
 end
 
