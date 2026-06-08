@@ -40,6 +40,17 @@ class PlaceOS::Driver
     # Is the subscription loop running?
     getter running : Bool = false
 
+    # Number of times the subscription connection has been re-established after
+    # the initial connect (i.e. reconnect events). Climbs once per monitor loop
+    # restart, so a rapidly increasing value is a churn signal — the watchdog
+    # forcing repeated reconnects. Atomic for safe cross-thread reads.
+    @reconnect_count = Atomic(Int64).new(0_i64)
+
+    # Number of reconnects since this Subscriptions instance started.
+    def reconnect_count : Int64
+      @reconnect_count.get
+    end
+
     # Is the subscription terminated
     private property? terminated = false
 
@@ -198,6 +209,9 @@ class PlaceOS::Driver
       ) do
         return if terminated?
         monitor_count += 1
+        # monitor_count == 1 is the initial connect; every iteration after it is
+        # a reconnect. Exposed via #reconnect_count for churn observability.
+        @reconnect_count.add(1) if monitor_count > 1
         wait = Channel(Nil).new
         # Reset the watchdog clock so the heartbeat has a full ack_timeout
         # window to receive its first SUBSCRIBE ack on this iteration.

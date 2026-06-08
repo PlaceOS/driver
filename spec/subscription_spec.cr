@@ -697,6 +697,10 @@ module PlaceOS
 
         subs.blackholes.size.should be >= 2
 
+        # The reconnect counter should have climbed (initial connect does not
+        # count; each restart does).
+        subs.reconnect_count.should be >= 1_i64
+
         subs.terminate rescue nil
       end
 
