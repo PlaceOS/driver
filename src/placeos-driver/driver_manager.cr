@@ -13,43 +13,62 @@ class PlaceOS::Driver::DriverManager
     @calibrate_connected = false
 
     @transport = case @model.role
-                 in .ssh?
+                 when .ssh?
+                   {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:ssh] %}
+                     ip = @model.ip.not_nil!
+                     port = @model.port.not_nil!
+                     PlaceOS::Driver::TransportSSH.new(@queue, ip, port, @settings, @model.uri) do |data, task|
+                       received(data, task)
+                     end
+                   {% else %}
+                     raise "driver was not compiled with SSH transport support, declare `tcp_port` in the driver to enable it"
+                   {% end %}
+                 when .raw?
                    ip = @model.ip.not_nil!
                    port = @model.port.not_nil!
-                   PlaceOS::Driver::TransportSSH.new(@queue, ip, port, @settings, @model.uri) do |data, task|
-                     received(data, task)
-                   end
-                 in .raw?
-                   ip = @model.ip.not_nil!
-                   udp = @model.udp
-                   tls = @model.tls
-                   port = @model.port.not_nil!
-                   makebreak = @model.makebreak
 
-                   if udp
-                     PlaceOS::Driver::TransportUDP.new(@queue, ip, port, @settings, tls, @model.uri) do |data, task|
-                       received(data, task)
-                     end
+                   if @model.udp
+                     {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:udp] %}
+                       PlaceOS::Driver::TransportUDP.new(@queue, ip, port, @settings, @model.tls, @model.uri) do |data, task|
+                         received(data, task)
+                       end
+                     {% else %}
+                       raise "driver was not compiled with UDP transport support, declare `udp_port` in the driver to enable it"
+                     {% end %}
                    else
-                     PlaceOS::Driver::TransportTCP.new(@queue, ip, port, @settings, tls, @model.uri, makebreak) do |data, task|
+                     {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:tcp] %}
+                       PlaceOS::Driver::TransportTCP.new(@queue, ip, port, @settings, @model.tls, @model.uri, @model.makebreak) do |data, task|
+                         received(data, task)
+                       end
+                     {% else %}
+                       raise "driver was not compiled with TCP transport support, declare `tcp_port` in the driver to enable it"
+                     {% end %}
+                   end
+                 when .http?
+                   {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:http] %}
+                     PlaceOS::Driver::TransportHTTP.new(@queue, @model.uri.not_nil!, @settings) do
+                       http_received
+                     end
+                   {% else %}
+                     raise "driver was not compiled with HTTP transport support, declare `uri_base` in the driver to enable it"
+                   {% end %}
+                 when .websocket?
+                   {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:websocket] %}
+                     headers_callback = Proc(HTTP::Headers).new { websocket_headers }
+                     PlaceOS::Driver::TransportWebsocket.new(@queue, @model.uri.not_nil!, @settings, headers_callback) do |data, task|
                        received(data, task)
                      end
-                   end
-                 in .http?
-                   PlaceOS::Driver::TransportHTTP.new(@queue, @model.uri.not_nil!, @settings) do
-                     http_received
-                   end
-                 in .logic?
-                   # nothing required to be done here
+                   {% else %}
+                     raise "driver was not compiled with websocket transport support, declare `uri_base` in the driver to enable it"
+                   {% end %}
+                 else
+                   # logic transport is always compiled
                    PlaceOS::Driver::TransportLogic.new(@queue)
-                 in .websocket?
-                   headers_callback = Proc(HTTP::Headers).new { websocket_headers }
-                   PlaceOS::Driver::TransportWebsocket.new(@queue, @model.uri.not_nil!, @settings, headers_callback) do |data, task|
-                     received(data, task)
-                   end
                  end
     @driver = new_driver
   end
+
+  @transport : PlaceOS::Driver::Transport
 
   @subscriptions : Proxy::Subscriptions?
   getter model : ::PlaceOS::Driver::DriverModel

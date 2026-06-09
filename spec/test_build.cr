@@ -1,6 +1,9 @@
 require "../src/placeos-driver"
 require "promise"
 
+# the library specs exercise every transport directly
+PlaceOS::Driver.load_all_transports
+
 class Helper
   abstract class HelperBase < PlaceOS::Driver
     def implemented_in_base_class

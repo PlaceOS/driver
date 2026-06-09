@@ -643,10 +643,31 @@ require "./placeos-driver/transport"
 require "./placeos-driver/storage/edge-storage"
 require "./placeos-driver/proxy/*"
 require "./placeos-driver/subscriptions/*"
-require "./placeos-driver/transport/*"
+require "./placeos-driver/transport/logic"
 require "./placeos-driver/utilities/*"
 
 require "socket"
+
+# only compile the transports required by the driver, based on the discovery
+# settings defined (see utilities/discovery.cr) - this hook expands after the
+# driver class body so the TRANSPORTS flags have been populated
+macro finished
+  {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:tcp] %}
+    require "./placeos-driver/transport/tcp"
+  {% end %}
+  {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:udp] %}
+    require "./placeos-driver/transport/udp"
+  {% end %}
+  {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:ssh] %}
+    require "./placeos-driver/transport/ssh"
+  {% end %}
+  {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:http] %}
+    require "./placeos-driver/transport/http"
+  {% end %}
+  {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:websocket] %}
+    require "./placeos-driver/transport/websocket"
+  {% end %}
+end
 
 macro finished
   # Launch the process manager by default, this can be overriten for testing

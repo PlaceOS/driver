@@ -1,4 +1,9 @@
 abstract class PlaceOS::Driver
+  # :nodoc:
+  # the transports a driver requires, populated by the discovery macros below
+  # and inspected at the end of compilation to require only those transports
+  TRANSPORTS = {} of Nil => Nil
+
   module Utilities
     # :nodoc:
     class Discovery
@@ -35,22 +40,42 @@ abstract class PlaceOS::Driver
   end
 
   # define a TCP port default if your driver connects over a raw TCP socket
-  def self.tcp_port(port)
-    Utilities::Discovery.settings[:tcp_port] = port.to_i
+  #
+  # this compiles the TCP and SSH transports into the driver
+  macro tcp_port(port)
+    {% ::PlaceOS::Driver::TRANSPORTS[:tcp] = true %}
+    {% ::PlaceOS::Driver::TRANSPORTS[:ssh] = true %}
+    ::PlaceOS::Driver::Utilities::Discovery.settings[:tcp_port] = ({{port}}).to_i
   end
 
   # define a UDP port default if your driver connects over a raw UDP socket
   #
   # also use this if you are using multicast for communications
-  def self.udp_port(port)
-    Utilities::Discovery.settings[:udp_port] = port.to_i
+  #
+  # this compiles the UDP transport into the driver
+  macro udp_port(port)
+    {% ::PlaceOS::Driver::TRANSPORTS[:udp] = true %}
+    ::PlaceOS::Driver::Utilities::Discovery.settings[:udp_port] = ({{port}}).to_i
   end
 
   # the default base URI for a service driver, all HTTP requests will have this domain and path appended
   #
   # for example: https://api.google.com/
-  def self.uri_base(url)
-    Utilities::Discovery.settings[:uri_base] = url.to_s
+  #
+  # this compiles the HTTP and websocket transports into the driver
+  macro uri_base(url)
+    {% ::PlaceOS::Driver::TRANSPORTS[:http] = true %}
+    {% ::PlaceOS::Driver::TRANSPORTS[:websocket] = true %}
+    ::PlaceOS::Driver::Utilities::Discovery.settings[:uri_base] = ({{url}}).to_s
+  end
+
+  # compile every transport into the binary, regardless of the discovery
+  # settings defined. Used by specs and documentation builds, the same can be
+  # achieved with the `-Dplaceos_all_transports` compiler flag
+  macro load_all_transports
+    {% for transport in [:tcp, :udp, :ssh, :http, :websocket] %}
+      {% ::PlaceOS::Driver::TRANSPORTS[transport] = true %}
+    {% end %}
   end
 
   # when using a TCP protocol, we want to close the connection after every request / response

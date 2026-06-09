@@ -1,5 +1,9 @@
 require "./helper"
 
+# transports are required in a `macro finished` hook, so the class needs to be
+# explicitly required here for the top level subclass below to resolve
+require "../src/placeos-driver/transport/tcp"
+
 # Exposes @socket so leak specs can assert on what `start_socket` left behind.
 private class TestableTCP < PlaceOS::Driver::TransportTCP
   def socket_ref : IO?

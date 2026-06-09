@@ -1,3 +1,4 @@
+require "http"
 require "tokenizer"
 require "./transport/http_proxy"
 
@@ -24,11 +25,6 @@ abstract class PlaceOS::Driver::Transport
 
   # NOTE:: overloaded in transport/http
   def before_request(&@before_request : HTTP::Request ->)
-  end
-
-  # Only SSH implements exec
-  def exec(message) : SSH2::Channel
-    raise ::IO::EOFError.new("exec is only available to SSH transports")
   end
 
   # Use `logger` of `Driver::Queue`

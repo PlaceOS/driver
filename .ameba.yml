@@ -9,3 +9,8 @@ Lint/NotNil:
 
 Style/QueryBoolMethods:
   Enabled: false
+
+# compile-only driver fixtures, not spec files
+Lint/SpecFilename:
+  Excluded:
+    - spec/slim_fixtures/*.cr

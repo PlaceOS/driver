@@ -6,6 +6,14 @@ require "openssl_ext"
 
 require "../transport"
 
+# Only SSH transports implement exec, the default is defined here so the base
+# Transport class has no dependency on the ssh2 library
+abstract class PlaceOS::Driver::Transport
+  def exec(message) : SSH2::Channel
+    raise ::IO::EOFError.new("exec is only available to SSH transports")
+  end
+end
+
 class PlaceOS::Driver
   protected def exec(message)
     transport.exec(message)
