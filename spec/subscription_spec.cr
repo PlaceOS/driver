@@ -161,6 +161,39 @@ private class WatchdogTestSubscriptions < PlaceOS::Driver::Subscriptions
   end
 end
 
+# Reception loop (BlackholeRedis) + heartbeat run normally, but the drain is
+# NEVER started — models the `sub-drive` fiber dying before it reaches
+# `drain_subscription_channel`. Used to prove the heartbeat does not park
+# forever on a consumer-less `subscription_channel.send` (Fix B: a stalled send
+# is treated as a dead pipeline and forces a reconnect).
+private class DeadDrainTestSubscriptions < PlaceOS::Driver::Subscriptions
+  getter blackholes = [] of BlackholeRedis
+
+  def initialize(ack_timeout : Time::Span, heartbeat_interval : Time::Span)
+    @redis = next_blackhole
+    super(ack_timeout: ack_timeout, heartbeat_interval: heartbeat_interval)
+  end
+
+  private def redis
+    @redis ||= next_blackhole
+  end
+
+  private def next_blackhole : BlackholeRedis
+    bh = BlackholeRedis.new
+    @blackholes << bh
+    bh
+  end
+
+  # Unblock the waiter and mark the loop running, but NEVER consume
+  # subscription_channel — i.e. the drain is dead from the heartbeat's POV.
+  private def drive_subscriptions(wait : Channel(Nil), channel : Channel(Tuple(Bool, String)), iter : Int32, current_iter : -> Int32) : Nil
+    wait.receive?
+    return if terminated? || iter != current_iter.call || @redis.nil?
+    @running = true
+    # intentionally do NOT call drain_subscription_channel
+  end
+end
+
 module PlaceOS
   class Driver
     describe Subscriptions do
@@ -844,6 +877,47 @@ module PlaceOS
           sleep 20.milliseconds
         end
 
+        subs.blackholes.size.should be >= 2
+
+        subs.terminate rescue nil
+      end
+
+      # Regression for Fix B (the watchdog must not be defeatable by a dead
+      # drain). If the drain stops consuming subscription_channel, the heartbeat
+      # would — with an unbounded send — park forever on its re-SUBSCRIBE send
+      # and never reach the @last_ack watchdog test, so no reconnect is ever
+      # forced and the loop wedges silently (the persistence mechanism behind
+      # the production bug). The bounded send (select + timeout(@ack_timeout))
+      # must instead treat a non-consumed send as a dead pipeline and force a
+      # reconnect.
+      #
+      # ack_timeout (300ms) > heartbeat_interval (50ms) so the first heartbeat
+      # tick does NOT trip the @last_ack path — only the bounded send can drive
+      # the reconnect here, isolating Fix B.
+      it "forces a reconnect when the drain stops consuming (watchdog not parked)" do
+        subs = DeadDrainTestSubscriptions.new(
+          ack_timeout: 300.milliseconds,
+          heartbeat_interval: 50.milliseconds,
+        )
+
+        deadline = Time.instant + 5.seconds
+        until subs.running
+          fail "subscription loop never started" if Time.instant > deadline
+          sleep 10.milliseconds
+        end
+
+        # With the bug the heartbeat parks on the consumer-less send and the
+        # loop never restarts. With Fix B the send times out after ack_timeout
+        # and forces a reconnect.
+        deadline = Time.instant + 5.seconds
+        until subs.reconnect_count >= 1_i64
+          fail "watchdog parked on a dead drain — no reconnect forced (wedge)" if Time.instant > deadline
+          sleep 20.milliseconds
+        end
+
+        subs.reconnect_count.should be >= 1_i64
+        # A fresh reception connection on the new iteration proves the loop
+        # actually restarted rather than merely incrementing a counter.
         subs.blackholes.size.should be >= 2
 
         subs.terminate rescue nil
