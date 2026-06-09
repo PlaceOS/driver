@@ -329,10 +329,35 @@ class PlaceOS::Driver
           force_reconnect.send(nil) rescue nil
           break
         end
+        # Re-SUBSCRIBE through the drain to generate a fresh ack. If the drain
+        # has stopped consuming (e.g. an exception killed `sub-drive` before it
+        # reached `drain_subscription_channel`), an unbounded send would PARK
+        # here forever and silently defeat the watchdog — the connection looks
+        # healthy, no ack times out, and the loop never restarts (bindings stay
+        # un-served until process restart). Bound it: a send the drain can't
+        # accept within `@ack_timeout` means the pipeline is dead, so force a
+        # reconnect just as the ack-timeout path does.
+        #
         # rescue break: if the channel was just closed by the ensure block
-        # (loop restart), exit cleanly rather than crashing the fiber with an
-        # unhandled ClosedError.
-        subscription_channel.send({true, SYSTEM_ORDER_UPDATE}) rescue break
+        # (loop restart), exit cleanly rather than crashing on a ClosedError.
+        delivered =
+          begin
+            select
+            when subscription_channel.send({true, SYSTEM_ORDER_UPDATE})
+              true
+            when timeout(@ack_timeout)
+              false
+            end
+          rescue
+            break
+          end
+
+        unless delivered
+          Log.warn { "subscription drain not consuming within #{@ack_timeout.total_seconds}s — forcing reconnect" }
+          redis.close rescue nil
+          force_reconnect.send(nil) rescue nil
+          break
+        end
       end
     end
 
@@ -451,7 +476,22 @@ class PlaceOS::Driver
         # The HGET in current_value suspends the fiber, so it must run OUTSIDE
         # the lock. A pub/sub message for this channel can therefore arrive
         # mid-read and on_message will deliver + clear `awaiting_value` for it.
-        next unless current_value = subscription.current_value
+        #
+        # current_value can RAISE (e.g. Redis::CommandTimeoutError when a
+        # storage node stalls during the same redis stress that triggered a
+        # reconnect). It MUST NOT propagate: this runs inline in
+        # `drive_subscriptions`' reconnect sweep, and an escape would kill the
+        # `sub-drive` fiber before `drain_subscription_channel` ever starts —
+        # wedging the whole monitor loop until process restart. Skip the binding
+        # on error; it stays in `awaiting_value` and is retried on the next
+        # pub/sub message or reconnect.
+        begin
+          current_value = subscription.current_value
+        rescue error
+          Log.warn(exception: error) { "failed reading current value for re-delivery on #{channel}; will retry" }
+          next
+        end
+        next unless current_value
         value = current_value
 
         # `awaiting_value` membership is the single claim token shared with

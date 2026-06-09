@@ -106,6 +106,39 @@ private class StuckCloseBlackholeRedis < BlackholeRedis
   end
 end
 
+# A subscription whose current_value HGET raises — models a storage node
+# Redis::CommandTimeoutError during the redis stress that triggers a reconnect.
+# Used to prove the reconnect re-delivery sweep (notify_awaiting) does not let
+# that exception escape and kill the sub-drive fiber.
+private class RaisingValueSubscription < PlaceOS::Driver::Subscriptions::Subscription
+  def initialize(@channel : String)
+  end
+
+  def subscribe_to : String?
+    @channel
+  end
+
+  def current_value : String?
+    raise ::Redis::CommandTimeoutError.new("injected storage timeout")
+  end
+
+  def callback(logger : ::Log, message : String) : Nil
+  end
+end
+
+# Exposes a way to seed an awaiting binding straight into the cache (mimicking
+# perform_subscribe's insert) so the next reconnect sweep calls its
+# current_value.
+private class SweepWedgeTestSubscriptions < PlaceOS::Driver::Subscriptions
+  def inject_awaiting(sub : PlaceOS::Driver::Subscriptions::Subscription) : Nil
+    channel = sub.subscribe_to.not_nil!
+    mutex.synchronize do
+      (subscriptions[channel] ||= [] of PlaceOS::Driver::Subscriptions::Subscription) << sub
+      (awaiting_value[channel] ||= [] of PlaceOS::Driver::Subscriptions::Subscription) << sub
+    end
+  end
+end
+
 # Pre-injects a fresh BlackholeRedis on each iteration so monitor_changes
 # never tries to connect to a real redis. Each restart of the loop uses a
 # new mock so tests can count restarts via `blackholes.size`.
@@ -702,6 +735,68 @@ module PlaceOS
         subs.reconnect_count.should be >= 1_i64
 
         subs.terminate rescue nil
+      end
+
+      # Regression for the production wedge: WARN "no subscribe ack within 15s"
+      # then FATAL "redis subscription failed", then SOME bindings permanently
+      # miss notifications until rest-api restart (non-TLS).
+      #
+      # Root cause: the post-reconnect re-delivery sweep
+      # (drive_subscriptions -> notify_awaiting -> current_value) does a storage
+      # HGET that can raise Redis::CommandTimeoutError (a stalled node during the
+      # same redis stress that tripped the watchdog). That exception was
+      # unrescued, so it unwound out of drive_subscriptions and killed the
+      # sub-drive fiber BEFORE drain_subscription_channel started — leaving no
+      # consumer for subscription_channel. The loop then wedged silently and
+      # every new first-on-channel bind blocked forever. notify_awaiting must
+      # skip a binding whose current_value raises (it stays awaiting, retried
+      # later) so the drain always starts and the loop recovers.
+      it "survives a current_value error during the reconnect re-delivery sweep" do
+        subs = SweepWedgeTestSubscriptions.new
+
+        deadline = Time.instant + 5.seconds
+        until subs.running
+          fail "subscription loop never started" if Time.instant > deadline
+          sleep 10.milliseconds
+        end
+
+        # Seed a poisoned awaiting binding: the next reconnect's sweep will call
+        # its current_value, which raises.
+        subs.inject_awaiting(RaisingValueSubscription.new("status/poison-#{Random.new.hex(4)}/power"))
+
+        # A normal binding we use to prove the drain is still alive after the
+        # reconnect (delivery of a value set post-recovery).
+        module_id = "mod-sweep-#{Random.new.hex(4)}"
+        storage = RedisStorage.new(module_id)
+        storage.delete("power")
+        fired = Channel(String).new(1)
+        subs.subscribe(module_id, :power) { |_, m| fired.send(m) }
+        sleep 100.milliseconds
+
+        # Force the loop down then up; drive_subscriptions runs the sweep over
+        # awaiting_value, hitting the poisoned binding.
+        subs.terminate(false)
+
+        # With the bug: the sweep raises, sub-drive dies, the loop wedges and
+        # `running` never returns. With the fix: the poison is skipped and the
+        # loop recovers.
+        deadline = Time.instant + 10.seconds
+        until subs.running
+          fail "loop wedged after current_value raised in the reconnect sweep" if Time.instant > deadline
+          sleep 10.milliseconds
+        end
+
+        # And the drain must be alive: a value set now must reach the binding.
+        storage["power"] = "on"
+        select
+        when msg = fired.receive
+          msg.should eq("on")
+        when timeout(3.seconds)
+          fail "drain dead after reconnect — new value never delivered (wedge)"
+        end
+
+        storage.delete("power")
+        subs.terminate
       end
 
       # Regression for the production wedge: the watchdog fired
