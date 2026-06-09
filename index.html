@@ -771,7 +771,7 @@
 | <code>uri_base &quot;https://...&quot;</code> | HTTP + websocket |
 | none of the above | logic only |</p>
 <p>Starting a module with a role the driver was not compiled for raises at module start, for example: <code>driver was not compiled with HTTP transport support, declare 'uri_base' in the driver to enable it</code>.</p>
-<p>All transports can be forced into a binary with the <code>-Dplaceos_all_transports</code> compiler flag or by calling <code>PlaceOS::Driver.load_all_transports</code> after requiring the library. The test-harness builds driver binaries with this flag, as <code><a href="DriverSpecs.html">DriverSpecs</a></code> launches every driver against a mock raw TCP server (<code>role: 1</code>) plus a mock HTTP server, regardless of the transports the driver uses in production.</p>
+<p>All transports can be forced into a binary with the <code>-Dplaceos_all_transports</code> compiler flag, by setting the <code>PLACEOS_ALL_TRANSPORTS</code> env var at build time, or by calling <code>PlaceOS::Driver.load_all_transports</code> after requiring the library. The test-harness sets the env var on its build service, as <code><a href="DriverSpecs.html">DriverSpecs</a></code> launches every driver against a mock raw TCP server (<code>role: 1</code>) plus a mock HTTP server, regardless of the transports the driver uses in production.</p>
 </div>
 </body>
 </html>
