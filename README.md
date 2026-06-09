@@ -21,4 +21,4 @@ Only the transports a driver declares are compiled into the binary, based on the
 
 Starting a module with a role the driver was not compiled for raises at module start, for example: `driver was not compiled with HTTP transport support, declare 'uri_base' in the driver to enable it`.
 
-All transports can be forced into a binary with the `-Dplaceos_all_transports` compiler flag or by calling `PlaceOS::Driver.load_all_transports` after requiring the library. The test-harness builds driver binaries with this flag, as `DriverSpecs` launches every driver against a mock raw TCP server (`role: 1`) plus a mock HTTP server, regardless of the transports the driver uses in production.
+All transports can be forced into a binary with the `-Dplaceos_all_transports` compiler flag, by setting the `PLACEOS_ALL_TRANSPORTS` env var at build time, or by calling `PlaceOS::Driver.load_all_transports` after requiring the library. The test-harness sets the env var on its build service, as `DriverSpecs` launches every driver against a mock raw TCP server (`role: 1`) plus a mock HTTP server, regardless of the transports the driver uses in production.

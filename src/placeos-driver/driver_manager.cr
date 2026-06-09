@@ -14,7 +14,7 @@ class PlaceOS::Driver::DriverManager
 
     @transport = case @model.role
                  when .ssh?
-                   {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:ssh] %}
+                   {% if PlaceOS::Driver::TRANSPORTS[:ssh] %}
                      ip = @model.ip.not_nil!
                      port = @model.port.not_nil!
                      PlaceOS::Driver::TransportSSH.new(@queue, ip, port, @settings, @model.uri) do |data, task|
@@ -28,7 +28,7 @@ class PlaceOS::Driver::DriverManager
                    port = @model.port.not_nil!
 
                    if @model.udp
-                     {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:udp] %}
+                     {% if PlaceOS::Driver::TRANSPORTS[:udp] %}
                        PlaceOS::Driver::TransportUDP.new(@queue, ip, port, @settings, @model.tls, @model.uri) do |data, task|
                          received(data, task)
                        end
@@ -36,7 +36,7 @@ class PlaceOS::Driver::DriverManager
                        raise "driver was not compiled with UDP transport support, declare `udp_port` in the driver to enable it"
                      {% end %}
                    else
-                     {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:tcp] %}
+                     {% if PlaceOS::Driver::TRANSPORTS[:tcp] %}
                        PlaceOS::Driver::TransportTCP.new(@queue, ip, port, @settings, @model.tls, @model.uri, @model.makebreak) do |data, task|
                          received(data, task)
                        end
@@ -45,7 +45,7 @@ class PlaceOS::Driver::DriverManager
                      {% end %}
                    end
                  when .http?
-                   {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:http] %}
+                   {% if PlaceOS::Driver::TRANSPORTS[:http] %}
                      PlaceOS::Driver::TransportHTTP.new(@queue, @model.uri.not_nil!, @settings) do
                        http_received
                      end
@@ -53,7 +53,7 @@ class PlaceOS::Driver::DriverManager
                      raise "driver was not compiled with HTTP transport support, declare `uri_base` in the driver to enable it"
                    {% end %}
                  when .websocket?
-                   {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:websocket] %}
+                   {% if PlaceOS::Driver::TRANSPORTS[:websocket] %}
                      headers_callback = Proc(HTTP::Headers).new { websocket_headers }
                      PlaceOS::Driver::TransportWebsocket.new(@queue, @model.uri.not_nil!, @settings, headers_callback) do |data, task|
                        received(data, task)

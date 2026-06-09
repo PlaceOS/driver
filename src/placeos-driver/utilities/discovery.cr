@@ -4,6 +4,16 @@ abstract class PlaceOS::Driver
   # and inspected at the end of compilation to require only those transports
   TRANSPORTS = {} of Nil => Nil
 
+  # all transports are compiled when the `placeos_all_transports` flag is
+  # defined or the PLACEOS_ALL_TRANSPORTS env var is set at build time.
+  # The test-harness sets the env var on its build service as driver specs
+  # launch every driver against a mock raw TCP server (role: 1)
+  {% if flag?(:placeos_all_transports) || !(env("PLACEOS_ALL_TRANSPORTS") || "").empty? %}
+    {% for transport in [:tcp, :udp, :ssh, :http, :websocket] %}
+      {% TRANSPORTS[transport] = true %}
+    {% end %}
+  {% end %}
+
   module Utilities
     # :nodoc:
     class Discovery

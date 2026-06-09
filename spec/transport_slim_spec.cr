@@ -7,13 +7,15 @@ require "spec"
 # * `uri_base` => HTTP + websocket
 # * none defined => logic only
 #
-# the `-Dplaceos_all_transports` flag forces all transports to be included,
-# used by the test-harness as drivers are spec'd against mock TCP servers
-private def compile(fixture : String, *flags) : Bool
+# the `-Dplaceos_all_transports` flag or the PLACEOS_ALL_TRANSPORTS env var
+# force all transports to be included, used by the test-harness as drivers
+# are spec'd against mock TCP servers
+private def compile(fixture : String, *flags, env : Process::Env = nil) : Bool
   output = IO::Memory.new
   status = Process.run(
     "crystal",
     ["build", "--no-codegen", *flags, "./spec/slim_fixtures/#{fixture}"],
+    env: env,
     output: output,
     error: output
   )
@@ -36,5 +38,9 @@ describe "transport slimming" do
 
   it "includes all transports when the placeos_all_transports flag is defined" do
     compile("http_only_no_ssh.cr", "-Dplaceos_all_transports").should be_true
+  end
+
+  it "includes all transports when the PLACEOS_ALL_TRANSPORTS env var is set" do
+    compile("http_only_no_ssh.cr", env: {"PLACEOS_ALL_TRANSPORTS" => "1"}).should be_true
   end
 end

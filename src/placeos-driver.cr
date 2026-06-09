@@ -652,19 +652,19 @@ require "socket"
 # settings defined (see utilities/discovery.cr) - this hook expands after the
 # driver class body so the TRANSPORTS flags have been populated
 macro finished
-  {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:tcp] %}
+  {% if PlaceOS::Driver::TRANSPORTS[:tcp] %}
     require "./placeos-driver/transport/tcp"
   {% end %}
-  {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:udp] %}
+  {% if PlaceOS::Driver::TRANSPORTS[:udp] %}
     require "./placeos-driver/transport/udp"
   {% end %}
-  {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:ssh] %}
+  {% if PlaceOS::Driver::TRANSPORTS[:ssh] %}
     require "./placeos-driver/transport/ssh"
   {% end %}
-  {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:http] %}
+  {% if PlaceOS::Driver::TRANSPORTS[:http] %}
     require "./placeos-driver/transport/http"
   {% end %}
-  {% if flag?(:placeos_all_transports) || PlaceOS::Driver::TRANSPORTS[:websocket] %}
+  {% if PlaceOS::Driver::TRANSPORTS[:websocket] %}
     require "./placeos-driver/transport/websocket"
   {% end %}
 end
