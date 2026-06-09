@@ -767,8 +767,9 @@
     Overview
   </h2>
 
-  <p>This is base class for all PlaceOS drivers.
-It implements a standardised interface by introspecting the driver code you write.</p>
+  <p>driver level HTTP helpers, these are available on all transports via
+<code>Transport#http</code> so are always compiled, regardless of the transports
+selected by the discovery settings</p>
 
 
 
@@ -795,252 +796,259 @@ It implements a standardised interface by introspecting the driver code you writ
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L56" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L56" target="_blank">
         placeos-driver.cr:56
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L651" target="_blank">
-        placeos-driver.cr:651
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L672" target="_blank">
+        placeos-driver.cr:672
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/constants.cr#L3" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/constants.cr#L3" target="_blank">
         placeos-driver/constants.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/camera.cr#L5" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/camera.cr#L5" target="_blank">
         placeos-driver/interface/camera.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/chat_bot.cr#L3" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/chat_bot.cr#L3" target="_blank">
         placeos-driver/interface/chat_bot.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/chat_functions.cr#L3" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/chat_functions.cr#L3" target="_blank">
         placeos-driver/interface/chat_functions.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/desk_control.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/desk_control.cr#L1" target="_blank">
         placeos-driver/interface/desk_control.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/device_info.cr#L3" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/device_info.cr#L3" target="_blank">
         placeos-driver/interface/device_info.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/door_security.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/door_security.cr#L1" target="_blank">
         placeos-driver/interface/door_security.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/electrical_relay.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/electrical_relay.cr#L1" target="_blank">
         placeos-driver/interface/electrical_relay.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/guest_building_access.cr#L3" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/guest_building_access.cr#L3" target="_blank">
         placeos-driver/interface/guest_building_access.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/lighting.cr#L3" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/lighting.cr#L3" target="_blank">
         placeos-driver/interface/lighting.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/locatable.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/locatable.cr#L1" target="_blank">
         placeos-driver/interface/locatable.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/lockers.cr#L4" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/lockers.cr#L4" target="_blank">
         placeos-driver/interface/lockers.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/mailer.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/mailer.cr#L1" target="_blank">
         placeos-driver/interface/mailer.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/mailer_templates.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/mailer_templates.cr#L1" target="_blank">
         placeos-driver/interface/mailer_templates.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/moveable.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/moveable.cr#L1" target="_blank">
         placeos-driver/interface/moveable.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/muteable.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/muteable.cr#L1" target="_blank">
         placeos-driver/interface/muteable.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/powerable.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/powerable.cr#L1" target="_blank">
         placeos-driver/interface/powerable.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/sensor.cr#L7" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/sensor.cr#L7" target="_blank">
         placeos-driver/interface/sensor.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/sms.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/sms.cr#L1" target="_blank">
         placeos-driver/interface/sms.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/standby_image.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/standby_image.cr#L1" target="_blank">
         placeos-driver/interface/standby_image.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/stoppable.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/stoppable.cr#L1" target="_blank">
         placeos-driver/interface/stoppable.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/switchable.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/switchable.cr#L1" target="_blank">
         placeos-driver/interface/switchable.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/zone_access_security.cr#L3" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/zone_access_security.cr#L3" target="_blank">
         placeos-driver/interface/zone_access_security.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/interface/zoomable.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/interface/zoomable.cr#L1" target="_blank">
         placeos-driver/interface/zoomable.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/logger.cr#L4" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/logger.cr#L4" target="_blank">
         placeos-driver/logger.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/logger_io.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/logger_io.cr#L1" target="_blank">
         placeos-driver/logger_io.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/protocol/request.cr#L3" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/protocol/request.cr#L3" target="_blank">
         placeos-driver/protocol/request.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/storage.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/storage.cr#L1" target="_blank">
         placeos-driver/storage.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/subscriptions.cr#L6" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/subscriptions.cr#L6" target="_blank">
         placeos-driver/subscriptions.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/transport/http.cr#L6" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/transport/http.cr#L6" target="_blank">
         placeos-driver/transport/http.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/transport/ssh.cr#L9" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/transport/ssh.cr#L17" target="_blank">
         placeos-driver/transport/ssh.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/utilities/binder.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/binder.cr#L1" target="_blank">
         placeos-driver/utilities/binder.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/utilities/discovery.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/discovery.cr#L1" target="_blank">
         placeos-driver/utilities/discovery.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/utilities/rescue_from.cr#L1" target="_blank">
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/http_helpers.cr#L6" target="_blank">
+        placeos-driver/utilities/http_helpers.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/rescue_from.cr#L1" target="_blank">
         placeos-driver/utilities/rescue_from.cr
       </a>
     
@@ -1145,27 +1153,6 @@ It implements a standardised interface by introspecting the driver code you writ
         
       </li>
     
-      <li class="entry-summary">
-        <a href="#tcp_port%28port%29-class-method" class="signature"><strong>.tcp_port</strong>(port)</a>
-        
-          <div class="summary"><p>define a TCP port default if your driver connects over a raw TCP socket</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#udp_port%28port%29-class-method" class="signature"><strong>.udp_port</strong>(port)</a>
-        
-          <div class="summary"><p>define a UDP port default if your driver connects over a raw UDP socket</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#uri_base%28url%29-class-method" class="signature"><strong>.uri_base</strong>(url)</a>
-        
-          <div class="summary"><p>the default base URI for a service driver, all HTTP requests will have this domain and path appended</p></div>
-        
-      </li>
-    
   </ul>
 
 
@@ -1191,6 +1178,13 @@ It implements a standardised interface by introspecting the driver code you writ
         <a href="#bind%28mod%2Cstatus%2Chandler%3Dnil%29-macro" class="signature"><strong>bind</strong>(mod, status, handler = <span class="n">nil</span>)</a>
         
           <div class="summary"><p>a helper for any driver to bind to changes in its own status values <em>logic drivers</em> can additionally bind to status values on remote drivers</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#load_all_transports-macro" class="signature"><strong>load_all_transports</strong></a>
+        
+          <div class="summary"><p>compile every transport into the binary, regardless of the discovery settings defined.</p></div>
         
       </li>
     
@@ -1226,6 +1220,27 @@ It implements a standardised interface by introspecting the driver code you writ
         <a href="#status%3F%28klass%2Ckey%29-macro" class="signature"><strong>status?</strong>(klass, key)</a>
         
           <div class="summary"><p>reads a status key and deserialises the value into the class provided.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#tcp_port%28port%29-macro" class="signature"><strong>tcp_port</strong>(port)</a>
+        
+          <div class="summary"><p>define a TCP port default if your driver connects over a raw TCP socket</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#udp_port%28port%29-macro" class="signature"><strong>udp_port</strong>(port)</a>
+        
+          <div class="summary"><p>define a UDP port default if your driver connects over a raw UDP socket</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#uri_base%28url%29-macro" class="signature"><strong>uri_base</strong>(url)</a>
+        
+          <div class="summary"><p>the default base URI for a service driver, all HTTP requests will have this domain and path appended</p></div>
         
       </li>
     
@@ -1470,7 +1485,7 @@ It implements a standardised interface by introspecting the driver code you writ
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/utilities/discovery.cr#L62" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/discovery.cr#L87" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1492,7 +1507,7 @@ It implements a standardised interface by introspecting the driver code you writ
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/utilities/discovery.cr#L33" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/discovery.cr#L38" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1514,7 +1529,7 @@ It implements a standardised interface by introspecting the driver code you writ
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/utilities/discovery.cr#L19" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/discovery.cr#L24" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1536,7 +1551,7 @@ It implements a standardised interface by introspecting the driver code you writ
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/utilities/discovery.cr#L26" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/discovery.cr#L31" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1552,7 +1567,7 @@ It implements a standardised interface by introspecting the driver code you writ
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/logger.cr#L14" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/logger.cr#L14" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1573,7 +1588,7 @@ It implements a standardised interface by introspecting the driver code you writ
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/utilities/discovery.cr#L57" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/discovery.cr#L82" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1595,72 +1610,7 @@ Toggle TRACE level logging using <code>kill -s USR1 %PID</code></p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/logger.cr#L31" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="tcp_port(port)-class-method">
-      <div class="signature">
-        
-        def self.<strong>tcp_port</strong>(port)
-
-        <a class="method-permalink" href="#tcp_port%28port%29-class-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>define a TCP port default if your driver connects over a raw TCP socket</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/utilities/discovery.cr#L38" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="udp_port(port)-class-method">
-      <div class="signature">
-        
-        def self.<strong>udp_port</strong>(port)
-
-        <a class="method-permalink" href="#udp_port%28port%29-class-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>define a UDP port default if your driver connects over a raw UDP socket</p>
-<p>also use this if you are using multicast for communications</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/utilities/discovery.cr#L45" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="uri_base(url)-class-method">
-      <div class="signature">
-        
-        def self.<strong>uri_base</strong>(url)
-
-        <a class="method-permalink" href="#uri_base%28url%29-class-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>the default base URI for a service driver, all HTTP requests will have this domain and path appended</p>
-<p>for example: https://api.google.com/</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/utilities/discovery.cr#L52" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/logger.cr#L31" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1697,7 +1647,7 @@ Toggle TRACE level logging using <code>kill -s USR1 %PID</code></p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/utilities/discovery.cr#L75" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/discovery.cr#L100" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1723,7 +1673,30 @@ Toggle TRACE level logging using <code>kill -s USR1 %PID</code></p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/utilities/binder.cr#L34" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/binder.cr#L34" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="load_all_transports-macro">
+      <div class="signature">
+        
+        macro <strong>load_all_transports</strong>
+
+        <a class="method-permalink" href="#load_all_transports-macro">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>compile every transport into the binary, regardless of the discovery
+settings defined. Used by specs and documentation builds, the same can be
+achieved with the <code>-Dplaceos_all_transports</code> compiler flag</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/discovery.cr#L75" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1746,7 +1719,7 @@ or alternatively: <code>rescue_from(DivisionByZeroError) { 0 }</code></p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver/utilities/rescue_from.cr#L8" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/rescue_from.cr#L8" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1769,7 +1742,7 @@ or alternatively: <code>rescue_from(DivisionByZeroError) { 0 }</code></p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L226" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L226" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1792,7 +1765,7 @@ or alternatively: <code>rescue_from(DivisionByZeroError) { 0 }</code></p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L235" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L235" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1814,7 +1787,7 @@ or alternatively: <code>rescue_from(DivisionByZeroError) { 0 }</code></p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L187" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L187" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1836,7 +1809,75 @@ or alternatively: <code>rescue_from(DivisionByZeroError) { 0 }</code></p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L194" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L194" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="tcp_port(port)-macro">
+      <div class="signature">
+        
+        macro <strong>tcp_port</strong>(port)
+
+        <a class="method-permalink" href="#tcp_port%28port%29-macro">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>define a TCP port default if your driver connects over a raw TCP socket</p>
+<p>this compiles the TCP and SSH transports into the driver</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/discovery.cr#L45" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="udp_port(port)-macro">
+      <div class="signature">
+        
+        macro <strong>udp_port</strong>(port)
+
+        <a class="method-permalink" href="#udp_port%28port%29-macro">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>define a UDP port default if your driver connects over a raw UDP socket</p>
+<p>also use this if you are using multicast for communications</p>
+<p>this compiles the UDP transport into the driver</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/discovery.cr#L56" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="uri_base(url)-macro">
+      <div class="signature">
+        
+        macro <strong>uri_base</strong>(url)
+
+        <a class="method-permalink" href="#uri_base%28url%29-macro">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>the default base URI for a service driver, all HTTP requests will have this domain and path appended</p>
+<p>for example: https://api.google.com/</p>
+<p>this compiles the HTTP and websocket transports into the driver</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver/utilities/discovery.cr#L66" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1869,7 +1910,7 @@ or alternatively: <code>rescue_from(DivisionByZeroError) { 0 }</code></p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L173" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L173" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1891,7 +1932,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L156" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L156" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1912,7 +1953,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L178" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L178" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1933,7 +1974,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L129" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L129" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1954,7 +1995,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L240" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L240" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1975,7 +2016,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L347" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L347" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1996,7 +2037,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L150" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L150" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2012,7 +2053,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L116" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L116" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2033,7 +2074,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L140" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L140" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2056,7 +2097,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L320" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L320" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2078,7 +2119,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L304" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L304" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2094,7 +2135,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L116" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L116" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2142,7 +2183,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L267" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L267" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2158,7 +2199,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L116" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L116" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2180,7 +2221,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L274" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L274" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2202,7 +2243,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L284" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L284" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2226,7 +2267,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L337" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L337" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2242,7 +2283,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L116" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L116" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2263,7 +2304,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L200" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L200" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2286,7 +2327,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L296" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L296" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2307,7 +2348,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L123" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L123" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2328,7 +2369,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L217" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L217" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2350,7 +2391,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L207" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L207" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2366,7 +2407,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L116" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L116" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -2387,7 +2428,7 @@ allowing them to bind to value updates</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/f039a4a494ea0e55a1d561bed386d5e7bcd3a9dc/src/placeos-driver.cr#L326" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/249289716b08729f6d35becc7277b6935e6cf5ee/src/placeos-driver.cr#L326" target="_blank">View source</a>]
         
       </div>
     </div>

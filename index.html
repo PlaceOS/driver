@@ -758,6 +758,20 @@
 <ul>
 <li>libssh2 required for SSH support</li>
 </ul>
+<h2><a id="transport-selection" class="anchor" href="#transport-selection">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Transport selection</h2>
+<p>Only the transports a driver declares are compiled into the binary, based on the discovery settings in the driver class body:</p>
+<p>| Declaration | Transports compiled |
+|---|---|
+| <code>tcp_port 1234</code> | TCP + SSH |
+| <code>udp_port 1234</code> | UDP |
+| <code>uri_base &quot;https://...&quot;</code> | HTTP + websocket |
+| none of the above | logic only |</p>
+<p>Starting a module with a role the driver was not compiled for raises at module start, for example: <code>driver was not compiled with HTTP transport support, declare 'uri_base' in the driver to enable it</code>.</p>
+<p>All transports can be forced into a binary with the <code>-Dplaceos_all_transports</code> compiler flag or by calling <code>PlaceOS::Driver.load_all_transports</code> after requiring the library. The test-harness builds driver binaries with this flag, as <code><a href="DriverSpecs.html">DriverSpecs</a></code> launches every driver against a mock raw TCP server (<code>role: 1</code>) plus a mock HTTP server, regardless of the transports the driver uses in production.</p>
 </div>
 </body>
 </html>
