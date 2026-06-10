@@ -290,34 +290,44 @@ class PlaceOS::Driver::DriverManager
     request.set_error(error)
   end
 
+  # serialises connected-state processing: the redis operations below suspend
+  # the fiber, so without this a slow earlier transition could land its status
+  # write after a rapid newer one — worse, the newer transition's
+  # read-compare-write would see "no change" and skip its write entirely,
+  # leaving the stored status inverted against the queue state
+  @connection_lock : Mutex = Mutex.new
+
   private def connection(state : Bool) : Nil
     driver = @driver
-    # this is just a hint so we can ignore it if redis was offline
-    check_proxy_usage(driver) rescue nil
+    @connection_lock.synchronize do
+      # this is just a hint so we can ignore it if redis was offline
+      check_proxy_usage(driver) rescue nil
 
-    # connected status is more important so we should ensure this is calibrated
-    begin
-      driver[:connected] = state
-      @calibrate_connected = false
-    rescue error
-      @calibrate_connected = true
-      logger.warn(exception: error) { "error setting connected status #{driver.class} (#{@module_id})" }
-    end
-
-    # Run lifecycle callbacks on a fresh fiber so user code cannot synchronously
-    # re-enter this callback. Without the spawn, a driver that toggles queue
-    # state (e.g. `queue.set_connected`) from inside `connected`/`disconnected`
-    # would call back into `connection` on the same stack — historically a
-    # source of stack-overflow bugs in transport-driven auth flows.
-    spawn(same_thread: true, name: "driver-lifecycle") do
+      # connected status is more important so we should ensure this is calibrated
       begin
-        if state
-          driver.connected
-        else
-          driver.disconnected
-        end
+        driver[:connected] = state
+        @calibrate_connected = false
       rescue error
-        logger.warn(exception: error) { "error changing connected state #{driver.class} (#{@module_id})" }
+        @calibrate_connected = true
+        logger.warn(exception: error) { "error setting connected status #{driver.class} (#{@module_id})" }
+      end
+
+      # Run lifecycle callbacks on a fresh fiber so user code cannot synchronously
+      # re-enter this callback. Without the spawn, a driver that toggles queue
+      # state (e.g. `queue.set_connected`) from inside `connected`/`disconnected`
+      # would call back into `connection` on the same stack — historically a
+      # source of stack-overflow bugs in transport-driven auth flows.
+      # Spawned inside the lock so the callbacks fire in transition order.
+      spawn(same_thread: true, name: "driver-lifecycle") do
+        begin
+          if state
+            driver.connected
+          else
+            driver.disconnected
+          end
+        rescue error
+          logger.warn(exception: error) { "error changing connected state #{driver.class} (#{@module_id})" }
+        end
       end
     end
   rescue error
@@ -355,9 +365,14 @@ class PlaceOS::Driver::DriverManager
   end
 
   private def ensure_connected_calibrate(driver) : Nil
-    driver[:connected] = true
-    check_proxy_usage(driver) rescue nil
-    @calibrate_connected = false
+    @connection_lock.synchronize do
+      # re-check under the lock, a queued connection callback may have
+      # already calibrated while we were waiting
+      return unless @calibrate_connected
+      driver[:connected] = true
+      check_proxy_usage(driver) rescue nil
+      @calibrate_connected = false
+    end
   rescue
   end
 
