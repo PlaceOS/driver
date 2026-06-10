@@ -23,6 +23,9 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
 
   @connect_lock : Mutex = Mutex.new
   @connection_state_changing : Bool = false
+  # incremented each time a new socket is established so delayed disconnect
+  # fibers can detect their socket has already been replaced
+  @generation : UInt64 = 0_u64
   @headers_callback : -> HTTP::Headers
   @ip : String
   @path : String
@@ -38,24 +41,35 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
       @connection_state_changing = true
     end
 
-    if websocket = @websocket
-      return unless websocket.closed?
-    end
+    # the cleanup must only run once this fiber owns the state change,
+    # otherwise an early return here would clear the flag set by another
+    # connect and tear down the connection that fiber is mid-establishing
+    begin
+      if websocket = @websocket
+        unless websocket.closed?
+          # a healthy socket already exists, re-assert the connected state in
+          # case a delayed disconnect marked the queue offline after this
+          # socket was established
+          set_connected_state(true)
+          return
+        end
+      end
 
-    # Clear any buffered data before we re-connect
-    tokenizer = @tokenizer
-    tokenizer.clear if tokenizer
+      # Clear any buffered data before we re-connect
+      tokenizer = @tokenizer
+      tokenizer.clear if tokenizer
 
-    SimpleRetry.try_to(
-      base_interval: 1.second,
-      max_interval: 10.seconds,
-      randomise: 500.milliseconds
-    ) do
-      start_socket(connect_timeout) unless @terminated
+      SimpleRetry.try_to(
+        base_interval: 1.second,
+        max_interval: 10.seconds,
+        randomise: 500.milliseconds
+      ) do
+        start_socket(connect_timeout) unless @terminated
+      end
+    ensure
+      @connect_lock.synchronize { @connection_state_changing = false }
+      disconnect if @terminated || @websocket.nil? || @websocket.try(&.closed?)
     end
-  ensure
-    @connect_lock.synchronize { @connection_state_changing = false }
-    disconnect if @terminated || @websocket.nil? || @websocket.try(&.closed?)
   end
 
   private def start_socket(connect_timeout)
@@ -96,12 +110,13 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
 
     # configure websocket
     websocket = @websocket = ConnectProxy::WebSocket.new(@ip, @path, @port, @tls, headers, proxy, ignore_env: true)
+    generation = @generation &+= 1
 
     # Enable queuing
     set_connected_state(true)
 
     # Start consuming data from the socket
-    spawn(same_thread: true, name: "ws-consume") { consume_io(websocket) }
+    spawn(same_thread: true, name: "ws-consume") { consume_io(websocket, generation) }
   rescue error
     logger.info(exception: error) { "error connecting to device on #{@ip}:#{@port}#{@path}" }
     set_connected_state(false)
@@ -115,12 +130,23 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
   end
 
   def disconnect : Nil
+    disconnect(@generation)
+  end
+
+  # tears down the connection unless `generation` is stale, i.e. the socket
+  # the disconnect was issued against has already been replaced
+  protected def disconnect(generation : UInt64) : Nil
     websocket = @websocket
     @connect_lock.synchronize do
-      return if @connection_state_changing
+      return if @connection_state_changing || generation != @generation
       @websocket = nil
     end
     websocket.try(&.close) rescue nil
+
+    # close yields this fiber; if a reconnect completed while we were
+    # suspended the new connection must not be marked offline
+    return if generation != @generation
+
     set_connected_state(false)
     # Spawn the reconnect so disconnect can't grow the stack via the
     # disconnect -> connect -> (ensure) disconnect chain when the device
@@ -171,7 +197,7 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
     @websocket.try &.pong(message)
   end
 
-  private def consume_io(websocket)
+  private def consume_io(websocket, generation)
     websocket.on_ping { |message| websocket.pong(message) }
     websocket.on_binary { |bytes| process bytes }
     websocket.on_message { |string| process string.to_slice }
@@ -180,9 +206,13 @@ class PlaceOS::Driver::TransportWebsocket < PlaceOS::Driver::Transport
   rescue error
     logger.error(exception: error) { "error consuming IO" }
   ensure
+    # ensure the socket reports closed so a concurrent connect's safety check
+    # can detect the death even if the disconnect below is dropped — a TCP
+    # reset doesn't flag the websocket as closed on its own
+    websocket.close rescue nil
     # only call disconnect if we're still processing the same socket
     # if not then connect has already been called or disconnect was
     # called explicitly
-    disconnect if websocket == @websocket
+    disconnect(generation) if websocket == @websocket
   end
 end
