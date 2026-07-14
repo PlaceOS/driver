@@ -586,7 +586,10 @@ abstract class PlaceOS::Driver
           "functions": #{funcs},
           "implements": #{implements.to_json},
           "requirements": #{Utilities::Discovery.requirements.to_json},
-          "security": #{self.security}
+          "security": #{self.security},
+          "versions": {
+            "driver": #{::PlaceOS::Driver::VERSION.to_json}
+          }
         }).gsub(/\s/, "")
       end
 

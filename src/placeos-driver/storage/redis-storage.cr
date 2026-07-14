@@ -43,6 +43,48 @@ module PlaceOS
       json_value
     end
 
+    # Set a status value that automatically expires after `ttl`.
+    #
+    # Like `#[]=` but the field is removed by redis once `ttl` elapses. `ttl` may
+    # be a `Time::Span` or an integer number of seconds. Setting a `"null"` value
+    # deletes the field. Pass `publish: true` to notify subscribers of the change.
+    def set_expire(status_name, json_value, ttl : Time::Span | Int, publish : Bool = false)
+      status_name = status_name.to_s
+      adjusted_value = json_value.to_s.presence || "null"
+
+      if adjusted_value != "null"
+        millis = self.class.ttl_milliseconds(ttl)
+        @@redis_lock.synchronize do
+          if publish
+            redis.pipelined(hash_key, reconnect: true) do |pipeline|
+              pipeline.hsetex(hash_key, status_name, adjusted_value, px: millis)
+              pipeline.publish("#{hash_key}/#{status_name}", adjusted_value)
+            end
+          else
+            redis.hsetex(hash_key, status_name, adjusted_value, px: millis)
+          end
+        end
+      elsif publish
+        delete(status_name)
+      else
+        @@redis_lock.synchronize { redis.hdel(hash_key, status_name) }
+      end
+
+      json_value
+    end
+
+    # Reset (or set) the expiry on an existing field without changing its value.
+    #
+    # `ttl` may be a `Time::Span` or an integer number of seconds. No status
+    # signal is published as the value is unchanged. Returns `true` when the
+    # expiry was applied, `false` when the field does not exist.
+    def expire(status_name, ttl : Time::Span | Int) : Bool
+      status_name = status_name.to_s
+      millis = self.class.ttl_milliseconds(ttl)
+      result = @@redis_lock.synchronize { redis.hpexpire(hash_key, millis, status_name) }
+      result.first? == 1_i64
+    end
+
     def fetch(key, & : String ->)
       key = key.to_s
       entry = @@redis_lock.synchronize { redis.hget(hash_key, key) }
@@ -99,6 +141,15 @@ module PlaceOS
     #############################################################################
 
     private getter redis : Redis::Client { self.class.shared_redis_client }
+
+    # Normalise a `Time::Span` or integer number of seconds into milliseconds.
+    def self.ttl_milliseconds(ttl : Int) : Int64
+      ttl.to_i64 * 1000
+    end
+
+    def self.ttl_milliseconds(ttl : Time::Span) : Int64
+      ttl.total_milliseconds.round.to_i64
+    end
 
     def self.get(key)
       @@redis_lock.synchronize { shared_redis_client.get(key.to_s) }

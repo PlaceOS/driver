@@ -125,8 +125,8 @@ describe PlaceOS::Driver::Settings do
     {% end %}
 
     # test where no fields are required
-    JSON::Schema.introspect(NamedTuple(steve: String?)).should eq({type: "object", properties: {steve: {anyOf: { {type: "null"}, {type: "string"} }}}})
-    JSON::Schema.introspect(SchemaKlassNoRequired).should eq({type: "object", properties: {cmd: {anyOf: { {type: "null"}, {type: "string"} }}, other: {anyOf: { {type: "integer", format: "Int32"}, {type: "null"} }}}})
+    JSON::Schema.introspect(NamedTuple(steve: String?)).should eq({type: "object", properties: {steve: {anyOf: { {type: "null"}, {type: "string"} }}}, required: [] of String})
+    JSON::Schema.introspect(SchemaKlassNoRequired).should eq({type: "object", properties: {cmd: {anyOf: { {type: "null"}, {type: "string"} }}, other: {anyOf: { {type: "integer", format: "Int32"}, {type: "null"} }}}, required: [] of String})
 
     # allow totally custom classes to define their own schema
     JSON::Schema.introspect(RandomCustomKlass).should eq({type: "object", required: ["something"]})

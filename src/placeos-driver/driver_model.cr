@@ -69,6 +69,9 @@ struct PlaceOS::Driver::DriverModel
     # JSON Schema derived from the settings used in the driver
     property settings : NamedTuple(type: String, properties: Hash(String, JSON::Any)?, required: Array(String)?)?
 
+    # library versions
+    property versions : Hash(String, String)? = nil
+
     # Notes that might be relevant to a LLM
     property notes : String? = nil
 
