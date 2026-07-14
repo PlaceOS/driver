@@ -16,7 +16,7 @@ class PlaceOS::Driver::Queue
     @waiting = false
     @mutex = Mutex.new
 
-    spawn(same_thread: true, name: "queue-process") { process! }
+    spawn(name: "queue-process") { process! }
   end
 
   getter logger : ::Log
@@ -150,7 +150,7 @@ class PlaceOS::Driver::Queue
     logger.error(exception: error) { "unexpected exception processing queue" }
   ensure
     # The queue should always be running so we need to restart it
-    spawn(same_thread: true, name: "queue-process") { process! } unless @terminated
+    spawn(name: "queue-process") { process! } unless @terminated
   end
 
   # :nodoc:
@@ -176,7 +176,7 @@ class PlaceOS::Driver::Queue
     elsif name
       @mutex.synchronize { insert_named_task(name, task) }
     else
-      spawn(same_thread: true, name: "queue-offline-abort") { task.abort("transport is currently offline") }
+      spawn(name: "queue-offline-abort") { task.abort("transport is currently offline") }
     end
     task
   end
@@ -185,7 +185,7 @@ class PlaceOS::Driver::Queue
     if existing = @queue.index { |t| t.name == name }
       old_task = @queue[existing]
       @queue[existing] = task
-      spawn(same_thread: true, name: "queue-dedup-abort") { old_task.abort(warn: false) }
+      spawn(name: "queue-dedup-abort") { old_task.abort(warn: false) }
     else
       @queue.push task
     end

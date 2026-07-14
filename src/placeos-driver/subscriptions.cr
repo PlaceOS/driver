@@ -82,7 +82,7 @@ class PlaceOS::Driver
     @last_ack : Time::Instant = Time.instant
 
     def initialize(@ack_timeout : Time::Span = 15.seconds, @heartbeat_interval : Time::Span = 3.seconds)
-      spawn(same_thread: true, name: "sub-monitor") { monitor_changes }
+      spawn(name: "sub-monitor") { monitor_changes }
     end
 
     def terminate(terminate = true) : Nil
@@ -233,13 +233,13 @@ class PlaceOS::Driver
           # frozen" symptom).
           force_reconnect = Channel(Nil).new(1)
 
-          spawn(same_thread: true, name: "sub-drive") { drive_subscriptions(wait, channel, iter, -> { monitor_count }) }
+          spawn(name: "sub-drive") { drive_subscriptions(wait, channel, iter, -> { monitor_count }) }
 
           # The blocking reception loop runs in its OWN fiber so the watchdog
           # can abandon it if `redis.close` fails to free the connection. Its
           # exit (normal or error) is reported via `loop_done`.
           loop_done = Channel(Exception?).new(1)
-          spawn(same_thread: true, name: "sub-receive") do
+          spawn(name: "sub-receive") do
             run_reception_loop(wait, force_reconnect, loop_done, iter, -> { monitor_count })
           end
 
@@ -302,7 +302,7 @@ class PlaceOS::Driver
           end
         end
         on.message { |c, m| on_message(c, m) }
-        spawn(same_thread: true, name: "sub-heartbeat") { run_heartbeat(wait, force_reconnect, current_iter) }
+        spawn(name: "sub-heartbeat") { run_heartbeat(wait, force_reconnect, current_iter) }
       end
       loop_done.send(nil) rescue nil
     rescue e
@@ -404,7 +404,7 @@ class PlaceOS::Driver
         mutex.synchronize { awaiting_value.keys }.each { |chan| notify_awaiting(chan) }
       end
 
-      spawn(same_thread: true, name: "sub-remap") {
+      spawn(name: "sub-remap") {
         # re-check indirect subscriptions, these are registered by the
         # subscriptions above. Snapshot the keys under the lock (mirroring the
         # `subscriptions.keys` idiom above) so we never iterate the live hash
@@ -508,7 +508,7 @@ class PlaceOS::Driver
           end
         end
 
-        spawn(same_thread: true, name: "sub-initial") { subscription.callback(Log, value) } if claimed
+        spawn(name: "sub-initial") { subscription.callback(Log, value) } if claimed
       end
     end
 

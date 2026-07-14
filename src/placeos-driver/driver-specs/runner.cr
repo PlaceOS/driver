@@ -69,7 +69,7 @@ class DriverSpecs
 
     # Load the driver (inherit STDOUT for logging)
     # -p is for protocol / process mode - expecting placeos core
-    spawn(same_thread: true) do
+    spawn do
       begin
         puts "Launching driver: #{driver_exec.colorize(:green)}"
         Process.run(
@@ -130,9 +130,9 @@ class DriverSpecs
       # Start comms
       puts "... starting driver IO services"
       spec = DriverSpecs.new(driver_name, io, makebreak, default_settings)
-      spawn(same_thread: true) { spec.__start_server__ }
-      spawn(same_thread: true) { spec.__start_http_server__ }
-      spawn(same_thread: true) { spec.__process_responses__ }
+      spawn { spec.__start_server__ }
+      spawn { spec.__start_http_server__ }
+      spawn { spec.__process_responses__ }
       Fiber.yield
 
       tcp_port, http_port = spec.__get_ports__
@@ -304,7 +304,7 @@ class DriverSpecs
   # :nodoc:
   def __start_server__
     while client = @server.accept?
-      spawn(same_thread: true) { @new_connection.send(client.as(TCPSocket)) }
+      spawn { @new_connection.send(client.as(TCPSocket)) }
     end
   end
 
@@ -328,7 +328,7 @@ class DriverSpecs
           string = String.new(message[0..-3])
           _, _, string = string.rpartition("\x00\x02")
           request = PlaceOS::Driver::Protocol::Request.from_json(string)
-          spawn(same_thread: true) do
+          spawn do
             case request.cmd
             when .result?
               seq = request.seq
@@ -409,13 +409,13 @@ class DriverSpecs
     connection = nil
 
     # timeout
-    spawn(same_thread: true) do
+    spawn do
       sleep timeout
       @new_connection.close unless connection
     end
 
     @comms = connection = socket = @new_connection.receive
-    spawn(same_thread: true) { __process_transmissions__(socket) }
+    spawn { __process_transmissions__(socket) }
     socket
   rescue error : Channel::ClosedError
     raise "timeout waiting for module to connect"
@@ -537,7 +537,7 @@ class DriverSpecs
     if channel
       # Timeout
       tdata = data
-      spawn(same_thread: true) do
+      spawn do
         sleep timeout
         if sent.empty?
           channel.not_nil!.close

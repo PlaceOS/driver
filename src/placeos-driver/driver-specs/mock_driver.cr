@@ -87,7 +87,7 @@ abstract class DriverSpecs::MockDriver
 
   # pushes a change notification for the key specified, even though it hasn't changed
   def signal_status(key)
-    spawn(same_thread: true) { @__storage__.signal_status(key) }
+    spawn { @__storage__.signal_status(key) }
   end
 
   # reads a status key and deserialises the value into the class provided.

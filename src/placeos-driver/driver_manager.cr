@@ -103,7 +103,7 @@ class PlaceOS::Driver::DriverManager
     # a driver might be making a HTTP request in on_load for exampe which
     # could block for a long time, resulting in poor feedback
     wait_on_load = Channel(Nil).new
-    spawn(same_thread: true, name: "driver-on-load") do
+    spawn(name: "driver-on-load") do
       begin
         driver.on_load
       rescue error
@@ -129,7 +129,7 @@ class PlaceOS::Driver::DriverManager
     if @model.makebreak
       @queue.online = true
     else
-      spawn(same_thread: true, name: "transport-connect") { @transport.connect }
+      spawn(name: "transport-connect") { @transport.connect }
     end
   end
 
@@ -146,7 +146,7 @@ class PlaceOS::Driver::DriverManager
   ensure
     if driver.responds_to?(:on_unload)
       wait_on_unload = Channel(Nil).new
-      spawn(same_thread: true, name: "driver-on-unload") do
+      spawn(name: "driver-on-unload") do
         begin
           driver.on_unload
         rescue error
@@ -190,7 +190,7 @@ class PlaceOS::Driver::DriverManager
   end
 
   protected def spawn_request_fiber(channel, request) : Nil
-    spawn(same_thread: true, name: request.user_id || "exec-internal") do
+    spawn(name: request.user_id || "exec-internal") do
       Log.context.set user_id: (request.user_id || "internal"), request_id: request.id
       response = process(request)
       channel.send(response)
@@ -318,7 +318,7 @@ class PlaceOS::Driver::DriverManager
       # would call back into `connection` on the same stack — historically a
       # source of stack-overflow bugs in transport-driven auth flows.
       # Spawned inside the lock so the callbacks fire in transition order.
-      spawn(same_thread: true, name: "driver-lifecycle") do
+      spawn(name: "driver-lifecycle") do
         begin
           if state
             driver.connected

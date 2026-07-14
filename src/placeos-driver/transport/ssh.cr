@@ -199,7 +199,7 @@ class PlaceOS::Driver
         keepalive(settings.keepalive || 30)
 
         # Start consuming data from the shell
-        spawn(same_thread: true, name: "ssh-consume") do
+        spawn(name: "ssh-consume") do
           if @shell
             consume_messages
           else
@@ -295,7 +295,7 @@ class PlaceOS::Driver
       # Spawn the reconnect so disconnect can't grow the stack via the
       # disconnect -> connect -> (on failure) disconnect chain when the device
       # rapidly closes the new session.
-      spawn(same_thread: true, name: "ssh-reconnect") { connect } unless @terminated
+      spawn(name: "ssh-reconnect") { connect } unless @terminated
     end
 
     def send(message) : TransportSSH
@@ -317,7 +317,7 @@ class PlaceOS::Driver
       self
     rescue error
       # disconnect on failed sends - we need to reset state
-      spawn(same_thread: true, name: "ssh-disconnect") { disconnect }
+      spawn(name: "ssh-disconnect") { disconnect }
       raise error
     end
 
@@ -328,7 +328,7 @@ class PlaceOS::Driver
 
     private def consume_messages
       if messages = @messages
-        spawn(same_thread: true, name: "ssh-consume") { consume_io }
+        spawn(name: "ssh-consume") { consume_io }
 
         while raw_data = messages.receive?
           process raw_data

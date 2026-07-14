@@ -198,7 +198,7 @@ abstract class PlaceOS::Driver
 
   # pushes a change notification for the key specified, even though it hasn't changed
   def signal_status(key)
-    spawn(same_thread: true, name: "signal-status") { @__storage__.signal_status(key) }
+    spawn(name: "signal-status") { @__storage__.signal_status(key) }
   end
 
   # provides access to the details of the system the logic driver is running in.
@@ -685,7 +685,7 @@ macro finished
     # Detect ctr-c to shutdown gracefully
     Signal::INT.trap do |signal|
       puts " > terminating gracefully"
-      spawn(same_thread: true, name: "pm-terminate") { protocol.process_manager.terminate }
+      spawn(name: "pm-terminate") { protocol.process_manager.terminate }
       signal.ignore
     end
 
