@@ -193,7 +193,7 @@ class PlaceOS::Driver::DriverManager
     spawn(same_thread: true, name: request.user_id || "exec-internal") do
       Log.context.set user_id: (request.user_id || "internal"), request_id: request.id
       response = process(request)
-      channel.send(response)
+      channel.as(Channel(Protocol::Request?)).send(response)
     end
   rescue error
     Log.error(exception: error) { "error spawning request fiber" }
