@@ -44,14 +44,14 @@ describe PlaceOS::Driver::DriverManager do
     release = Channel(Nil).new
     manager.suspend_connection = release
     disconnect_processed = Channel(Nil).new
-    spawn(same_thread: true) do
+    spawn do
       queue.online = false
       disconnect_processed.send nil
     end
     sleep 10.milliseconds
 
     # a rapid reconnect arrives while the disconnect is still in flight
-    spawn(same_thread: true) { queue.online = true }
+    spawn { queue.online = true }
     sleep 10.milliseconds
 
     # the suspended disconnect transition resumes

@@ -48,7 +48,7 @@ describe PlaceOS::Driver::Proxy::Scheduler do
 
     # Test cancellation
     task = sched.at(20.milliseconds.from_now) { true }
-    spawn(same_thread: true) { task.cancel }
+    spawn { task.cancel }
     expect_raises(Exception, "Task cancelled") do
       task.get
       raise "failed"
@@ -162,7 +162,7 @@ describe PlaceOS::Driver::Proxy::Scheduler do
     ran.should eq 5
 
     # Test cancelation
-    spawn(same_thread: true) { task.cancel }
+    spawn { task.cancel }
     expect_raises(Exception, "Task cancelled") do
       task.get
     end

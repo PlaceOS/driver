@@ -37,7 +37,7 @@ describe PlaceOS::Driver::TransportHTTP do
     end
     address = server.bind_tcp 0
     port = address.port
-    spawn(same_thread: true) { server.listen }
+    spawn { server.listen }
     sleep 50.milliseconds
 
     queue = Helper.queue
@@ -79,7 +79,7 @@ describe PlaceOS::Driver::TransportHTTP do
     end
     address = server.bind_tcp 0
     port = address.port
-    spawn(same_thread: true) { server.listen }
+    spawn { server.listen }
     sleep 50.milliseconds
 
     queue = Helper.queue

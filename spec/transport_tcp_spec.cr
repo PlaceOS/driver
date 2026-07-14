@@ -86,7 +86,7 @@ describe PlaceOS::Driver::TransportTCP do
     # TLS handshake error on the client.
     server = TCPServer.new("127.0.0.1", 0)
     port = server.local_address.port
-    spawn(same_thread: true) do
+    spawn do
       loop do
         client = server.accept?
         break unless client
@@ -130,7 +130,7 @@ describe PlaceOS::Driver::TransportTCP do
     # whose remote end is shut so consume_io exits via EOF.
     test_server = TCPServer.new("127.0.0.1", 0)
     port = test_server.local_address.port
-    spawn(same_thread: true) do
+    spawn do
       loop do
         client = test_server.accept?
         break unless client

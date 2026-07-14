@@ -38,7 +38,7 @@ private class WSTestServer
     @server = HTTP::Server.new([ws_handler])
     @port = @server.bind_unused_port("127.0.0.1").port
     server = @server
-    spawn(same_thread: true) { server.listen }
+    spawn { server.listen }
     Fiber.yield
   end
 

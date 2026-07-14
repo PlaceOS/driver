@@ -570,7 +570,7 @@ module PlaceOS
         loop_done = Channel(Nil).new
 
         # Enter the subscription loop in a separate fiber (it blocks).
-        spawn(same_thread: true) do
+        spawn do
           redis.subscribe("regression-channel-a") do |on|
             on.message { |_, _| }
           end
@@ -627,7 +627,7 @@ module PlaceOS
         # again once SimpleRetry establishes a fresh subscription loop.
         restart_count = 0
         done = Channel(Nil).new
-        spawn(same_thread: true) do
+        spawn do
           last_state = subs.running
           until done.closed?
             current = subs.running
@@ -701,7 +701,7 @@ module PlaceOS
         # Queue more subscribes than we have capacity to serialize quickly.
         # subscription_channel is unbuffered, so these senders pile up.
         20.times do |i|
-          spawn(same_thread: true) do
+          spawn do
             subs.subscribe("mod-cascade-more-#{i}", :power) { |_, _| }
           end
         end
