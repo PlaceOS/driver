@@ -186,7 +186,14 @@ class PlaceOS::Driver
 
     private def on_message(channel, message)
       if channel == SYSTEM_ORDER_UPDATE
-        remap_indirect(message)
+        # Must NOT run inline: on_message executes on the reception-loop fiber,
+        # and remap_indirect -> perform_subscribe -> wait_for_subscribe_ack
+        # blocks waiting for a SUBSCRIBE ack that is only delivered by this very
+        # fiber (via `on.subscribe`). Running inline deadlocks it until the ack
+        # times out, stalling all message processing (indirect bindings never
+        # receive updates). Spawn it off the loop, mirroring drive_subscriptions'
+        # own `sub-remap` spawn.
+        spawn(name: "sub-remap") { remap_indirect(message) }
       elsif channel_subscriptions = mutex.synchronize { awaiting_value.delete(channel); subscriptions[channel]? }
         # every binding on this channel is receiving a value, so none are
         # awaiting their first value any more (delete handled above)
