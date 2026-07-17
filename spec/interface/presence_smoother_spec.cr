@@ -1,14 +1,11 @@
 require "../helper"
 require "../../src/placeos-driver/interface/presence_smoother"
 
-# Test harness: the smoother is a mix-in, so exercise it through a concrete
-# class. Timestamps are `Time::Instant` values, which have no public
-# constructor, so each spec captures a `base = Time.instant` and expresses
-# every observation/poll time as `base + offset`. The offsets keep the specs
+# Timestamps are `Time::Instant` values, which have no public constructor, so
+# each spec captures a `base = Time.instant` and expresses every
+# observation/poll time as `base + offset`. The offsets keep the specs
 # deterministic (all arithmetic is relative) without sleeping.
-private class TestSmoother
-  include PlaceOS::Driver::Presence::Smoother
-end
+alias TestSmoother = PlaceOS::Driver::Presence::Smoother
 
 describe PlaceOS::Driver::Presence::Smoother do
   describe "initialization" do

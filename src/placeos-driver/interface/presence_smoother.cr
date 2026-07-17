@@ -2,8 +2,10 @@ require "deque"
 require "json"
 
 abstract class PlaceOS::Driver
-  # a device or service that provides sensor data, either singular or for multiple devices
-  module Presence::Smoother
+  # Smooths the output of an unreliable presence sensor over a sliding time
+  # window, latching the state and only switching once the opposing signal
+  # dominates the window. Compose one instance per sensor.
+  class Presence::Smoother
     record Transition,
       at : Time::Instant,
       state : Bool
