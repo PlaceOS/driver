@@ -502,7 +502,16 @@ class PlaceOS::Driver::Protocol::Management
           # end
 
           request = Request.from_json(string)
-          spawn(name: "process_request") { process(request) }
+          # The rescue is inside the fiber deliberately: an exception escaping
+          # `process` kills the fiber, and whatever promise that request was
+          # meant to settle is then never settled — the caller waits forever.
+          spawn(name: "process_request") do
+            begin
+              process(request)
+            rescue error
+              Log.error(exception: error) { "error processing request #{request.inspect}" }
+            end
+          end
         rescue error
           Log.warn(exception: error) { "error parsing request #{string.inspect}" }
         end
@@ -532,8 +541,19 @@ class PlaceOS::Driver::Protocol::Management
         starting.resolve(nil)
       end
     when .result?
-      seq = request.seq.not_nil!
-      if promise = request_lock.synchronize { @requests.delete(seq) }
+      # A result with no sequence number is a failed *command* response, not a
+      # reply to an exec. `start` carries no `seq`, and the driver's error path
+      # (`Request#set_error`) rewrites `cmd` to `:result` — so a driver that
+      # fails to start answers with exactly this shape. Settling the pending
+      # start promise here is what stops the caller waiting forever.
+      if (seq = request.seq).nil?
+        if starting = request_lock.synchronize { @starting.delete(request.id) }
+          Log.warn { "driver failed to start #{request.id}: #{request.payload}" }
+          starting.reject request.build_error
+        else
+          Log.warn { "result without sequence number for #{request.id}: #{request.payload}" }
+        end
+      elsif promise = request_lock.synchronize { @requests.delete(seq) }
         # determine if the result was a success or an error
         if request.error
           promise.reject request.build_error
