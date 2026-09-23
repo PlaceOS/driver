@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../../../js/doc.js"></script>
 
   <meta name="repository-name" content="placeos-driver">
-  <title>PlaceOS::Driver::Proxy::Driver - placeos-driver master</title>
+  <title>PlaceOS::Driver::Presence::Smoother - placeos-driver master</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../../";
   </script>
@@ -522,12 +522,12 @@
       
     </li>
   
-  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Presence" data-name="placeos::driver::presence">
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Presence" data-name="placeos::driver::presence">
       <a href="../../../PlaceOS/Driver/Presence.html">Presence</a>
       
         <ul>
   
-  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Presence/Smoother" data-name="placeos::driver::presence::smoother">
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Presence/Smoother" data-name="placeos::driver::presence::smoother">
       <a href="../../../PlaceOS/Driver/Presence/Smoother.html">Smoother</a>
       
         <ul>
@@ -557,12 +557,12 @@
       
     </li>
   
-  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Proxy" data-name="placeos::driver::proxy">
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Proxy" data-name="placeos::driver::proxy">
       <a href="../../../PlaceOS/Driver/Proxy.html">Proxy</a>
       
         <ul>
   
-  <li class=" current" data-id="placeos-driver/PlaceOS/Driver/Proxy/Driver" data-name="placeos::driver::proxy::driver">
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Proxy/Driver" data-name="placeos::driver::proxy::driver">
       <a href="../../../PlaceOS/Driver/Proxy/Driver.html">Driver</a>
       
     </li>
@@ -777,16 +777,29 @@
 <h1 class="type-name">
 
   <span class="kind">
-    struct
-  </span> PlaceOS::<wbr>Driver::<wbr>Proxy::<wbr>Driver
+    class
+  </span> PlaceOS::<wbr>Driver::<wbr>Presence::<wbr>Smoother
 
 </h1>
 
 
-  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../../PlaceOS/Driver/Proxy/Driver.html">PlaceOS::Driver::Proxy::Driver</a></li><li class="superclass">Struct</li><li class="superclass">Value</li><li class="superclass"><a href="../../../Object.html">Object</a></li></ul>
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../../PlaceOS/Driver/Presence/Smoother.html">PlaceOS::Driver::Presence::Smoother</a></li><li class="superclass">Reference</li><li class="superclass"><a href="../../../Object.html">Object</a></li></ul>
 
 
 
+
+  <h2>
+    <a id="overview" class="anchor" href="#overview">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Overview
+  </h2>
+
+  <p>Smooths the output of an unreliable presence sensor over a sliding time
+window, latching the state and only switching once the opposing signal
+dominates the window. Compose one instance per sensor.</p>
 
 
 
@@ -813,8 +826,8 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L24" target="_blank">
-        placeos-driver/proxy/driver.cr
+      <a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L8" target="_blank">
+        placeos-driver/interface/presence_smoother.cr
       </a>
     
     <br/>
@@ -836,7 +849,7 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#new%28reply_id%3AString%2Cmodule_name%3AString%2Cindex%3AInt32%2Cmodule_id%3AString%2Csystem%3APlaceOS%3A%3ADriver%3A%3AProxy%3A%3ASystem%2Cmetadata%3APlaceOS%3A%3ADriver%3A%3ADriverModel%3A%3AMetadata%29-class-method" class="signature"><strong>.new</strong>(reply_id : String, module_name : String, index : Int32, module_id : String, system : PlaceOS::Driver::Proxy::System, metadata : PlaceOS::Driver::DriverModel::Metadata)</a>
+        <a href="#new%28window%3ATime%3A%3ASpan%3D3.minutes%2Cthreshold%3AFloat64%3D0.70%29-class-method" class="signature"><strong>.new</strong>(window : Time::Span = <span class="n">3</span>.minutes, threshold : Float64 = <span class="n">0.70</span>)</a>
         
       </li>
     
@@ -846,25 +859,6 @@
   
 
   
-  <h2>
-    <a id="macro-summary" class="anchor" href="#macro-summary">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Macro Summary
-  </h2>
-  <ul class="list-summary">
-    
-      <li class="entry-summary">
-        <a href="#method_missing%28call%29-macro" class="signature"><strong>method_missing</strong>(call)</a>
-        
-          <div class="summary"><p>Don't raise errors directly.</p></div>
-        
-      </li>
-    
-  </ul>
-
 
   
   <h2>
@@ -878,78 +872,40 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#%5B%5D%28status%29-instance-method" class="signature"><strong>#[]</strong>(status)</a>
+        <a href="#confidence%28now%3ATime%3A%3AInstant%3DTime.instant%29%3AFloat64%7CNil-instance-method" class="signature"><strong>#confidence</strong>(now : Time::Instant = <span class="t">Time</span>.instant) : Float64 | Nil</a>
+        
+          <div class="summary"><p>Returns confidence in the current smoothed output state, from 0.0 to 1.0.</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#%5B%5D%3D%28status%2Cvalue%29-instance-method" class="signature"><strong>#[]=</strong>(status, value)</a>
+        <a href="#confidence_percent%28now%3ATime%3A%3AInstant%3DTime.instant%29%3AFloat64%7CNil-instance-method" class="signature"><strong>#confidence_percent</strong>(now : Time::Instant = <span class="t">Time</span>.instant) : Float64 | Nil</a>
         
-          <div class="summary"><p>This deliberately prevents compilation if called from driver code</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#%5B%5D%3F%28status%29-instance-method" class="signature"><strong>#[]?</strong>(status)</a>
+          <div class="summary"><p>Returns confidence in the current smoothed output state as a percentage.</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#__metadata__%3APlaceOS%3A%3ADriver%3A%3ADriverModel%3A%3AMetadata-instance-method" class="signature"><strong>#__metadata__</strong> : PlaceOS::Driver::DriverModel::Metadata</a>
+        <a href="#observe%28state%3ABool%2Cat%3ATime%3A%3AInstant%3DTime.instant%29%3ANil-instance-method" class="signature"><strong>#observe</strong>(state : Bool, at : Time::Instant = <span class="t">Time</span>.instant) : Nil</a>
+        
+          <div class="summary"><p>Records a raw sensor state.</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#__send__%28function_name%3AString%7CSymbol%2Carguments%3AArray%7CTuple%3DTuple.new%2Cnamed_args%3ANamedTuple%7CHash%3DNamedTuple.new%29-instance-method" class="signature"><strong>#__send__</strong>(function_name : String | Symbol, arguments : Array | Tuple = <span class="t">Tuple</span>.new, named_args : NamedTuple | Hash = <span class="t">NamedTuple</span>.new)</a>
-        
-          <div class="summary"><p>provide a programatic way of calling a remote function similar to Ruby array and hash types required for dynamic invocation across drivers</p></div>
+        <a href="#output_state%3ABool%7CNil-instance-method" class="signature"><strong>#output_state</strong> : Bool | Nil</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#__status__-instance-method" class="signature"><strong>#__status__</strong></a>
+        <a href="#poll%28now%3ATime%3A%3AInstant%3DTime.instant%29%3ASnapshot%7CNil-instance-method" class="signature"><strong>#poll</strong>(now : Time::Instant = <span class="t">Time</span>.instant) : Snapshot | Nil</a>
+        
+          <div class="summary"><p>Evaluates the current sliding window and returns the smoothed state, confidence and supporting information.</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#__status_keys__-instance-method" class="signature"><strong>#__status_keys__</strong></a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#implements%3F%28interface%29%3ABool-instance-method" class="signature"><strong>#implements?</strong>(interface) : Bool</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#index%3AInt32-instance-method" class="signature"><strong>#index</strong> : Int32</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#module_id%3AString-instance-method" class="signature"><strong>#module_id</strong> : String</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#module_name%3AString-instance-method" class="signature"><strong>#module_name</strong> : String</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#status%28klass%2Ckey%29-instance-method" class="signature"><strong>#status</strong>(klass, key)</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#status%3F%28klass%2Ckey%29-instance-method" class="signature"><strong>#status?</strong>(klass, key)</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#subscribe%28status%2C%26callback%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3AIndirectSubscription%2CString-%3ENil%29%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3AIndirectSubscription-instance-method" class="signature"><strong>#subscribe</strong>(status, &callback : PlaceOS::Driver::Subscriptions::IndirectSubscription, String -> Nil) : PlaceOS::Driver::Subscriptions::IndirectSubscription</a>
-        
-          <div class="summary"><p>All subscriptions to external drivers should be indirect as the driver might be swapped into a completely different system - whilst we've looked up the id of this instance of a driver, it's expected that this object is short lived</p></div>
+        <a href="#raw_state%3ABool%7CNil-instance-method" class="signature"><strong>#raw_state</strong> : Bool | Nil</a>
         
       </li>
     
@@ -958,19 +914,6 @@
 
 
   <div class="methods-inherited">
-    
-      
-
-
-      
-
-
-      
-
-
-      
-
-
     
       
 
@@ -1010,18 +953,18 @@
     Constructor Detail
   </h2>
   
-    <div class="entry-detail" id="new(reply_id:String,module_name:String,index:Int32,module_id:String,system:PlaceOS::Driver::Proxy::System,metadata:PlaceOS::Driver::DriverModel::Metadata)-class-method">
+    <div class="entry-detail" id="new(window:Time::Span=3.minutes,threshold:Float64=0.70)-class-method">
       <div class="signature">
         
-        def self.<strong>new</strong>(reply_id : String, module_name : String, index : Int32, module_id : String, system : <a href="../../../PlaceOS/Driver/Proxy/System.html">PlaceOS::Driver::Proxy::System</a>, metadata : <a href="../../../PlaceOS/Driver/DriverModel/Metadata.html">PlaceOS::Driver::DriverModel::Metadata</a>)
+        def self.<strong>new</strong>(window : Time::Span = <span class="n">3</span>.minutes, threshold : Float64 = <span class="n">0.70</span>)
 
-        <a class="method-permalink" href="#new%28reply_id%3AString%2Cmodule_name%3AString%2Cindex%3AInt32%2Cmodule_id%3AString%2Csystem%3APlaceOS%3A%3ADriver%3A%3AProxy%3A%3ASystem%2Cmetadata%3APlaceOS%3A%3ADriver%3A%3ADriverModel%3A%3AMetadata%29-class-method">#</a>
+        <a class="method-permalink" href="#new%28window%3ATime%3A%3ASpan%3D3.minutes%2Cthreshold%3AFloat64%3D0.70%29-class-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L25" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L46" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -1031,38 +974,6 @@
   
 
   
-  <h2>
-    <a id="macro-detail" class="anchor" href="#macro-detail">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Macro Detail
-  </h2>
-  
-    <div class="entry-detail" id="method_missing(call)-macro">
-      <div class="signature">
-        
-        macro <strong>method_missing</strong>(call)
-
-        <a class="method-permalink" href="#method_missing%28call%29-macro">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>Don't raise errors directly.
-Ensure they are logged and raise if the response is requested</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L87" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-
 
   
   <h2>
@@ -1074,244 +985,125 @@ Ensure they are logged and raise if the response is requested</p>
     Instance Method Detail
   </h2>
   
-    <div class="entry-detail" id="[](status)-instance-method">
+    <div class="entry-detail" id="confidence(now:Time::Instant=Time.instant):Float64|Nil-instance-method">
       <div class="signature">
         
-        def <strong>[]</strong>(status)
+        def <strong>confidence</strong>(now : Time::Instant = <span class="t">Time</span>.instant) : Float64 | Nil
 
-        <a class="method-permalink" href="#%5B%5D%28status%29-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L38" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="[]=(status,value)-instance-method">
-      <div class="signature">
-        
-        def <strong>[]=</strong>(status, value)
-
-        <a class="method-permalink" href="#%5B%5D%3D%28status%2Cvalue%29-instance-method">#</a>
+        <a class="method-permalink" href="#confidence%28now%3ATime%3A%3AInstant%3DTime.instant%29%3AFloat64%7CNil-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>This deliberately prevents compilation if called from driver code</p>
+          <p>Returns confidence in the current smoothed output state, from 0.0 to 1.0.</p>
+<p>Calling this also evaluates whether the smoothed state should change.</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L70" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L174" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="[]?(status)-instance-method">
+    <div class="entry-detail" id="confidence_percent(now:Time::Instant=Time.instant):Float64|Nil-instance-method">
       <div class="signature">
         
-        def <strong>[]?</strong>(status)
+        def <strong>confidence_percent</strong>(now : Time::Instant = <span class="t">Time</span>.instant) : Float64 | Nil
 
-        <a class="method-permalink" href="#%5B%5D%3F%28status%29-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L43" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="__metadata__:PlaceOS::Driver::DriverModel::Metadata-instance-method">
-      <div class="signature">
-        
-        def <strong>__metadata__</strong> : <a href="../../../PlaceOS/Driver/DriverModel/Metadata.html">PlaceOS::Driver::DriverModel::Metadata</a>
-
-        <a class="method-permalink" href="#__metadata__%3APlaceOS%3A%3ADriver%3A%3ADriverModel%3A%3AMetadata-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L57" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="__send__(function_name:String|Symbol,arguments:Array|Tuple=Tuple.new,named_args:NamedTuple|Hash=NamedTuple.new)-instance-method">
-      <div class="signature">
-        
-        def <strong>__send__</strong>(function_name : String | Symbol, arguments : Array | Tuple = <span class="t">Tuple</span>.new, named_args : NamedTuple | Hash = <span class="t">NamedTuple</span>.new)
-
-        <a class="method-permalink" href="#__send__%28function_name%3AString%7CSymbol%2Carguments%3AArray%7CTuple%3DTuple.new%2Cnamed_args%3ANamedTuple%7CHash%3DNamedTuple.new%29-instance-method">#</a>
+        <a class="method-permalink" href="#confidence_percent%28now%3ATime%3A%3AInstant%3DTime.instant%29%3AFloat64%7CNil-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>provide a programatic way of calling a remote function similar to Ruby
-array and hash types required for dynamic invocation across drivers</p>
+          <p>Returns confidence in the current smoothed output state as a percentage.</p>
+<p>For example, 56.3 means 56.3% confidence.</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L115" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L183" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="__status__-instance-method">
+    <div class="entry-detail" id="observe(state:Bool,at:Time::Instant=Time.instant):Nil-instance-method">
       <div class="signature">
         
-        def <strong>__status__</strong>
+        def <strong>observe</strong>(state : Bool, at : Time::Instant = <span class="t">Time</span>.instant) : Nil
 
-        <a class="method-permalink" href="#__status__-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L61" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="__status_keys__-instance-method">
-      <div class="signature">
-        
-        def <strong>__status_keys__</strong>
-
-        <a class="method-permalink" href="#__status_keys__-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L65" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="implements?(interface):Bool-instance-method">
-      <div class="signature">
-        
-        def <strong>implements?</strong>(interface) : Bool
-
-        <a class="method-permalink" href="#implements%3F%28interface%29%3ABool-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L74" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="index:Int32-instance-method">
-      <div class="signature">
-        
-        def <strong>index</strong> : Int32
-
-        <a class="method-permalink" href="#index%3AInt32-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L36" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="module_id:String-instance-method">
-      <div class="signature">
-        
-        def <strong>module_id</strong> : String
-
-        <a class="method-permalink" href="#module_id%3AString-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L36" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="module_name:String-instance-method">
-      <div class="signature">
-        
-        def <strong>module_name</strong> : String
-
-        <a class="method-permalink" href="#module_name%3AString-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L36" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="status(klass,key)-instance-method">
-      <div class="signature">
-        
-        def <strong>status</strong>(klass, key)
-
-        <a class="method-permalink" href="#status%28klass%2Ckey%29-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L48" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="status?(klass,key)-instance-method">
-      <div class="signature">
-        
-        def <strong>status?</strong>(klass, key)
-
-        <a class="method-permalink" href="#status%3F%28klass%2Ckey%29-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L52" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="subscribe(status,&amp;callback:PlaceOS::Driver::Subscriptions::IndirectSubscription,String-&gt;Nil):PlaceOS::Driver::Subscriptions::IndirectSubscription-instance-method">
-      <div class="signature">
-        
-        def <strong>subscribe</strong>(status, &callback : PlaceOS::Driver::Subscriptions::IndirectSubscription, String -> Nil) : PlaceOS::Driver::Subscriptions::IndirectSubscription
-
-        <a class="method-permalink" href="#subscribe%28status%2C%26callback%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3AIndirectSubscription%2CString-%3ENil%29%3APlaceOS%3A%3ADriver%3A%3ASubscriptions%3A%3AIndirectSubscription-instance-method">#</a>
+        <a class="method-permalink" href="#observe%28state%3ABool%2Cat%3ATime%3A%3AInstant%3DTime.instant%29%3ANil-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>All subscriptions to external drivers should be indirect as the driver might
-be swapped into a completely different system - whilst we've looked up the id
-of this instance of a driver, it's expected that this object is short lived</p>
+          <p>Records a raw sensor state.</p>
+<p>The first observation establishes the initial smoothed output state.
+Repeated observations of the same state are ignored because the state
+continues accumulating time without requiring another transition.</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/proxy/driver.cr#L81" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L66" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="output_state:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>output_state</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#output_state%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L39" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="poll(now:Time::Instant=Time.instant):Snapshot|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>poll</strong>(now : Time::Instant = <span class="t">Time</span>.instant) : <a href="../../../PlaceOS/Driver/Presence/Smoother/Snapshot.html">Snapshot</a> | Nil
+
+        <a class="method-permalink" href="#poll%28now%3ATime%3A%3AInstant%3DTime.instant%29%3ASnapshot%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Evaluates the current sliding window and returns the smoothed state,
+confidence and supporting information.</p>
+<p>Returns nil until the first sensor observation.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L99" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="raw_state:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>raw_state</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#raw_state%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L40" target="_blank">View source</a>]
         
       </div>
     </div>

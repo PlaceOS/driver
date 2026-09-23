@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../../../../js/doc.js"></script>
 
   <meta name="repository-name" content="placeos-driver">
-  <title>PlaceOS::Driver::Interface::Sensor::Status - placeos-driver master</title>
+  <title>PlaceOS::Driver::Presence::Smoother::Transition - placeos-driver master</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../../../";
   </script>
@@ -117,7 +117,7 @@
       
     </li>
   
-  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface" data-name="placeos::driver::interface">
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface" data-name="placeos::driver::interface">
       <a href="../../../../PlaceOS/Driver/Interface.html">Interface</a>
       
         <ul>
@@ -402,7 +402,7 @@
       
     </li>
   
-  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor" data-name="placeos::driver::interface::sensor">
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor" data-name="placeos::driver::interface::sensor">
       <a href="../../../../PlaceOS/Driver/Interface/Sensor.html">Sensor</a>
       
         <ul>
@@ -432,7 +432,7 @@
       
     </li>
   
-  <li class=" current" data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/Status" data-name="placeos::driver::interface::sensor::status">
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/Status" data-name="placeos::driver::interface::sensor::status">
       <a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html">Status</a>
       
     </li>
@@ -522,12 +522,12 @@
       
     </li>
   
-  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Presence" data-name="placeos::driver::presence">
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Presence" data-name="placeos::driver::presence">
       <a href="../../../../PlaceOS/Driver/Presence.html">Presence</a>
       
         <ul>
   
-  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Presence/Smoother" data-name="placeos::driver::presence::smoother">
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Presence/Smoother" data-name="placeos::driver::presence::smoother">
       <a href="../../../../PlaceOS/Driver/Presence/Smoother.html">Smoother</a>
       
         <ul>
@@ -537,7 +537,7 @@
       
     </li>
   
-  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Presence/Smoother/Transition" data-name="placeos::driver::presence::smoother::transition">
+  <li class=" current" data-id="placeos-driver/PlaceOS/Driver/Presence/Smoother/Transition" data-name="placeos::driver::presence::smoother::transition">
       <a href="../../../../PlaceOS/Driver/Presence/Smoother/Transition.html">Transition</a>
       
     </li>
@@ -777,11 +777,13 @@
 <h1 class="type-name">
 
   <span class="kind">
-    enum
-  </span> PlaceOS::<wbr>Driver::<wbr>Interface::<wbr>Sensor::<wbr>Status
+    struct
+  </span> PlaceOS::<wbr>Driver::<wbr>Presence::<wbr>Smoother::<wbr>Transition
 
 </h1>
 
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../../../PlaceOS/Driver/Presence/Smoother/Transition.html">PlaceOS::Driver::Presence::Smoother::Transition</a></li><li class="superclass">Struct</li><li class="superclass">Value</li><li class="superclass"><a href="../../../../Object.html">Object</a></li></ul>
 
 
 
@@ -811,8 +813,8 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/sensor.cr#L58" target="_blank">
-        placeos-driver/interface/sensor.cr
+      <a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L9" target="_blank">
+        placeos-driver/interface/presence_smoother.cr
       </a>
     
     <br/>
@@ -820,43 +822,26 @@
 
 
 
+
+
   
-    <h2>
-      <a id="enum-members" class="anchor" href="#enum-members">
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
   <svg class="octicon-link" aria-hidden="true">
     <use href="#octicon-link"/>
   </svg>
 </a>
-      Enum Members
-    </h2>
-  
-  <dl>
+    Constructors
+  </h2>
+  <ul class="list-summary">
     
-      <dt class="entry-const" id="Normal">
-        <strong>Normal</strong> = <code><span class="n">0</span></code>
-      </dt>
-      
+      <li class="entry-summary">
+        <a href="#new%28at%3ATime%3A%3AInstant%2Cstate%3ABool%29-class-method" class="signature"><strong>.new</strong>(at : Time::Instant, state : Bool)</a>
+        
+      </li>
     
-      <dt class="entry-const" id="Alarm">
-        <strong>Alarm</strong> = <code><span class="n">1</span></code>
-      </dt>
-      
-    
-      <dt class="entry-const" id="Fault">
-        <strong>Fault</strong> = <code><span class="n">2</span></code>
-      </dt>
-      
-    
-      <dt class="entry-const" id="OutOfService">
-        <strong>OutOfService</strong> = <code><span class="n">3</span></code>
-      </dt>
-      
-    
-  </dl>
+  </ul>
 
-
-
-  
 
   
 
@@ -874,30 +859,22 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#alarm%3F-instance-method" class="signature"><strong>#alarm?</strong></a>
-        
-          <div class="summary"><p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#Alarm">Alarm</a></code></p></div>
+        <a href="#at%3ATime%3A%3AInstant-instance-method" class="signature"><strong>#at</strong> : Time::Instant</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#fault%3F-instance-method" class="signature"><strong>#fault?</strong></a>
-        
-          <div class="summary"><p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#Fault">Fault</a></code></p></div>
+        <a href="#clone-instance-method" class="signature"><strong>#clone</strong></a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#normal%3F-instance-method" class="signature"><strong>#normal?</strong></a>
-        
-          <div class="summary"><p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#Normal">Normal</a></code></p></div>
+        <a href="#copy_with%28at_at%3D%40at%2Cstate_state%3D%40state%29-instance-method" class="signature"><strong>#copy_with</strong>(at _at = @at, state _state = @state)</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#out_of_service%3F-instance-method" class="signature"><strong>#out_of_service?</strong></a>
-        
-          <div class="summary"><p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#OutOfService">OutOfService</a></code></p></div>
+        <a href="#state%3ABool-instance-method" class="signature"><strong>#state</strong> : Bool</a>
         
       </li>
     
@@ -946,22 +923,35 @@
 
 
     
-      
-
-
-      
-
-
-      
-
-
-      
-
-
-    
   </div>
 
   
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(at:Time::Instant,state:Bool)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(at : Time::Instant, state : Bool)
+
+        <a class="method-permalink" href="#new%28at%3ATime%3A%3AInstant%2Cstate%3ABool%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L9" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
 
   
 
@@ -977,86 +967,62 @@
     Instance Method Detail
   </h2>
   
-    <div class="entry-detail" id="alarm?-instance-method">
+    <div class="entry-detail" id="at:Time::Instant-instance-method">
       <div class="signature">
         
-        def <strong>alarm?</strong>
+        def <strong>at</strong> : Time::Instant
 
-        <a class="method-permalink" href="#alarm%3F-instance-method">#</a>
+        <a class="method-permalink" href="#at%3ATime%3A%3AInstant-instance-method">#</a>
       </div>
-      
-        <div class="doc">
-          
-          <p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#Alarm">Alarm</a></code></p>
-        </div>
       
       <br/>
       <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/sensor.cr#L60" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="fault?-instance-method">
+    <div class="entry-detail" id="clone-instance-method">
       <div class="signature">
         
-        def <strong>fault?</strong>
+        def <strong>clone</strong>
 
-        <a class="method-permalink" href="#fault%3F-instance-method">#</a>
+        <a class="method-permalink" href="#clone-instance-method">#</a>
       </div>
-      
-        <div class="doc">
-          
-          <p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#Fault">Fault</a></code></p>
-        </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/sensor.cr#L61" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L9" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="normal?-instance-method">
+    <div class="entry-detail" id="copy_with(at_at=@at,state_state=@state)-instance-method">
       <div class="signature">
         
-        def <strong>normal?</strong>
+        def <strong>copy_with</strong>(at _at = @at, state _state = @state)
 
-        <a class="method-permalink" href="#normal%3F-instance-method">#</a>
+        <a class="method-permalink" href="#copy_with%28at_at%3D%40at%2Cstate_state%3D%40state%29-instance-method">#</a>
       </div>
-      
-        <div class="doc">
-          
-          <p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#Normal">Normal</a></code></p>
-        </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/sensor.cr#L59" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L9" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="out_of_service?-instance-method">
+    <div class="entry-detail" id="state:Bool-instance-method">
       <div class="signature">
         
-        def <strong>out_of_service?</strong>
+        def <strong>state</strong> : Bool
 
-        <a class="method-permalink" href="#out_of_service%3F-instance-method">#</a>
+        <a class="method-permalink" href="#state%3ABool-instance-method">#</a>
       </div>
-      
-        <div class="doc">
-          
-          <p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#OutOfService">OutOfService</a></code></p>
-        </div>
       
       <br/>
       <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/sensor.cr#L62" target="_blank">View source</a>]
         
       </div>
     </div>

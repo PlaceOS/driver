@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../../../../js/doc.js"></script>
 
   <meta name="repository-name" content="placeos-driver">
-  <title>PlaceOS::Driver::Interface::Sensor::Status - placeos-driver master</title>
+  <title>PlaceOS::Driver::Presence::Smoother::Snapshot - placeos-driver master</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../../../";
   </script>
@@ -117,7 +117,7 @@
       
     </li>
   
-  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface" data-name="placeos::driver::interface">
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface" data-name="placeos::driver::interface">
       <a href="../../../../PlaceOS/Driver/Interface.html">Interface</a>
       
         <ul>
@@ -402,7 +402,7 @@
       
     </li>
   
-  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor" data-name="placeos::driver::interface::sensor">
+  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor" data-name="placeos::driver::interface::sensor">
       <a href="../../../../PlaceOS/Driver/Interface/Sensor.html">Sensor</a>
       
         <ul>
@@ -432,7 +432,7 @@
       
     </li>
   
-  <li class=" current" data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/Status" data-name="placeos::driver::interface::sensor::status">
+  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Interface/Sensor/Status" data-name="placeos::driver::interface::sensor::status">
       <a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html">Status</a>
       
     </li>
@@ -522,17 +522,17 @@
       
     </li>
   
-  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Presence" data-name="placeos::driver::presence">
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Presence" data-name="placeos::driver::presence">
       <a href="../../../../PlaceOS/Driver/Presence.html">Presence</a>
       
         <ul>
   
-  <li class="parent " data-id="placeos-driver/PlaceOS/Driver/Presence/Smoother" data-name="placeos::driver::presence::smoother">
+  <li class="parent open current" data-id="placeos-driver/PlaceOS/Driver/Presence/Smoother" data-name="placeos::driver::presence::smoother">
       <a href="../../../../PlaceOS/Driver/Presence/Smoother.html">Smoother</a>
       
         <ul>
   
-  <li class=" " data-id="placeos-driver/PlaceOS/Driver/Presence/Smoother/Snapshot" data-name="placeos::driver::presence::smoother::snapshot">
+  <li class=" current" data-id="placeos-driver/PlaceOS/Driver/Presence/Smoother/Snapshot" data-name="placeos::driver::presence::smoother::snapshot">
       <a href="../../../../PlaceOS/Driver/Presence/Smoother/Snapshot.html">Snapshot</a>
       
     </li>
@@ -777,11 +777,13 @@
 <h1 class="type-name">
 
   <span class="kind">
-    enum
-  </span> PlaceOS::<wbr>Driver::<wbr>Interface::<wbr>Sensor::<wbr>Status
+    struct
+  </span> PlaceOS::<wbr>Driver::<wbr>Presence::<wbr>Smoother::<wbr>Snapshot
 
 </h1>
 
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../../../PlaceOS/Driver/Presence/Smoother/Snapshot.html">PlaceOS::Driver::Presence::Smoother::Snapshot</a></li><li class="superclass">Struct</li><li class="superclass">Value</li><li class="superclass"><a href="../../../../Object.html">Object</a></li></ul>
 
 
 
@@ -811,8 +813,8 @@
   </h2>
   
     
-      <a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/sensor.cr#L58" target="_blank">
-        placeos-driver/interface/sensor.cr
+      <a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L13" target="_blank">
+        placeos-driver/interface/presence_smoother.cr
       </a>
     
     <br/>
@@ -820,43 +822,26 @@
 
 
 
+
+
   
-    <h2>
-      <a id="enum-members" class="anchor" href="#enum-members">
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
   <svg class="octicon-link" aria-hidden="true">
     <use href="#octicon-link"/>
   </svg>
 </a>
-      Enum Members
-    </h2>
-  
-  <dl>
+    Constructors
+  </h2>
+  <ul class="list-summary">
     
-      <dt class="entry-const" id="Normal">
-        <strong>Normal</strong> = <code><span class="n">0</span></code>
-      </dt>
-      
+      <li class="entry-summary">
+        <a href="#new%28state%3ABool%2Cchanged%3ABool%2Craw_state%3ABool%2Cconfidence%3AFloat64%2Cconfidence_percent%3AFloat64%2Con_fraction%3AFloat64%2Coff_fraction%3AFloat64%2Cobserved_for%3ATime%3A%3ASpan%2Cwindow_ready%3ABool%29-class-method" class="signature"><strong>.new</strong>(state : Bool, changed : Bool, raw_state : Bool, confidence : Float64, confidence_percent : Float64, on_fraction : Float64, off_fraction : Float64, observed_for : Time::Span, window_ready : Bool)</a>
+        
+      </li>
     
-      <dt class="entry-const" id="Alarm">
-        <strong>Alarm</strong> = <code><span class="n">1</span></code>
-      </dt>
-      
-    
-      <dt class="entry-const" id="Fault">
-        <strong>Fault</strong> = <code><span class="n">2</span></code>
-      </dt>
-      
-    
-      <dt class="entry-const" id="OutOfService">
-        <strong>OutOfService</strong> = <code><span class="n">3</span></code>
-      </dt>
-      
-    
-  </dl>
+  </ul>
 
-
-
-  
 
   
 
@@ -874,30 +859,73 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#alarm%3F-instance-method" class="signature"><strong>#alarm?</strong></a>
+        <a href="#changed%3ABool-instance-method" class="signature"><strong>#changed</strong> : Bool</a>
         
-          <div class="summary"><p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#Alarm">Alarm</a></code></p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#fault%3F-instance-method" class="signature"><strong>#fault?</strong></a>
-        
-          <div class="summary"><p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#Fault">Fault</a></code></p></div>
+          <div class="summary"><p>Whether the smoothed state changed during this poll.</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#normal%3F-instance-method" class="signature"><strong>#normal?</strong></a>
-        
-          <div class="summary"><p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#Normal">Normal</a></code></p></div>
+        <a href="#clone-instance-method" class="signature"><strong>#clone</strong></a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#out_of_service%3F-instance-method" class="signature"><strong>#out_of_service?</strong></a>
+        <a href="#confidence%3AFloat64-instance-method" class="signature"><strong>#confidence</strong> : Float64</a>
         
-          <div class="summary"><p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#OutOfService">OutOfService</a></code></p></div>
+          <div class="summary"><p>Confidence in the smoothed output state, from 0.0 to 1.0.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#confidence_percent%3AFloat64-instance-method" class="signature"><strong>#confidence_percent</strong> : Float64</a>
+        
+          <div class="summary"><p>Percentage equivalent of confidence, from 0.0 to 100.0.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#copy_with%28state_state%3D%40state%2Cchanged_changed%3D%40changed%2Craw_state_raw_state%3D%40raw_state%2Cconfidence_confidence%3D%40confidence%2Cconfidence_percent_confidence_percent%3D%40confidence_percent%2Con_fraction_on_fraction%3D%40on_fraction%2Coff_fraction_off_fraction%3D%40off_fraction%2Cobserved_for_observed_for%3D%40observed_for%2Cwindow_ready_window_ready%3D%40window_ready%29-instance-method" class="signature"><strong>#copy_with</strong>(state _state = @state, changed _changed = @changed, raw_state _raw_state = @raw_state, confidence _confidence = @confidence, confidence_percent _confidence_percent = @confidence_percent, on_fraction _on_fraction = @on_fraction, off_fraction _off_fraction = @off_fraction, observed_for _observed_for = @observed_for, window_ready _window_ready = @window_ready)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#observed_for%3ATime%3A%3ASpan-instance-method" class="signature"><strong>#observed_for</strong> : Time::Span</a>
+        
+          <div class="summary"><p>Amount of history currently available.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#off_fraction%3AFloat64-instance-method" class="signature"><strong>#off_fraction</strong> : Float64</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#on_fraction%3AFloat64-instance-method" class="signature"><strong>#on_fraction</strong> : Float64</a>
+        
+          <div class="summary"><p>Proportion of the evaluated period attributed to each raw state.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#raw_state%3ABool-instance-method" class="signature"><strong>#raw_state</strong> : Bool</a>
+        
+          <div class="summary"><p>Most recently observed raw sensor state.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#state%3ABool-instance-method" class="signature"><strong>#state</strong> : Bool</a>
+        
+          <div class="summary"><p>Smoothed/latched output state.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#window_ready%3ABool-instance-method" class="signature"><strong>#window_ready</strong> : Bool</a>
+        
+          <div class="summary"><p>True once at least one complete smoothing window exists.</p></div>
         
       </li>
     
@@ -946,22 +974,35 @@
 
 
     
-      
-
-
-      
-
-
-      
-
-
-      
-
-
-    
   </div>
 
   
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(state:Bool,changed:Bool,raw_state:Bool,confidence:Float64,confidence_percent:Float64,on_fraction:Float64,off_fraction:Float64,observed_for:Time::Span,window_ready:Bool)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(state : Bool, changed : Bool, raw_state : Bool, confidence : Float64, confidence_percent : Float64, on_fraction : Float64, off_fraction : Float64, observed_for : Time::Span, window_ready : Bool)
+
+        <a class="method-permalink" href="#new%28state%3ABool%2Cchanged%3ABool%2Craw_state%3ABool%2Cconfidence%3AFloat64%2Cconfidence_percent%3AFloat64%2Con_fraction%3AFloat64%2Coff_fraction%3AFloat64%2Cobserved_for%3ATime%3A%3ASpan%2Cwindow_ready%3ABool%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L13" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
 
   
 
@@ -977,86 +1018,200 @@
     Instance Method Detail
   </h2>
   
-    <div class="entry-detail" id="alarm?-instance-method">
+    <div class="entry-detail" id="changed:Bool-instance-method">
       <div class="signature">
         
-        def <strong>alarm?</strong>
+        def <strong>changed</strong> : Bool
 
-        <a class="method-permalink" href="#alarm%3F-instance-method">#</a>
+        <a class="method-permalink" href="#changed%3ABool-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#Alarm">Alarm</a></code></p>
+          <p>Whether the smoothed state changed during this poll.</p>
         </div>
       
       <br/>
       <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/sensor.cr#L60" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="fault?-instance-method">
+    <div class="entry-detail" id="clone-instance-method">
       <div class="signature">
         
-        def <strong>fault?</strong>
+        def <strong>clone</strong>
 
-        <a class="method-permalink" href="#fault%3F-instance-method">#</a>
+        <a class="method-permalink" href="#clone-instance-method">#</a>
       </div>
-      
-        <div class="doc">
-          
-          <p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#Fault">Fault</a></code></p>
-        </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/sensor.cr#L61" target="_blank">View source</a>]
+          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L13" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="normal?-instance-method">
+    <div class="entry-detail" id="confidence:Float64-instance-method">
       <div class="signature">
         
-        def <strong>normal?</strong>
+        def <strong>confidence</strong> : Float64
 
-        <a class="method-permalink" href="#normal%3F-instance-method">#</a>
+        <a class="method-permalink" href="#confidence%3AFloat64-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#Normal">Normal</a></code></p>
+          <p>Confidence in the smoothed output state, from 0.0 to 1.0.</p>
         </div>
       
       <br/>
       <div>
-        
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/sensor.cr#L59" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="out_of_service?-instance-method">
+    <div class="entry-detail" id="confidence_percent:Float64-instance-method">
       <div class="signature">
         
-        def <strong>out_of_service?</strong>
+        def <strong>confidence_percent</strong> : Float64
 
-        <a class="method-permalink" href="#out_of_service%3F-instance-method">#</a>
+        <a class="method-permalink" href="#confidence_percent%3AFloat64-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>Returns <code>true</code> if this enum value equals <code><a href="../../../../PlaceOS/Driver/Interface/Sensor/Status.html#OutOfService">OutOfService</a></code></p>
+          <p>Percentage equivalent of confidence, from 0.0 to 100.0.</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/sensor.cr#L62" target="_blank">View source</a>]
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="copy_with(state_state=@state,changed_changed=@changed,raw_state_raw_state=@raw_state,confidence_confidence=@confidence,confidence_percent_confidence_percent=@confidence_percent,on_fraction_on_fraction=@on_fraction,off_fraction_off_fraction=@off_fraction,observed_for_observed_for=@observed_for,window_ready_window_ready=@window_ready)-instance-method">
+      <div class="signature">
+        
+        def <strong>copy_with</strong>(state _state = @state, changed _changed = @changed, raw_state _raw_state = @raw_state, confidence _confidence = @confidence, confidence_percent _confidence_percent = @confidence_percent, on_fraction _on_fraction = @on_fraction, off_fraction _off_fraction = @off_fraction, observed_for _observed_for = @observed_for, window_ready _window_ready = @window_ready)
+
+        <a class="method-permalink" href="#copy_with%28state_state%3D%40state%2Cchanged_changed%3D%40changed%2Craw_state_raw_state%3D%40raw_state%2Cconfidence_confidence%3D%40confidence%2Cconfidence_percent_confidence_percent%3D%40confidence_percent%2Con_fraction_on_fraction%3D%40on_fraction%2Coff_fraction_off_fraction%3D%40off_fraction%2Cobserved_for_observed_for%3D%40observed_for%2Cwindow_ready_window_ready%3D%40window_ready%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/PlaceOS/driver/blob/2d6f62d2cdb4d36c4566095872795f584bb66042/src/placeos-driver/interface/presence_smoother.cr#L13" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="observed_for:Time::Span-instance-method">
+      <div class="signature">
+        
+        def <strong>observed_for</strong> : Time::Span
+
+        <a class="method-permalink" href="#observed_for%3ATime%3A%3ASpan-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Amount of history currently available.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="off_fraction:Float64-instance-method">
+      <div class="signature">
+        
+        def <strong>off_fraction</strong> : Float64
+
+        <a class="method-permalink" href="#off_fraction%3AFloat64-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="on_fraction:Float64-instance-method">
+      <div class="signature">
+        
+        def <strong>on_fraction</strong> : Float64
+
+        <a class="method-permalink" href="#on_fraction%3AFloat64-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Proportion of the evaluated period attributed to each raw state.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="raw_state:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>raw_state</strong> : Bool
+
+        <a class="method-permalink" href="#raw_state%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Most recently observed raw sensor state.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="state:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>state</strong> : Bool
+
+        <a class="method-permalink" href="#state%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Smoothed/latched output state.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="window_ready:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>window_ready</strong> : Bool
+
+        <a class="method-permalink" href="#window_ready%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>True once at least one complete smoothing window exists.</p>
+        </div>
+      
+      <br/>
+      <div>
         
       </div>
     </div>
