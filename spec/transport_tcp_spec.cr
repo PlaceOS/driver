@@ -162,6 +162,50 @@ describe PlaceOS::Driver::TransportTCP do
     test_server.close
   end
 
+  # Regression: when the socket dropped and the immediate reconnect succeeded
+  # the queue stayed online, so drivers never saw `disconnected` / `connected`
+  # and couldn't re-run connection handshakes.
+  it "signals offline then online when the connection drops and reconnects" do
+    server = TCPServer.new("127.0.0.1", 0)
+    port = server.local_address.port
+    accepted = Channel(TCPSocket).new(2)
+    spawn do
+      loop do
+        client = server.accept?
+        break unless client
+        accepted.send client
+      end
+    end
+
+    states = Channel(Bool).new(4)
+    next_state = ->(expected : Bool) do
+      select
+      when state = states.receive then state.should eq(expected)
+      when timeout(2.seconds) then fail "timeout waiting for online = #{expected}"
+      end
+    end
+    queue = PlaceOS::Driver::Queue.new { |state| states.send state }
+    transport = PlaceOS::Driver::TransportTCP.new(queue, "127.0.0.1", port, ::PlaceOS::Driver::Settings.new("{}")) { |_data, _task| }
+
+    transport.connect
+    next_state.call(true)
+    accepted.receive
+
+    # driver initiated disconnect (i.e. a driver wanting to re-handshake)
+    transport.disconnect
+    next_state.call(false)
+    next_state.call(true)
+
+    # remote end closes the connection
+    accepted.receive.close
+    next_state.call(false)
+    next_state.call(true)
+    queue.online.should be_true
+
+    transport.terminate
+    server.close
+  end
+
   it "should work with a pre-processor" do
     Helper.tcp_server
 

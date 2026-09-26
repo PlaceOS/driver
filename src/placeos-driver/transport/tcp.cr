@@ -166,14 +166,19 @@ class PlaceOS::Driver::TransportTCP < PlaceOS::Driver::Transport
   rescue error
     logger.error(exception: error) { "error consuming IO" }
   ensure
-    if socket == @socket
+    # Always release our socket so the FD and kernel buffers are freed
+    # immediately rather than waiting for GC. Otherwise concurrent connect()
+    # races (or makebreak's per-send connect) silently leak orphan sockets.
+    socket.close rescue nil
+
+    # Only signal offline if the transport hasn't moved on to a newer socket.
+    # `@socket` is nil when the driver called `disconnect` itself.
+    current = @socket
+    if current.nil? || current == socket
       disconnect
-    else
-      # The transport has moved on to a new socket; close ours so the FD
-      # and kernel buffers are released immediately rather than waiting
-      # for GC. Otherwise concurrent connect() races (or makebreak's
-      # per-send connect) silently leak the orphan socket.
-      socket.close rescue nil
+      # ensures `disconnected` / `connected` callbacks fire on reconnect so
+      # drivers can reset state and re-run any connection handshakes
+      set_connected_state(false) unless @makebreak
     end
     connect unless @makebreak
   end
