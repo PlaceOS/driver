@@ -33,6 +33,39 @@ module PlaceOS::Driver::Proxy
       responses.get.should eq Array(JSON::Any).from_json("[]")
     end
 
+    it "returns implementing modules in the system's module order" do
+      cs = PlaceOS::Driver::DriverModel::ControlSystem.from_json(%(
+          {
+            "id": "sys-order-1",
+            "name": "Ordered System",
+            "capacity": 0,
+            "bookable": false,
+            "zones": ["zone-1234"],
+            "modules": ["mod-first", "mod-second", "mod-third"]
+          }
+      ))
+      system = PlaceOS::Driver::Proxy::System.new cs, "reply_id"
+
+      # the redis hash was written in a different order to the system's list
+      storage = PlaceOS::Driver::RedisStorage.new(cs.id, "system")
+      storage.clear
+      storage["Calendar/1"] = "mod-third"
+      storage["Mailer/1"] = "mod-first"
+      storage["Mailer/2"] = "mod-second"
+      storage["Extra/1"] = "mod-unlisted"
+
+      redis = PlaceOS::Driver::RedisStorage.new_redis_client
+      meta = PlaceOS::Driver::DriverModel::Metadata.new({
+        "send_mail" => {} of String => JSON::Any,
+      }, ["Mailer"])
+      {"mod-first", "mod-second", "mod-third", "mod-unlisted"}.each { |id| redis.set("interface/#{id}", meta.to_json) }
+
+      system.implementing(:Mailer).map(&.module_id).should eq(["mod-first", "mod-second", "mod-third", "mod-unlisted"])
+      system.all(:Mailer).map(&.index).should eq([1, 2])
+
+      storage.clear
+    end
+
     it "should execute functions on collections of remote drivers" do
       cs = PlaceOS::Driver::DriverModel::ControlSystem.from_json(%(
           {

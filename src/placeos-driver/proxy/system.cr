@@ -105,7 +105,7 @@ struct PlaceOS::Driver::Proxy::System
       end
     end
 
-    PlaceOS::Driver::Proxy::Drivers.new(drivers)
+    PlaceOS::Driver::Proxy::Drivers.new(drivers.sort_by(&.index))
   end
 
   def all(module_name, *, implementing) : PlaceOS::Driver::Proxy::Drivers
@@ -125,7 +125,7 @@ struct PlaceOS::Driver::Proxy::System
       drivers << Proxy::Driver.new(@reply_id, mod_name, index.to_i, module_id, self, metadata)
     end
 
-    PlaceOS::Driver::Proxy::Drivers.new(drivers)
+    PlaceOS::Driver::Proxy::Drivers.new(drivers.sort_by(&.index))
   end
 
   private def get_metadata(module_id : String?) : DriverModel::Metadata
@@ -140,6 +140,9 @@ struct PlaceOS::Driver::Proxy::System
   end
 
   # grabs all modules implementing(Powerable) for example
+  #
+  # Modules are returned in the order they are listed on the system, so the
+  # first result is the module an administrator placed first
   def implementing(interface) : PlaceOS::Driver::Proxy::Drivers
     interface = interface.to_s
     drivers = [] of Proxy::Driver
@@ -155,7 +158,24 @@ struct PlaceOS::Driver::Proxy::System
       drivers << Proxy::Driver.new(@reply_id, mod_name, index.to_i, module_id, self, metadata)
     end
 
-    PlaceOS::Driver::Proxy::Drivers.new(drivers)
+    PlaceOS::Driver::Proxy::Drivers.new(in_system_order(drivers))
+  end
+
+  # The redis hash holding the module mappings has no defined order, so sort by
+  # the system's module list. Modules missing from the list keep a stable
+  # name and index order after those found.
+  private def in_system_order(drivers : Array(Proxy::Driver)) : Array(Proxy::Driver)
+    return drivers if drivers.size < 2
+    order = begin
+      config.modules
+    rescue error
+      logger.warn(exception: error) { "unable to load the module order for system #{@system_id}" }
+      [] of String
+    end
+    drivers.sort_by do |driver|
+      position = order.index(driver.module_id) || Int32::MAX
+      {position, driver.module_name, driver.index}
+    end
   end
 
   # coordination to occur on placeos core
