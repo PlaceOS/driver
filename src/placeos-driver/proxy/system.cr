@@ -105,7 +105,7 @@ struct PlaceOS::Driver::Proxy::System
       end
     end
 
-    PlaceOS::Driver::Proxy::Drivers.new(drivers.sort_by(&.index))
+    PlaceOS::Driver::Proxy::Drivers.new(drivers.sort_by!(&.index))
   end
 
   def all(module_name, *, implementing) : PlaceOS::Driver::Proxy::Drivers
@@ -125,7 +125,7 @@ struct PlaceOS::Driver::Proxy::System
       drivers << Proxy::Driver.new(@reply_id, mod_name, index.to_i, module_id, self, metadata)
     end
 
-    PlaceOS::Driver::Proxy::Drivers.new(drivers.sort_by(&.index))
+    PlaceOS::Driver::Proxy::Drivers.new(drivers.sort_by!(&.index))
   end
 
   private def get_metadata(module_id : String?) : DriverModel::Metadata
@@ -172,7 +172,7 @@ struct PlaceOS::Driver::Proxy::System
       logger.warn(exception: error) { "unable to load the module order for system #{@system_id}" }
       [] of String
     end
-    drivers.sort_by do |driver|
+    drivers.sort_by! do |driver|
       position = order.index(driver.module_id) || Int32::MAX
       {position, driver.module_name, driver.index}
     end
