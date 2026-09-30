@@ -20,6 +20,8 @@ struct PlaceOS::Driver::DriverModel
     property timezone : String?
     property support_url : String?
     property zones : Array(String)
+    # module ids in the order they are listed on the system
+    property modules : Array(String) = [] of String
     property images : Array(String)?
     property security_groups : Array(String)?
   end
