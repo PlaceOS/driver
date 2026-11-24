@@ -41,8 +41,11 @@ jobs:
           --health-retries 5
     continue-on-error: ${{ !matrix.stable }}
     steps:
-      - name: Install LibSSH2
-        run: apk add --no-cache libssh2-static iputils
+      - name: Install system dependencies
+        run: |
+          # Update Python before apk installs the newly split python3-ndbm package.
+          apk upgrade --no-cache python3
+          apk add --no-cache libssh2-static iputils
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: shards install --ignore-crystal-version --skip-postinstall --skip-executables
