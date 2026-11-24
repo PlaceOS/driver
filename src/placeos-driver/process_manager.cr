@@ -99,7 +99,7 @@ class PlaceOS::Driver::ProcessManager
     response.cmd = :result
     response
   rescue error
-    Log.error(exception: error) { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})" }
+    Log.error(exception: error) { "dispatching execution request to #{DriverManager.driver_class} (#{request.id})" }
     request.set_error(error)
   end
 

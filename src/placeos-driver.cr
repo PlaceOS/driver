@@ -63,6 +63,17 @@ abstract class PlaceOS::Driver
   module Utilities
   end
 
+  # Omits request arguments and exception details from the driver's execution
+  # error log. Use on methods that accept sensitive information such as passwords.
+  #
+  # ```
+  # @[Sensitive]
+  # def set_password(password : String)
+  # end
+  # ```
+  annotation Sensitive
+  end
+
   # applies a security level to a driver function
   #
   # ```
@@ -431,11 +442,23 @@ abstract class PlaceOS::Driver
       # all public API methods
       def initialize(json : String)
         @lookup = Hash(String, JSON::Any).from_json(json)
-        @exec = @lookup["__exec__"].as_s
+        @method_name = @lookup["__exec__"].as_s
       end
 
       @lookup : Hash(String, JSON::Any)
-      @exec : String
+      getter method_name : String
+
+      private SENSITIVE_METHODS = [
+        {% for method in methods %}
+          {% if method.annotation(Sensitive) %}
+            {{method.name.stringify}},
+          {% end %}
+        {% end %}
+      ] of String
+
+      def sensitive? : Bool
+        SENSITIVE_METHODS.includes?(@method_name)
+      end
 
       # :nodoc:
       EXECUTORS = {
@@ -502,9 +525,9 @@ abstract class PlaceOS::Driver
       } {% if methods.empty? %} of String => Nil {% end %}
 
       def execute(klass : {{@type.id}}) : Task | String
-        json = @lookup[@exec]
-        executor = EXECUTORS[@exec]?
-        raise "execute requested for unknown method: #{@exec} on #{klass.class}" unless executor
+        json = @lookup[@method_name]
+        executor = EXECUTORS[@method_name]?
+        raise "execute requested for unknown method: #{@method_name} on #{klass.class}" unless executor
         executor.call(json, klass)
       end
 
