@@ -108,25 +108,43 @@ describe PlaceOS::Driver::Settings do
     JSON::Schema.introspect(Array(Int32)).should eq({type: "array", items: {type: "integer", format: "Int32"}})
     JSON::Schema.introspect(Array(Float32)).should eq({type: "array", items: {type: "number", format: "Float32"}})
     JSON::Schema.introspect(Array(Bool)).should eq({type: "array", items: {type: "boolean"}})
-    JSON::Schema.introspect(Array(JSON::Any)).should eq({type: "array", items: {type: "object"}})
+    # json-schema 2.x uses an empty schema for an unconstrained JSON value.
+    any_array = JSON.parse(JSON::Schema.introspect(Array(JSON::Any)).to_json)
+    any_array["type"].should eq("array")
+    [JSON.parse("{}"), JSON.parse(%({"type":"object"}))].should contain(any_array["items"])
     JSON::Schema.introspect(NamedTuple(steve: String)).should eq({type: "object", properties: {steve: {type: "string"}}, required: ["steve"]})
     JSON::Schema.introspect(TestEnum).should eq({type: "string", enum: ["bob", "jane"]})
-    JSON::Schema.introspect(Tuple(String, Bool)).should eq({type: "array", items: { {type: "string"}, {type: "boolean"} }})
-    JSON::Schema.introspect(SomeType).should eq({anyOf: {
-      {type: "string"},
-      {type: "array", items: { {type: "string"}, {type: "boolean"} }},
-    }})
+    # The newer JSON Schema dialect uses prefixItems for positional schemas.
+    tuple = JSON.parse(JSON::Schema.introspect(Tuple(String, Bool)).to_json)
+    [
+      JSON.parse(%({"type":"array","items":[{"type":"string"},{"type":"boolean"}]})),
+      JSON.parse(%({"type":"array","prefixItems":[{"type":"string"},{"type":"boolean"}],"items":false,"minItems":2,"maxItems":2})),
+    ].should contain(tuple)
+    union = JSON.parse(JSON::Schema.introspect(SomeType).to_json)
+    union["anyOf"].as_a.should eq([JSON.parse(%({"type":"string"})), tuple])
     JSON::Schema.introspect(Hash(String, Int32)).should eq({type: "object", additionalProperties: {type: "integer", format: "Int32"}})
     JSON::Schema.introspect(SuperHash).should eq({type: "object", additionalProperties: {type: "integer", format: "Int32"}})
     JSON::Schema.introspect(Bool | String).should eq({anyOf: { {type: "boolean"}, {type: "string"} }})
 
     {% unless compare_versions(Crystal::VERSION, "1.0.0") < 0 %}
-      JSON::Schema.introspect(SchemaKlass).should eq({type: "object", properties: {cmd: {type: "string"}, other: {anyOf: { {type: "integer", format: "Int32"}, {type: "null"} }}, foo: {enum: [0, 1]}}, required: ["cmd", "foo"]})
+      schema = JSON.parse(JSON::Schema.introspect(SchemaKlass).to_json)
+      schema["type"].should eq("object")
+      schema["required"].should eq(JSON.parse(%(["cmd","foo"])))
+      properties = schema["properties"].as_h
+      enum_schema = properties.delete("foo").not_nil!
+      [JSON.parse(%({"enum":[0,1]})), JSON.parse(%({"enum":[0,1],"type":"integer"}))].should contain(enum_schema)
+      properties.should eq(JSON.parse(%({"cmd":{"type":"string"},"other":{"anyOf":[{"type":"integer","format":"Int32"},{"type":"null"}]}})).as_h)
     {% end %}
 
-    # test where no fields are required
-    JSON::Schema.introspect(NamedTuple(steve: String?)).should eq({type: "object", properties: {steve: {anyOf: { {type: "null"}, {type: "string"} }}}, required: [] of String})
-    JSON::Schema.introspect(SchemaKlassNoRequired).should eq({type: "object", properties: {cmd: {anyOf: { {type: "null"}, {type: "string"} }}, other: {anyOf: { {type: "integer", format: "Int32"}, {type: "null"} }}}, required: [] of String})
+    # Newer schemas omit the required keyword when every property is optional.
+    named_tuple = JSON.parse(JSON::Schema.introspect(NamedTuple(steve: String?)).to_json)
+    optional_class = JSON.parse(JSON::Schema.introspect(SchemaKlassNoRequired).to_json)
+    {named_tuple, optional_class}.each do |schema|
+      schema["type"].should eq("object")
+      (schema["required"]?.try(&.as_a) || [] of JSON::Any).should be_empty
+    end
+    named_tuple["properties"].should eq(JSON.parse(%({"steve":{"anyOf":[{"type":"null"},{"type":"string"}]}})))
+    optional_class["properties"].should eq(JSON.parse(%({"cmd":{"anyOf":[{"type":"null"},{"type":"string"}]},"other":{"anyOf":[{"type":"integer","format":"Int32"},{"type":"null"}]}})))
 
     # allow totally custom classes to define their own schema
     JSON::Schema.introspect(RandomCustomKlass).should eq({type: "object", required: ["something"]})

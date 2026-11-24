@@ -138,7 +138,7 @@ describe PlaceOS::Driver::Proxy::Driver do
   it "should subscribe to status updates" do
     cs = PlaceOS::Driver::DriverModel::ControlSystem.from_json(%(
         {
-          "id": "sys-1234",
+          "id": "sys-driver-proxy-sub",
           "name": "Tesing System",
           "email": "name@email.com",
           "capacity": 20,
@@ -148,45 +148,40 @@ describe PlaceOS::Driver::Proxy::Driver do
         }
     ))
 
-    subs = PlaceOS::Driver::Proxy::Subscriptions.new
-    system = PlaceOS::Driver::Proxy::System.new cs, "reply_id"
+    subscriber = PlaceOS::Driver::Subscriptions.new
+    subs = PlaceOS::Driver::Proxy::Subscriptions.new(subscriber)
+    system = PlaceOS::Driver::Proxy::System.new cs, "reply_id", subscriptions: subs
     # Create some virtual systems
     storage = PlaceOS::Driver::RedisStorage.new(cs.id, "system")
-    storage["Display/1"] = "mod-1234"
+    module_id = "mod-driver-proxy-sub"
+    storage["Display/1"] = module_id
 
-    in_callback = false
-    sub_passed = nil
-    message_passed = nil
-    channel = Channel(Nil).new
+    channel = Channel({PlaceOS::Driver::Subscriptions::IndirectSubscription, String}).new(1)
 
-    mod_store = PlaceOS::Driver::RedisStorage.new("mod-1234")
+    mod_store = PlaceOS::Driver::RedisStorage.new(module_id)
     mod_store.delete("power")
 
-    subscription = system[:Display_1].subscribe(:power) do |sub, value|
-      sub_passed = sub
-      message_passed = value
-      in_callback = true
-      channel.close
+    driver = system[:Display_1]
+    driver.module_id.should eq(module_id)
+    subscription = driver.subscribe(:power) do |sub, value|
+      channel.send({sub, value})
     end
 
-    # Subscription should not exist yet - i.e. no lookup
-    subscription.module_id.should eq("mod-1234")
-    sleep 50.milliseconds
-
-    # Update the status
     mod_store["power"] = true
-    channel.receive?
-
-    in_callback.should eq(true)
-    message_passed.should eq("true")
-    sub_passed.should eq(subscription)
-
+    select
+    when delivery = channel.receive
+      delivery.should eq({subscription, "true"})
+    when timeout(5.seconds)
+      fail "timed out waiting for status update"
+    end
     # Test ability to access module state
-    system[:Display_1]["power"].as_bool == true
-    system[:Display_1].status(Bool, "power") == true
-
-    subs.terminate
-    mod_store.clear
-    storage.clear
+    driver["power"].as_bool.should be_true
+    driver.status(Bool, "power").should be_true
+  ensure
+    subs.try &.terminate
+    subscriber.try &.terminate
+    channel.try &.close
+    mod_store.try &.clear
+    storage.try &.clear
   end
 end
