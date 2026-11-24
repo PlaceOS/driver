@@ -185,8 +185,11 @@ class PlaceOS::Driver::DriverManager
   end
 
   def execute(json)
-    executor = {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.new(json)
-    executor.execute(@driver)
+    build_executor(json).execute(@driver)
+  end
+
+  private def build_executor(json)
+    {{PlaceOS::Driver::CONCRETE_DRIVERS.values.first[1]}}.new(json)
   end
 
   protected def spawn_request_fiber(channel, request) : Nil
@@ -263,7 +266,8 @@ class PlaceOS::Driver::DriverManager
       {% if !::PlaceOS::Driver::RESCUE_FROM.empty? %}
         begin
       {% end %}
-        process_execute_result request, execute(request.payload.not_nil!)
+        executor = build_executor(request.payload.not_nil!)
+        process_execute_result request, executor.execute(@driver)
       {% if !::PlaceOS::Driver::RESCUE_FROM.empty? %}
         {% for exception, details in ::PlaceOS::Driver::RESCUE_FROM %}
           rescue error : {{exception.id}}
@@ -272,7 +276,12 @@ class PlaceOS::Driver::DriverManager
         end
       {% end %}
     rescue error
-      logger.error(exception: error) { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})" }
+      if executor.nil? || executor.sensitive?
+        # Exception messages can contain request arguments too.
+        logger.error { "executing #{executor.try(&.method_name) || "request"} on #{DriverManager.driver_class} (#{request.id})" }
+      else
+        logger.error(exception: error) { "executing #{request.payload} on #{DriverManager.driver_class} (#{request.id})" }
+      end
       request.set_error(error)
     end
   end

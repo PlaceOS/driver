@@ -143,6 +143,12 @@ class Helper
       raise ArgumentError.new("you fool!")
     end
 
+    @[Sensitive]
+    def check_secret(secret : String) : Bool
+      return true if secret == "accepted"
+      raise ArgumentError.new("rejected secret #{secret}")
+    end
+
     def not_json
       ArgumentError.new("you fool!")
     end

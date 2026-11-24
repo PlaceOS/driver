@@ -239,6 +239,46 @@ describe PlaceOS::Driver::ProcessManager do
     process.loaded.size.should eq 0
   end
 
+  it "omits arguments and exception details from sensitive execution logs" do
+    PlaceOS::Driver::Protocol.new_instance(Helper.protocol[0]) unless PlaceOS::Driver::Protocol.instance?
+    logs = IO::Memory.new
+    process = PlaceOS::Driver::ProcessManager.new(logger_io: logs, edge_driver: true)
+    driver_id = "mod-sensitive"
+    request = PlaceOS::Driver::Protocol::Request
+    process.start(request.new(driver_id, :start, %({"role":99,"udp":false,"tls":false,"makebreak":false,"settings":{}})))
+
+    success = process.exec(request.new(driver_id, :exec, %({"__exec__":"check_secret","check_secret":["accepted"]})))
+    success.code.should eq(200)
+    success.payload.should eq("true")
+
+    response = process.exec(request.new(driver_id, :exec, %({"__exec__":"check_secret","check_secret":{"secret":"sensitive-argument"}})))
+    response.cmd.result?.should be_true
+    response.code.should eq(500)
+    response.error.should eq("ArgumentError")
+    response.payload.should eq("rejected secret sensitive-argument")
+    response.backtrace.not_nil!.should_not be_empty
+
+    bad_args = process.exec(request.new(driver_id, :exec, %({"__exec__":"check_secret","check_secret":["extra-sensitive-argument", 1]})))
+    bad_args.code.should eq(500)
+    bad_args.payload.not_nil!.should contain("wrong number of arguments")
+
+    malformed = process.exec(request.new(driver_id, :exec, %({"__exec__":"check_secret","check_secret":["malformed-sensitive-argument"])))
+    malformed.code.should eq(500)
+
+    ordinary_payload = %({"__exec__":"raise_error","raise_error":["ordinary-argument"]})
+    process.exec(request.new(driver_id, :exec, ordinary_payload)).code.should eq(500)
+
+    # Stopping the driver flushes the asynchronous logger before the assertions.
+    process.stop(request.new(driver_id, :stop))
+    log = logs.to_s
+    log.scan("executing check_secret on Helper::TestDriver (mod-sensitive)").size.should eq(2)
+    log.should contain("executing request on Helper::TestDriver (mod-sensitive)")
+    log.should_not contain("sensitive-argument")
+    log.should_not contain("rejected secret")
+    log.should contain("ordinary-argument")
+    log.should contain("you fool!")
+  end
+
   it "should work with functions returning queue tasks" do
     process, input, output, logs, driver_id = Helper.process
     process.loaded.size.should eq 1
